@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Head-to-Head Matchup History - Legion of Whom FFL</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-main: #020617;
+      --card-bg: #020617;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.18);
+      --border-subtle: #1f2937;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --text-soft: #6b7280;
+      --positive: #22c55e;
+      --negative: #ef4444;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #020617 0%, #020617 36%, #020617 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    .container {
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,0.12), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(59,130,246,0.12), transparent 55%),
+        var(--card-bg);
+      border-radius: 18px;
+      border: 1px solid rgba(148,163,184,0.3);
+      box-shadow:
+        0 40px 80px rgba(0,0,0,0.8),
+        0 0 0 1px rgba(15,23,42,0.9);
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 28px 32px;
+      backdrop-filter: blur(14px);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      color: #e5e7eb;
+      font-size: 2.05rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      color: var(--text-soft);
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+      align-items: flex-end;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 6px;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    select {
+      appearance: none;
+      padding: 9px 11px;
+      border-radius: 10px;
+      border: 1px solid rgba(55,65,81,0.9);
+      background:
+        linear-gradient(135deg, rgba(15,23,42,0.95), rgba(15,23,42,0.98));
+      color: var(--text-main);
+      font-size: 0.92rem;
+      outline: none;
+      position: relative;
+    }
+
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(56,189,248,0.7);
+    }
+
+    button {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: linear-gradient(135deg, #0ea5e9, #22c55e);
+      color: white;
+      box-shadow:
+        0 10px 25px rgba(34,197,94,0.35),
+        0 0 0 1px rgba(15,23,42,0.9);
+      transition: transform 0.12s ease-out, box-shadow 0.12s ease-out;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 18px 30px rgba(34,197,94,0.45),
+        0 0 0 1px rgba(15,23,42,1);
+    }
+
+    .record-section {
+      background: radial-gradient(circle at top left, rgba(15,23,42,0.95), rgba(15,23,42,0.98));
+      border-radius: 14px;
+      border: 1px solid rgba(31,41,55,0.95);
+      padding: 18px 18px 18px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .record-section.show {
+      display: block;
+    }
+
+    .record-header {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .record-box {
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: radial-gradient(circle at top left, rgba(15,23,42,0.9), rgba(15,23,42,0.98));
+      border: 1px solid rgba(55,65,81,0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .record-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      font-weight: 600;
+    }
+
+    .record-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+
+    .record-value.positive {
+      color: var(--positive);
+    }
+
+    .record-value.negative {
+      color: var(--negative);
+    }
+
+    .stats-summary {
+      margin-bottom: 14px;
+      padding: 11px 12px;
+      background: rgba(15,23,42,0.98);
+      border-radius: 10px;
+      border: 1px solid rgba(31,41,55,0.98);
+      color: var(--text-muted);
+      font-size: 0.86rem;
+    }
+
+    .stats-summary strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .stats-summary ul {
+      margin-top: 6px;
+      margin-left: 18px;
+    }
+
+    .stats-summary li {
+      margin-bottom: 4px;
+    }
+
+    .matchup-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      border-radius: 10px;
+      overflow: hidden;
+      background: rgba(15,23,42,0.98);
+      border: 1px solid rgba(31,41,55,0.95);
+    }
+
+    .matchup-table thead {
+      background: radial-gradient(circle at top, rgba(15,23,42,0.9), rgba(15,23,42,1));
+    }
+
+    .matchup-table th,
+    .matchup-table td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(31,41,55,0.9);
+      white-space: nowrap;
+    }
+
+    .matchup-table th {
+      font-size: 0.74rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      font-weight: 600;
+    }
+
+    .matchup-table tbody tr:nth-child(even) {
+      background: rgba(15,23,42,0.94);
+    }
+
+    .matchup-table tbody tr:hover {
+      background: rgba(15,23,42,1);
+    }
+
+    .score {
+      font-weight: 600;
+    }
+
+    .score.win {
+      color: var(--positive);
+    }
+
+    .score.loss {
+      color: var(--negative);
+    }
+
+    .year-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 52px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.98);
+      border: 1px solid rgba(55,65,81,0.95);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .week-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(55,65,81,0.95);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .playoff-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(55,65,81,0.85);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--text-soft);
+      gap: 5px;
+      background: rgba(15,23,42,0.96);
+    }
+
+    .playoff-pill.playoffs {
+      border-color: var(--accent);
+      background: rgba(15,118,110,0.16);
+      color: #a5f3fc;
+    }
+
+    .playoff-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(148,163,184,0.8);
+    }
+
+    .playoffs .playoff-dot {
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(56,189,248,0.35);
+    }
+
+    .no-data {
+      font-size: 0.86rem;
+      color: var(--text-soft);
+      padding: 18px 10px 8px;
+      text-align: center;
+    }
+
+    .no-data span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 11px;
+      border-radius: 999px;
+      border: 1px dashed rgba(75,85,99,0.9);
+      background: rgba(15,23,42,0.9);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    @media (max-width: 900px) {
+      .controls {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 700px) {
+      .container {
+        padding: 22px 16px 24px;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .record-header {
+        grid-template-columns: 1fr;
+      }
+
+      .matchup-table {
+        font-size: 0.84rem;
+      }
+
+      .matchup-table th,
+      .matchup-table td {
+        padding: 9px 9px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Head-to-Head Matchup History</h1>
+      <p>Legion of Whom Fantasy Football League · 2014–Present</p>
+    </div>
+
+    <div class="controls">
+      <div class="control-group">
+        <label for="manager1Select">Manager 1</label>
+        <select id="manager1Select">
+          <option value="">Select a manager…</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="manager2Select">Manager 2 / Opponent</label>
+        <select id="manager2Select">
+          <option value="">Select a manager…</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="gameTypeSelect">Game Type</label>
+        <select id="gameTypeSelect">
+          <option value="all" selected>All Matchups</option>
+          <option value="regular">Regular Season</option>
+          <option value="playoffs">Playoffs</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <button type="button" onclick="loadMatchupHistory()">Load History</button>
+      </div>
+    </div>
+
+    <div class="record-section" id="recordSection">
+      <div class="record-header">
+        <div class="record-box">
+          <div class="record-label" id="manager1Label">Manager 1</div>
+          <div class="record-value positive" id="manager1Wins">0</div>
+        </div>
+        <div class="record-box">
+          <div class="record-label">Total Matchups</div>
+          <div class="record-value" id="totalMatchups">0</div>
+        </div>
+        <div class="record-box">
+          <div class="record-label" id="manager2Label">Manager 2</div>
+          <div class="record-value negative" id="manager2Wins">0</div>
+        </div>
+      </div>
+
+      <div class="stats-summary" id="statsSummary"></div>
+
+      <table class="matchup-table">
+        <thead>
+          <tr>
+            <th>Year</th>
+            <th>Week</th>
+            <th>Playoffs</th>
+            <th>Manager 1</th>
+            <th>Score 1</th>
+            <th>vs</th>
+            <th>Score 2</th>
+            <th>Manager 2</th>
+          </tr>
+        </thead>
+        <tbody id="matchupBody"></tbody>
+      </table>
+    </div>
+
+    <div class="no-data" id="noDataMessage">
+      <span>Tip · Select two managers or a manager and “All Opponents”</span>
+      <div style="margin-top: 10px;">
+        Use the <strong>Game Type</strong> filter to see only regular season or playoff battles.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------------
+    // H2H APP USING SHARED JSON FILE
+    // -------------------------------------------------------------------
+    // This app expects a file called `league-scores.json` in the SAME
+    // folder as this HTML file. That JSON file should be a plain array
+    // of matchup objects like:
+    //
+    // [
+    //   {
+    //     "year": 2014,
+    //     "week": 1,
+    //     "manager1": "Adam Goho",
+    //     "score1": 95.16,
+    //     "manager2": "Samuel Wheeler",
+    //     "score2": 102.04,
+    //     "playoffs": "N/A"
+    //   },
+    //   ...
+    // ]
+    //
+    // Career records and this H2H page can both pull from that single file.
+    // -------------------------------------------------------------------
+
+    let matchupDatabase = [];
+    let managers = [];
+
+    // Helper number formatter
+    function formatNumber(num, fractionDigits = 0) {
+      return Number(num).toLocaleString("en-US", {
+        minimumFractionDigits: fractionDigits,
+        maximumFractionDigits: fractionDigits
+      });
+    }
+
+    // Based on year + week, determine playoff round label
+    function getPlayoffsLabel(year, week) {
+      const trophy = "🏆";
+
+      // 2014–2020 playoff structure
+      if (year >= 2014 && year <= 2020) {
+        if (week === 14) return "First Round";
+        if (week === 15) return "Semifinals";
+        if (week === 16) return "Championship " + trophy;
+      }
+      // 2021–present playoff structure
+      if (year >= 2021) {
+        if (week === 15) return "First Round";
+        if (week === 16) return "Semifinals";
+        if (week === 17) return "Championship " + trophy;
+      }
+      return "-";
+    }
+
+    function isPlayoffGame(matchup) {
+      // Anything with a non-dash playoff label counts as a playoff game
+      const label = getPlayoffsLabel(matchup.year, matchup.week);
+      return label !== "-";
+    }
+
+    // Build manager list from matchupDatabase
+    function buildManagerList() {
+      const set = new Set();
+      matchupDatabase.forEach(m => {
+        if (m.manager1) set.add(m.manager1);
+        if (m.manager2) set.add(m.manager2);
+      });
+      managers = Array.from(set).sort();
+    }
+
+    // Populate dropdowns once data is loaded
+    function initializeDropdowns() {
+      const select1 = document.getElementById("manager1Select");
+      const select2 = document.getElementById("manager2Select");
+
+      // Clear any existing (in case of reload)
+      select1.options.length = 1; // keep placeholder
+      select2.options.length = 1;
+
+      managers.forEach(manager => {
+        const option1 = document.createElement("option");
+        option1.value = manager;
+        option1.textContent = manager;
+        select1.appendChild(option1);
+
+        const option2 = document.createElement("option");
+        option2.value = manager;
+        option2.textContent = manager;
+        select2.appendChild(option2);
+      });
+
+      // Add "All Opponents" to Manager 2 dropdown
+      const allOption2 = document.createElement("option");
+      allOption2.value = "ALL";
+      allOption2.textContent = "All Opponents";
+      select2.appendChild(allOption2);
+    }
+
+    // Main H2H loader
+    function loadMatchupHistory() {
+      if (!matchupDatabase.length) {
+        alert("Matchup data has not loaded yet. Check that league-scores.json is present.");
+        return;
+      }
+
+      const manager1 = document.getElementById("manager1Select").value;
+      const manager2 = document.getElementById("manager2Select").value;
+      const gameType = document.getElementById("gameTypeSelect").value;
+      const recordSection = document.getElementById("recordSection");
+      const noDataMessage = document.getElementById("noDataMessage");
+
+      if (!manager1 || !manager2) {
+        alert('Please select both managers (or a manager and "All Opponents").');
+        return;
+      }
+
+      if (manager1 === manager2 && manager2 !== "ALL") {
+        alert("Please select two different managers.");
+        return;
+      }
+
+      let matchups;
+      if (manager2 === "ALL") {
+        // All-opponents view: any matchup involving manager1
+        matchups = matchupDatabase.filter(
+          m => m.manager1 === manager1 || m.manager2 === manager1
+        );
+      } else {
+        // True H2H between manager1 and manager2
+        matchups = matchupDatabase.filter(
+          m =>
+            (m.manager1 === manager1 && m.manager2 === manager2) ||
+            (m.manager1 === manager2 && m.manager2 === manager1)
+        );
+      }
+
+      // Apply game-type filter
+      if (gameType !== "all") {
+        matchups = matchups.filter(m => {
+          const playoff = isPlayoffGame(m);
+          if (gameType === "playoffs") return playoff;
+          if (gameType === "regular") return !playoff;
+          return true;
+        });
+      }
+
+      if (matchups.length === 0) {
+        recordSection.classList.remove("show");
+        noDataMessage.style.display = "block";
+        noDataMessage.innerHTML = `
+          <span>No matchups found for this combo</span>
+          <div style="margin-top: 8px;">
+            Try switching Game Type or choose "All Opponents".
+          </div>
+        `;
+        return;
+      }
+
+      // Sort newest first
+      matchups.sort((a, b) => {
+        if (a.year !== b.year) return b.year - a.year;
+        return b.week - a.week;
+      });
+
+      let manager1Wins = 0;
+      let manager2Wins = 0;
+      let totalManager1Points = 0;
+      let totalManager2Points = 0;
+
+      // Update record labels
+      document.getElementById("manager1Label").textContent = manager1;
+      document.getElementById("manager2Label").textContent =
+        manager2 === "ALL" ? "All Opponents" : manager2;
+
+      // Populate table body
+      const tbody = document.getElementById("matchupBody");
+      tbody.innerHTML = "";
+
+      matchups.forEach(m => {
+        let rowManager1Name, rowManager2Name;
+        let rowManager1Score, rowManager2Score;
+
+        if (manager2 === "ALL") {
+          const primary = manager1;
+          const isPrimaryFirst = m.manager1 === primary;
+          rowManager1Name = primary;
+          rowManager2Name = isPrimaryFirst ? m.manager2 : m.manager1;
+          rowManager1Score = isPrimaryFirst ? m.score1 : m.score2;
+          rowManager2Score = isPrimaryFirst ? m.score2 : m.score1;
+        } else {
+          if (m.manager1 === manager1 && m.manager2 === manager2) {
+            rowManager1Name = manager1;
+            rowManager2Name = manager2;
+            rowManager1Score = m.score1;
+            rowManager2Score = m.score2;
+          } else {
+            rowManager1Name = manager1;
+            rowManager2Name = manager2;
+            rowManager1Score = m.score2;
+            rowManager2Score = m.score1;
+          }
+        }
+
+        const manager1Won = rowManager1Score > rowManager2Score;
+        const manager2Won = rowManager2Score > rowManager1Score;
+
+        if (manager1Won) manager1Wins++;
+        else if (manager2Won) manager2Wins++;
+
+        totalManager1Points += rowManager1Score;
+        totalManager2Points += rowManager2Score;
+
+        const playoffsLabel = getPlayoffsLabel(m.year, m.week);
+        const isPlayoffs = playoffsLabel !== "-";
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td><span class="year-badge">${m.year}</span></td>
+          <td><span class="week-badge">Wk ${m.week}</span></td>
+          <td>
+            ${
+              isPlayoffs
+                ? `<span class="playoff-pill playoffs">
+                     <span class="playoff-dot"></span>
+                     ${playoffsLabel}
+                   </span>`
+                : `<span class="playoff-pill">
+                     <span class="playoff-dot" style="opacity:0.2;"></span>
+                     -
+                   </span>`
+            }
+          </td>
+          <td>${rowManager1Name}</td>
+          <td class="score ${manager1Won ? "win" : manager2Won ? "loss" : ""}">
+            ${formatNumber(rowManager1Score, 2)}
+          </td>
+          <td style="text-align:center;">vs</td>
+          <td class="score ${manager2Won ? "win" : manager1Won ? "loss" : ""}">
+            ${formatNumber(rowManager2Score, 2)}
+          </td>
+          <td>${rowManager2Name}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      // Aggregate stats
+      const totalGames = matchups.length;
+      const manager1WinPct =
+        totalGames > 0 ? (manager1Wins / totalGames) * 100 : 0;
+      const manager2WinPct =
+        totalGames > 0 ? (manager2Wins / totalGames) * 100 : 0;
+
+      const avgManager1Points = totalGames > 0 ? totalManager1Points / totalGames : 0;
+      const avgManager2Points = totalGames > 0 ? totalManager2Points / totalGames : 0;
+
+      document.getElementById("manager1Wins").textContent = manager1Wins;
+      document.getElementById("manager2Wins").textContent = manager2Wins;
+      document.getElementById("totalMatchups").textContent = totalGames;
+
+      document.getElementById("manager1Wins").classList.toggle(
+        "positive",
+        manager1Wins >= manager2Wins
+      );
+      document.getElementById("manager1Wins").classList.toggle(
+        "negative",
+        manager1Wins < manager2Wins
+      );
+      document.getElementById("manager2Wins").classList.toggle(
+        "positive",
+        manager2Wins >= manager1Wins
+      );
+      document.getElementById("manager2Wins").classList.toggle(
+        "negative",
+        manager2Wins < manager1Wins
+      );
+
+      const statsSummary = document.getElementById("statsSummary");
+      statsSummary.innerHTML = `
+        <div>
+          <strong>Series Snapshot</strong>
+          <ul>
+            <li>${manager1}: <strong>${manager1Wins}-${manager2Wins}</strong> (${formatNumber(
+              manager1WinPct,
+              1
+            )}%)</li>
+            <li>${manager2 === "ALL" ? "All Opponents" : manager2}: <strong>${manager2Wins}-${manager1Wins}</strong> (${formatNumber(
+        manager2WinPct,
+        1
+      )}%)</li>
+            <li>Average points — ${manager1}: <strong>${formatNumber(
+        avgManager1Points,
+        2
+      )}</strong>, ${manager2 === "ALL" ? "All Opponents" : manager2}: <strong>${formatNumber(
+        avgManager2Points,
+        2
+      )}</strong></li>
+          </ul>
+        </div>
+      `;
+
+      recordSection.classList.add("show");
+      noDataMessage.style.display = "none";
+    }
+
+    // Load JSON file and bootstrap app
+    async function initFromJson() {
+      const noDataMessage = document.getElementById("noDataMessage");
+      try {
+        const response = await fetch("league-scores.json");
+        if (!response.ok) {
+          throw new Error("HTTP " + response.status);
+        }
+        matchupDatabase = await response.json();
+
+        buildManagerList();
+        initializeDropdowns();
+
+        // Reset tip text
+        noDataMessage.style.display = "block";
+        noDataMessage.innerHTML = `
+          <span>Tip · Select two managers or a manager and “All Opponents”</span>
+          <div style="margin-top: 10px;">
+            Use the <strong>Game Type</strong> filter to see only regular season or playoff battles.
+          </div>
+        `;
+      } catch (err) {
+        console.error("Error loading league-scores.json:", err);
+        noDataMessage.style.display = "block";
+        noDataMessage.innerHTML = `
+          <span>Error · Could not load matchup data</span>
+          <div style="margin-top: 8px;">
+            Make sure <code>league-scores.json</code> is in the same folder
+            as this file and that it contains valid JSON.
+          </div>
+        `;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", initFromJson);
+  </script>
+</body>
+</html>
