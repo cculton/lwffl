@@ -197,7 +197,7 @@
       white-space: nowrap;
       cursor: pointer;
       user-select: none;
-      text-align: left; /* everything left-aligned */
+      text-align: left;
     }
 
     .leaderboard-table tbody tr {
@@ -221,7 +221,7 @@
       padding: 9px 10px;
       border-bottom: 1px solid rgba(31, 41, 55, 0.96);
       color: var(--text-main);
-      text-align: left; /* everything left-aligned */
+      text-align: left;
       font-variant-numeric: tabular-nums;
     }
 
@@ -348,7 +348,7 @@
         </div>
         <div class="control-group">
           <div class="hint">
-            Season-level records with matchup, scoring, and standings context.
+            Use filters to explore seasons.
           </div>
         </div>
       </section>
@@ -385,7 +385,6 @@
 
   <script>
     let allSeasons = [];
-    // Default sort: most points for (PF) across all managers/seasons
     let currentSort = {
       columnKey: "points_for",
       direction: "desc"
@@ -489,7 +488,7 @@
 
       const years = Array.from(
         new Set(allSeasons.map(r => r.year))
-      ).sort((a, b) => a - b);
+      ).sort((a, b) => b - a); // DESCENDING
 
       years.forEach(y => {
         const opt = document.createElement("option");
@@ -552,7 +551,8 @@
       if (managerValue === "__all__" && yearValue === "__all__") {
         titleText = "All Seasons · All Managers";
       } else if (managerValue === "__all__") {
-        titleText = `Season ${yearValue} · All Managers`;
+        // FIXED: "Year Season" ordering
+        titleText = `${yearValue} Season · All Managers`;
       } else if (yearValue === "__all__") {
         titleText = `All Seasons · ${managerValue}`;
       } else {
@@ -590,7 +590,6 @@
         return a.manager.localeCompare(b.manager);
       });
 
-      // Build header
       headerRow.innerHTML = "";
       headerDefs.forEach(def => {
         const th = document.createElement("th");
@@ -603,7 +602,6 @@
         headerRow.appendChild(th);
       });
 
-      // Build body
       tbody.innerHTML = "";
       filtered.forEach((row, index) => {
         const tr = document.createElement("tr");
@@ -722,8 +720,6 @@
         if (!colKey) return;
 
         if (colKey === "rank") {
-          // Rank sort is really "most recent best seasons", but we just
-          // snap back to default sort when clicking Rank.
           currentSort = { columnKey: "points_for", direction: "desc" };
         } else {
           let newDir = "desc";
