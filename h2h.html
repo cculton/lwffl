@@ -678,11 +678,11 @@
       const avgManager2Points = totalGames > 0 ? totalManager2Points / totalGames : 0;
 
       // Current streak (most recent game first)
-      let currentStreakText = "Current Streak – None";
+      let currentStreakText = "Current streak – None";
       if (results.length > 0) {
         const first = results[0];
         if (!first.manager1Won && !first.manager2Won) {
-          currentStreakText = "Current Streak – None (last game was a tie)";
+          currentStreakText = "Current streak – None (last game was a tie)";
         } else {
           const isM1 = first.manager1Won;
           const streakName = isM1 ? manager1 : displayManager2Name;
@@ -692,7 +692,7 @@
             else if (!isM1 && results[i].manager2Won) count++;
             else break;
           }
-          currentStreakText = `Current Streak – ${streakName} W${count}`;
+          currentStreakText = `Current streak – ${streakName} W${count}`;
         }
       }
 
