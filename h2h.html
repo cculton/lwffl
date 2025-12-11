@@ -16,7 +16,6 @@
       --bg-main: #020617;
       --card-bg: #020617;
       --accent: #38bdf8;
-      --accent-soft: rgba(56, 189, 248, 0.18);
       --border-subtle: #1f2937;
       --text-main: #e5e7eb;
       --text-muted: #9ca3af;
@@ -94,16 +93,17 @@
 
     select {
       appearance: none;
-      padding: 9px 11px;
+      padding: 10px 12px;
       border-radius: 10px;
-      border: 1px solid rgba(55,65,81,0.9);
-      background:
-        linear-gradient(135deg, rgba(15,23,42,0.95), rgba(15,23,42,0.98));
-      color: var(--text-main);
-      font-size: 0.92rem;
+      border: 1px solid rgba(75,85,99,0.9);
+      background-color: #0b1120;
+      color: #f9fafb;
+      font-size: 0.95rem;
+      font-weight: 500;
+      line-height: 1.4;
       outline: none;
-      position: relative;
       cursor: pointer;
+      box-shadow: 0 1px 3px rgba(15,23,42,0.7);
     }
 
     select:disabled {
@@ -113,7 +113,14 @@
 
     select:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(56,189,248,0.7);
+      box-shadow:
+        0 0 0 1px rgba(56,189,248,0.7),
+        0 0 12px rgba(56,189,248,0.45);
+    }
+
+    select option {
+      background-color: #020617;
+      color: #f9fafb;
     }
 
     .record-section {
@@ -158,12 +165,8 @@
       font-size: 1.25rem;
       font-weight: 700;
       letter-spacing: 0.06em;
-      color: #f9fafb; /* always white-ish, no red/green */
+      color: #f9fafb; /* always white-ish */
     }
-
-    /* These classes now do nothing color-wise (kept just in case) */
-    .record-value.positive { }
-    .record-value.negative { }
 
     .stats-summary {
       margin-bottom: 14px;
@@ -369,7 +372,7 @@
         </select>
       </div>
       <div class="control-group">
-        <label for="gameTypeSelect">Matchup Type</label>
+        <label for="gameTypeSelect">Game Type</label>
         <select id="gameTypeSelect" disabled>
           <option value="all" selected>All Matchups</option>
           <option value="regular">Regular Season</option>
@@ -381,16 +384,16 @@
     <div class="record-section" id="recordSection">
       <div class="record-header">
         <div class="record-box">
-          <div class="record-label" id="manager1Label">Manager 1</div>
+          <div class="record-label" id="manager1Label">Manager 1 (Wins)</div>
           <div class="record-value" id="manager1Wins">0</div>
+        </div>
+        <div class="record-box">
+          <div class="record-label" id="manager2Label">Manager 2 (Wins)</div>
+          <div class="record-value" id="manager2Wins">0</div>
         </div>
         <div class="record-box">
           <div class="record-label">Total Matchups</div>
           <div class="record-value" id="totalMatchups">0</div>
-        </div>
-        <div class="record-box">
-          <div class="record-label" id="manager2Label">Manager 2</div>
-          <div class="record-value" id="manager2Wins">0</div>
         </div>
       </div>
 
@@ -452,7 +455,6 @@
       });
     }
 
-    // Based on year + week, determine playoff round label
     function getPlayoffsLabel(year, week) {
       const trophy = "🏆";
 
@@ -490,15 +492,15 @@
       const select2 = document.getElementById("manager2Select");
       const gameTypeSelect = document.getElementById("gameTypeSelect");
 
-      // Clear existing options
       select1.innerHTML = '<option value="">Select a manager…</option>';
-      select2.innerHTML = '<option value="">Select a manager…</option>';
+      select2.innerHTML = '<option value="">Select an opponent…</option>';
 
+      // All Opponents at the top (under placeholder)
       const allOption2 = document.createElement("option");
       allOption2.value = "ALL";
       allOption2.textContent = "All Opponents";
       select2.appendChild(allOption2);
-      
+
       managers.forEach(manager => {
         const option1 = document.createElement("option");
         option1.value = manager;
@@ -511,12 +513,10 @@
         select2.appendChild(option2);
       });
 
-      // Enable selects now that data is loaded
       select1.disabled = false;
       select2.disabled = false;
       gameTypeSelect.disabled = false;
 
-      // When any dropdown changes, recompute view
       select1.addEventListener("change", updateMatchupFromDropdowns);
       select2.addEventListener("change", updateMatchupFromDropdowns);
       gameTypeSelect.addEventListener("change", updateMatchupFromDropdowns);
@@ -599,10 +599,13 @@
       let manager2Wins = 0;
       let totalManager1Points = 0;
       let totalManager2Points = 0;
+      const results = [];
 
-      document.getElementById("manager1Label").textContent = manager1;
-      document.getElementById("manager2Label").textContent =
+      const displayManager2Name =
         manager2 === "ALL" ? "All Opponents" : manager2;
+
+      document.getElementById("manager1Label").textContent = `${manager1} (Wins)`;
+      document.getElementById("manager2Label").textContent = `${displayManager2Name} (Wins)`;
 
       const tbody = document.getElementById("matchupBody");
       tbody.innerHTML = "";
@@ -634,6 +637,8 @@
 
         const manager1Won = rowManager1Score > rowManager2Score;
         const manager2Won = rowManager2Score > rowManager1Score;
+
+        results.push({ manager1Won, manager2Won });
 
         if (manager1Won) manager1Wins++;
         else if (manager2Won) manager2Wins++;
@@ -683,6 +688,25 @@
       const avgManager1Points = totalGames > 0 ? totalManager1Points / totalGames : 0;
       const avgManager2Points = totalGames > 0 ? totalManager2Points / totalGames : 0;
 
+      // Current streak (most recent game first)
+      let streakText = "Streak – None";
+      if (results.length > 0) {
+        const first = results[0];
+        if (!first.manager1Won && !first.manager2Won) {
+          streakText = "Streak – None (last game was a tie)";
+        } else {
+          const isM1 = first.manager1Won;
+          const streakName = isM1 ? manager1 : displayManager2Name;
+          let count = 1;
+          for (let i = 1; i < results.length; i++) {
+            if (isM1 && results[i].manager1Won) count++;
+            else if (!isM1 && results[i].manager2Won) count++;
+            else break;
+          }
+          streakText = `Streak – ${streakName} W${count}`;
+        }
+      }
+
       document.getElementById("manager1Wins").textContent = manager1Wins;
       document.getElementById("manager2Wins").textContent = manager2Wins;
       document.getElementById("totalMatchups").textContent = totalGames;
@@ -696,17 +720,25 @@
               manager1WinPct,
               1
             )}%)</li>
-            <li>${manager2 === "ALL" ? "All Opponents" : manager2}: <strong>${manager2Wins}-${manager1Wins}</strong> (${formatNumber(
+            <li>${displayManager2Name}: <strong>${manager2Wins}-${manager1Wins}</strong> (${formatNumber(
         manager2WinPct,
         1
       )}%)</li>
+            <li>Cumulative points — ${manager1}: <strong>${formatNumber(
+        totalManager1Points,
+        2
+      )}</strong>, ${displayManager2Name}: <strong>${formatNumber(
+        totalManager2Points,
+        2
+      )}</strong></li>
             <li>Average points — ${manager1}: <strong>${formatNumber(
         avgManager1Points,
         2
-      )}</strong>, ${manager2 === "ALL" ? "All Opponents" : manager2}: <strong>${formatNumber(
+      )}</strong>, ${displayManager2Name}: <strong>${formatNumber(
         avgManager2Points,
         2
       )}</strong></li>
+            <li>${streakText}</li>
           </ul>
         </div>
       `;
@@ -727,7 +759,6 @@
         buildManagerList();
         initializeDropdowns();
 
-        // Once loaded, show tip until user picks managers
         showTip("Tip · Select two managers or a manager and “All Opponents”");
       } catch (err) {
         console.error("Error loading league-scores.json:", err);
