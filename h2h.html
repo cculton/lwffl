@@ -735,38 +735,47 @@
       document.getElementById("manager2Wins").textContent = manager2Wins;
       document.getElementById("totalMatchups").textContent = totalGames;
 
-      const statsSummary = document.getElementById("statsSummary");
-      statsSummary.innerHTML = `
-        <div>
-          <strong>Series Snapshot</strong>
-          <ul>
-            <li>${manager1}: <strong>${manager1Wins}-${manager2Wins}</strong> (${formatNumber(
-              manager1WinPct,
-              1
-            )}%)</li>
-            <li>${displayManager2Name}: <strong>${manager2Wins}-${manager1Wins}</strong> (${formatNumber(
+     // Make streak codes like W2 / L3 bold
+const boldStreak = (text) => {
+  if (!text) return "";
+  return text.replace(/(W\d+|L\d+)/g, "<strong>$1</strong>");
+};
+
+const formattedCurrentStreakText = boldStreak(currentStreakText);
+const formattedLongestStreakText = boldStreak(longestStreakText);
+
+const statsSummary = document.getElementById("statsSummary");
+statsSummary.innerHTML = `
+  <div>
+    <strong>Series Snapshot</strong>
+    <ul>
+      <li>${manager1}: <strong>${manager1Wins}-${manager2Wins}</strong> (${formatNumber(
+        manager1WinPct,
+        1
+      )}%)</li>
+      <li>${displayManager2Name}: <strong>${manager2Wins}-${manager1Wins}</strong> (${formatNumber(
         manager2WinPct,
         1
       )}%)</li>
-            <li>Cumulative points — ${manager1}: <strong>${formatNumber(
+      <li>Cumulative points — ${manager1}: <strong>${formatNumber(
         totalManager1Points,
         2
       )}</strong>, ${displayManager2Name}: <strong>${formatNumber(
         totalManager2Points,
         2
       )}</strong></li>
-            <li>Average points — ${manager1}: <strong>${formatNumber(
+      <li>Average points — ${manager1}: <strong>${formatNumber(
         avgManager1Points,
         2
       )}</strong>, ${displayManager2Name}: <strong>${formatNumber(
         avgManager2Points,
         2
       )}</strong></li>
-            <li>${currentStreakText}</li>
-            <li>${longestStreakText}</li>
-          </ul>
-        </div>
-      `;
+      <li>${formattedCurrentStreakText}</li>
+      <li>${formattedLongestStreakText}</li>
+    </ul>
+  </div>
+`;
 
       recordSection.classList.add("show");
       noDataMessage.style.display = "none";
