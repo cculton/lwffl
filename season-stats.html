@@ -21,6 +21,8 @@
       --text-soft: #6b7280;
       --positive: #22c55e;
       --negative: #ef4444;
+      --sorted-header-bg: rgba(15, 23, 42, 0.95);
+      --sorted-cell-bg: rgba(15, 23, 42, 0.88);
     }
 
     body {
@@ -217,14 +219,7 @@
       white-space: nowrap;
       cursor: pointer;
       user-select: none;
-    }
-
-    .th-left {
-      text-align: left;
-    }
-
-    .th-right {
-      text-align: right;
+      text-align: left; /* everything left-aligned */
     }
 
     .leaderboard-table tbody tr {
@@ -248,6 +243,8 @@
       padding: 9px 10px;
       border-bottom: 1px solid rgba(31, 41, 55, 0.96);
       color: var(--text-main);
+      text-align: left; /* everything left-aligned */
+      font-variant-numeric: tabular-nums;
     }
 
     .leaderboard-table tbody tr:last-child td {
@@ -258,24 +255,16 @@
       font-weight: 600;
       color: var(--text-muted);
       width: 60px;
-      text-align: left;
     }
 
     .year-cell {
       width: 70px;
-      text-align: left;
       color: var(--text-main);
     }
 
     .manager-cell {
       font-weight: 500;
       white-space: nowrap;
-      text-align: left;
-    }
-
-    .stat-cell {
-      text-align: right;
-      font-variant-numeric: tabular-nums;
     }
 
     .value-positive {
@@ -291,6 +280,15 @@
     .top-rank {
       background: radial-gradient(circle at left, rgba(56, 189, 248, 0.16), transparent 60%);
       box-shadow: inset 2px 0 0 rgba(56, 189, 248, 0.8);
+    }
+
+    .sorted-col-header {
+      background: var(--sorted-header-bg);
+      color: #e5e7eb;
+    }
+
+    .sorted-col-cell {
+      background: var(--sorted-cell-bg);
     }
 
     .no-data {
@@ -372,7 +370,7 @@
         </div>
         <div class="control-group">
           <div class="hint">
-            Season-by-season records with contextual stats (matchups, PF/PA, margins, transactions).
+            Season-level records with matchup, scoring, and standings context.
           </div>
         </div>
       </section>
@@ -384,7 +382,7 @@
               All Seasons · All Managers
             </div>
             <div class="leaderboard-subtitle" id="leaderboardSubtitle">
-              One row per manager-season
+              Filter by manager and season
             </div>
           </div>
           <div class="pill">
@@ -419,36 +417,42 @@
     };
 
     const headerDefs = [
-      { key: "rank", label: "Rank", align: "left" },
-      { key: "year", label: "Season", align: "left" },
-      { key: "manager", label: "Manager", align: "left" },
-      { key: "record", label: "Record", align: "right" },
-      { key: "games", label: "M", align: "right" },
-      { key: "points_for", label: "Pts For", align: "right" },
-      { key: "points_against", label: "Pts Against", align: "right" },
-      { key: "ppm_for", label: "PPM", align: "right" },
-      { key: "ppm_against", label: "PPM Against", align: "right" },
-      { key: "final_standing", label: "Final Stand", align: "right" },
-      { key: "division_finish", label: "Div Finish", align: "right" },
-      { key: "weekly_margin", label: "Weekly Margin", align: "right" },
-      { key: "transaction_count", label: "Txns", align: "right" }
+      { key: "rank", label: "Rank" },
+      { key: "year", label: "Season" },
+      { key: "manager", label: "Manager" },
+      { key: "wins", label: "W" },
+      { key: "losses", label: "L" },
+      { key: "ties", label: "T" },
+      { key: "record", label: "Record" },
+      { key: "games", label: "M" },
+      { key: "points_for", label: "PF" },
+      { key: "points_against", label: "PA" },
+      { key: "ppm_for", label: "PPM" },
+      { key: "ppm_against", label: "PAPM" },
+      { key: "final_standing", label: "FS" },
+      { key: "division_finish", label: "DF" },
+      { key: "weekly_margin", label: "WM" },
+      { key: "transaction_count", label: "TRANS" }
     ];
 
     function getHeaderTitle(label) {
       switch (label) {
         case "Rank": return "Rank within the current filter";
-        case "Season": return "NFL / league season year";
+        case "Season": return "League season year";
         case "Manager": return "Manager name";
+        case "W": return "Season wins";
+        case "L": return "Season losses";
+        case "T": return "Season ties";
         case "Record": return "Season record (wins–losses–ties)";
         case "M": return "Total number of matchups played that season";
-        case "Pts For": return "Total points scored by this team that season";
-        case "Pts Against": return "Total points scored against this team that season";
+        case "PF": return "Total points scored by this team that season";
+        case "PA": return "Total points scored against this team that season";
         case "PPM": return "Points scored per matchup (points for ÷ matchups)";
-        case "PPM Against": return "Points allowed per matchup (points against ÷ matchups)";
-        case "Final Stand": return "Final league standing at end of season";
-        case "Div Finish": return "Division finishing position";
-        case "Weekly Margin": return "Average weekly scoring margin (points for − points against)";
-        case "Txns": return "Number of transactions made that season";
+        case "PAPM": return "Points against per matchup (points against ÷ matchups)";
+        case "FS": return "Final league standing at end of season";
+        case "DF": return "Division finishing position";
+        case "WM": return "Average weekly scoring margin (points for − points against)";
+        case "TRANS": return "Number of transactions made that season";
         default: return label;
       }
     }
@@ -481,6 +485,9 @@
 
       return {
         ...raw,
+        wins,
+        losses,
+        ties,
         games,
         ppm_for: ppmFor,
         ppm_against: ppmAgainst,
@@ -565,7 +572,6 @@
 
       const filtered = getFilteredRows();
 
-      // Header text / pill label
       const managerValue = document.getElementById("managerSelect").value;
       const yearValue = document.getElementById("yearSelect").value;
 
@@ -581,11 +587,9 @@
       }
       titleEl.textContent = titleText;
 
-      let pillText = "";
       const mgrLabel = managerValue === "__all__" ? "all managers" : managerValue;
       const yrLabel = yearValue === "__all__" ? "all seasons" : yearValue;
-      pillText = `${yrLabel} · ${mgrLabel}`;
-      pillLabel.textContent = pillText;
+      pillLabel.textContent = `${yrLabel} · ${mgrLabel}`;
 
       if (!filtered.length) {
         headerRow.innerHTML = "";
@@ -595,13 +599,11 @@
         return;
       }
 
-      // Sort
       const sortKey = currentSort.columnKey || "year";
       const direction = currentSort.direction || "desc";
 
       filtered.sort((a, b) => {
         if (sortKey === "rank") {
-          // fall back to year desc, then final standing asc, then manager
           if (a.year !== b.year) return (b.year - a.year);
           const fa = a.final_standing ?? Number.POSITIVE_INFINITY;
           const fb = b.final_standing ?? Number.POSITIVE_INFINITY;
@@ -612,7 +614,6 @@
         const primary = compareValues(a, b, sortKey, direction);
         if (primary !== 0) return primary;
 
-        // Secondary tiebreaks: year desc, final standing asc, manager asc
         if (a.year !== b.year) return b.year - a.year;
         const fa = a.final_standing ?? Number.POSITIVE_INFINITY;
         const fb = b.final_standing ?? Number.POSITIVE_INFINITY;
@@ -627,7 +628,9 @@
         th.textContent = def.label;
         th.title = getHeaderTitle(def.label);
         th.dataset.colKey = def.key;
-        th.className = def.align === "left" ? "th-left" : "th-right";
+        if (currentSort.columnKey === def.key) {
+          th.classList.add("sorted-col-header");
+        }
         headerRow.appendChild(th);
       });
 
@@ -637,69 +640,100 @@
         const tr = document.createElement("tr");
         if (index === 0) tr.classList.add("top-rank");
 
+        const sortedKey = currentSort.columnKey;
+
         const rankTd = document.createElement("td");
         rankTd.className = "rank-cell";
         rankTd.textContent = index + 1;
+        if (sortedKey === "rank") rankTd.classList.add("sorted-col-cell");
 
         const yearTd = document.createElement("td");
         yearTd.className = "year-cell";
         yearTd.textContent = row.year ?? "—";
+        if (sortedKey === "year") yearTd.classList.add("sorted-col-cell");
 
         const managerTd = document.createElement("td");
         managerTd.className = "manager-cell";
         managerTd.textContent = row.manager || "—";
+        if (sortedKey === "manager") managerTd.classList.add("sorted-col-cell");
+
+        const winsTd = document.createElement("td");
+        winsTd.textContent = formatInteger(row.wins);
+        if (sortedKey === "wins") winsTd.classList.add("sorted-col-cell");
+
+        const lossesTd = document.createElement("td");
+        lossesTd.textContent = formatInteger(row.losses);
+        if (sortedKey === "losses") lossesTd.classList.add("sorted-col-cell");
+
+        const tiesTd = document.createElement("td");
+        tiesTd.textContent = formatInteger(row.ties);
+        if (sortedKey === "ties") tiesTd.classList.add("sorted-col-cell");
 
         const recordTd = document.createElement("td");
-        recordTd.className = "stat-cell";
         recordTd.textContent = row.record || "—";
+        if (sortedKey === "record") recordTd.classList.add("sorted-col-cell");
 
         const gamesTd = document.createElement("td");
-        gamesTd.className = "stat-cell";
         gamesTd.textContent = formatInteger(row.games);
+        if (sortedKey === "games") gamesTd.classList.add("sorted-col-cell");
 
         const pfTd = document.createElement("td");
-        pfTd.className = "stat-cell value-positive";
+        pfTd.classList.add("value-positive");
         pfTd.textContent = formatNumber(row.points_for, 1);
+        if (sortedKey === "points_for") pfTd.classList.add("sorted-col-cell");
 
         const paTd = document.createElement("td");
-        paTd.className = "stat-cell value-negative";
+        paTd.classList.add("value-negative");
         paTd.textContent = formatNumber(row.points_against, 1);
+        if (sortedKey === "points_against") paTd.classList.add("sorted-col-cell");
 
         const ppmForTd = document.createElement("td");
-        ppmForTd.className = "stat-cell value-positive";
+        ppmForTd.classList.add("value-positive");
         ppmForTd.textContent = row.ppm_for === null ? "—" : formatNumber(row.ppm_for, 1);
+        if (sortedKey === "ppm_for") ppmForTd.classList.add("sorted-col-cell");
 
         const ppmAgainstTd = document.createElement("td");
-        ppmAgainstTd.className = "stat-cell value-negative";
-        ppmAgainstTd.textContent = row.ppm_against === null ? "—" : formatNumber(row.ppm_against, 1);
+        ppmAgainstTd.classList.add("value-negative");
+        ppmAgainstTd.textContent =
+          row.ppm_against === null ? "—" : formatNumber(row.ppm_against, 1);
+        if (sortedKey === "ppm_against") ppmAgainstTd.classList.add("sorted-col-cell");
 
         const finalTd = document.createElement("td");
-        finalTd.className = "stat-cell";
-        finalTd.textContent = row.final_standing != null ? formatInteger(row.final_standing) : "—";
+        finalTd.textContent =
+          row.final_standing != null ? formatInteger(row.final_standing) : "—";
+        if (sortedKey === "final_standing") finalTd.classList.add("sorted-col-cell");
 
         const divTd = document.createElement("td");
-        divTd.className = "stat-cell";
-        divTd.textContent = row.division_finish != null ? formatInteger(row.division_finish) : "—";
+        divTd.textContent =
+          row.division_finish != null ? formatInteger(row.division_finish) : "—";
+        if (sortedKey === "division_finish") divTd.classList.add("sorted-col-cell");
 
         const marginTd = document.createElement("td");
-        marginTd.className = "stat-cell";
         if (row.weekly_margin != null) {
-          if (row.weekly_margin > 0) marginTd.classList.add("value-positive");
-          if (row.weekly_margin < 0) marginTd.classList.add("value-negative");
-          marginTd.textContent = formatNumber(row.weekly_margin, 1);
+          let formatted = formatNumber(row.weekly_margin, 1);
+          if (row.weekly_margin > 0) {
+            formatted = "+" + formatted;
+            marginTd.classList.add("value-positive");
+          } else if (row.weekly_margin < 0) {
+            marginTd.classList.add("value-negative");
+          }
+          marginTd.textContent = formatted;
         } else {
           marginTd.textContent = "—";
         }
+        if (sortedKey === "weekly_margin") marginTd.classList.add("sorted-col-cell");
 
         const txTd = document.createElement("td");
-        txTd.className = "stat-cell";
-        txTd.textContent = row.transaction_count != null
-          ? formatInteger(row.transaction_count)
-          : "—";
+        txTd.textContent =
+          row.transaction_count != null ? formatInteger(row.transaction_count) : "—";
+        if (sortedKey === "transaction_count") txTd.classList.add("sorted-col-cell");
 
         tr.appendChild(rankTd);
         tr.appendChild(yearTd);
         tr.appendChild(managerTd);
+        tr.appendChild(winsTd);
+        tr.appendChild(lossesTd);
+        tr.appendChild(tiesTd);
         tr.appendChild(recordTd);
         tr.appendChild(gamesTd);
         tr.appendChild(pfTd);
@@ -716,7 +750,6 @@
 
       noDataMessage.style.display = "none";
 
-      // Header click sorting
       headerRow.onclick = (e) => {
         const th = e.target.closest("th");
         if (!th) return;
@@ -724,7 +757,6 @@
         if (!colKey) return;
 
         if (colKey === "rank") {
-          // rank toggles back to default sort
           currentSort = { columnKey: "year", direction: "desc" };
         } else {
           let newDir = "desc";
