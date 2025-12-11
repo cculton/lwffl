@@ -153,7 +153,7 @@
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      margin-bottom: 16px; /* slightly more breathing room */
+      margin-bottom: 16px;
       gap: 12px;
       flex-wrap: wrap;
     }
@@ -164,7 +164,7 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: #e5e7eb;
-      margin-bottom: 6px; /* more space above subtitle */
+      margin-bottom: 6px;
     }
 
     .leaderboard-subtitle {
@@ -226,6 +226,15 @@
 
     .th-right {
       text-align: right;
+    }
+
+    /* Visual separation for featured stat vs contextual stats */
+    .featured-stat-header {
+      border-right: 1px solid rgba(55, 65, 81, 0.8);
+    }
+
+    .featured-stat-cell {
+      border-right: 1px solid rgba(31, 41, 55, 0.9);
     }
 
     .leaderboard-table tbody tr {
@@ -413,6 +422,8 @@
     ];
 
     // Category definitions
+    // First column in `columns` is treated as the FEATURED stat;
+    // all remaining are contextual, aligned to the right side.
     const CATEGORY_DEFS = [
       // SCORING – FOR
       {
@@ -422,7 +433,7 @@
         sortDir: "desc",
         type: "aggregate",
         columns: [
-          { key: "pointsFor", label: "Pts For", format: "points", polarity: "positivePrimary" },
+          { key: "pointsFor", label: "Pts For", format: "points", polarity: "positivePrimary" }, // featured
           { key: "games", label: "M", format: "integer" },
           { key: "ppmFor", label: "PPM", format: "ppm", polarity: "positive" }
         ]
@@ -434,7 +445,7 @@
         sortDir: "asc",
         type: "aggregate",
         columns: [
-          { key: "pointsFor", label: "Pts For", format: "points", polarity: "negativePrimary" },
+          { key: "pointsFor", label: "Pts For", format: "points", polarity: "negativePrimary" }, // featured
           { key: "games", label: "M", format: "integer" },
           { key: "ppmFor", label: "PPM", format: "ppm", polarity: "negative" }
         ]
@@ -446,7 +457,7 @@
         sortDir: "desc",
         type: "aggregate",
         columns: [
-          { key: "ppmFor", label: "PPM", format: "ppm", polarity: "positivePrimary" },
+          { key: "ppmFor", label: "PPM", format: "ppm", polarity: "positivePrimary" }, // featured
           { key: "pointsFor", label: "Pts For", format: "points" },
           { key: "games", label: "M", format: "integer" }
         ]
@@ -458,7 +469,7 @@
         sortDir: "asc",
         type: "aggregate",
         columns: [
-          { key: "ppmFor", label: "PPM", format: "ppm", polarity: "negativePrimary" },
+          { key: "ppmFor", label: "PPM", format: "ppm", polarity: "negativePrimary" }, // featured
           { key: "pointsFor", label: "Pts For", format: "points" },
           { key: "games", label: "M", format: "integer" }
         ]
@@ -472,7 +483,7 @@
         sortDir: "desc",
         type: "aggregate",
         columns: [
-          { key: "pointsAgainst", label: "Pts Against", format: "points", polarity: "negativePrimary" },
+          { key: "pointsAgainst", label: "Pts Against", format: "points", polarity: "negativePrimary" }, // featured
           { key: "games", label: "M", format: "integer" },
           { key: "ppmAgainst", label: "PPM Against", format: "ppm", polarity: "negative" }
         ]
@@ -484,7 +495,7 @@
         sortDir: "asc",
         type: "aggregate",
         columns: [
-          { key: "pointsAgainst", label: "Pts Against", format: "points", polarity: "positivePrimary" },
+          { key: "pointsAgainst", label: "Pts Against", format: "points", polarity: "positivePrimary" }, // featured
           { key: "games", label: "M", format: "integer" },
           { key: "ppmAgainst", label: "PPM Against", format: "ppm", polarity: "positive" }
         ]
@@ -496,7 +507,7 @@
         sortDir: "desc",
         type: "aggregate",
         columns: [
-          { key: "ppmAgainst", label: "PPM Against", format: "ppm", polarity: "negativePrimary" },
+          { key: "ppmAgainst", label: "PPM Against", format: "ppm", polarity: "negativePrimary" }, // featured
           { key: "pointsAgainst", label: "Pts Against", format: "points" },
           { key: "games", label: "M", format: "integer" }
         ]
@@ -508,7 +519,7 @@
         sortDir: "asc",
         type: "aggregate",
         columns: [
-          { key: "ppmAgainst", label: "PPM Against", format: "ppm", polarity: "positivePrimary" },
+          { key: "ppmAgainst", label: "PPM Against", format: "ppm", polarity: "positivePrimary" }, // featured
           { key: "pointsAgainst", label: "Pts Against", format: "points" },
           { key: "games", label: "M", format: "integer" }
         ]
@@ -522,7 +533,7 @@
         sortDir: "desc",
         type: "aggregate",
         columns: [
-          { key: "winPct", label: "Win %", format: "percent", polarity: "positivePrimary" },
+          { key: "winPct", label: "Win %", format: "percent", polarity: "positivePrimary" }, // featured
           { key: "record", label: "Record", format: "record" },
           { key: "games", label: "M", format: "integer" }
         ]
@@ -534,7 +545,7 @@
         sortDir: "asc",
         type: "aggregate",
         columns: [
-          { key: "winPct", label: "Win %", format: "percent", polarity: "negativePrimary" },
+          { key: "winPct", label: "Win %", format: "percent", polarity: "negativePrimary" }, // featured
           { key: "record", label: "Record", format: "record" },
           { key: "games", label: "M", format: "integer" }
         ]
@@ -548,7 +559,7 @@
         sortDir: "desc",
         type: "aggregate",
         columns: [
-          { key: "winsInt", label: "W", format: "integer", polarity: "positivePrimary" },
+          { key: "winsInt", label: "W", format: "integer", polarity: "positivePrimary" }, // featured
           { key: "lossesInt", label: "L", format: "integer" },
           { key: "tiesInt", label: "T", format: "integer" },
           { key: "winPct", label: "Win %", format: "percent" },
@@ -562,7 +573,7 @@
         sortDir: "desc",
         type: "aggregate",
         columns: [
-          { key: "lossesInt", label: "L", format: "integer", polarity: "negativePrimary" },
+          { key: "lossesInt", label: "L", format: "integer", polarity: "negativePrimary" }, // featured
           { key: "winsInt", label: "W", format: "integer" },
           { key: "tiesInt", label: "T", format: "integer" },
           { key: "winPct", label: "Win %", format: "percent" },
@@ -578,7 +589,7 @@
         sortDir: "desc",
         type: "aggregate",
         columns: [
-          { key: "weeklyHighCount", label: "Weekly Highs", format: "integer", polarity: "positivePrimary" },
+          { key: "weeklyHighCount", label: "Weekly Highs", format: "integer", polarity: "positivePrimary" }, // featured
           { key: "weeklyHighRate", label: "Weekly High Rate", format: "percent" },
           { key: "games", label: "M", format: "integer" }
         ]
@@ -590,7 +601,7 @@
         sortDir: "asc",
         type: "aggregate",
         columns: [
-          { key: "weeklyHighCount", label: "Weekly Highs", format: "integer", polarity: "negativePrimary" },
+          { key: "weeklyHighCount", label: "Weekly Highs", format: "integer", polarity: "negativePrimary" }, // featured
           { key: "weeklyHighRate", label: "Weekly High Rate", format: "percent" },
           { key: "games", label: "M", format: "integer" }
         ]
@@ -648,8 +659,8 @@
       matches.forEach(m => {
         const scopes = getScopesForMatch(m);
         const participants = [
-          { manager: m.manager1, scored: m.score1, allowed: m.score2 },
-          { manager: m.manager2, scored: m.score2, allowed: m.score1 }
+          { manager: m.manager1, scored: m.score1, against: m.score2 },
+          { manager: m.manager2, scored: m.score2, against: m.score1 }
         ];
 
         scopes.forEach(scope => {
@@ -684,15 +695,15 @@
             const s = managersStats[p.manager];
             s.games += 1;
             s.pointsFor += p.scored;
-            s.pointsAgainst += p.allowed;
+            s.pointsAgainst += p.against;
 
             let isWin = false;
             let isLoss = false;
 
-            if (p.scored > p.allowed) {
+            if (p.scored > p.against) {
               s.winsInt += 1;
               isWin = true;
-            } else if (p.scored < p.allowed) {
+            } else if (p.scored < p.against) {
               s.lossesInt += 1;
               isLoss = true;
             } else {
@@ -884,23 +895,23 @@
 
     function getHeaderTitle(label) {
       switch (label) {
-        case "Rank": return "Rank among managers";
+        case "Rank": return "Rank among managers for this stat";
         case "Manager": return "Manager name";
-        case "Pts For": return "Total points for";
-        case "Pts Against": return "Total points against";
-        case "PPM": return "Points per matchup";
-        case "PPM Against": return "Points per matchup against";
+        case "Pts For": return "Total points scored (Points For)";
+        case "Pts Against": return "Total points conceded (Points Against)";
+        case "PPM": return "Points Per Matchup (average points scored per matchup)";
+        case "PPM Against": return "Points Per Matchup Against (average points conceded per matchup)";
         case "M": return "Total number of matchups played";
         case "W": return "Total wins";
         case "L": return "Total losses";
         case "T": return "Total ties";
         case "Win %": return "Winning percentage";
-        case "Record": return "Overall record";
+        case "Record": return "Overall record (wins-losses-ties)";
         case "Weekly Highs": return "Number of times this manager had the highest score in a week";
-        case "Weekly High Rate": return "Percentage of weeks this manager recorded the weekly high score";
-        case "Win Streak": return "Length of winning streak";
-        case "Loss Streak": return "Length of losing streak";
-        case "Span": return "Season and week range streak spanned";
+        case "Weekly High Rate": return "Percentage of matchups where this manager recorded the weekly high score";
+        case "Win Streak": return "Length of the winning streak (consecutive wins)";
+        case "Loss Streak": return "Length of the losing streak (consecutive losses)";
+        case "Span": return "Season and week range covered by the streak";
         default:
           return label;
       }
@@ -1029,7 +1040,19 @@
       headerRow.appendChild(rankTh);
       headerRow.appendChild(managerTh);
 
-      def.columns.forEach(col => {
+      // Separate featured stat vs contextual stats
+      const [featuredCol, ...contextCols] = def.columns;
+
+      if (featuredCol) {
+        const th = document.createElement("th");
+        th.textContent = featuredCol.label;
+        th.title = getHeaderTitle(featuredCol.label);
+        th.className = "th-right featured-stat-header";
+        th.dataset.colKey = featuredCol.key === "record" ? "winPct" : featuredCol.key;
+        headerRow.appendChild(th);
+      }
+
+      contextCols.forEach(col => {
         const th = document.createElement("th");
         th.textContent = col.label;
         th.title = getHeaderTitle(col.label);
@@ -1054,7 +1077,27 @@
         tr.appendChild(rankTd);
         tr.appendChild(managerTd);
 
-        def.columns.forEach(col => {
+        // Featured stat cell
+        if (featuredCol) {
+          const td = document.createElement("td");
+          td.className = "stat-cell featured-stat-cell";
+          const metricKey = featuredCol.key === "record" ? "record" : featuredCol.key;
+          const rawValue =
+            metricKey === "record" ? null : getMetric(stats, metricKey);
+          const displayValue =
+            metricKey === "record"
+              ? formatValue(null, "record", stats)
+              : formatValue(rawValue, featuredCol.format, stats);
+
+          if (featuredCol.polarity === "positivePrimary") td.classList.add("value-positive");
+          if (featuredCol.polarity === "negativePrimary") td.classList.add("value-negative");
+
+          td.textContent = displayValue;
+          tr.appendChild(td);
+        }
+
+        // Contextual stat cells – all grouped to the right
+        contextCols.forEach(col => {
           const td = document.createElement("td");
           td.className = "stat-cell";
           const metricKey = col.key === "record" ? "record" : col.key;
@@ -1229,7 +1272,7 @@
       managerTh.dataset.colKey = "manager";
 
       const lenTh = document.createElement("th");
-      lenTh.className = "th-right";
+      lenTh.className = "th-right featured-stat-header";
       lenTh.textContent = def.streakType === "win" ? "Win Streak" : "Loss Streak";
       lenTh.title = getHeaderTitle(def.streakType === "win" ? "Win Streak" : "Loss Streak");
       lenTh.dataset.colKey = "length";
@@ -1260,7 +1303,7 @@
 
         const lenTd = document.createElement("td");
         lenTd.className =
-          "stat-cell " +
+          "stat-cell featured-stat-cell " +
           (def.streakType === "win" ? "value-positive" : "value-negative");
         lenTd.textContent = s.length.toString();
 
