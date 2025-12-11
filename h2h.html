@@ -91,8 +91,11 @@
       text-transform: uppercase;
     }
 
+    /* Make selects readable & consistent across browsers (including Safari) */
     select {
       appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
       padding: 10px 12px;
       border-radius: 10px;
       border: 1px solid rgba(75,85,99,0.9);
@@ -104,6 +107,7 @@
       outline: none;
       cursor: pointer;
       box-shadow: 0 1px 3px rgba(15,23,42,0.7);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     select:disabled {
@@ -121,6 +125,7 @@
     select option {
       background-color: #020617;
       color: #f9fafb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     .record-section {
@@ -407,7 +412,7 @@
             <th>Playoffs</th>
             <th>Manager 1</th>
             <th>Score 1</th>
-            <th>vs</th>
+            <th></th>
             <th>Score 2</th>
             <th>Manager 2</th>
           </tr>
@@ -427,22 +432,6 @@
   <script>
     // ============================================================
     // H2H APP USING SHARED league-scores.json
-    // ============================================================
-    // league-scores.json must be in the SAME folder as this file.
-    // It should be a JSON array like:
-    //
-    // [
-    //   {
-    //     "year": 2014,
-    //     "week": 1,
-    //     "manager1": "Adam Goho",
-    //     "score1": 95.16,
-    //     "manager2": "Samuel Wheeler",
-    //     "score2": 102.04,
-    //     "playoffs": "N/A"
-    //   },
-    //   ...
-    // ]
     // ============================================================
 
     let matchupDatabase = [];
@@ -670,7 +659,7 @@
           <td class="score ${manager1Won ? "win" : manager2Won ? "loss" : ""}">
             ${formatNumber(rowManager1Score, 2)}
           </td>
-          <td style="text-align:center;">vs</td>
+          <td>-</td>
           <td class="score ${manager2Won ? "win" : manager1Won ? "loss" : ""}">
             ${formatNumber(rowManager2Score, 2)}
           </td>
@@ -689,11 +678,11 @@
       const avgManager2Points = totalGames > 0 ? totalManager2Points / totalGames : 0;
 
       // Current streak (most recent game first)
-      let streakText = "Streak – None";
+      let currentStreakText = "Current Streak – None";
       if (results.length > 0) {
         const first = results[0];
         if (!first.manager1Won && !first.manager2Won) {
-          streakText = "Streak – None (last game was a tie)";
+          currentStreakText = "Current Streak – None (last game was a tie)";
         } else {
           const isM1 = first.manager1Won;
           const streakName = isM1 ? manager1 : displayManager2Name;
@@ -703,8 +692,43 @@
             else if (!isM1 && results[i].manager2Won) count++;
             else break;
           }
-          streakText = `Streak – ${streakName} W${count}`;
+          currentStreakText = `Current Streak – ${streakName} W${count}`;
         }
+      }
+
+      // Longest streak in series (walk oldest -> newest)
+      let longestM1 = 0;
+      let longestM2 = 0;
+      let curM1 = 0;
+      let curM2 = 0;
+
+      for (let i = results.length - 1; i >= 0; i--) {
+        const r = results[i];
+        if (r.manager1Won) {
+          curM1 += 1;
+          curM2 = 0;
+        } else if (r.manager2Won) {
+          curM2 += 1;
+          curM1 = 0;
+        } else {
+          curM1 = 0;
+          curM2 = 0;
+        }
+        if (curM1 > longestM1) longestM1 = curM1;
+        if (curM2 > longestM2) longestM2 = curM2;
+      }
+
+      let longestStreakText = "Longest streak in series — None";
+      if (longestM1 === 0 && longestM2 === 0) {
+        longestStreakText = "Longest streak in series — None (no decisive games)";
+      } else if (longestM1 > longestM2) {
+        longestStreakText = `Longest streak in series — ${manager1} W${longestM1}`;
+      } else if (longestM2 > longestM1) {
+        longestStreakText = `Longest streak in series — ${displayManager2Name} W${longestM2}`;
+      } else { // tie
+        longestStreakText =
+          `Longest streak in series — Tie · ` +
+          `${manager1} W${longestM1}, ${displayManager2Name} W${longestM2}`;
       }
 
       document.getElementById("manager1Wins").textContent = manager1Wins;
@@ -738,7 +762,8 @@
         avgManager2Points,
         2
       )}</strong></li>
-            <li>${streakText}</li>
+            <li>${currentStreakText}</li>
+            <li>${longestStreakText}</li>
           </ul>
         </div>
       `;
