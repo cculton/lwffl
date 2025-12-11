@@ -175,28 +175,6 @@
       text-transform: uppercase;
     }
 
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 9px;
-      border-radius: 999px;
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      background: rgba(15, 23, 42, 0.9);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--text-muted);
-    }
-
-    .pill-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: var(--accent);
-      opacity: 0.8;
-    }
-
     .leaderboard-table {
       width: 100%;
       border-collapse: collapse;
@@ -385,10 +363,6 @@
               Filter by manager and season
             </div>
           </div>
-          <div class="pill">
-            <span class="pill-dot"></span>
-            <span id="pillLabel">All seasons · all managers</span>
-          </div>
         </div>
 
         <table class="leaderboard-table" aria-live="polite">
@@ -411,8 +385,9 @@
 
   <script>
     let allSeasons = [];
+    // Default sort: most points for (PF) across all managers/seasons
     let currentSort = {
-      columnKey: "year",
+      columnKey: "points_for",
       direction: "desc"
     };
 
@@ -423,7 +398,6 @@
       { key: "wins", label: "W" },
       { key: "losses", label: "L" },
       { key: "ties", label: "T" },
-      { key: "record", label: "Record" },
       { key: "games", label: "M" },
       { key: "points_for", label: "PF" },
       { key: "points_against", label: "PA" },
@@ -443,7 +417,6 @@
         case "W": return "Season wins";
         case "L": return "Season losses";
         case "T": return "Season ties";
-        case "Record": return "Season record (wins–losses–ties)";
         case "M": return "Total number of matchups played that season";
         case "PF": return "Total points scored by this team that season";
         case "PA": return "Total points scored against this team that season";
@@ -560,6 +533,7 @@
       if (colKey === "manager") return "asc";
       if (colKey === "year") return "desc";
       if (colKey === "final_standing" || colKey === "division_finish") return "asc";
+      if (colKey === "points_for") return "desc";
       return "desc";
     }
 
@@ -568,7 +542,6 @@
       const tbody = document.getElementById("leaderboardBody");
       const noDataMessage = document.getElementById("noDataMessage");
       const titleEl = document.getElementById("leaderboardTitle");
-      const pillLabel = document.getElementById("pillLabel");
 
       const filtered = getFilteredRows();
 
@@ -587,10 +560,6 @@
       }
       titleEl.textContent = titleText;
 
-      const mgrLabel = managerValue === "__all__" ? "all managers" : managerValue;
-      const yrLabel = yearValue === "__all__" ? "all seasons" : yearValue;
-      pillLabel.textContent = `${yrLabel} · ${mgrLabel}`;
-
       if (!filtered.length) {
         headerRow.innerHTML = "";
         tbody.innerHTML = "";
@@ -599,7 +568,7 @@
         return;
       }
 
-      const sortKey = currentSort.columnKey || "year";
+      const sortKey = currentSort.columnKey || "points_for";
       const direction = currentSort.direction || "desc";
 
       filtered.sort((a, b) => {
@@ -669,10 +638,6 @@
         tiesTd.textContent = formatInteger(row.ties);
         if (sortedKey === "ties") tiesTd.classList.add("sorted-col-cell");
 
-        const recordTd = document.createElement("td");
-        recordTd.textContent = row.record || "—";
-        if (sortedKey === "record") recordTd.classList.add("sorted-col-cell");
-
         const gamesTd = document.createElement("td");
         gamesTd.textContent = formatInteger(row.games);
         if (sortedKey === "games") gamesTd.classList.add("sorted-col-cell");
@@ -689,7 +654,8 @@
 
         const ppmForTd = document.createElement("td");
         ppmForTd.classList.add("value-positive");
-        ppmForTd.textContent = row.ppm_for === null ? "—" : formatNumber(row.ppm_for, 1);
+        ppmForTd.textContent =
+          row.ppm_for === null ? "—" : formatNumber(row.ppm_for, 1);
         if (sortedKey === "ppm_for") ppmForTd.classList.add("sorted-col-cell");
 
         const ppmAgainstTd = document.createElement("td");
@@ -734,7 +700,6 @@
         tr.appendChild(winsTd);
         tr.appendChild(lossesTd);
         tr.appendChild(tiesTd);
-        tr.appendChild(recordTd);
         tr.appendChild(gamesTd);
         tr.appendChild(pfTd);
         tr.appendChild(paTd);
@@ -757,7 +722,9 @@
         if (!colKey) return;
 
         if (colKey === "rank") {
-          currentSort = { columnKey: "year", direction: "desc" };
+          // Rank sort is really "most recent best seasons", but we just
+          // snap back to default sort when clicking Rank.
+          currentSort = { columnKey: "points_for", direction: "desc" };
         } else {
           let newDir = "desc";
           if (currentSort.columnKey === colKey) {
