@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Legion of Whom Fantasy Football League</title>
+  <title>LWFFL Stats Hub</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     * {
@@ -15,6 +15,7 @@
       --bg-main: #020617;
       --card-bg: #020617;
       --accent: #38bdf8;
+      --border-subtle: #1f2937;
       --text-main: #e5e7eb;
       --text-muted: #9ca3af;
       --text-soft: #6b7280;
@@ -27,214 +28,160 @@
       min-height: 100vh;
       padding: 24px 16px;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
     }
 
     .shell {
-      max-width: 720px;
+      max-width: 900px;
       width: 100%;
     }
 
-    .card {
+    .container {
       background:
-        radial-gradient(circle at top left, rgba(56,189,248,0.12), transparent 55%),
-        radial-gradient(circle at bottom right, rgba(59,130,246,0.16), transparent 55%),
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.18), transparent 55%),
         var(--card-bg);
-      border-radius: 20px;
-      border: 1px solid rgba(148,163,184,0.35);
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
       box-shadow:
-        0 36px 80px rgba(0,0,0,0.85),
-        0 0 0 1px rgba(15,23,42,0.95);
-      padding: 28px 22px 24px;
-      text-align: center;
+        0 40px 80px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+      padding: 32px 24px 28px;
       backdrop-filter: blur(14px);
     }
 
-    .logo-circle {
-      width: 40px;
-      height: 40px;
-      border-radius: 999px;
-      border: 2px solid rgba(56,189,248,0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 10px;
-      background: radial-gradient(circle at top, rgba(8,47,73,0.9), rgba(15,23,42,0.95));
-      box-shadow:
-        0 0 0 4px rgba(15,23,42,1),
-        0 0 26px rgba(56,189,248,0.45);
-      font-size: 0.9rem;
-      font-weight: 700;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: #e0f2fe;
-    }
-
-    h1 {
-      font-size: 1.7rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .subtitle {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: var(--text-soft);
+    header {
+      text-align: center;
       margin-bottom: 32px;
     }
 
-    .meta-line {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-bottom: 22px;
-    }
-
-    .links {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-
-    .app-link {
-      display: block;
-      border-radius: 12px;
-      border: 1px solid rgba(55,65,81,0.9);
-      padding: 11px 12px;
-      background: radial-gradient(circle at left, rgba(15,23,42,0.98), rgba(15,23,42,1));
-      color: var(--text-main);
-      text-decoration: none;
-      text-align: left;
-      transition: border-color 0.12s ease-out, box-shadow 0.12s ease-out, transform 0.12s ease-out, background 0.12s ease-out;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .app-link:hover {
-      border-color: rgba(56,189,248,0.9);
-      box-shadow:
-        0 12px 30px rgba(15,23,42,0.9),
-        0 0 0 1px rgba(15,23,42,1);
-      transform: translateY(-1px);
-      background: radial-gradient(circle at left, rgba(15,23,42,1), rgba(15,23,42,0.98));
-    }
-
-    .app-main {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .app-icon {
-      width: 30px;
-      height: 30px;
-      border-radius: 10px;
-      border: 1px solid rgba(55,65,81,0.95);
-      background: radial-gradient(circle at top, rgba(15,23,42,0.98), rgba(15,23,42,1));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-    }
-
-    .app-text {
-      min-width: 0;
-    }
-
-    .app-title {
-      font-size: 0.9rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
+    header h1 {
+      font-size: 1.9rem;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      margin-bottom: 2px;
+      font-weight: 700;
+      color: #f9fafb;
     }
 
-    .app-desc {
+    header p {
+      margin-top: 14px; /* a bit more breathing room per your earlier note */
+      color: var(--text-soft);
+      font-size: 0.85rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .nav-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      background: rgba(15, 23, 42, 0.94);
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
+    }
+
+    .nav-card:hover {
+      background: rgba(15, 23, 42, 0.99);
+      transform: translateY(-2px);
+      box-shadow:
+        0 18px 35px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(56, 189, 248, 0.3);
+    }
+
+    .nav-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .nav-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #e5e7eb;
+      margin-bottom: 4px;
+    }
+
+    .nav-desc {
       font-size: 0.8rem;
       color: var(--text-soft);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      line-height: 1.4;
     }
 
-    .chevron {
-      font-size: 1rem;
-      color: var(--text-soft);
-    }
-
-    .footnote {
-      font-size: 0.75rem;
-      color: var(--text-soft);
-    }
-
-    .footnote code {
-      font-size: 0.75rem;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    .nav-footer {
+      margin-top: 12px;
+      font-size: 0.72rem;
       color: var(--accent);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
     }
 
-    @media (max-width: 600px) {
-      .card {
-        padding: 22px 16px 20px;
-      }
-
-      h1 {
-        font-size: 1.4rem;
-      }
-
-      .app-link {
-        padding: 9px 10px;
-      }
-
-      .app-desc {
-        white-space: normal;
+    @media (max-width: 800px) {
+      .links-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
   <div class="shell">
-    <div class="card">
-      <h2>Legion of Whom Fantasy Football League</h2>
-      <div class="meta-line">
-        Full catalogue of stats and accomplishments · 2014–Present 
-      </div>
-      
-      <div class="links">
-        <a href="career-records.html" class="app-link">
-          <div class="app-main">
-            <div class="app-icon">📊</div>
-            <div class="app-text">
-              <div class="app-title">Career Leaders</div>
-              <div class="app-desc">Points, win %, weekly highs, streaks & more.</div>
-            </div>
-          </div>
-          <div class="chevron">›</div>
-        </a>
-      </div>
-    
-      <div class="links">
-        <a href="h2h.html" class="app-link">
-          <div class="app-main">
-            <div class="app-icon">⚔️</div>
-            <div class="app-text">
-              <div class="app-title">Head-to-Head Matchup History</div>
-              <div class="app-desc">Series records, points, and streaks between managers.</div>
-            </div>
-          </div>
-          <div class="chevron">›</div>
-        </a>
+    <div class="container">
+      <header>
+        <h1>Legion of Whom Fantasy Football League</h1>
+        <p>Full catalogue of stats and accomplishments · 2014–Present</p>
+      </header>
 
-      <div class="footnote">
-        All pages read from <code>league-scores.json</code>.
-      </div>
+      <main>
+        <div class="links-grid">
+          <!-- Option 1: H2H -->
+          <a href="h2h.html" class="nav-card">
+            <div>
+              <div class="nav-label">Page 01</div>
+              <div class="nav-title">Head-to-Head Matchups</div>
+              <div class="nav-desc">
+                Explore every matchup between two managers: results, scoring, and series streaks.
+              </div>
+            </div>
+            <div class="nav-footer">Open H2H</div>
+          </a>
+
+          <!-- Option 2: Career Leaders -->
+          <a href="career-records.html" class="nav-card">
+            <div>
+              <div class="nav-label">Page 02</div>
+              <div class="nav-title">Career Leaders</div>
+              <div class="nav-desc">
+                League-wide career records: points, win %, streaks, and weekly dominance.
+              </div>
+            </div>
+            <div class="nav-footer">Open Career Leaders</div>
+          </a>
+
+          <!-- Option 3: Season By Season Stats -->
+          <a href="season-by-season-stats.html" class="nav-card">
+            <div>
+              <div class="nav-label">Page 03</div>
+              <div class="nav-title">Season By Season Stats</div>
+              <div class="nav-desc">
+                One row per manager-season with matchups, scoring, standings, and transaction context.
+              </div>
+            </div>
+            <div class="nav-footer">Open Season Stats</div>
+          </a>
+        </div>
+      </main>
     </div>
   </div>
 </body>
