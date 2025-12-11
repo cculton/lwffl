@@ -884,23 +884,23 @@
 
     function getHeaderTitle(label) {
       switch (label) {
-        case "Rank": return "Rank among managers for this stat";
+        case "Rank": return "Rank among managers";
         case "Manager": return "Manager name";
-        case "Pts For": return "Total points scored (Points For)";
-        case "Pts Against": return "Total points allowed (Points Against)";
-        case "PPM": return "Points Per Matchup (average points scored per matchup)";
-        case "PPM Against": return "Points Per Matchup Allowed (average points allowed per matchup)";
+        case "Pts For": return "Total points for";
+        case "Pts Against": return "Total points against";
+        case "PPM": return "Points per matchup";
+        case "PPM Against": return "Points per matchup against";
         case "M": return "Total number of matchups played";
         case "W": return "Total wins";
         case "L": return "Total losses";
         case "T": return "Total ties";
         case "Win %": return "Winning percentage";
-        case "Record": return "Overall record (wins-losses-ties)";
+        case "Record": return "Overall record";
         case "Weekly Highs": return "Number of times this manager had the highest score in a week";
-        case "Weekly High Rate": return "Percentage of matchups where this manager recorded the weekly high score";
-        case "Win Streak": return "Length of the winning streak (consecutive wins)";
-        case "Loss Streak": return "Length of the losing streak (consecutive losses)";
-        case "Span": return "Season and week range covered by the streak";
+        case "Weekly High Rate": return "Percentage of weeks this manager recorded the weekly high score";
+        case "Win Streak": return "Length of winning streak";
+        case "Loss Streak": return "Length of losing streak";
+        case "Span": return "Season and week range streak spanned";
         default:
           return label;
       }
