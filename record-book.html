@@ -1,2227 +1,983 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Record Book – LWFFL</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root{
-      --bg-main:#020617;
-      --card-bg:#020617;
-      --accent:#38bdf8;
-      --border-subtle:#1f2937;
-      --text-main:#e5e7eb;
-      --text-muted:#9ca3af;
-      --text-soft:#6b7280;
-      --positive:#22c55e;
-      --negative:#ef4444;
-      --warning:#f59e0b;
-    }
-
-    body{
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #020617 0%, #020617 35%, #020617 100%);
-      color: var(--text-main);
-      min-height: 100vh;
-      padding: 24px 16px;
-    }
-
-    .shell{ max-width: 1100px; margin: 0 auto; }
-    .container{
-      background:
-        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%),
-        radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.18), transparent 55%),
-        var(--card-bg);
-      border-radius: 18px;
-      border: 1px solid rgba(148, 163, 184, 0.3);
-      box-shadow: 0 40px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(15,23,42,0.9);
-      padding: 28px 24px 28px;
-      backdrop-filter: blur(14px);
-    }
-
-    .header{ text-align:center; margin-bottom: 16px; }
-    .header h1{
-      font-size: 2rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      font-weight: 700;
-      margin-bottom: 6px;
-      color:#f9fafb;
-    }
-    .header p{
-      color: var(--text-soft);
-      font-size: 0.9rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-
-    /* Scope tabs */
-    .scope-tabs{
-      display:flex;
-      gap:10px;
-      justify-content:center;
-      align-items:center;
-      flex-wrap:wrap;
-      margin: 18px 0 18px;
-    }
-    .scope-btn{
-      border: 1px solid rgba(55,65,81,0.9);
-      background: rgba(15,23,42,0.7);
-      color: var(--text-muted);
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      cursor: pointer;
-      user-select:none;
-      transition: transform .08s ease, box-shadow .15s ease, border-color .15s ease, color .15s ease;
-    }
-    .scope-btn:hover{ transform: translateY(-1px); }
-    .scope-btn[aria-selected="true"]{
-      color:#f9fafb;
-      border-color: rgba(56,189,248,0.85);
-      box-shadow: 0 0 0 1px rgba(56,189,248,0.35), 0 0 12px rgba(56,189,248,0.25);
-      background: rgba(15,23,42,0.92);
-    }
-
-    .controls{
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap:16px;
-      margin-bottom: 18px;
-      align-items:end;
-    }
-    .control-group{ display:flex; flex-direction:column; }
-
-    label{
-      margin-bottom:6px;
-      color: var(--text-muted);
-      font-weight:600;
-      font-size:0.8rem;
-      letter-spacing:0.14em;
-      text-transform:uppercase;
-    }
-
-    select{
-      appearance:none; -webkit-appearance:none; -moz-appearance:none;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid rgba(75,85,99,0.9);
-      background-color: #0b1120;
-      color:#f9fafb;
-      font-size:0.95rem;
-      font-weight:500;
-      line-height:1.4;
-      outline:none;
-      cursor:pointer;
-      box-shadow: 0 1px 3px rgba(15,23,42,0.7);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-    select:focus{
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(56,189,248,0.7), 0 0 12px rgba(56,189,248,0.45);
-    }
-    optgroup{
-      background-color:#020617;
-      color: var(--text-soft);
-      font-style:normal;
-      font-size:0.8rem;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-    select option{ background-color:#020617; color:#f9fafb; }
-
-    .hint{
-      font-size:0.8rem;
-      color: var(--text-soft);
-      text-align:right;
-      line-height:1.35;
-    }
-
-    .leaderboard-card{
-      background: radial-gradient(circle at top, rgba(15,23,42,0.97), rgba(15,23,42,0.99));
-      border-radius: 14px;
-      border: 1px solid rgba(31,41,55,0.95);
-      box-shadow: 0 20px 40px rgba(15,23,42,0.95), 0 0 0 1px rgba(15,23,42,0.95);
-      padding: 18px 16px 16px;
-    }
-
-    .leaderboard-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:baseline;
-      margin-bottom: 12px;
-      gap: 12px;
-      flex-wrap:wrap;
-    }
-
-    .leaderboard-title{
-      font-size:1.1rem;
-      font-weight:600;
-      letter-spacing:0.08em;
-      text-transform:uppercase;
-      color:#e5e7eb;
-      margin-bottom: 6px;
-    }
-    .leaderboard-subtitle{
-      font-size:0.8rem;
-      color: var(--text-soft);
-      letter-spacing:0.16em;
-      text-transform:uppercase;
-      line-height: 1.3;
-    }
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding: 4px 9px;
-      border-radius: 999px;
-      border: 1px solid rgba(55,65,81,0.9);
-      background: rgba(15,23,42,0.9);
-      font-size:0.72rem;
-      text-transform:uppercase;
-      letter-spacing:0.12em;
-      color: var(--text-muted);
-      white-space:nowrap;
-    }
-    .pill-dot{ width:6px; height:6px; border-radius:999px; background: var(--accent); opacity:0.8; }
-
-    /* Table wrapper = mobile friendly */
-    .table-wrap{
-      width:100%;
-      overflow-x:auto;
-      -webkit-overflow-scrolling: touch;
-      border-radius: 10px;
-    }
-
-    .leaderboard-table{
-      width:100%;
-      border-collapse: collapse;
-      font-size:0.9rem;
-      min-width: 560px;
-      border-radius:10px;
-      overflow:hidden;
-    }
-    .leaderboard-table thead{ background: linear-gradient(90deg, #020617, #020617); }
-    .leaderboard-table th{
-      padding: 8px 10px;
-      font-size:0.78rem;
-      text-transform:uppercase;
-      letter-spacing:0.18em;
-      color:#9ca3af;
-      border-bottom: 1px solid rgba(55,65,81,0.9);
-      white-space:nowrap;
-      cursor:pointer;
-      user-select:none;
-    }
-    .th-left{ text-align:left; }
-    .th-right{ text-align:right; }
-
-    .leaderboard-table tbody tr{ transition: background 0.15s ease, transform 0.08s ease; }
-    .leaderboard-table tbody tr:nth-child(odd){ background:#020617; }
-    .leaderboard-table tbody tr:nth-child(even){ background:#020617; }
-    .leaderboard-table tbody tr:hover{ background: rgba(15,23,42,0.98); transform: translateY(-1px); }
-
-    .leaderboard-table td{
-      padding: 9px 10px;
-      border-bottom: 1px solid rgba(31,41,55,0.96);
-      color: var(--text-main);
-    }
-    .leaderboard-table tbody tr:last-child td{ border-bottom:none; }
-
-    .rank-cell{ font-weight:600; color: var(--text-muted); width:60px; text-align:left; }
-    .manager-cell{ font-weight:500; white-space:nowrap; text-align:left; }
-    .stat-cell{ text-align:right; font-variant-numeric: tabular-nums; }
-
-    .value-positive{ color: var(--positive); font-weight:600; }
-    .value-negative{ color: var(--negative); font-weight:600; }
-    .top-rank{
-      background: radial-gradient(circle at left, rgba(56,189,248,0.16), transparent 60%);
-      box-shadow: inset 2px 0 0 rgba(56,189,248,0.8);
-    }
-
-    .no-data{
-      font-size:0.9rem;
-      color: var(--text-soft);
-      padding: 14px 8px 4px;
-    }
-    .no-data span{
-      border-radius:999px;
-      border: 1px dashed rgba(75,85,99,0.9);
-      padding: 6px 10px;
-      display:inline-flex;
-      gap:6px;
-      align-items:center;
-      background: rgba(15,23,42,0.85);
-      font-size:0.78rem;
-      text-transform:uppercase;
-      letter-spacing:0.14em;
-      line-height:1.25;
-    }
-
-    .footer-note{
-      margin-top: 14px;
-      font-size: 0.75rem;
-      color: var(--text-soft);
-      text-align:right;
-    }
-
-    @media (max-width: 900px){
-      .controls{ grid-template-columns: 1fr; }
-      .hint{ text-align:left; }
-    }
-    @media (max-width: 600px){
-      .container{ padding: 22px 14px 20px; }
-      .header h1{ font-size: 1.4rem; }
-      .leaderboard-title{ font-size: 1rem; }
-      .leaderboard-table th, .leaderboard-table td{ padding: 7px 6px; }
-      .leaderboard-table{ min-width: 520px; }
-    }
-  
-    
-    .pagination{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:flex-end;
-      flex-wrap:wrap;
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(31,41,55,0.75);
-    }
-    .page-btn{
-      border: 1px solid rgba(55,65,81,0.9);
-      background: rgba(15,23,42,0.85);
-      color: #f9fafb;
-      padding: 8px 12px;
-      border-radius: 10px;
-      font-size: 0.82rem;
-      font-weight: 650;
-      letter-spacing: 0.06em;
-      cursor:pointer;
-      transition: transform .08s ease, box-shadow .15s ease, border-color .15s ease;
-    }
-    .page-btn:disabled{
-      opacity: 0.4;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-    .page-btn:hover:not(:disabled){
-      transform: translateY(-1px);
-      border-color: rgba(56,189,248,0.7);
-      box-shadow: 0 0 0 1px rgba(56,189,248,0.25);
-    }
-    .page-meta{
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      white-space:nowrap;
-    }
-    .page-status{
-      font-size: 0.78rem;
-      color: var(--text-soft);
-      letter-spacing: 0.06em;
-      white-space:nowrap;
-    }
-
-    /* Featured stat column highlight */
-    .featured-col{
-      background: rgba(56, 189, 248, 0.08);
-    }
-    .leaderboard-table thead th.featured-col{
-      background: rgba(56, 189, 248, 0.12);
-    }
-
-    /* Weekly scope: left-align all columns */
-    body.weekly-scope .leaderboard-table th,
-    body.weekly-scope .leaderboard-table td{
-      text-align: left !important;
-    }
-
-    /* Global: left-align all table headers/cells across scopes */
-    .leaderboard-table th,
-    .leaderboard-table td{
-      text-align: left !important;
-    }
-    .stat-cell{
-      text-align: left !important;
-      font-variant-numeric: tabular-nums;
-    }
-
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Record Book – LWFFL</title>
+<style>
+  :root{
+    --bg:#0b1220;
+    --panel:#0f1a2e;
+    --panel2:#0c1628;
+    --border:rgba(148,163,184,.18);
+    --text:#e5e7eb;
+    --muted:#9ca3af;
+    --soft:#cbd5e1;
+    --accent:rgba(56,189,248,.85);
+    --accent2:rgba(34,211,238,.75);
+    --good:#22c55e;
+    --bad:#ef4444;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    background: radial-gradient(1200px 600px at 30% -10%, rgba(56,189,248,.18), transparent 60%),
+                radial-gradient(900px 500px at 80% 0%, rgba(34,211,238,.12), transparent 55%),
+                var(--bg);
+    color:var(--text);
+  }
+  .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap}
+  h1{margin:0;font-size:28px;letter-spacing:.04em}
+  .sub{color:var(--muted);font-size:13px;max-width:720px;line-height:1.35}
+  .card{
+    background: linear-gradient(180deg, rgba(15,26,46,.92), rgba(12,22,40,.92));
+    border:1px solid var(--border);
+    border-radius:16px;
+    box-shadow: 0 16px 40px rgba(0,0,0,.28);
+    overflow:hidden;
+  }
+  .controls{padding:14px 14px 10px 14px;border-bottom:1px solid var(--border)}
+  .tabs{
+    display:flex;gap:8px;flex-wrap:wrap;
+    margin-bottom:12px;
+  }
+  .tab{
+    appearance:none;border:1px solid var(--border);
+    background:rgba(2,6,23,.35);
+    color:var(--soft);
+    padding:8px 12px;border-radius:999px;
+    font-weight:700;font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+    cursor:pointer;
+  }
+  .tab[aria-selected="true"]{
+    border-color: rgba(56,189,248,.55);
+    box-shadow: 0 0 0 2px rgba(56,189,248,.18);
+    color: #f8fafc;
+    background: rgba(56,189,248,.08);
+  }
+  .row{
+    display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+  }
+  label{font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+  .field{display:flex;flex-direction:column;gap:6px;min-width:220px;flex:1}
+  select{
+    width:100%;
+    padding:10px 12px;border-radius:12px;
+    border:1px solid var(--border);
+    background: rgba(2,6,23,.55);
+    color:var(--text);
+    outline:none;
+    font-weight:650;
+  }
+  .pill{
+    margin-left:auto;
+    padding:10px 12px;border-radius:12px;
+    border:1px solid var(--border);
+    background: rgba(2,6,23,.35);
+    color:var(--soft);
+    font-size:12px;
+    letter-spacing:.06em;
+    white-space:nowrap;
+  }
+  .meta{padding:12px 14px 0 14px}
+  .meta h2{margin:0;font-size:14px;letter-spacing:.08em;text-transform:uppercase}
+  .meta p{margin:6px 0 0 0;color:var(--muted);font-size:13px;line-height:1.35}
+  .tablewrap{padding:12px 14px 16px 14px}
+  .scroll{
+    width:100%;
+    overflow:auto;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background: rgba(2,6,23,.28);
+  }
+  table{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    min-width: 760px;
+  }
+  thead th{
+    position:sticky;top:0;
+    background: rgba(12,22,40,.95);
+    border-bottom:1px solid var(--border);
+    color:var(--soft);
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    padding:10px 12px;
+    text-align:left !important;
+    cursor:pointer;
+    user-select:none;
+    white-space:nowrap;
+  }
+  tbody td{
+    padding:10px 12px;
+    border-bottom:1px solid rgba(148,163,184,.10);
+    color:var(--text);
+    font-size:13px;
+    text-align:left !important;
+    white-space:nowrap;
+  }
+  tbody tr:hover td{background: rgba(56,189,248,.06)}
+  .rank{color:#94a3b8;font-weight:800}
+  .top1 td{background: rgba(34,197,94,.08)}
+  .featured-col{background: rgba(56,189,248,.10)}
+  thead th.featured-col{background: rgba(56,189,248,.14)}
+  .good{color:var(--good);font-weight:800}
+  .bad{color:var(--bad);font-weight:800}
+  .pagination{
+    display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap;
+    margin-top:10px;padding-top:10px;border-top:1px solid var(--border);
+  }
+  .pagebtn{
+    border:1px solid var(--border);
+    background: rgba(2,6,23,.45);
+    color:var(--text);
+    padding:8px 12px;border-radius:12px;
+    cursor:pointer;font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:11px;
+  }
+  .pagebtn:disabled{opacity:.45;cursor:not-allowed}
+  .pagemeta{color:var(--muted);font-size:12px;letter-spacing:.08em}
+  .nodata{
+    display:none;
+    padding:14px;
+    border:1px dashed rgba(148,163,184,.28);
+    border-radius:14px;
+    color:var(--muted);
+    background: rgba(2,6,23,.25);
+  }
+  @media (max-width:640px){
+    h1{font-size:24px}
+    .field{min-width: 160px}
+    table{min-width: 680px}
+    .pill{width:100%;text-align:left}
+  }
+</style>
 </head>
-
 <body>
-  <div class="shell">
-    <div class="container">
-      <header class="header">
+  <div class="wrap">
+    <header>
+      <div>
         <h1>Record Book</h1>
-        <p>Legion of Whom Fantasy Football League  · 2014–Present</p>
-      </header>
+        <div class="sub">Three scopes: Career, Season, Weekly. Use Matchup Type + Stat Category to explore. Click any column header to sort. 25 rows per page.</div>
+      </div>
+    </header>
 
-      <nav class="scope-tabs" aria-label="Scope">
-        <button class="scope-btn" data-scope="Career" aria-selected="true" type="button">Career</button>
-        <button class="scope-btn" data-scope="Season" aria-selected="false" type="button">Season</button>
-        <button class="scope-btn" data-scope="Weekly" aria-selected="false" type="button">Weekly</button>
-      </nav>
-
-      <section class="controls" aria-label="Controls">
-        <div class="control-group">
-          <label for="matchupTypeSelect">Matchup Type</label>
-          <select id="matchupTypeSelect"></select>
+    <div class="card">
+      <div class="controls">
+        <div class="tabs" role="tablist" aria-label="Scopes">
+          <button class="tab" data-scope="Career" aria-selected="true">Career</button>
+          <button class="tab" data-scope="Season" aria-selected="false">Season</button>
+          <button class="tab" data-scope="Weekly" aria-selected="false">Weekly</button>
         </div>
 
-        <div class="control-group">
-          <label for="categorySelect">Stat Category</label>
-          <select id="categorySelect"></select>
-        </div>
-
-        <div class="control-group">
-          <div class="hint" id="scopeHint">
-            Career records with contextual stats (matchups, PPM, win %, streaks).
+        <div class="row">
+          <div class="field">
+            <label for="matchupType">Matchup Type</label>
+            <select id="matchupType">
+              <option>Regular Season + Playoffs</option>
+              <option>Regular Season Only</option>
+              <option>Playoffs Only</option>
+            </select>
           </div>
-        </div>
-      </section>
-
-      <section class="leaderboard-card">
-        <div class="leaderboard-header">
-          <div>
-            <div class="leaderboard-title" id="leaderboardTitle">Career Leaders</div>
-            <div class="leaderboard-subtitle" id="leaderboardSubtitle">Career leaders across all eligible matchups</div>
+          <div class="field">
+            <label for="category">Stat Category</label>
+            <select id="category"></select>
           </div>
-          <div class="pill" title="Scope · Matchup Type">
-            <span class="pill-dot"></span>
-            <span id="pillLabel">Career · —</span>
-          </div>
+          <div class="pill" id="pill">Career · Regular Season + Playoffs</div>
         </div>
+      </div>
 
-        <div class="table-wrap">
-          <table class="leaderboard-table" aria-live="polite">
-            <thead><tr id="headerRow"></tr></thead>
-            <tbody id="leaderboardBody"></tbody>
+      <div class="meta">
+        <h2 id="title">Career Leaders</h2>
+        <p id="subtitle">Aggregate performance across all seasons.</p>
+      </div>
+
+      <div class="tablewrap">
+        <div class="nodata" id="nodata">No data available for this combination.</div>
+
+        <div class="scroll">
+          <table aria-label="Leaderboard">
+            <thead><tr id="thead"></tr></thead>
+            <tbody id="tbody"></tbody>
           </table>
         </div>
 
-        <div class="pagination" id="pagination" aria-label="Pagination">
-          <button class="page-btn" id="prevPage" type="button">Prev</button>
-          <div class="page-meta" id="pageMeta">Page 1 of 1</div>
-          <button class="page-btn" id="nextPage" type="button">Next</button>
-          <div class="page-status" id="pageStatus">Showing 0–0 of 0</div>
+        <div class="pagination" id="pagination" style="display:none">
+          <button class="pagebtn" id="prev">Prev</button>
+          <div class="pagemeta" id="pagemeta">Page 1 of 1</div>
+          <button class="pagebtn" id="next">Next</button>
+          <div class="pagemeta" id="pagestatus">Showing 0–0 of 0</div>
         </div>
-
-        <div class="no-data" id="noDataMessage">
-          <span>Select a matchup type and stat category to see leaderboard data.</span>
-        </div>
-
-        <div class="footer-note">
-          Data source: <strong>league-scores.json</strong> in this repo.
-        </div>
-      </section>
+      </div>
     </div>
   </div>
 
 <script>
-  // === Global containers ===
-  let rawMatchups = [];
-  let currentScope = "Career";
+/* -----------------------------
+   Data loading
+------------------------------ */
+const DATA_URL = "league-scores.json";
 
-  // Career containers (kept from original)
-  let aggregatesByScope = {};
-  let streaksByScope = {};
+/** Expected minimal row fields:
+ *  year (int), week (int),
+ *  manager1 (away), score1 (number),
+ *  manager2 (home), score2 (number),
+ *  playoffs? (boolean or string)
+ */
+function toNumber(x){
+  const n = Number(x);
+  return Number.isFinite(n) ? n : null;
+}
+function parseBoolish(x){
+  if (typeof x === "boolean") return x;
+  if (typeof x === "number") return x !== 0;
+  if (typeof x === "string"){
+    const s = x.trim().toLowerCase();
+    if (["true","t","yes","y","1","playoffs","playoff"].includes(s)) return true;
+    if (["false","f","no","n","0","regular"].includes(s)) return false;
+  }
+  return false;
+}
+function normalizeRow(r){
+  const year = Number(r.year);
+  const week = Number(r.week);
+  const manager1 = String(r.manager1 ?? "").trim();
+  const manager2 = String(r.manager2 ?? "").trim();
+  const score1 = toNumber(r.score1);
+  const score2 = toNumber(r.score2);
+  const playoffs = parseBoolish(r.playoffs ?? r.isPlayoff ?? r.playoff ?? false);
+  if (!Number.isFinite(year) || !Number.isFinite(week) || !manager1 || !manager2 || score1===null || score2===null){
+    return null;
+  }
+  return { year, week, manager1, manager2, score1, score2, playoffs };
+}
 
-  // Season containers
-  let seasonAggByMatchupType = {}; // { matchupType: { "2024": {manager:stats} } }
+async function loadData(){
+  const res = await fetch(DATA_URL, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to load " + DATA_URL);
+  const raw = await res.json();
+  if (!Array.isArray(raw)) throw new Error("league-scores.json must be an array");
+  const rows = raw.map(normalizeRow).filter(Boolean);
+  return rows;
+}
 
-  // Weekly containers
-  let weeklyRowsByMatchupType = {}; // { matchupType: [row...] }
+/* -----------------------------
+   UI State
+------------------------------ */
+const SCOPES = ["Career","Season","Weekly"];
+const MATCHUP_TYPES = ["Regular Season + Playoffs","Regular Season Only","Playoffs Only"];
 
-  const MATCHUP_TYPES = ["Regular Season + Playoffs","Regular Season Only","Playoffs Only"];
+let currentScope = "Career";
+let allMatchups = [];
 
-  // ---------------------------
-  // Category definitions
-  // ---------------------------
+const pagination = { pageSize:25, currentPage:1, total:0 };
 
-  // CAREER (verbatim naming / grouping from your current page)
-  const CAREER_CATEGORY_DEFS = [
-    // SCORING – FOR
-    { label:"Most Points For", group:"Scoring (Points For)", sortKey:"pointsFor", sortDir:"desc", type:"aggregate",
-      columns:[ {key:"pointsFor",label:"PF",format:"points",polarity:"positivePrimary"},
-                {key:"games",label:"M",format:"integer"},
-                {key:"ppmFor",label:"PPM",format:"ppm",polarity:"positive"} ]},
-    { label:"Fewest Points For", group:"Scoring (Points For)", sortKey:"pointsFor", sortDir:"asc", type:"aggregate",
-      columns:[ {key:"pointsFor",label:"PF",format:"points",polarity:"negativePrimary"},
-                {key:"games",label:"M",format:"integer"},
-                {key:"ppmFor",label:"PPM",format:"ppm",polarity:"negative"} ]},
-    { label:"Highest Points Per Matchup (PPM)", group:"Scoring (Points For)", sortKey:"ppmFor", sortDir:"desc", type:"aggregate",
-      columns:[ {key:"ppmFor",label:"PPM",format:"marg",polarity:"positivePrimary"},
-                {key:"pointsFor",label:"PF",format:"points"},
-                {key:"games",label:"M",format:"integer"} ]},
-    { label:"Lowest Points Per Matchup (PPM)", group:"Scoring (Points For)", sortKey:"ppmFor", sortDir:"asc", type:"aggregate",
-      columns:[ {key:"ppmFor",label:"PPM",format:"ppm",polarity:"negativePrimary"},
-                {key:"pointsFor",label:"PF",format:"points"},
-                {key:"games",label:"M",format:"integer"} ]},
+let sortState = { key:null, dir:"desc" }; // dir: asc|desc
+let currentDef = null;
 
-    // SCORING – AGAINST
-    { label:"Most Points Against", group:"Scoring (Points Against)", sortKey:"pointsAgainst", sortDir:"desc", type:"aggregate",
-      columns:[ {key:"pointsAgainst",label:"PA",format:"points",polarity:"negativePrimary"},
-                {key:"games",label:"M",format:"integer"},
-                {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"negative"} ]},
-    { label:"Fewest Points Against", group:"Scoring (Points Against)", sortKey:"pointsAgainst", sortDir:"asc", type:"aggregate",
-      columns:[ {key:"pointsAgainst",label:"PA",format:"points",polarity:"positivePrimary"},
-                {key:"games",label:"M",format:"integer"},
-                {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"positive"} ]},
-    { label:"Highest Points Against Per Matchup (PAPM)", group:"Scoring (Points Against)", sortKey:"ppmAgainst", sortDir:"desc", type:"aggregate",
-      columns:[ {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"negativePrimary"},
-                {key:"pointsAgainst",label:"PA",format:"points"},
-                {key:"games",label:"M",format:"integer"} ]},
-    { label:"Lowest Points Against Per Matchup (PAPM)", group:"Scoring (Points Against)", sortKey:"ppmAgainst", sortDir:"asc", type:"aggregate",
-      columns:[ {key:"ppmAgainst",label:"PAPM",format:"marg",polarity:"positivePrimary"},
-                {key:"pointsAgainst",label:"PA",format:"points"},
-                {key:"games",label:"M",format:"integer"} ]},
+function resetPage(){ pagination.currentPage = 1; }
 
-    // RESULTS – WIN %
-    { label:"Highest Winning Percentage", group:"Results (Win % & Record)", sortKey:"winPct", sortDir:"desc", type:"aggregate",
-      columns:[ {key:"winPct",label:"Win %",format:"percent",polarity:"positivePrimary"},
-                {key:"record",label:"Record",format:"record"},
-                {key:"games",label:"M",format:"integer"} ]},
-    { label:"Lowest Winning Percentage", group:"Results (Win % & Record)", sortKey:"winPct", sortDir:"asc", type:"aggregate",
-      columns:[ {key:"winPct",label:"Win %",format:"percent",polarity:"negativePrimary"},
-                {key:"record",label:"Record",format:"record"},
-                {key:"games",label:"M",format:"integer"} ]},
+function updatePill(){
+  const mt = document.getElementById("matchupType").value;
+  document.getElementById("pill").textContent = `${currentScope} · ${mt}`;
+}
 
-    // RESULTS – WINS & LOSSES
-    { label:"Most Wins", group:"Results (Wins & Losses)", sortKey:"winsInt", sortDir:"desc", type:"aggregate",
-      columns:[ {key:"winsInt",label:"W",format:"integer",polarity:"positivePrimary"},
-                {key:"lossesInt",label:"L",format:"integer"},
-                {key:"tiesInt",label:"T",format:"integer"},
-                {key:"winPct",label:"Win %",format:"percent"},
-                {key:"games",label:"M",format:"integer"} ]},
-    { label:"Most Losses", group:"Results (Wins & Losses)", sortKey:"lossesInt", sortDir:"desc", type:"aggregate",
-      columns:[ {key:"lossesInt",label:"L",format:"integer",polarity:"negativePrimary"},
-                {key:"winsInt",label:"W",format:"integer"},
-                {key:"tiesInt",label:"T",format:"integer"},
-                {key:"winPct",label:"Win %",format:"percent"},
-                {key:"games",label:"M",format:"integer"} ]},
+function showNoData(msg){
+  const nd = document.getElementById("nodata");
+  nd.textContent = msg || "No data available for this combination.";
+  nd.style.display = "block";
+  document.getElementById("pagination").style.display = "none";
+  document.getElementById("thead").innerHTML = "";
+  document.getElementById("tbody").innerHTML = "";
+}
+function hideNoData(){
+  document.getElementById("nodata").style.display = "none";
+}
 
-    // WEEKLY HIGHS
-    { label:"Most Weekly High Scores", group:"Weekly Dominance", sortKey:"weeklyHighCount", sortDir:"desc", type:"aggregate",
-      columns:[ {key:"weeklyHighCount",label:"Weekly Highs",format:"integer",polarity:"positivePrimary"},
-                {key:"weeklyHighRate",label:"Weekly High Rate",format:"percent"},
-                {key:"games",label:"M",format:"integer"} ]},
-    { label:"Fewest Weekly High Scores", group:"Weekly Dominance", sortKey:"weeklyHighCount", sortDir:"asc", type:"aggregate",
-      columns:[ {key:"weeklyHighCount",label:"Weekly Highs",format:"integer",polarity:"negativePrimary"},
-                {key:"weeklyHighRate",label:"Weekly High Rate",format:"percent"},
-                {key:"games",label:"M",format:"integer"} ]},
+/* -----------------------------
+   Matchup Type filtering
+------------------------------ */
+function inType(m, matchupType){
+  if (matchupType === "Regular Season + Playoffs") return true;
+  if (matchupType === "Regular Season Only") return !m.playoffs;
+  if (matchupType === "Playoffs Only") return !!m.playoffs;
+  return true;
+}
 
-    // STREAKS
-    { label:"Longest Winning Streak", group:"Streaks", type:"streak", streakType:"win" },
-    { label:"Longest Losing Streak", group:"Streaks", type:"streak", streakType:"lose" }
-  ];
+/* -----------------------------
+   Formatting helpers
+------------------------------ */
+function fmtYear(y){ return String(y); } // no commas
+function fmtPoints2(x){
+  return x.toLocaleString("en-US",{minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fmtAvg1(x){
+  return x.toLocaleString("en-US",{minimumFractionDigits:1, maximumFractionDigits:1});
+}
+function fmtMarg1(x){
+  const s = (x>=0?"+":"") + fmtAvg1(x);
+  return s;
+}
+function fmtRecord(w,l,t){ return `${w}-${l}-${t}`; }
 
-  // SEASON
-  // Mirrors the Career naming/terminology, but rankings are "best single season" records.
-  const SEASON_CATEGORY_DEFS = [
-    { label:"Most Points For", group:"Scoring (Points For)", sortKey:"pointsFor", sortDir:"desc", type:"season",
-      columns:[ {key:"pointsFor",label:"PF",format:"points",polarity:"positivePrimary"},
-                {key:"games",label:"M",format:"integer"},
-                {key:"ppmFor",label:"PPM",format:"ppm",polarity:"positive"},
-                {key:"year",label:"Year",format:"year"} ]},
-    { label:"Fewest Points For", group:"Scoring (Points For)", sortKey:"pointsFor", sortDir:"asc", type:"season",
-      columns:[ {key:"pointsFor",label:"PF",format:"points",polarity:"negativePrimary"},
-                {key:"games",label:"M",format:"integer"},
-                {key:"ppmFor",label:"PPM",format:"ppm",polarity:"negative"},
-                {key:"year",label:"Year",format:"year"} ]},
-    { label:"Highest Points Per Matchup (PPM)", group:"Scoring (Points For)", sortKey:"ppmFor", sortDir:"desc", type:"season",
-      columns:[ {key:"ppmFor",label:"PPM",format:"marg",polarity:"positivePrimary"},
-                {key:"pointsFor",label:"PF",format:"points"},
-                {key:"games",label:"M",format:"integer"},
-                {key:"year",label:"Year",format:"year"} ]},
-    { label:"Lowest Points Per Matchup (PPM)", group:"Scoring (Points For)", sortKey:"ppmFor", sortDir:"asc", type:"season",
-      columns:[ {key:"ppmFor",label:"PPM",format:"ppm",polarity:"negativePrimary"},
-                {key:"pointsFor",label:"PF",format:"points"},
-                {key:"games",label:"M",format:"integer"},
-                {key:"year",label:"Year",format:"year"} ]},
-
-    { label:"Most Points Against", group:"Scoring (Points Against)", sortKey:"pointsAgainst", sortDir:"desc", type:"season",
-      columns:[ {key:"pointsAgainst",label:"PA",format:"points",polarity:"negativePrimary"},
-                {key:"games",label:"M",format:"integer"},
-                {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"negative"},
-                {key:"year",label:"Year",format:"year"} ]},
-    { label:"Fewest Points Against", group:"Scoring (Points Against)", sortKey:"pointsAgainst", sortDir:"asc", type:"season",
-      columns:[ {key:"pointsAgainst",label:"PA",format:"points",polarity:"positivePrimary"},
-                {key:"games",label:"M",format:"integer"},
-                {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"positive"},
-                {key:"year",label:"Year",format:"year"} ]},
-
-    { label:"Highest Winning Percentage", group:"Results (Win % & Record)", sortKey:"winPct", sortDir:"desc", type:"season",
-      columns:[ {key:"winPct",label:"Win %",format:"percent",polarity:"positivePrimary"},
-                {key:"record",label:"Record",format:"record"},
-                {key:"games",label:"M",format:"integer"},
-                {key:"year",label:"Year",format:"year"} ]},
-    { label:"Lowest Winning Percentage", group:"Results (Win % & Record)", sortKey:"winPct", sortDir:"asc", type:"season",
-      columns:[ {key:"winPct",label:"Win %",format:"percent",polarity:"negativePrimary"},
-                {key:"record",label:"Record",format:"record"},
-                {key:"games",label:"M",format:"integer"},
-                {key:"year",label:"Year",format:"year"} ]},
-
-    { label:"Most Wins", group:"Results (Wins & Losses)", sortKey:"winsInt", sortDir:"desc", type:"season",
-      columns:[ {key:"winsInt",label:"W",format:"integer",polarity:"positivePrimary"},
-                {key:"lossesInt",label:"L",format:"integer"},
-                {key:"tiesInt",label:"T",format:"integer"},
-                {key:"winPct",label:"Win %",format:"percent"},
-                {key:"year",label:"Year",format:"year"} ]},
-    { label:"Most Losses", group:"Results (Wins & Losses)", sortKey:"lossesInt", sortDir:"desc", type:"season",
-      columns:[ {key:"lossesInt",label:"L",format:"integer",polarity:"negativePrimary"},
-                {key:"winsInt",label:"W",format:"integer"},
-                {key:"tiesInt",label:"T",format:"integer"},
-                {key:"winPct",label:"Win %",format:"percent"},
-                {key:"year",label:"Year",format:"year"} ]}
-  
-    ,
-    // STREAKS
-    { label:"Longest Winning Streak", group:"Streaks", type:"seasonStreak", streakType:"win" },
-    { label:"Longest Losing Streak", group:"Streaks", type:"seasonStreak", streakType:"lose" }
+/* -----------------------------
+   Category definitions
+------------------------------ */
+const CAREER_CATEGORIES = [
+  { label:"Most Wins", type:"careerAgg", featured:{key:"wins", label:"Wins", kind:"int"} },
+  { label:"Best Win %", type:"careerAgg", featured:{key:"winPct", label:"Win %", kind:"pct"} },
+  { label:"Most PF", type:"careerAgg", featured:{key:"pf", label:"PF", kind:"points"} },
+  { label:"Most PA", type:"careerAgg", featured:{key:"pa", label:"PA", kind:"points"} },
+  { label:"Highest PF Per Matchup (PFPM)", type:"careerAgg", featured:{key:"pfpm", label:"PFPM", kind:"avg"} },
+  { label:"Lowest PA Per Matchup (PAPM)", type:"careerAgg", featured:{key:"papm", label:"PAPM", kind:"avg", polarity:"lowBetter"} },
+  { label:"Highest Points Against Per Matchup (PAPM)", type:"careerAgg", featured:{key:"papm", label:"PAPM", kind:"avg"} },
+  { label:"Highest MARG", type:"careerAgg", featured:{key:"marg", label:"MARG", kind:"marg"} },
+  { label:"Longest Winning Streak", type:"careerStreak", streak:"win" },
+  { label:"Longest Losing Streak", type:"careerStreak", streak:"lose" },
 ];
 
-  // WEEKLY (single-matchup / weekly records)
-  const WEEKLY_CATEGORY_DEFS = [
-    { label:"Highest Score", group:"Scoring (Single Matchup)", sortKey:"scoreFor", sortDir:"desc", type:"weekly",
-      columns:[ {key:"scoreFor",label:"Score",format:"points",polarity:"positivePrimary"},
-                {key:"opponent",label:"Opponent",format:"text"},
-                {key:"scoreAgainst",label:"Opp Score",format:"points"},
-                {key:"yearWeek",label:"Year / Week",format:"text"} ]},
-    { label:"Lowest Score", group:"Scoring (Single Matchup)", sortKey:"scoreFor", sortDir:"asc", type:"weekly",
-      columns:[ {key:"scoreFor",label:"Score",format:"points",polarity:"negativePrimary"},
-                {key:"opponent",label:"Opponent",format:"text"},
-                {key:"scoreAgainst",label:"Opp Score",format:"points"},
-                {key:"yearWeek",label:"Year / Week",format:"text"} ]},
-    { label:"Biggest Margin of Victory", group:"Results (Single Matchup)", sortKey:"margin", sortDir:"desc", type:"weekly",
-      columns:[ {key:"margin",label:"MARG",format:"marg",polarity:"positivePrimary"},
-                {key:"scoreFor",label:"Score",format:"points"},
-                {key:"scoreAgainst",label:"Opp Score",format:"points"},
-                {key:"opponent",label:"Opponent",format:"text"},
-                {key:"yearWeek",label:"Year / Week",format:"text"} ]},
-    { label:"Closest Win", group:"Results (Single Matchup)", sortKey:"margin", sortDir:"asc", type:"weekly",
-      filterKey:"isWin", filterValue:true,
-      columns:[ {key:"margin",label:"MARG",format:"marg",polarity:"warningPrimary"},
-                {key:"scoreFor",label:"Score",format:"points"},
-                {key:"scoreAgainst",label:"Opp Score",format:"points"},
-                {key:"opponent",label:"Opponent",format:"text"},
-                {key:"yearWeek",label:"Year / Week",format:"text"} ]}
-  ];
+const SEASON_CATEGORIES = [
+  { label:"Most Wins", type:"seasonAgg", featured:{key:"wins", label:"Wins", kind:"int"} },
+  { label:"Best Win %", type:"seasonAgg", featured:{key:"winPct", label:"Win %", kind:"pct"} },
+  { label:"Most PF", type:"seasonAgg", featured:{key:"pf", label:"PF", kind:"points"} },
+  { label:"Most PA", type:"seasonAgg", featured:{key:"pa", label:"PA", kind:"points"} },
+  { label:"Highest PF Per Matchup (PFPM)", type:"seasonAgg", featured:{key:"pfpm", label:"PFPM", kind:"avg"} },
+  { label:"Lowest Points Against Per Matchup (PAPM)", type:"seasonAgg", featured:{key:"papm", label:"PAPM", kind:"avg", polarity:"lowBetter"} },
+  { label:"Highest Points Against Per Matchup (PAPM)", type:"seasonAgg", featured:{key:"papm", label:"PAPM", kind:"avg"} },
+  { label:"Highest MARG", type:"seasonAgg", featured:{key:"marg", label:"MARG", kind:"marg"} },
+  { label:"Longest Winning Streak", type:"seasonStreak", streak:"win" },
+  { label:"Longest Losing Streak", type:"seasonStreak", streak:"lose" },
+];
 
-  // Map by scope
-  const DEFS_BY_SCOPE = {
-    "Career": CAREER_CATEGORY_DEFS,
-    "Season": SEASON_CATEGORY_DEFS,
-    "Weekly": WEEKLY_CATEGORY_DEFS
+const WEEKLY_CATEGORIES = [
+  { label:"Highest Score", type:"weekly", featured:{key:"scoreFor", label:"Score", kind:"points"} },
+  { label:"Lowest Score", type:"weekly", featured:{key:"scoreFor", label:"Score", kind:"points", polarity:"lowBetter"} },
+  { label:"Biggest MARG", type:"weekly", featured:{key:"margin", label:"MARG", kind:"marg"} },
+  { label:"Closest Match (smallest MARG)", type:"weekly", featured:{key:"absMargin", label:"MARG", kind:"marg", polarity:"lowBetter"} },
+];
+
+function getScopeDefs(scope){
+  if (scope==="Career") return CAREER_CATEGORIES;
+  if (scope==="Season") return SEASON_CATEGORIES;
+  return WEEKLY_CATEGORIES;
+}
+
+/* -----------------------------
+   Computations
+------------------------------ */
+function buildCareerAgg(matchups, matchupType){
+  const map = new Map();
+  const add = (mgr, scored, against) => {
+    if (!map.has(mgr)){
+      map.set(mgr, { manager:mgr, games:0, wins:0, losses:0, ties:0, pf:0, pa:0, marg:0 });
+    }
+    const s = map.get(mgr);
+    s.games += 1;
+    if (scored > against) s.wins += 1;
+    else if (scored < against) s.losses += 1;
+    else s.ties += 1;
+    s.pf += scored;
+    s.pa += against;
+    s.marg += (scored - against);
   };
 
-  // ---------------------------
-  // Helpers
-  // ---------------------------
+  matchups.forEach(m => {
+    if (!inType(m, matchupType)) return;
+    add(m.manager1, m.score1, m.score2);
+    add(m.manager2, m.score2, m.score1);
+  });
 
-  function isPlayoffGame(m){ return m.playoffs && m.playoffs !== "N/A"; }
+  return Array.from(map.values()).map(s => ({
+    ...s,
+    record: fmtRecord(s.wins, s.losses, s.ties),
+    winPct: (s.wins + 0.5*s.ties) / Math.max(1, s.games),
+    pfpm: s.pf / Math.max(1, s.games),
+    papm: s.pa / Math.max(1, s.games),
+    marg: s.marg / Math.max(1, s.games) // avg margin per matchup
+  }));
+}
 
-  function getMatchupTypesForMatch(m){
-    const types = new Set();
-    types.add("Regular Season + Playoffs");
-    if (isPlayoffGame(m)) types.add("Playoffs Only");
-    else types.add("Regular Season Only");
-    return types;
+function buildSeasonAgg(matchups, matchupType){
+  const map = new Map(); // key: year|manager
+  const add = (year, mgr, scored, against) => {
+    const key = `${year}||${mgr}`;
+    if (!map.has(key)){
+      map.set(key, { year, manager:mgr, games:0, wins:0, losses:0, ties:0, pf:0, pa:0, margSum:0 });
+    }
+    const s = map.get(key);
+    s.games += 1;
+    if (scored > against) s.wins += 1;
+    else if (scored < against) s.losses += 1;
+    else s.ties += 1;
+    s.pf += scored;
+    s.pa += against;
+    s.margSum += (scored - against);
+  };
+
+  matchups.forEach(m => {
+    if (!inType(m, matchupType)) return;
+    add(m.year, m.manager1, m.score1, m.score2);
+    add(m.year, m.manager2, m.score2, m.score1);
+  });
+
+  return Array.from(map.values()).map(s => ({
+    ...s,
+    record: fmtRecord(s.wins, s.losses, s.ties),
+    winPct: (s.wins + 0.5*s.ties) / Math.max(1, s.games),
+    pfpm: s.pf / Math.max(1, s.games),
+    papm: s.pa / Math.max(1, s.games),
+    marg: s.margSum / Math.max(1, s.games)
+  }));
+}
+
+function buildWeeklyRows(matchups, matchupType){
+  const rows = [];
+  matchups.forEach(m => {
+    if (!inType(m, matchupType)) return;
+    rows.push({
+      year:m.year, week:m.week,
+      manager:m.manager1, opponent:m.manager2,
+      scoreFor:m.score1, scoreAgainst:m.score2,
+      margin: m.score1 - m.score2,
+      absMargin: Math.abs(m.score1 - m.score2),
+      playoffs: m.playoffs
+    });
+    rows.push({
+      year:m.year, week:m.week,
+      manager:m.manager2, opponent:m.manager1,
+      scoreFor:m.score2, scoreAgainst:m.score1,
+      margin: m.score2 - m.score1,
+      absMargin: Math.abs(m.score2 - m.score1),
+      playoffs: m.playoffs
+    });
+  });
+  return rows.map(r => ({
+    ...r,
+    yearWeek: `${fmtYear(r.year)} Wk ${r.week}`
+  }));
+}
+
+function buildCareerStreaks(matchups, matchupType){
+  // Longest consecutive wins/losses across all weeks (within manager). We'll sort by year,week globally.
+  const byMgr = new Map();
+  const add = (mgr, year, week, isWin, isLoss) => {
+    if (!byMgr.has(mgr)) byMgr.set(mgr, []);
+    byMgr.get(mgr).push({ year, week, isWin, isLoss });
+  };
+  matchups.forEach(m => {
+    if (!inType(m, matchupType)) return;
+    add(m.manager1, m.year, m.week, m.score1>m.score2, m.score1<m.score2);
+    add(m.manager2, m.year, m.week, m.score2>m.score1, m.score2<m.score1);
+  });
+
+  const streaks = { win:[], lose:[] };
+  for (const [mgr, arr] of byMgr.entries()){
+    arr.sort((a,b)=> a.year===b.year ? a.week-b.week : a.year-b.year);
+
+    // win streak
+    let start=null;
+    for (let i=0;i<arr.length;i++){
+      if (arr[i].isWin){
+        if (start===null) start=i;
+      } else if (start!==null){
+        const end=i-1;
+        streaks.win.push({ manager:mgr, length:end-start+1, start:arr[start], end:arr[end] });
+        start=null;
+      }
+    }
+    if (start!==null){
+      const end=arr.length-1;
+      streaks.win.push({ manager:mgr, length:end-start+1, start:arr[start], end:arr[end] });
+    }
+
+    // loss streak
+    start=null;
+    for (let i=0;i<arr.length;i++){
+      if (arr[i].isLoss){
+        if (start===null) start=i;
+      } else if (start!==null){
+        const end=i-1;
+        streaks.lose.push({ manager:mgr, length:end-start+1, start:arr[start], end:arr[end] });
+        start=null;
+      }
+    }
+    if (start!==null){
+      const end=arr.length-1;
+      streaks.lose.push({ manager:mgr, length:end-start+1, start:arr[start], end:arr[end] });
+    }
   }
+  return streaks;
+}
 
-  function ensureStatsObj(){
-    return {
-      games: 0,
-      pointsFor: 0,
-      pointsAgainst: 0,
-      winsInt: 0,
-      lossesInt: 0,
-      tiesInt: 0,
-      weeklyHighCount: 0,
-      lastYear: null,
-      lastWeek: null
+function buildSeasonStreaks(matchups, matchupType){
+  // streaks constrained within year
+  const byYearMgr = new Map(); // key year||mgr
+  const add = (year, mgr, week, isWin, isLoss) => {
+    const key = `${year}||${mgr}`;
+    if (!byYearMgr.has(key)) byYearMgr.set(key, []);
+    byYearMgr.get(key).push({ year, week, isWin, isLoss });
+  };
+  matchups.forEach(m => {
+    if (!inType(m, matchupType)) return;
+    add(m.year, m.manager1, m.week, m.score1>m.score2, m.score1<m.score2);
+    add(m.year, m.manager2, m.week, m.score2>m.score1, m.score2<m.score1);
+  });
+
+  const streaks = { win:[], lose:[] };
+  for (const [key, arr] of byYearMgr.entries()){
+    const [yearStr, mgr] = key.split("||");
+    arr.sort((a,b)=>a.week-b.week);
+
+    let start=null;
+    for (let i=0;i<arr.length;i++){
+      if (arr[i].isWin){
+        if (start===null) start=i;
+      } else if (start!==null){
+        const end=i-1;
+        streaks.win.push({ year:Number(yearStr), manager:mgr, length:end-start+1, startWeek:arr[start].week, endWeek:arr[end].week });
+        start=null;
+      }
+    }
+    if (start!==null){
+      const end=arr.length-1;
+      streaks.win.push({ year:Number(yearStr), manager:mgr, length:end-start+1, startWeek:arr[start].week, endWeek:arr[end].week });
+    }
+
+    start=null;
+    for (let i=0;i<arr.length;i++){
+      if (arr[i].isLoss){
+        if (start===null) start=i;
+      } else if (start!==null){
+        const end=i-1;
+        streaks.lose.push({ year:Number(yearStr), manager:mgr, length:end-start+1, startWeek:arr[start].week, endWeek:arr[end].week });
+        start=null;
+      }
+    }
+    if (start!==null){
+      const end=arr.length-1;
+      streaks.lose.push({ year:Number(yearStr), manager:mgr, length:end-start+1, startWeek:arr[start].week, endWeek:arr[end].week });
+    }
+  }
+  return streaks;
+}
+
+/* -----------------------------
+   Sorting helpers
+------------------------------ */
+function compare(a,b,key){
+  const av = a[key];
+  const bv = b[key];
+  if (av === bv) return 0;
+  // nulls last
+  if (av === null || av === undefined) return 1;
+  if (bv === null || bv === undefined) return -1;
+
+  if (typeof av === "number" && typeof bv === "number") return av - bv;
+  return String(av).localeCompare(String(bv));
+}
+function sortRows(rows){
+  if (!sortState.key) return rows;
+  const dir = sortState.dir === "asc" ? 1 : -1;
+  return rows.slice().sort((a,b)=>{
+    const c = compare(a,b,sortState.key);
+    if (c!==0) return c*dir;
+    // stable-ish tiebreakers
+    if ("year" in a && "year" in b && a.year!==b.year) return (b.year-a.year); // recency
+    if ("week" in a && "week" in b && a.week!==b.week) return (b.week-a.week);
+    if ("manager" in a && "manager" in b) return a.manager.localeCompare(b.manager);
+    return 0;
+  });
+}
+
+/* -----------------------------
+   Pagination
+------------------------------ */
+function paginate(rows){
+  const total = rows.length;
+  pagination.total = total;
+  const totalPages = Math.max(1, Math.ceil(total / pagination.pageSize));
+  if (pagination.currentPage > totalPages) pagination.currentPage = totalPages;
+  if (pagination.currentPage < 1) pagination.currentPage = 1;
+
+  const start = (pagination.currentPage-1)*pagination.pageSize;
+  const end = Math.min(total, start + pagination.pageSize);
+  const pageRows = rows.slice(start, end);
+
+  const pg = document.getElementById("pagination");
+  if (total === 0){
+    pg.style.display="none";
+  } else {
+    pg.style.display="flex";
+    document.getElementById("pagemeta").textContent = `Page ${pagination.currentPage} of ${totalPages}`;
+    document.getElementById("pagestatus").textContent = `Showing ${start+1}–${end} of ${total}`;
+    document.getElementById("prev").disabled = pagination.currentPage<=1;
+    document.getElementById("next").disabled = pagination.currentPage>=totalPages;
+  }
+  return pageRows;
+}
+
+/* -----------------------------
+   Rendering
+------------------------------ */
+function setHeader(columns, featuredKey){
+  const thead = document.getElementById("thead");
+  thead.innerHTML = "";
+  columns.forEach(col=>{
+    const th = document.createElement("th");
+    th.textContent = col.label;
+    th.dataset.key = col.key;
+    if (col.key === featuredKey) th.classList.add("featured-col");
+    th.onclick = () => {
+      // sort toggle
+      if (sortState.key === col.key){
+        sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
+      } else {
+        sortState.key = col.key;
+        // default dir: desc for numbers, asc for text
+        sortState.dir = col.kind==="text" ? "asc" : "desc";
+      }
+      resetPage();
+      render();
     };
+    thead.appendChild(th);
+  });
+}
+
+function setRows(rows, columns, featuredKey, topRankKey){
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+  rows.forEach((r, i)=>{
+    const tr = document.createElement("tr");
+    if (r._rank === 1) tr.classList.add("top1");
+    columns.forEach(col=>{
+      const td = document.createElement("td");
+      if (col.key === "rank") td.classList.add("rank");
+      if (col.key === featuredKey) td.classList.add("featured-col");
+      let v = r[col.key];
+
+      if (col.format === "points") td.textContent = fmtPoints2(v);
+      else if (col.format === "avg") td.textContent = fmtAvg1(v);
+      else if (col.format === "marg") td.textContent = fmtMarg1(v);
+      else if (col.format === "pct") td.textContent = fmtAvg1(v*100) + "%";
+      else td.textContent = (v===null || v===undefined) ? "" : String(v);
+
+      // color helpers
+      if (col.key === featuredKey && col.polarity === "lowBetter"){
+        // For low-better featured columns (e.g., PAPM, lowest score): highlight green-ish when lower relative not trivial
+        // Keep simple: do nothing here.
+      }
+      tbody.appendChild(tr);
+      tr.appendChild(td);
+    });
+  });
+}
+
+function rankWithTies(rows, featuredKey, dir){
+  // returns new array with _rank assigned based on featuredKey
+  const sortedForRank = rows.slice().sort((a,b)=>{
+    const c = compare(a,b,featuredKey);
+    return (dir==="asc" ? c : -c);
+  });
+  let rank = 0;
+  let prev = null;
+  sortedForRank.forEach((r, idx)=>{
+    const v = r[featuredKey];
+    if (prev === null || v !== prev){
+      rank = idx+1;
+      prev = v;
+    }
+    r._rank = rank;
+  });
+  return rows;
+}
+
+function render(){
+  updatePill();
+  hideNoData();
+
+  const matchupType = document.getElementById("matchupType").value;
+  const categoryLabel = document.getElementById("category").value;
+  const defs = getScopeDefs(currentScope);
+  currentDef = defs.find(d=>d.label===categoryLabel) || defs[0];
+
+  if (!currentDef){
+    showNoData("No categories available.");
+    return;
   }
 
-  // === CAREER aggregation & streaks (kept extremely close to your existing code) ===
-  function buildCareerAggregates(matches){
-    const result = {};
-    const weekScoresByScope = {};
-    const seqByScope = {};
+  const title = document.getElementById("title");
+  const subtitle = document.getElementById("subtitle");
 
-    MATCHUP_TYPES.forEach(scope => {
-      result[scope] = {};
-      weekScoresByScope[scope] = {};
-      seqByScope[scope] = {};
-      streaksByScope[scope] = { win: [], lose: [] };
-    });
+  let rows = [];
+  let columns = [];
+  let featuredKey = null;
 
-    matches.forEach(m => {
-      const scopes = getMatchupTypesForMatch(m);
-      const participants = [
-        { manager: m.manager1, scored: m.score1, against: m.score2 },
-        { manager: m.manager2, scored: m.score2, against: m.score1 }
+  // default sort key when changing categories
+  if (!sortState.key){
+    // will set after columns known
+  }
+
+  if (currentScope==="Career"){
+    if (currentDef.type==="careerAgg"){
+      title.textContent = "Career Leaders";
+      subtitle.textContent = "Aggregate performance across all seasons.";
+      const all = buildCareerAgg(allMatchups, matchupType);
+
+      // base columns
+      featuredKey = currentDef.featured.key;
+      columns = [
+        { key:"rank", label:"Rank", kind:"int" },
+        { key:"manager", label:"Manager", kind:"text" },
+        { key:"record", label:"Record", kind:"text" },
+        { key:"games", label:"GP", kind:"int" },
+        { key:"wins", label:"Wins", kind:"int" },
+        { key:"losses", label:"Losses", kind:"int" },
+        { key:"ties", label:"Ties", kind:"int" },
       ];
 
-      scopes.forEach(scope => {
-        const managersStats = result[scope];
-        const weekScores = weekScoresByScope[scope];
-        const seqMap = seqByScope[scope];
-
-        const weekKey = `${m.year}-${m.week}`;
-        if (!weekScores[weekKey]) weekScores[weekKey] = [];
-
-        participants.forEach(p => {
-          weekScores[weekKey].push({ manager: p.manager, score: p.scored });
-
-          if (!managersStats[p.manager]) {
-            managersStats[p.manager] = { manager: p.manager, ...ensureStatsObj(), longestWinStreak:0, longestLoseStreak:0 };
-            seqMap[p.manager] = [];
-          }
-
-          const s = managersStats[p.manager];
-          s.games += 1;
-          s.pointsFor += p.scored;
-          s.pointsAgainst += p.against;
-
-          let isWin = false;
-          let isLoss = false;
-
-          if (p.scored > p.against){ s.winsInt += 1; isWin = true; }
-          else if (p.scored < p.against){ s.lossesInt += 1; isLoss = true; }
-          else { s.tiesInt += 1; }
-
-          if (s.lastYear === null || m.year > s.lastYear || (m.year === s.lastYear && m.week > s.lastWeek)){
-            s.lastYear = m.year;
-            s.lastWeek = m.week;
-          }
-
-          seqMap[p.manager].push({ year:m.year, week:m.week, isWin, isLoss });
-        });
-      });
-    });
-
-    // Weekly highs & streaks
-    MATCHUP_TYPES.forEach(scope => {
-      const managersStats = result[scope];
-      const weekScores = weekScoresByScope[scope];
-      const seqMap = seqByScope[scope];
-      const scopeStreaks = streaksByScope[scope];
-
-      // Weekly highs
-      Object.keys(weekScores).forEach(weekKey => {
-        const arr = weekScores[weekKey];
-        if (!arr || arr.length === 0) return;
-        const maxScore = Math.max(...arr.map(x => x.score));
-        arr.forEach(x => {
-          if (x.score === maxScore && managersStats[x.manager]) managersStats[x.manager].weeklyHighCount += 1;
-        });
-      });
-
-      // Streaks
-      Object.keys(seqMap).forEach(manager => {
-        const seq = seqMap[manager].slice().sort((a,b) => (a.year !== b.year) ? a.year - b.year : a.week - b.week);
-
-        let winStreaks = [];
-        let loseStreaks = [];
-
-        // Win streaks
-        let startIdx = null;
-        for (let i=0;i<seq.length;i++){
-          const e = seq[i];
-          if (e.isWin){ if (startIdx === null) startIdx = i; }
-          else if (startIdx !== null){
-            const endIdx = i-1;
-            const start = seq[startIdx];
-            const end = seq[endIdx];
-            winStreaks.push({ manager, length:endIdx-startIdx+1, startYear:start.year, startWeek:start.week, endYear:end.year, endWeek:end.week });
-            startIdx = null;
-          }
-        }
-        if (startIdx !== null){
-          const endIdx = seq.length-1;
-          const start = seq[startIdx];
-          const end = seq[endIdx];
-          winStreaks.push({ manager, length:endIdx-startIdx+1, startYear:start.year, startWeek:start.week, endYear:end.year, endWeek:end.week });
-        }
-
-        // Loss streaks
-        startIdx = null;
-        for (let i=0;i<seq.length;i++){
-          const e = seq[i];
-          if (e.isLoss){ if (startIdx === null) startIdx = i; }
-          else if (startIdx !== null){
-            const endIdx = i-1;
-            const start = seq[startIdx];
-            const end = seq[endIdx];
-            loseStreaks.push({ manager, length:endIdx-startIdx+1, startYear:start.year, startWeek:start.week, endYear:end.year, endWeek:end.week });
-            startIdx = null;
-          }
-        }
-        if (startIdx !== null){
-          const endIdx = seq.length-1;
-          const start = seq[startIdx];
-          const end = seq[endIdx];
-          loseStreaks.push({ manager, length:endIdx-startIdx+1, startYear:start.year, startWeek:start.week, endYear:end.year, endWeek:end.week });
-        }
-
-        const longestWin = winStreaks.reduce((max,s)=>Math.max(max,s.length),0);
-        const longestLose = loseStreaks.reduce((max,s)=>Math.max(max,s.length),0);
-        managersStats[manager].longestWinStreak = longestWin;
-        managersStats[manager].longestLoseStreak = longestLose;
-
-        scopeStreaks.win.push(...winStreaks);
-        scopeStreaks.lose.push(...loseStreaks);
-      });
-    });
-
-    return result;
-  }
-
-  // === SEASON aggregation ===
-  function buildSeasonAggregates(matches){
-    const out = {};
-    MATCHUP_TYPES.forEach(t => out[t] = {});
-
-    // track weekly highs per year/week within matchupType, then assign into season stats
-    const weekScores = {}; // { matchupType: { weekKey: [{manager,score}] } }
-    MATCHUP_TYPES.forEach(t => weekScores[t] = {});
-
-    matches.forEach(m => {
-      const types = getMatchupTypesForMatch(m);
-      const participants = [
-        { manager: m.manager1, scored: m.score1, against: m.score2, opponent: m.manager2 },
-        { manager: m.manager2, scored: m.score2, against: m.score1, opponent: m.manager1 }
+      // Add featured + contextual stats
+      const contextual = [
+        { key:"pf", label:"PF", kind:"num", format:"points" },
+        { key:"pa", label:"PA", kind:"num", format:"points" },
+        { key:"pfpm", label:"PFPM", kind:"num", format:"avg" },
+        { key:"papm", label:"PAPM", kind:"num", format:"avg" },
+        { key:"marg", label:"MARG", kind:"num", format:"marg" },
+        { key:"winPct", label:"Win %", kind:"num", format:"pct" },
       ];
 
-      types.forEach(type => {
-        const yearKey = String(m.year);
-        if (!out[type][yearKey]) out[type][yearKey] = {};
+      // reorder: put featured column early (after manager) if not already present
+      const featuredCol = contextual.find(c=>c.key===featuredKey) || columns.find(c=>c.key===featuredKey);
+      const restContext = contextual.filter(c=>c.key!==featuredKey);
 
-        const wkKey = `${m.year}-${m.week}`;
-        if (!weekScores[type][wkKey]) weekScores[type][wkKey] = [];
-        participants.forEach(p => weekScores[type][wkKey].push({ manager: p.manager, score: p.scored, year: m.year }));
+      // Ensure record etc stay; insert featured after Record maybe
+      columns = columns.concat([]);
+      if (featuredCol && !columns.some(c=>c.key===featuredCol.key)){
+        columns.push(featuredCol);
+      }
+      columns = columns.concat(restContext);
 
-        participants.forEach(p => {
-          if (!out[type][yearKey][p.manager]) out[type][yearKey][p.manager] = { manager:p.manager, year:m.year, ...ensureStatsObj() };
+      rows = all;
 
-          const s = out[type][yearKey][p.manager];
-          s.games += 1;
-          s.pointsFor += p.scored;
-          s.pointsAgainst += p.against;
+      // ranking direction
+      const rankDir = (currentDef.featured.polarity==="lowBetter") ? "asc" : "desc";
+      rankWithTies(rows, featuredKey, rankDir);
 
-          if (p.scored > p.against) s.winsInt += 1;
-          else if (p.scored < p.against) s.lossesInt += 1;
-          else s.tiesInt += 1;
+      // default sort: featured
+      if (!sortState.key) sortState = { key: featuredKey, dir: rankDir };
 
-          if (s.lastYear === null || m.year > s.lastYear || (m.year === s.lastYear && m.week > s.lastWeek)){
-            s.lastYear = m.year;
-            s.lastWeek = m.week;
-          }
-        });
-      });
-    });
+    } else {
+      title.textContent = "Career Streaks";
+      subtitle.textContent = "Longest streaks across all seasons.";
+      const streaks = buildCareerStreaks(allMatchups, matchupType);
+      const list = (currentDef.streak==="win") ? streaks.win : streaks.lose;
 
-    // assign weekly highs into the season bucket they occurred in
-    MATCHUP_TYPES.forEach(type => {
-      Object.keys(weekScores[type]).forEach(wkKey => {
-        const arr = weekScores[type][wkKey];
-        if (!arr || arr.length === 0) return;
-        const maxScore = Math.max(...arr.map(x => x.score));
-        arr.forEach(x => {
-          const yearKey = String(x.year);
-          const s = out[type]?.[yearKey]?.[x.manager];
-          if (s && x.score === maxScore) s.weeklyHighCount += 1;
-        });
-      });
-    });
-
-    return out;
-  }
-
-  
-  // Season streak containers
-  let seasonStreaksByMatchupType = {}; // { matchupType: { win:[], lose:[] } }
-
-  // === SEASON streaks (per-year, per-manager) ===
-  function buildSeasonStreaks(matches){
-    const out = {};
-    MATCHUP_TYPES.forEach(t => out[t] = { win: [], lose: [] });
-
-    const seq = {}; // { type: { year: { manager: [ {week,isWin,isLoss} ] } } }
-    MATCHUP_TYPES.forEach(t => seq[t] = {});
-
-    matches.forEach(m => {
-      const types = getMatchupTypesForMatch(m);
-      const participants = [
-        { manager: m.manager1, scored: m.score1, against: m.score2 },
-        { manager: m.manager2, scored: m.score2, against: m.score1 }
-      ];
-
-      types.forEach(type => {
-        const y = String(m.year);
-        if (!seq[type][y]) seq[type][y] = {};
-        participants.forEach(p => {
-          if (!seq[type][y][p.manager]) seq[type][y][p.manager] = [];
-          seq[type][y][p.manager].push({
-            year: m.year,
-            week: m.week,
-            isWin: p.scored > p.against,
-            isLoss: p.scored < p.against
-          });
-        });
-      });
-    });
-
-    MATCHUP_TYPES.forEach(type => {
-      Object.keys(seq[type]).forEach(yStr => {
-        const managers = seq[type][yStr] || {};
-        Object.keys(managers).forEach(manager => {
-          const arr = managers[manager].slice().sort((a,b)=>a.week-b.week);
-
-          let startIdx = null;
-          for (let i=0;i<arr.length;i++){
-            if (arr[i].isWin){
-              if (startIdx === null) startIdx = i;
-            } else if (startIdx !== null){
-              const endIdx = i-1;
-              out[type].win.push({
-                manager,
-                length: endIdx-startIdx+1,
-                startYear: arr[startIdx].year,
-                startWeek: arr[startIdx].week,
-                endYear: arr[endIdx].year,
-                endWeek: arr[endIdx].week
-              });
-              startIdx = null;
-            }
-          }
-          if (startIdx !== null){
-            const endIdx = arr.length-1;
-            out[type].win.push({
-              manager,
-              length: endIdx-startIdx+1,
-              startYear: arr[startIdx].year,
-              startWeek: arr[startIdx].week,
-              endYear: arr[endIdx].year,
-              endWeek: arr[endIdx].week
-            });
-          }
-
-          startIdx = null;
-          for (let i=0;i<arr.length;i++){
-            if (arr[i].isLoss){
-              if (startIdx === null) startIdx = i;
-            } else if (startIdx !== null){
-              const endIdx = i-1;
-              out[type].lose.push({
-                manager,
-                length: endIdx-startIdx+1,
-                startYear: arr[startIdx].year,
-                startWeek: arr[startIdx].week,
-                endYear: arr[endIdx].year,
-                endWeek: arr[endIdx].week
-              });
-              startIdx = null;
-            }
-          }
-          if (startIdx !== null){
-            const endIdx = arr.length-1;
-            out[type].lose.push({
-              manager,
-              length: endIdx-startIdx+1,
-              startYear: arr[startIdx].year,
-              startWeek: arr[startIdx].week,
-              endYear: arr[endIdx].year,
-              endWeek: arr[endIdx].week
-            });
-          }
-        });
-      });
-    });
-
-    return out;
-  }
-
-// === WEEKLY rows ===
-  function buildWeeklyRows(matches){
-    const out = {};
-    MATCHUP_TYPES.forEach(t => out[t] = []);
-
-    matches.forEach(m => {
-      const types = getMatchupTypesForMatch(m);
-      const rows = [
-        { manager:m.manager1, opponent:m.manager2, year:m.year, week:m.week, scoreFor:m.score1, scoreAgainst:m.score2, playoffs:m.playoffs },
-        { manager:m.manager2, opponent:m.manager1, year:m.year, week:m.week, scoreFor:m.score2, scoreAgainst:m.score1, playoffs:m.playoffs }
-      ].map(r => ({
-        ...r,
-        margin: r.scoreFor - r.scoreAgainst,
-        isWin: r.scoreFor > r.scoreAgainst,
-        isLoss: r.scoreFor < r.scoreAgainst,
-        yearWeek: `${r.year} Wk ${r.week}`
+      rows = list.map(s=>({
+        manager:s.manager,
+        length:s.length,
+        span: `${fmtYear(s.start.year)} Wk ${s.start.week} – ${fmtYear(s.end.year)} Wk ${s.end.week}`
       }));
 
-      types.forEach(t => out[t].push(...rows));
-    });
+      featuredKey = "length";
+      columns = [
+        { key:"rank", label:"Rank", kind:"int" },
+        { key:"manager", label:"Manager", kind:"text" },
+        { key:"length", label: currentDef.streak==="win" ? "Win Streak" : "Loss Streak", kind:"int" },
+        { key:"span", label:"Span", kind:"text" },
+      ];
 
-    return out;
-  }
-
-  // ---------------------------
-  // Metric + formatting helpers (kept close)
-  // ---------------------------
-
-  function getMetric(stats, key){
-    switch(key){
-      case "games": return stats.games;
-      case "pointsFor": return stats.pointsFor;
-      case "ppmFor": return stats.games ? stats.pointsFor / stats.games : 0;
-      case "pointsAgainst": return stats.pointsAgainst;
-      case "ppmAgainst": return stats.games ? stats.pointsAgainst / stats.games : 0;
-      case "winsInt": return stats.winsInt;
-      case "lossesInt": return stats.lossesInt;
-      case "tiesInt": return stats.tiesInt;
-      case "winPct": return stats.games ? (stats.winsInt + 0.5 * stats.tiesInt) / stats.games : 0;
-      case "weeklyHighCount": return stats.weeklyHighCount;
-      case "weeklyHighRate": return stats.games ? stats.weeklyHighCount / stats.games : 0;
-      default: return stats[key];
+      // rank
+      rankWithTies(rows, "length", "desc");
+      if (!sortState.key) sortState = { key:"length", dir:"desc" };
     }
   }
 
-  function formatValue(value, format, stats){
-    if (format === "record"){
-      const w = stats.winsInt || 0;
-      const l = stats.lossesInt || 0;
-      const t = stats.tiesInt || 0;
-      return `${w}-${l}-${t}`;
-    }
-    if (value === null || value === undefined || Number.isNaN(value)) return "-";
+  if (currentScope==="Season"){
+    if (currentDef.type==="seasonAgg"){
+      title.textContent = "Season Leaders";
+      subtitle.textContent = "Best single-season stat lines across all managers.";
+      const all = buildSeasonAgg(allMatchups, matchupType);
 
-    switch(format){
-      case "percent": return (value * 100).toFixed(2);
-      case "ppm": return value.toFixed(1);
-      case "marg": return (value >= 0 ? "+" : "") + value.toFixed(1);
-      case "points":
-        return value.toLocaleString("en-US",{ minimumFractionDigits:2, maximumFractionDigits:2 });
-      case "year": return String(value);
-      case "text": return String(value);
-      case "integer":
-      default:
-        return value.toLocaleString("en-US",{ maximumFractionDigits:0 });
-    }
-  }
+      featuredKey = currentDef.featured.key;
+      columns = [
+        { key:"rank", label:"Rank", kind:"int" },
+        { key:"year", label:"Year", kind:"int" },
+        { key:"manager", label:"Manager", kind:"text" },
+        { key:"record", label:"Record", kind:"text" },
+        { key:"games", label:"GP", kind:"int" },
+        { key:"wins", label:"Wins", kind:"int" },
+        { key:"losses", label:"Losses", kind:"int" },
+        { key:"ties", label:"Ties", kind:"int" },
+      ];
+      const contextual = [
+        { key:"pf", label:"PF", kind:"num", format:"points" },
+        { key:"pa", label:"PA", kind:"num", format:"points" },
+        { key:"pfpm", label:"PFPM", kind:"num", format:"avg" },
+        { key:"papm", label:"PAPM", kind:"num", format:"avg" },
+        { key:"marg", label:"MARG", kind:"num", format:"marg" },
+        { key:"winPct", label:"Win %", kind:"num", format:"pct" },
+      ];
+      const featuredCol = contextual.find(c=>c.key===featuredKey);
+      const rest = contextual.filter(c=>c.key!==featuredKey);
+      if (featuredCol) columns.push(featuredCol);
+      columns = columns.concat(rest);
 
-  function getHeaderTitle(label){
-    switch(label){
-      case "Rank": return "Rank among managers for this stat";
-      case "Manager": return "Manager name";
-      case "PF": return "Total points scored (Points For)";
-      case "PA": return "Total points conceded (Points Against)";
-      case "PPM": return "Points Per Matchup (average points scored per matchup)";
-      case "PAPM": return "Points Against Per Matchup (average points conceded per matchup)";
-      case "M": return "Total number of matchups played";
-      case "W": return "Total wins";
-      case "L": return "Total losses";
-      case "T": return "Total ties";
-      case "Win %": return "Winning percentage";
-      case "Record": return "Overall record (wins-losses-ties)";
-      case "Weekly Highs": return "Number of times this manager had the highest score in a week";
-      case "Weekly High Rate": return "Percentage of matchups where this manager recorded the weekly high score";
-      case "Win Streak": return "Length of the winning streak (consecutive wins)";
-      case "Loss Streak": return "Length of the losing streak (consecutive losses)";
-      case "Span": return "Season and week range covered by the streak";
-      case "Year": return "Season year";
-      case "Score": return "Manager score in this matchup";
-      case "Opp Score": return "Opponent score in this matchup";
-      case "Opponent": return "Opponent manager";
-      case "MARG": return "Margin (Score - Opp Score)";
-      case "Year / Week": return "Season year and week";
-      default: return label;
-    }
-  }
+      rows = all;
 
-  // ---------------------------
-  // Dropdowns
-  // ---------------------------
+      const rankDir = (currentDef.featured.polarity==="lowBetter") ? "asc" : "desc";
+      rankWithTies(rows, featuredKey, rankDir);
+      if (!sortState.key) sortState = { key: featuredKey, dir: rankDir };
 
-  function resetSelect(selectEl, placeholderText){
-    selectEl.innerHTML = "";
-    const ph = document.createElement("option");
-    ph.value = "";
-    ph.textContent = placeholderText;
-    ph.disabled = true;
-    ph.selected = true;
-    ph.hidden = true;
-    selectEl.appendChild(ph);
-  }
-
-  function populateMatchupDropdown(){
-    const matchupSelect = document.getElementById("matchupTypeSelect");
-    resetSelect(matchupSelect, "Select a matchup type...");
-    MATCHUP_TYPES.forEach(type => {
-      const opt = document.createElement("option");
-      opt.value = type;
-      opt.textContent = type;
-      matchupSelect.appendChild(opt);
-    }
-
-    // Default to Regular Season + Playoffs
-    matchupSelect.value = "Regular Season + Playoffs";
-);
-  }
-
-  function populateCategoryDropdown(scope){
-    const defs = DEFS_BY_SCOPE[scope] || [];
-    const categorySelect = document.getElementById("categorySelect");
-    resetSelect(categorySelect, "Select a stat category...");
-
-    const groups = [...new Set(defs.map(d => d.group))];
-    groups.forEach(groupLabel => {
-      const group = document.createElement("optgroup");
-      group.label = groupLabel;
-      defs.filter(d => d.group === groupLabel).forEach(def => {
-        const opt = document.createElement("option");
-        opt.value = def.label;
-        opt.textContent = def.label;
-        group.appendChild(opt);
-      });
-      categorySelect.appendChild(group);
-    });
-  }
-
-  function setScopeUI(scope){
-    currentScope = scope;
-
-    // scope class on body for styling
-    document.body.classList.toggle("weekly-scope", scope === "Weekly");
-
-    // tabs
-    document.querySelectorAll(".scope-btn").forEach(btn => {
-      const isActive = btn.dataset.scope === scope;
-      btn.setAttribute("aria-selected", isActive ? "true" : "false");
-    });
-
-    // hints + titles
-    const hint = document.getElementById("scopeHint");
-    const titleEl = document.getElementById("leaderboardTitle");
-    const subtitleEl = document.getElementById("leaderboardSubtitle");
-    const pillLabel = document.getElementById("pillLabel");
-
-    if (scope === "Career"){
-      hint.textContent = "Career records with contextual stats (matchups, PPM, win %, streaks).";
-      titleEl.textContent = "Career Leaders";
-      subtitleEl.textContent = "Career leaders across all eligible matchups";
-    } else if (scope === "Season"){
-      hint.textContent = "Season records (best single-season performances) with contextual stats.";
-      titleEl.textContent = "Season Leaders";
-      subtitleEl.textContent = "Best single-season stat lines across all managers";
     } else {
-      hint.textContent = "Weekly records (single-matchup highs/lows and game-level results).";
-      titleEl.textContent = "Weekly Records";
-      subtitleEl.textContent = "Single-matchup records across all eligible matchups";
-    }
-
-    pillLabel.textContent = `${scope} · —`;
-
-    // dropdowns
-    populateCategoryDropdown(scope);
-
-    // clear table
-    neutralState();
-  }
-
-  // ---------------------------
-  // Sorting state
-  // ---------------------------
-
-  let currentSort = {
-    scope: "Career",
-    type: null,
-    matchupType: null,
-    categoryLabel: null,
-    columnKey: null,
-    direction: null
-  };
-
-  // ---------------------------
-  // Pagination (all scopes)
-  // ---------------------------
-  const paginationState = {
-    currentPage: 1,
-    pageSize: 25,
-    totalItems: 0
-  };
-
-  function paginateRows(rows){
-    const total = rows.length;
-    paginationState.totalItems = total;
-
-    const totalPages = Math.max(1, Math.ceil(total / paginationState.pageSize));
-    if (paginationState.currentPage > totalPages) paginationState.currentPage = totalPages;
-    if (paginationState.currentPage < 1) paginationState.currentPage = 1;
-
-    const startIdx = (paginationState.currentPage - 1) * paginationState.pageSize;
-    const endIdx = Math.min(total, startIdx + paginationState.pageSize);
-    const pageRows = rows.slice(startIdx, endIdx);
-
-    updatePaginationUI(totalPages, startIdx, endIdx, total);
-    return pageRows;
-  }
-
-  function updatePaginationUI(totalPages, startIdx, endIdx, total){
-    const wrap = document.getElementById("pagination");
-    const prev = document.getElementById("prevPage");
-    const next = document.getElementById("nextPage");
-    const meta = document.getElementById("pageMeta");
-    const status = document.getElementById("pageStatus");
-
-    if (!wrap || !prev || !next || !meta || !status) return;
-
-    // Hide pagination when empty
-    if (total === 0){
-      wrap.style.display = "none";
-      return;
-    }
-
-    wrap.style.display = "flex";
-    meta.textContent = `Page ${paginationState.currentPage} of ${totalPages}`;
-    status.textContent = `Showing ${startIdx + 1}–${endIdx} of ${total}`;
-    prev.disabled = paginationState.currentPage <= 1;
-    next.disabled = paginationState.currentPage >= totalPages;
-  }
-
-  function resetToPage1(){
-    paginationState.currentPage = 1;
-  }
-
-
-  // ---------------------------
-  // Render helpers
-  // ---------------------------
-
-  function neutralState(){
-    const headerRow = document.getElementById("headerRow");
-    const tbody = document.getElementById("leaderboardBody");
-    const noDataMessage = document.getElementById("noDataMessage");
-    const pillLabel = document.getElementById("pillLabel");
-
-    headerRow.innerHTML = "";
-    tbody.innerHTML = "";
-    noDataMessage.style.display = "block";
-    noDataMessage.firstElementChild.textContent = "Select a matchup type and stat category to see leaderboard data.";
-    pillLabel.textContent = `${currentScope} · —`;
-
-    const pg = document.getElementById("pagination");
-    if (pg) pg.style.display = "none";
-  }
-
-  function setNoData(msg){
-    const headerRow = document.getElementById("headerRow");
-    const tbody = document.getElementById("leaderboardBody");
-    const noDataMessage = document.getElementById("noDataMessage");
-
-    headerRow.innerHTML = "";
-    tbody.innerHTML = "";
-    noDataMessage.style.display = "block";
-    noDataMessage.firstElementChild.textContent = msg;
-
-    const pg = document.getElementById("pagination");
-    if (pg) pg.style.display = "none";
-  }
-
-  // CAREER aggregate leaderboard render
-  function renderCareerAggregate(matchupType, def){
-    const headerRow = document.getElementById("headerRow");
-    const tbody = document.getElementById("leaderboardBody");
-    const noDataMessage = document.getElementById("noDataMessage");
-
-    const statsMap = aggregatesByScope[matchupType] || {};
-    const allStats = Object.values(statsMap);
-
-    if (!allStats.length){
-      setNoData("Note · No data for this combination yet");
-      return;
-    }
-
-    // ranking (ties share rank; recency tiebreak)
-    const rankingOrder = allStats.slice().sort((a,b) => {
-      const av = getMetric(a, def.sortKey);
-      const bv = getMetric(b, def.sortKey);
-      if (av !== bv) return def.sortDir === "asc" ? av - bv : bv - av;
-      if (a.lastYear !== b.lastYear) return b.lastYear - a.lastYear;
-      if (a.lastWeek !== b.lastWeek) return b.lastWeek - a.lastWeek;
-      return a.manager.localeCompare(b.manager);
-    });
-
-    const rankMap = {};
-    let prevValue = null;
-    let currentRank = 0;
-    rankingOrder.forEach((stats, idx) => {
-      const v = getMetric(stats, def.sortKey);
-      if (prevValue === null || v !== prevValue){
-        currentRank = idx + 1;
-        prevValue = v;
-      }
-      rankMap[stats.manager] = currentRank;
-    });
-
-    let columnKey = def.sortKey;
-    let direction = def.sortDir;
-    if (currentSort.scope === "Career" && currentSort.matchupType === matchupType && currentSort.categoryLabel === def.label && currentSort.columnKey){
-      columnKey = currentSort.columnKey;
-      direction = currentSort.direction || "desc";
-    }
-
-    const sorted = allStats.slice().sort((a,b) => {
-      if (columnKey === "manager"){
-        const cmp = a.manager.localeCompare(b.manager);
-        return direction === "asc" ? cmp : -cmp;
-      }
-      const av = getMetric(a, columnKey);
-      const bv = getMetric(b, columnKey);
-      if (av === bv){
-        if (a.lastYear !== b.lastYear) return b.lastYear - a.lastYear;
-        if (a.lastWeek !== b.lastWeek) return b.lastWeek - a.lastWeek;
-        return a.manager.localeCompare(b.manager);
-      }
-      return direction === "asc" ? av - bv : bv - av;
-    });
-
-    headerRow.innerHTML = "";
-    const rankTh = document.createElement("th");
-    rankTh.className = "th-left";
-    rankTh.textContent = "Rank";
-    rankTh.title = getHeaderTitle("Rank");
-    rankTh.dataset.colKey = "rank";
-
-    const managerTh = document.createElement("th");
-    managerTh.className = "th-left";
-    managerTh.textContent = "Manager";
-    managerTh.title = getHeaderTitle("Manager");
-    managerTh.dataset.colKey = "manager";
-
-    headerRow.appendChild(rankTh);
-    headerRow.appendChild(managerTh);
-
-    const [featuredCol, ...contextCols] = def.columns;
-
-    if (featuredCol){
-      const th = document.createElement("th");
-      th.textContent = featuredCol.label;
-      th.title = getHeaderTitle(featuredCol.label);
-      th.className = "th-right featured-col";
-      th.dataset.colKey = featuredCol.key === "record" ? "winPct" : featuredCol.key;
-      headerRow.appendChild(th);
-    }
-
-    contextCols.forEach(col => {
-      const th = document.createElement("th");
-      th.textContent = col.label;
-      th.title = getHeaderTitle(col.label);
-      th.className = "th-right";
-      th.dataset.colKey = col.key === "record" ? "winPct" : col.key;
-      headerRow.appendChild(th);
-    });
-
-    tbody.innerHTML = "";
-    const pageRows = paginateRows(sorted);
-    pageRows.forEach(stats => {
-      const tr = document.createElement("tr");
-      if (rankMap[stats.manager] === 1) tr.classList.add("top-rank");
-
-      const rankTd = document.createElement("td");
-      rankTd.className = "rank-cell";
-      rankTd.textContent = rankMap[stats.manager];
-
-      const managerTd = document.createElement("td");
-      managerTd.className = "manager-cell";
-      managerTd.textContent = stats.manager;
-
-      tr.appendChild(rankTd);
-      tr.appendChild(managerTd);
-
-      // Featured cell
-      if (featuredCol){
-        const td = document.createElement("td");
-        td.className = "stat-cell featured-col";
-        const metricKey = featuredCol.key === "record" ? "record" : featuredCol.key;
-        const rawValue = (metricKey === "record") ? null : getMetric(stats, metricKey);
-        const displayValue = (metricKey === "record")
-          ? formatValue(null,"record",stats)
-          : formatValue(rawValue, featuredCol.format, stats);
-
-        if (featuredCol.polarity === "positivePrimary") td.classList.add("value-positive");
-        if (featuredCol.polarity === "negativePrimary") td.classList.add("value-negative");
-
-        td.textContent = displayValue;
-        tr.appendChild(td);
-      }
-
-      // Context cells
-      contextCols.forEach(col => {
-        const td = document.createElement("td");
-        td.className = "stat-cell";
-        const metricKey = col.key === "record" ? "record" : col.key;
-        const rawValue = (metricKey === "record") ? null : getMetric(stats, metricKey);
-        const displayValue = (metricKey === "record")
-          ? formatValue(null,"record",stats)
-          : formatValue(rawValue, col.format, stats);
-
-        td.textContent = displayValue;
-        tr.appendChild(td);
-      });
-
-      tbody.appendChild(tr);
-    });
-
-    noDataMessage.style.display = "none";
-
-    headerRow.onclick = (e) => {
-      const th = e.target.closest("th");
-      if (!th) return;
-      const colKey = th.dataset.colKey;
-      if (!colKey) return;
-
-      let newColumnKey;
-      if (colKey === "rank") newColumnKey = def.sortKey;
-      else if (colKey === "manager") newColumnKey = "manager";
-      else newColumnKey = colKey;
-
-      let newDir = "desc";
-      if (currentSort.scope === "Career" && currentSort.matchupType === matchupType && currentSort.categoryLabel === def.label && currentSort.columnKey === newColumnKey){
-        newDir = currentSort.direction === "asc" ? "desc" : "asc";
-      } else {
-        if (newColumnKey === "manager") newDir = "asc";
-        else if (newColumnKey === def.sortKey) newDir = def.sortDir;
-        else newDir = "desc";
-      }
-
-      currentSort = { scope:"Career", type:"aggregate", matchupType, categoryLabel:def.label, columnKey:newColumnKey, direction:newDir };
-      resetToPage1();
-      renderLeaderboard(matchupType, def.label);
-    };
-  }
-
-  // CAREER streak render (kept close)
-  function renderCareerStreak(matchupType, def){
-    const headerRow = document.getElementById("headerRow");
-    const tbody = document.getElementById("leaderboardBody");
-    const noDataMessage = document.getElementById("noDataMessage");
-
-    const scopeStreaks = streaksByScope[matchupType] || { win: [], lose: [] };
-    const allRaw = def.streakType === "win" ? scopeStreaks.win : scopeStreaks.lose;
-
-    let raw = allRaw;
-
-    // playoff caps: wins >=3, losses >=2
-    if (matchupType === "Playoffs Only"){
-      raw = (def.streakType === "win") ? allRaw.filter(s => s.length >= 3) : allRaw.filter(s => s.length >= 2);
-    }
-    // regular season longest winning streak: min 8
-    if (matchupType === "Regular Season Only" && def.streakType === "win"){
-      raw = raw.filter(s => s.length >= 8);
-    }
-
-    if (!raw || raw.length === 0){
-      setNoData("Note · No streak data for this combination yet");
-      return;
-    }
-
-    const rowsWithLabels = raw.map(s => {
-      let spanLabel;
-      if (s.startYear === s.endYear){
-        spanLabel = (s.startWeek === s.endWeek) ? `${s.startYear} Wk ${s.startWeek}` : `${s.startYear} Wk ${s.startWeek}–Wk ${s.endWeek}`;
-      } else {
-        spanLabel = `${s.startYear} Wk ${s.startWeek} → ${s.endYear} Wk ${s.endWeek}`;
-      }
-      return { ...s, spanLabel };
-    });
-
-    const rankingOrder = rowsWithLabels.slice().sort((a,b) => {
-      if (b.length !== a.length) return b.length - a.length;
-      if (b.endYear !== a.endYear) return b.endYear - a.endYear;
-      if (b.endWeek !== a.endWeek) return b.endWeek - a.endWeek;
-      return a.manager.localeCompare(b.manager);
-    });
-
-    const rankMap = new Map();
-    let prevLen = null;
-    let currentRank = 0;
-    rankingOrder.forEach((s, idx) => {
-      const len = s.length;
-      if (prevLen === null || len !== prevLen){ currentRank = idx+1; prevLen = len; }
-      rankMap.set(s, currentRank);
-    });
-
-    let columnKey = "length";
-    let direction = "desc";
-    if (currentSort.scope === "Career" && currentSort.matchupType === matchupType && currentSort.categoryLabel === def.label && currentSort.type === "streak" && currentSort.columnKey){
-      columnKey = currentSort.columnKey;
-      direction = currentSort.direction || "desc";
-    }
-
-    const sorted = rowsWithLabels.slice().sort((a,b) => {
-      if (columnKey === "manager"){
-        const cmp = a.manager.localeCompare(b.manager);
-        return direction === "asc" ? cmp : -cmp;
-      } else if (columnKey === "spanLabel"){
-        const cmp = a.spanLabel.localeCompare(b.spanLabel);
-        return direction === "asc" ? cmp : -cmp;
-      } else {
-        const av = a.length, bv = b.length;
-        if (av === bv){
-          if (b.endYear !== a.endYear) return b.endYear - a.endYear;
-          if (b.endWeek !== a.endWeek) return b.endWeek - a.endWeek;
-          return a.manager.localeCompare(b.manager);
-        }
-        return direction === "asc" ? av - bv : bv - av;
-      }
-    });
-
-    const top = paginateRows(sorted);
-
-    headerRow.innerHTML = "";
-    const rankTh = document.createElement("th");
-    rankTh.className = "th-left";
-    rankTh.textContent = "Rank";
-    rankTh.title = getHeaderTitle("Rank");
-    rankTh.dataset.colKey = "rank";
-
-    const managerTh = document.createElement("th");
-    managerTh.className = "th-left";
-    managerTh.textContent = "Manager";
-    managerTh.title = getHeaderTitle("Manager");
-    managerTh.dataset.colKey = "manager";
-
-    const lenTh = document.createElement("th");
-    lenTh.className = "th-right featured-col";
-    lenTh.textContent = def.streakType === "win" ? "Win Streak" : "Loss Streak";
-    lenTh.title = getHeaderTitle(def.streakType === "win" ? "Win Streak" : "Loss Streak");
-    lenTh.dataset.colKey = "length";
-
-    const spanTh = document.createElement("th");
-    spanTh.className = "th-right";
-    spanTh.textContent = "Span";
-    spanTh.title = getHeaderTitle("Span");
-    spanTh.dataset.colKey = "spanLabel";
-
-    headerRow.appendChild(rankTh);
-    headerRow.appendChild(managerTh);
-    headerRow.appendChild(lenTh);
-    headerRow.appendChild(spanTh);
-
-    tbody.innerHTML = "";
-    top.forEach(s => {
-      const tr = document.createElement("tr");
-      if (rankMap.get(s) === 1) tr.classList.add("top-rank");
-
-      const rankTd = document.createElement("td");
-      rankTd.className = "rank-cell";
-      rankTd.textContent = rankMap.get(s);
-
-      const managerTd = document.createElement("td");
-      managerTd.className = "manager-cell";
-      managerTd.textContent = s.manager;
-
-      const lenTd = document.createElement("td");
-      lenTd.className = "stat-cell " + (def.streakType === "win" ? "value-positive" : "value-negative");
-      lenTd.textContent = String(s.length);
-
-      const spanTd = document.createElement("td");
-      spanTd.className = "stat-cell";
-      spanTd.textContent = s.spanLabel;
-
-      tr.appendChild(rankTd);
-      tr.appendChild(managerTd);
-      tr.appendChild(lenTd);
-      tr.appendChild(spanTd);
-      tbody.appendChild(tr);
-    });
-
-    noDataMessage.style.display = "none";
-
-    headerRow.onclick = (e) => {
-      const th = e.target.closest("th");
-      if (!th) return;
-      const colKey = th.dataset.colKey;
-      if (!colKey) return;
-
-      let newColumnKey = (colKey === "rank") ? "length" : colKey;
-      let newDir = "desc";
-      if (currentSort.scope === "Career" && currentSort.matchupType === matchupType && currentSort.categoryLabel === def.label && currentSort.type === "streak" && currentSort.columnKey === newColumnKey){
-        newDir = currentSort.direction === "asc" ? "desc" : "asc";
-      } else {
-        newDir = (newColumnKey === "manager" || newColumnKey === "spanLabel") ? "asc" : "desc";
-      }
-
-      currentSort = { scope:"Career", type:"streak", matchupType, categoryLabel:def.label, columnKey:newColumnKey, direction:newDir };
-      resetToPage1();
-      renderLeaderboard(matchupType, def.label);
-    };
-  }
-
-  // SEASON render
-  function renderSeasonLeaderboard(matchupType, def){
-    const yearsObj = seasonAggByMatchupType[matchupType] || {};
-    const allStats = [];
-    Object.keys(yearsObj).forEach(y => {
-      const managers = yearsObj[y] || {};
-      allStats.push(...Object.values(managers));
-    });
-
-    if (!allStats.length){
-      setNoData("Note · No season data for this combination yet");
-      return;
-    }
-
-    let rows = allStats.map(s => ({
-      ...s,
-      year: s.year
-    }));
-
-    // Sort & rank (ties share rank; recency tiebreak)
-    const rankingOrder = rows.slice().sort((a,b) => {
-      const av = getMetric(a, def.sortKey);
-      const bv = getMetric(b, def.sortKey);
-      if (av !== bv) return def.sortDir === "asc" ? av - bv : bv - av;
-      if (a.year !== b.year) return b.year - a.year;
-      return a.manager.localeCompare(b.manager);
-    });
-
-    const rankMap = new Map();
-    let prevValue = null;
-    let currentRank = 0;
-    rankingOrder.forEach((r, idx) => {
-      const v = getMetric(r, def.sortKey);
-      if (prevValue === null || v !== prevValue){ currentRank = idx+1; prevValue = v; }
-      rankMap.set(r, currentRank);
-    });
-
-    let columnKey = def.sortKey;
-    let direction = def.sortDir;
-    if (currentSort.scope === "Season" && currentSort.matchupType === matchupType && currentSort.categoryLabel === def.label && currentSort.columnKey){
-      columnKey = currentSort.columnKey;
-      direction = currentSort.direction || "desc";
-    }
-
-    const sorted = rows.slice().sort((a,b) => {
-      if (columnKey === "manager"){
-        const cmp = a.manager.localeCompare(b.manager);
-        return direction === "asc" ? cmp : -cmp;
-      } else if (columnKey === "year"){
-        return direction === "asc" ? a.year - b.year : b.year - a.year;
-      } else {
-        const av = getMetric(a, columnKey);
-        const bv = getMetric(b, columnKey);
-        if (av === bv){
-          if (a.year !== b.year) return b.year - a.year;
-          return a.manager.localeCompare(b.manager);
-        }
-        return direction === "asc" ? av - bv : bv - av;
-      }
-    });
-
-    // limit for readability
-    const top = paginateRows(sorted);
-
-    const headerRow = document.getElementById("headerRow");
-    const tbody = document.getElementById("leaderboardBody");
-    const noDataMessage = document.getElementById("noDataMessage");
-
-    headerRow.innerHTML = "";
-    const rankTh = document.createElement("th");
-    rankTh.className = "th-left";
-    rankTh.textContent = "Rank";
-    rankTh.title = getHeaderTitle("Rank");
-    rankTh.dataset.colKey = "rank";
-
-    const managerTh = document.createElement("th");
-    managerTh.className = "th-left";
-    managerTh.textContent = "Manager";
-    managerTh.title = getHeaderTitle("Manager");
-    managerTh.dataset.colKey = "manager";
-
-    headerRow.appendChild(rankTh);
-    headerRow.appendChild(managerTh);
-
-    const [featuredCol, ...contextCols] = def.columns;
-
-    function addCol(col){
-      const th = document.createElement("th");
-      th.textContent = col.label;
-      th.title = getHeaderTitle(col.label);
-      th.className = "th-left";
-      th.dataset.colKey = (col.key === "record") ? "winPct" : col.key;
-      headerRow.appendChild(th);
-    }
-
-    if (featuredCol) addCol(featuredCol);
-    contextCols.forEach(addCol);
-
-    tbody.innerHTML = "";
-    top.forEach(r => {
-      const tr = document.createElement("tr");
-      if (rankMap.get(r) === 1) tr.classList.add("top-rank");
-
-      const rankTd = document.createElement("td");
-      rankTd.className = "rank-cell";
-      rankTd.textContent = rankMap.get(r);
-
-      const managerTd = document.createElement("td");
-      managerTd.className = "manager-cell";
-      managerTd.textContent = r.manager;
-
-      tr.appendChild(rankTd);
-      tr.appendChild(managerTd);
-
-      // Featured
-      if (featuredCol){
-        const td = document.createElement("td");
-        td.className = "stat-cell featured-col";
-        const metricKey = featuredCol.key;
-        const rawValue = (metricKey === "record") ? null : (metricKey === "year" ? r.year : getMetric(r, metricKey));
-        const displayValue =
-          (metricKey === "record") ? formatValue(null,"record",r)
-          : formatValue(rawValue, featuredCol.format, r);
-
-        if (featuredCol.polarity === "positivePrimary") td.classList.add("value-positive");
-        if (featuredCol.polarity === "negativePrimary") td.classList.add("value-negative");
-        td.textContent = displayValue;
-        tr.appendChild(td);
-      }
-
-      // Context
-      contextCols.forEach(col => {
-        const td = document.createElement("td");
-        td.className = "stat-cell";
-
-        if (col.key === "year"){
-          td.textContent = String(r.year);
-        } else if (col.key === "record"){
-          td.textContent = formatValue(null,"record",r);
-        } else {
-          td.textContent = formatValue(getMetric(r, col.key), col.format, r);
-        }
-
-        tr.appendChild(td);
-      });
-
-      tbody.appendChild(tr);
-    });
-
-    noDataMessage.style.display = "none";
-
-    headerRow.onclick = (e) => {
-      const th = e.target.closest("th");
-      if (!th) return;
-      const colKey = th.dataset.colKey;
-      if (!colKey) return;
-
-      let newColumnKey;
-      if (colKey === "rank") newColumnKey = def.sortKey;
-      else if (colKey === "manager") newColumnKey = "manager";
-      else newColumnKey = colKey;
-
-      let newDir = "desc";
-      if (currentSort.scope === "Season" && currentSort.matchupType === matchupType && currentSort.categoryLabel === def.label && currentSort.columnKey === newColumnKey){
-        newDir = currentSort.direction === "asc" ? "desc" : "asc";
-      } else {
-        if (newColumnKey === "manager") newDir = "asc";
-        else if (newColumnKey === def.sortKey) newDir = def.sortDir;
-        else if (newColumnKey === "year") newDir = "desc";
-        else newDir = "desc";
-      }
-
-      currentSort = { scope:"Season", type:"season", matchupType, categoryLabel:def.label, columnKey:newColumnKey, direction:newDir };
-      resetToPage1();
-      renderLeaderboard(matchupType, def.label);
-    };
-  }
-
-
-  // SEASON streak render (same table format as Career streaks)
-  function renderSeasonStreak(matchupType, def){
-    const headerRow = document.getElementById("headerRow");
-    const tbody = document.getElementById("leaderboardBody");
-    const noDataMessage = document.getElementById("noDataMessage");
-
-    const scopeStreaks = seasonStreaksByMatchupType[matchupType] || { win: [], lose: [] };
-    const allRaw = def.streakType === "win" ? scopeStreaks.win : scopeStreaks.lose;
-
-    if (!allRaw || allRaw.length === 0){
-      setNoData("Note · No season streak data for this combination yet");
-      return;
-    }
-
-    const rowsWithLabels = allRaw.map(s => {
-      let spanLabel;
-      if (s.startWeek === s.endWeek) spanLabel = `${s.startYear} Wk ${s.startWeek}`;
-      else spanLabel = `${s.startYear} Wk ${s.startWeek}–Wk ${s.endWeek}`;
-      return { ...s, spanLabel };
-    });
-
-    const rankingOrder = rowsWithLabels.slice().sort((a,b) => {
-      if (b.length !== a.length) return b.length - a.length;
-      if (b.startYear !== a.startYear) return b.startYear - a.startYear;
-      if (b.endWeek !== a.endWeek) return b.endWeek - a.endWeek;
-      return a.manager.localeCompare(b.manager);
-    });
-
-    const rankMap = new Map();
-    let prevLen = null;
-    let currentRank = 0;
-    rankingOrder.forEach((s, idx) => {
-      if (prevLen === null || s.length !== prevLen){ currentRank = idx+1; prevLen = s.length; }
-      rankMap.set(s, currentRank);
-    });
-
-    let columnKey = "length";
-    let direction = "desc";
-    if (currentSort.scope === "Season" && currentSort.matchupType === matchupType && currentSort.categoryLabel === def.label && currentSort.type === "seasonStreak" && currentSort.columnKey){
-      columnKey = currentSort.columnKey;
-      direction = currentSort.direction || "desc";
-    }
-
-    const sorted = rowsWithLabels.slice().sort((a,b) => {
-      if (columnKey === "manager"){
-        const cmp = a.manager.localeCompare(b.manager);
-        return direction === "asc" ? cmp : -cmp;
-      } else if (columnKey === "spanLabel"){
-        const cmp = a.spanLabel.localeCompare(b.spanLabel);
-        return direction === "asc" ? cmp : -cmp;
-      } else {
-        if (a.length === b.length){
-          if (a.startYear !== b.startYear) return b.startYear - a.startYear;
-          if (a.endWeek !== b.endWeek) return b.endWeek - a.endWeek;
-          return a.manager.localeCompare(b.manager);
-        }
-        return direction === "asc" ? a.length - b.length : b.length - a.length;
-      }
-    });
-
-    const top = paginateRows(sorted);
-
-    headerRow.innerHTML = "";
-
-    const rankTh = document.createElement("th");
-    rankTh.className = "th-left";
-    rankTh.textContent = "Rank";
-    rankTh.title = getHeaderTitle("Rank");
-    rankTh.dataset.colKey = "rank";
-
-    const managerTh = document.createElement("th");
-    managerTh.className = "th-left";
-    managerTh.textContent = "Manager";
-    managerTh.title = getHeaderTitle("Manager");
-    managerTh.dataset.colKey = "manager";
-
-    const lenTh = document.createElement("th");
-    lenTh.className = "th-right featured-col";
-    lenTh.textContent = def.streakType === "win" ? "Win Streak" : "Loss Streak";
-    lenTh.title = getHeaderTitle(def.streakType === "win" ? "Win Streak" : "Loss Streak");
-    lenTh.dataset.colKey = "length";
-
-    const spanTh = document.createElement("th");
-    spanTh.className = "th-right";
-    spanTh.textContent = "Span";
-    spanTh.title = getHeaderTitle("Span");
-    spanTh.dataset.colKey = "spanLabel";
-
-    headerRow.appendChild(rankTh);
-    headerRow.appendChild(managerTh);
-    headerRow.appendChild(lenTh);
-    headerRow.appendChild(spanTh);
-
-    tbody.innerHTML = "";
-    top.forEach(s => {
-      const tr = document.createElement("tr");
-      if (rankMap.get(s) === 1) tr.classList.add("top-rank");
-
-      const rankTd = document.createElement("td");
-      rankTd.className = "rank-cell";
-      rankTd.textContent = rankMap.get(s);
-
-      const managerTd = document.createElement("td");
-      managerTd.className = "manager-cell";
-      managerTd.textContent = s.manager;
-
-      const lenTd = document.createElement("td");
-      lenTd.className = "stat-cell featured-col " + (def.streakType === "win" ? "value-positive" : "value-negative");
-      lenTd.textContent = String(s.length);
-
-      const spanTd = document.createElement("td");
-      spanTd.className = "stat-cell";
-      spanTd.textContent = s.spanLabel;
-
-      tr.appendChild(rankTd);
-      tr.appendChild(managerTd);
-      tr.appendChild(lenTd);
-      tr.appendChild(spanTd);
-      tbody.appendChild(tr);
-    });
-
-    noDataMessage.style.display = "none";
-
-    headerRow.onclick = (e) => {
-      const th = e.target.closest("th");
-      if (!th) return;
-      const colKey = th.dataset.colKey;
-      if (!colKey) return;
-
-      let newColumnKey = (colKey === "rank") ? "length" : colKey;
-      let newDir = "desc";
-      if (currentSort.scope === "Season" && currentSort.matchupType === matchupType && currentSort.categoryLabel === def.label && currentSort.type === "seasonStreak" && currentSort.columnKey === newColumnKey){
-        newDir = currentSort.direction === "asc" ? "desc" : "asc";
-      } else {
-        newDir = (newColumnKey === "manager" || newColumnKey === "spanLabel") ? "asc" : "desc";
-      }
-
-      currentSort = { scope:"Season", type:"seasonStreak", matchupType, categoryLabel:def.label, columnKey:newColumnKey, direction:newDir };
-      resetToPage1();
-      renderLeaderboard(matchupType, def.label);
-    };
-  }
-
-  // WEEKLY render
-  function renderWeeklyLeaderboard(matchupType, def){
-    let rows = (weeklyRowsByMatchupType[matchupType] || []).slice();
-    if (!rows.length){
-      setNoData("Note · No weekly data for this combination yet");
-      return;
-    }
-
-    // optional filter (e.g., Closest Win only considers wins)
-    if (def.filterKey){
-      rows = rows.filter(r => r[def.filterKey] === def.filterValue);
-    }
-
-    if (!rows.length){
-      setNoData("Note · No weekly data for this stat and matchup type yet");
-      return;
-    }
-
-    // ranking (ties share rank; recency tiebreak)
-    const rankingOrder = rows.slice().sort((a,b) => {
-      const av = a[def.sortKey];
-      const bv = b[def.sortKey];
-      if (av !== bv) return def.sortDir === "asc" ? av - bv : bv - av;
-      if (a.year !== b.year) return b.year - a.year;
-      if (a.week !== b.week) return b.week - a.week;
-      return a.manager.localeCompare(b.manager);
-    });
-
-    const rankMap = new Map();
-    let prevVal = null;
-    let currentRank = 0;
-    rankingOrder.forEach((r, idx) => {
-      const v = r[def.sortKey];
-      if (prevVal === null || v !== prevVal){ currentRank = idx+1; prevVal = v; }
-      rankMap.set(r, currentRank);
-    });
-
-    let columnKey = def.sortKey;
-    let direction = def.sortDir;
-    if (currentSort.scope === "Weekly" && currentSort.matchupType === matchupType && currentSort.categoryLabel === def.label && currentSort.columnKey){
-      columnKey = currentSort.columnKey;
-      direction = currentSort.direction || "desc";
-    }
-
-    const sorted = rows.slice().sort((a,b) => {
-      if (columnKey === "manager"){
-        const cmp = a.manager.localeCompare(b.manager);
-        return direction === "asc" ? cmp : -cmp;
-      }
-      const av = a[columnKey];
-      const bv = b[columnKey];
-      if (av === bv){
-        if (a.year !== b.year) return b.year - a.year;
-        if (a.week !== b.week) return b.week - a.week;
-        return a.manager.localeCompare(b.manager);
-      }
-      return direction === "asc" ? av - bv : bv - av;
-    });
-
-    const top = paginateRows(sorted);
-
-    const headerRow = document.getElementById("headerRow");
-    const tbody = document.getElementById("leaderboardBody");
-    const noDataMessage = document.getElementById("noDataMessage");
-
-    headerRow.innerHTML = "";
-    const rankTh = document.createElement("th");
-    rankTh.className = "th-left";
-    rankTh.textContent = "Rank";
-    rankTh.title = getHeaderTitle("Rank");
-    rankTh.dataset.colKey = "rank";
-
-    const managerTh = document.createElement("th");
-    managerTh.className = "th-left";
-    managerTh.textContent = "Manager";
-    managerTh.title = getHeaderTitle("Manager");
-    managerTh.dataset.colKey = "manager";
-
-    headerRow.appendChild(rankTh);
-    headerRow.appendChild(managerTh);
-
-    const [featuredCol, ...contextCols] = def.columns;
-
-    function addCol(col){
-      const th = document.createElement("th");
-      th.textContent = col.label;
-      th.title = getHeaderTitle(col.label);
-      th.className = "th-left";
-      th.dataset.colKey = col.key;
-      headerRow.appendChild(th);
-    }
-    if (featuredCol) addCol(featuredCol);
-    contextCols.forEach(addCol);
-
-    tbody.innerHTML = "";
-    top.forEach(r => {
-      const tr = document.createElement("tr");
-      if (rankMap.get(r) === 1) tr.classList.add("top-rank");
-
-      const rankTd = document.createElement("td");
-      rankTd.className = "rank-cell";
-      rankTd.textContent = rankMap.get(r);
-
-      const managerTd = document.createElement("td");
-      managerTd.className = "manager-cell";
-      managerTd.textContent = r.manager;
-
-      tr.appendChild(rankTd);
-      tr.appendChild(managerTd);
-
-      // Featured
-      if (featuredCol){
-        const td = document.createElement("td");
-        td.className = "stat-cell featured-col";
-
-        // special polarity for closest win
-        if (featuredCol.polarity === "positivePrimary") td.classList.add("value-positive");
-        if (featuredCol.polarity === "negativePrimary") td.classList.add("value-negative");
-        if (featuredCol.polarity === "warningPrimary") td.classList.add("value-positive"); // treat as highlight
-
-        td.textContent = formatValue(r[featuredCol.key], featuredCol.format, r);
-        tr.appendChild(td);
-      }
-
-      // Context
-      contextCols.forEach(col => {
-        const td = document.createElement("td");
-        td.className = "stat-cell";
-        td.style.textAlign = "left";
-
-        const v = r[col.key];
-        if (col.format === "text") td.textContent = String(v);
-        else td.textContent = formatValue(v, col.format, r);
-
-        tr.appendChild(td);
-      });
-
-      tbody.appendChild(tr);
-    });
-
-    noDataMessage.style.display = "none";
-
-    headerRow.onclick = (e) => {
-      const th = e.target.closest("th");
-      if (!th) return;
-      const colKey = th.dataset.colKey;
-      if (!colKey) return;
-
-      let newColumnKey;
-      if (colKey === "rank") newColumnKey = def.sortKey;
-      else if (colKey === "manager") newColumnKey = "manager";
-      else newColumnKey = colKey;
-
-      let newDir = "desc";
-      if (currentSort.scope === "Weekly" && currentSort.matchupType === matchupType && currentSort.categoryLabel === def.label && currentSort.columnKey === newColumnKey){
-        newDir = currentSort.direction === "asc" ? "desc" : "asc";
-      } else {
-        if (newColumnKey === "manager") newDir = "asc";
-        else if (newColumnKey === def.sortKey) newDir = def.sortDir;
-        else newDir = "desc";
-      }
-
-      currentSort = { scope:"Weekly", type:"weekly", matchupType, categoryLabel:def.label, columnKey:newColumnKey, direction:newDir };
-      resetToPage1();
-      renderLeaderboard(matchupType, def.label);
-    };
-  }
-
-  // ---------------------------
-  // Main render
-  // ---------------------------
-
-  function renderLeaderboard(matchupType, categoryLabel){
-    const defs = DEFS_BY_SCOPE[currentScope] || [];
-    const def = defs.find(d => d.label === categoryLabel);
-    if (!def) return;
-
-    const titleEl = document.getElementById("leaderboardTitle");
-    const subtitleEl = document.getElementById("leaderboardSubtitle");
-    const pillLabel = document.getElementById("pillLabel");
-
-    titleEl.textContent = def.label;
-    pillLabel.textContent = `${currentScope} · ${matchupType}`;
-
-    // Career-only: Weekly highs not valid for playoffs (kept)
-    if (
-      currentScope === "Career" &&
-      matchupType === "Playoffs Only" &&
-      def.group === "Weekly Dominance"
-    ){
-      setNoData("Note · Weekly high scores are only tracked for Regular Season matchups.");
-      subtitleEl.textContent = "This stat is only computed for regular season only matchups.";
-      return;
-    }
-
-    if (currentScope === "Career"){
-      subtitleEl.textContent = (def.type === "streak")
-        ? "Career streaks with exact start–end span"
-        : "Career leaders across all eligible matchups";
-
-      if (def.type === "streak") renderCareerStreak(matchupType, def);
-      else renderCareerAggregate(matchupType, def);
-
-      return;
-    }
-
-    if (currentScope === "Season"){
-      subtitleEl.textContent = (def.type === "seasonStreak")
-        ? "Season streaks with exact start–end span"
-        : "Best single-season stat lines across all managers";
-      if (def.type === "seasonStreak") renderSeasonStreak(matchupType, def);
-      else renderSeasonLeaderboard(matchupType, def);
-      return;
-    }
-
-    // Weekly
-    subtitleEl.textContent = "Single-matchup records across all eligible matchups";
-    renderWeeklyLeaderboard(matchupType, def);
-  }
-
-  // ---------------------------
-  // Load JSON & init
-  // ---------------------------
-
-  async function loadMatchups(){
-    try{
-      const res = await fetch("league-scores.json");
-      if (!res.ok){
-        console.error("Failed to load league-scores.json:", res.status, res.statusText);
-        return [];
-      }
-      return await res.json();
-    } catch(err){
-      console.error("Error loading league-scores.json", err);
-      return [];
+      title.textContent = "Season Streaks";
+      subtitle.textContent = "Season streaks with exact start–end span.";
+      const streaks = buildSeasonStreaks(allMatchups, matchupType);
+      const list = (currentDef.streak==="win") ? streaks.win : streaks.lose;
+
+      rows = list.map(s=>({
+        year:s.year,
+        manager:s.manager,
+        length:s.length,
+        span: `${fmtYear(s.year)} Wk ${s.startWeek}–Wk ${s.endWeek}`
+      }));
+      featuredKey = "length";
+      columns = [
+        { key:"rank", label:"Rank", kind:"int" },
+        { key:"year", label:"Year", kind:"int" },
+        { key:"manager", label:"Manager", kind:"text" },
+        { key:"length", label: currentDef.streak==="win" ? "Win Streak" : "Loss Streak", kind:"int" },
+        { key:"span", label:"Span", kind:"text" },
+      ];
+      rankWithTies(rows, "length", "desc");
+      if (!sortState.key) sortState = { key:"length", dir:"desc" };
     }
   }
 
-  document.addEventListener("DOMContentLoaded", async () => {
-    populateMatchupDropdown();
-    matchupSelect.value = "Regular Season + Playoffs";
-    populateCategoryDropdown("Career");
+  if (currentScope==="Weekly"){
+    title.textContent = "Weekly Records";
+    subtitle.textContent = "Single-matchup records across all managers.";
+    const all = buildWeeklyRows(allMatchups, matchupType);
 
-    rawMatchups = await loadMatchups();
-    aggregatesByScope = buildCareerAggregates(rawMatchups);
-    seasonAggByMatchupType = buildSeasonAggregates(rawMatchups);
-    weeklyRowsByMatchupType = buildWeeklyRows(rawMatchups);
-    seasonStreaksByMatchupType = buildSeasonStreaks(rawMatchups);
+    featuredKey = currentDef.featured.key;
+    rows = all;
 
-    const matchupSelect = document.getElementById("matchupTypeSelect");
-    const categorySelect = document.getElementById("categorySelect");
+    columns = [
+      { key:"rank", label:"Rank", kind:"int" },
+      { key:"yearWeek", label:"Year / Week", kind:"text" },
+      { key:"manager", label:"Manager", kind:"text" },
+      { key:"opponent", label:"Opponent", kind:"text" },
+      { key:"scoreFor", label:"Score", kind:"num", format:"points" },
+      { key:"scoreAgainst", label:"Opp Score", kind:"num", format:"points" },
+      { key:"margin", label:"MARG", kind:"num", format:"marg" },
+      { key:"playoffs", label:"Playoffs", kind:"text" },
+    ];
 
-    function update(){
-      resetToPage1();
-      const matchupType = matchupSelect.value;
-      const categoryLabel = categorySelect.value;
+    // rank based on featured metric; special case absMargin when showing closest match
+    const rankKey = featuredKey;
+    const rankDir = (currentDef.featured.polarity==="lowBetter") ? "asc" : "desc";
+    rankWithTies(rows, rankKey, rankDir);
+    if (!sortState.key) sortState = { key: rankKey, dir: rankDir };
+  }
 
-      if (!matchupType || !categoryLabel){
-        neutralState();
-        return;
-      }
+  if (!rows.length){
+    showNoData("Note · No data for this selection.");
+    return;
+  }
 
-      // default sort state per scope/type
-      const defs = DEFS_BY_SCOPE[currentScope] || [];
-      const def = defs.find(d => d.label === categoryLabel);
-      if (!def) return;
+  // Apply sorting and pagination
+  const sorted = sortRows(rows);
+  const pageRows = paginate(sorted);
 
-      currentSort = {
-        scope: currentScope,
-        type: def.type,
-        matchupType,
-        categoryLabel,
-        columnKey: def.type === "streak" ? "length" : def.sortKey,
-        direction: def.type === "streak" ? "desc" : def.sortDir
-      };
+  // Build header (sortable)
+  setHeader(columns, featuredKey);
 
-      renderLeaderboard(matchupType, categoryLabel);
-    }
+  // Render rows
+  // Ensure rank displayed from _rank (computed earlier)
+  const displayRows = pageRows.map(r => ({ ...r, rank: r._rank }));
+  setRows(displayRows, columns, featuredKey);
 
-    matchupSelect.addEventListener("change", update);
-    categorySelect.addEventListener("change", update);
-
-
-    // Pagination controls
-    const prevBtn = document.getElementById("prevPage");
-    const nextBtn = document.getElementById("nextPage");
-
-    function rerenderCurrent(){
-      const matchupType = matchupSelect.value;
-      const categoryLabel = categorySelect.value;
-      if (!matchupType || !categoryLabel){
-        neutralState();
-        return;
-      }
-      renderLeaderboard(matchupType, categoryLabel);
-    }
-
-    if (prevBtn) prevBtn.addEventListener("click", () => {
-      if (paginationState.currentPage > 1){
-        paginationState.currentPage -= 1;
-        rerenderCurrent();
-      }
-    });
-
-    if (nextBtn) nextBtn.addEventListener("click", () => {
-      paginationState.currentPage += 1;
-      rerenderCurrent();
-    });
-
-    // Scope switching
-    document.querySelectorAll(".scope-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        resetToPage1();
-        setScopeUI(btn.dataset.scope);
-
-        // keep matchup type selection if already selected
-        const mt = matchupSelect.value || "";
-        const cat = categorySelect.value || "";
-
-        // Reset category selection when changing scope (clean mental model)
-        // but keep matchup type if user already chose one.
-        populateCategoryDropdown(currentScope);
-        categorySelect.value = "";
-        const mt = matchupSelect.value || "";
-        matchupSelect.value = mt || "Regular Season + Playoffs";
-        neutralState();
-      });
-    });
-
-    // Initial neutral state
-    neutralState();
+  // Featured header style
+  // Add featured-col class to header cell
+  Array.from(document.querySelectorAll("thead th")).forEach(th=>{
+    if (th.dataset.key === featuredKey) th.classList.add("featured-col");
   });
+}
+
+/* -----------------------------
+   Dropdown population
+------------------------------ */
+function populateCategory(){
+  const catSel = document.getElementById("category");
+  const defs = getScopeDefs(currentScope);
+  catSel.innerHTML = "";
+  defs.forEach(d=>{
+    const opt = document.createElement("option");
+    opt.value = d.label;
+    opt.textContent = d.label;
+    catSel.appendChild(opt);
+  });
+  catSel.value = defs[0]?.label || "";
+}
+
+/* -----------------------------
+   Wire up
+------------------------------ */
+function setScope(scope){
+  currentScope = scope;
+  // toggle selected
+  document.querySelectorAll(".tab").forEach(btn=>{
+    const active = btn.dataset.scope === scope;
+    btn.setAttribute("aria-selected", active ? "true" : "false");
+  });
+  // Reset per user: keep matchup type across scopes, but reset category to first + page 1
+  populateCategory();
+  sortState = { key:null, dir:"desc" };
+  resetPage();
+  updatePill();
+  render();
+}
+
+document.getElementById("prev").addEventListener("click", ()=>{
+  if (pagination.currentPage>1){
+    pagination.currentPage -= 1;
+    render();
+  }
+});
+document.getElementById("next").addEventListener("click", ()=>{
+  pagination.currentPage += 1;
+  render();
+});
+
+document.getElementById("matchupType").addEventListener("change", ()=>{
+  resetPage();
+  sortState = { key:null, dir:"desc" };
+  render();
+});
+document.getElementById("category").addEventListener("change", ()=>{
+  resetPage();
+  sortState = { key:null, dir:"desc" };
+  render();
+});
+document.querySelectorAll(".tab").forEach(btn=>{
+  btn.addEventListener("click", ()=> setScope(btn.dataset.scope));
+});
+
+// Init
+(async function init(){
+  try{
+    // default matchup type to Regular Season + Playoffs on first load
+    document.getElementById("matchupType").value = "Regular Season + Playoffs";
+    populateCategory();
+    allMatchups = await loadData();
+    updatePill();
+    render();
+  }catch(err){
+    console.error(err);
+    showNoData("Error loading data. Check console + make sure league-scores.json is next to this HTML and is valid JSON.");
+  }
+})();
 </script>
 </body>
 </html>
