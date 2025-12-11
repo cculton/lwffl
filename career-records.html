@@ -228,14 +228,9 @@
       text-align: right;
     }
 
-    /* Visual separation for featured stat vs contextual stats */
-    .featured-stat-header {
-      border-right: 1px solid rgba(55, 65, 81, 0.8);
-    }
-
-    .featured-stat-cell {
-      border-right: 1px solid rgba(31, 41, 55, 0.9);
-    }
+    /* Keep classes for semantics, but no visual vertical separator */
+    .featured-stat-header { }
+    .featured-stat-cell { }
 
     .leaderboard-table tbody tr {
       transition: background 0.15s ease, transform 0.08s ease;
@@ -380,14 +375,14 @@
       <section class="leaderboard-card">
         <div class="leaderboard-header">
           <div>
-            <div class="leaderboard-title" id="leaderboardTitle">Most Points For · All Matchups</div>
+            <div class="leaderboard-title" id="leaderboardTitle">Career Leaders</div>
             <div class="leaderboard-subtitle" id="leaderboardSubtitle">
               Career leaders across all eligible matchups
             </div>
           </div>
           <div class="pill">
             <span class="pill-dot"></span>
-            <span id="pillLabel">All Matchups</span>
+            <span id="pillLabel">—</span>
           </div>
         </div>
 
@@ -398,8 +393,8 @@
           <tbody id="leaderboardBody"></tbody>
         </table>
 
-        <div class="no-data" id="noDataMessage" style="display: none;">
-          <span>Note · No data for this category &amp; matchup type yet</span>
+        <div class="no-data" id="noDataMessage">
+          <span>Select a matchup type and stat category to see leaderboard data.</span>
         </div>
 
         <div class="footer-note">
@@ -923,12 +918,30 @@
       const matchupSelect = document.getElementById("matchupTypeSelect");
       const categorySelect = document.getElementById("categorySelect");
 
+      // Placeholder for matchup type
+      const matchupPlaceholder = document.createElement("option");
+      matchupPlaceholder.value = "";
+      matchupPlaceholder.textContent = "Select a matchup type...";
+      matchupPlaceholder.disabled = true;
+      matchupPlaceholder.selected = true;
+      matchupPlaceholder.hidden = true;
+      matchupSelect.appendChild(matchupPlaceholder);
+
       MATCHUP_TYPES.forEach(type => {
         const opt = document.createElement("option");
         opt.value = type;
         opt.textContent = type;
         matchupSelect.appendChild(opt);
       });
+
+      // Placeholder for category
+      const categoryPlaceholder = document.createElement("option");
+      categoryPlaceholder.value = "";
+      categoryPlaceholder.textContent = "Select a stat category...";
+      categoryPlaceholder.disabled = true;
+      categoryPlaceholder.selected = true;
+      categoryPlaceholder.hidden = true;
+      categorySelect.appendChild(categoryPlaceholder);
 
       const groups = [...new Set(CATEGORY_DEFS.map(c => c.group))];
       groups.forEach(groupLabel => {
@@ -942,9 +955,6 @@
         });
         categorySelect.appendChild(group);
       });
-
-      matchupSelect.value = "All Matchups";
-      categorySelect.value = "Most Points For";
     }
 
     // === Sorting state ===
@@ -1096,7 +1106,7 @@
           tr.appendChild(td);
         }
 
-        // Contextual stat cells – all grouped to the right
+        // Contextual stat cells – grouped to the right
         contextCols.forEach(col => {
           const td = document.createElement("td");
           td.className = "stat-cell";
@@ -1430,6 +1440,26 @@
       function update() {
         const matchupType = matchupSelect.value;
         const categoryLabel = categorySelect.value;
+        const headerRow = document.getElementById("headerRow");
+        const tbody = document.getElementById("leaderboardBody");
+        const noDataMessage = document.getElementById("noDataMessage");
+        const titleEl = document.getElementById("leaderboardTitle");
+        const subtitleEl = document.getElementById("leaderboardSubtitle");
+        const pillLabel = document.getElementById("pillLabel");
+
+        // If either dropdown not selected, show neutral state
+        if (!matchupType || !categoryLabel) {
+          headerRow.innerHTML = "";
+          tbody.innerHTML = "";
+          noDataMessage.style.display = "block";
+          noDataMessage.firstElementChild.textContent =
+            "Select a matchup type and stat category to see leaderboard data.";
+          titleEl.textContent = "Career Leaders";
+          subtitleEl.textContent = "Career leaders across all eligible matchups";
+          pillLabel.textContent = "—";
+          return;
+        }
+
         const def = CATEGORY_BY_LABEL[categoryLabel];
         if (!def) return;
 
@@ -1457,6 +1487,7 @@
       matchupSelect.addEventListener("change", update);
       categorySelect.addEventListener("change", update);
 
+      // Initial neutral state
       update();
     });
   </script>
