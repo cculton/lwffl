@@ -441,6 +441,7 @@
     "weekly_margin": -10.2,
     "transaction_count": 5
   },
+ [
   {
     "year": 2017,
     "manager": "Ryan Davidson",
@@ -526,7 +527,76 @@
     "losses": 7,
     "ties": 0,
     "points_for": 1179.96,
-    "points_against": 1200.82
+    "points_against": 1200.82,
+    "final_standing": 7,
+    "division_finish": 3,
+    "weekly_margin": -1.6,
+    "transaction_count": 26
+  },
+  {
+    "year": 2017,
+    "manager": "Adam Goho",
+    "wins": 6,
+    "losses": 7,
+    "ties": 0,
+    "points_for": 1131.72,
+    "points_against": 1054.72,
+    "final_standing": 8,
+    "division_finish": 2,
+    "weekly_margin": 5.9,
+    "transaction_count": 26
+  },
+  {
+    "year": 2017,
+    "manager": "Chad Denton",
+    "wins": 5,
+    "losses": 8,
+    "ties": 0,
+    "points_for": 1066.1,
+    "points_against": 1217.4,
+    "final_standing": 9,
+    "division_finish": 2,
+    "weekly_margin": -11.6,
+    "transaction_count": 12
+  },
+  {
+    "year": 2017,
+    "manager": "Evan Turner",
+    "wins": 6,
+    "losses": 7,
+    "ties": 0,
+    "points_for": 1130.14,
+    "points_against": 1242.52,
+    "final_standing": 10,
+    "division_finish": 3,
+    "weekly_margin": -8.6,
+    "transaction_count": 3
+  },
+  {
+    "year": 2017,
+    "manager": "Tom Hos",
+    "wins": 4,
+    "losses": 9,
+    "ties": 0,
+    "points_for": 1055.62,
+    "points_against": 1175.56,
+    "final_standing": 11,
+    "division_finish": 3,
+    "weekly_margin": -9.2,
+    "transaction_count": 10
+  },
+  {
+    "year": 2017,
+    "manager": "Connor Glair",
+    "wins": 4,
+    "losses": 9,
+    "ties": 0,
+    "points_for": 1130.36,
+    "points_against": 1275.04,
+    "final_standing": 12,
+    "division_finish": 3,
+    "weekly_margin": -11.1,
+    "transaction_count": 28
   },
   {
     "year": 2018,
