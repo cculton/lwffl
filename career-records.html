@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Records & Leaders – LWFFL</title>
+  <title>Record Book – LWFFL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -281,6 +281,21 @@
       .leaderboard-table th, .leaderboard-table td{ padding: 7px 6px; }
       .leaderboard-table{ min-width: 520px; }
     }
+  
+    /* Featured stat column highlight */
+    .featured-col{
+      background: rgba(56, 189, 248, 0.08);
+    }
+    .leaderboard-table thead th.featured-col{
+      background: rgba(56, 189, 248, 0.12);
+    }
+
+    /* Weekly scope: left-align all columns */
+    body.weekly-scope .leaderboard-table th,
+    body.weekly-scope .leaderboard-table td{
+      text-align: left !important;
+    }
+
   </style>
 </head>
 
@@ -288,7 +303,7 @@
   <div class="shell">
     <div class="container">
       <header class="header">
-        <h1>Records & Leaders</h1>
+        <h1>Record Book</h1>
         <p>Legion of Whom Fantasy Football League  · 2014–Present</p>
       </header>
 
@@ -371,38 +386,38 @@
   const CAREER_CATEGORY_DEFS = [
     // SCORING – FOR
     { label:"Most Points For", group:"Scoring (Points For)", sortKey:"pointsFor", sortDir:"desc", type:"aggregate",
-      columns:[ {key:"pointsFor",label:"Pts For",format:"points",polarity:"positivePrimary"},
+      columns:[ {key:"pointsFor",label:"PF",format:"points",polarity:"positivePrimary"},
                 {key:"games",label:"M",format:"integer"},
                 {key:"ppmFor",label:"PPM",format:"ppm",polarity:"positive"} ]},
     { label:"Fewest Points For", group:"Scoring (Points For)", sortKey:"pointsFor", sortDir:"asc", type:"aggregate",
-      columns:[ {key:"pointsFor",label:"Pts For",format:"points",polarity:"negativePrimary"},
+      columns:[ {key:"pointsFor",label:"PF",format:"points",polarity:"negativePrimary"},
                 {key:"games",label:"M",format:"integer"},
                 {key:"ppmFor",label:"PPM",format:"ppm",polarity:"negative"} ]},
     { label:"Highest Points Per Matchup (PPM)", group:"Scoring (Points For)", sortKey:"ppmFor", sortDir:"desc", type:"aggregate",
-      columns:[ {key:"ppmFor",label:"PPM",format:"ppm",polarity:"positivePrimary"},
-                {key:"pointsFor",label:"Pts For",format:"points"},
+      columns:[ {key:"ppmFor",label:"PPM",format:"marg",polarity:"positivePrimary"},
+                {key:"pointsFor",label:"PF",format:"points"},
                 {key:"games",label:"M",format:"integer"} ]},
     { label:"Lowest Points Per Matchup (PPM)", group:"Scoring (Points For)", sortKey:"ppmFor", sortDir:"asc", type:"aggregate",
       columns:[ {key:"ppmFor",label:"PPM",format:"ppm",polarity:"negativePrimary"},
-                {key:"pointsFor",label:"Pts For",format:"points"},
+                {key:"pointsFor",label:"PF",format:"points"},
                 {key:"games",label:"M",format:"integer"} ]},
 
     // SCORING – AGAINST
     { label:"Most Points Against", group:"Scoring (Points Against)", sortKey:"pointsAgainst", sortDir:"desc", type:"aggregate",
-      columns:[ {key:"pointsAgainst",label:"Pts Against",format:"points",polarity:"negativePrimary"},
+      columns:[ {key:"pointsAgainst",label:"PA",format:"points",polarity:"negativePrimary"},
                 {key:"games",label:"M",format:"integer"},
-                {key:"ppmAgainst",label:"PPM Against",format:"ppm",polarity:"negative"} ]},
+                {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"negative"} ]},
     { label:"Fewest Points Against", group:"Scoring (Points Against)", sortKey:"pointsAgainst", sortDir:"asc", type:"aggregate",
-      columns:[ {key:"pointsAgainst",label:"Pts Against",format:"points",polarity:"positivePrimary"},
+      columns:[ {key:"pointsAgainst",label:"PA",format:"points",polarity:"positivePrimary"},
                 {key:"games",label:"M",format:"integer"},
-                {key:"ppmAgainst",label:"PPM Against",format:"ppm",polarity:"positive"} ]},
-    { label:"Highest PPM Against", group:"Scoring (Points Against)", sortKey:"ppmAgainst", sortDir:"desc", type:"aggregate",
-      columns:[ {key:"ppmAgainst",label:"PPM Against",format:"ppm",polarity:"negativePrimary"},
-                {key:"pointsAgainst",label:"Pts Against",format:"points"},
+                {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"positive"} ]},
+    { label:"Highest Points Against Per Matchup (PAPM)", group:"Scoring (Points Against)", sortKey:"ppmAgainst", sortDir:"desc", type:"aggregate",
+      columns:[ {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"negativePrimary"},
+                {key:"pointsAgainst",label:"PA",format:"points"},
                 {key:"games",label:"M",format:"integer"} ]},
-    { label:"Lowest PPM Against", group:"Scoring (Points Against)", sortKey:"ppmAgainst", sortDir:"asc", type:"aggregate",
-      columns:[ {key:"ppmAgainst",label:"PPM Against",format:"ppm",polarity:"positivePrimary"},
-                {key:"pointsAgainst",label:"Pts Against",format:"points"},
+    { label:"Lowest Points Against Per Matchup (PAPM)", group:"Scoring (Points Against)", sortKey:"ppmAgainst", sortDir:"asc", type:"aggregate",
+      columns:[ {key:"ppmAgainst",label:"PAPM",format:"marg",polarity:"positivePrimary"},
+                {key:"pointsAgainst",label:"PA",format:"points"},
                 {key:"games",label:"M",format:"integer"} ]},
 
     // RESULTS – WIN %
@@ -448,35 +463,35 @@
   // Mirrors the Career naming/terminology, but rankings are "best single season" records.
   const SEASON_CATEGORY_DEFS = [
     { label:"Most Points For", group:"Scoring (Points For)", sortKey:"pointsFor", sortDir:"desc", type:"season",
-      columns:[ {key:"pointsFor",label:"Pts For",format:"points",polarity:"positivePrimary"},
+      columns:[ {key:"pointsFor",label:"PF",format:"points",polarity:"positivePrimary"},
                 {key:"games",label:"M",format:"integer"},
                 {key:"ppmFor",label:"PPM",format:"ppm",polarity:"positive"},
                 {key:"year",label:"Year",format:"year"} ]},
     { label:"Fewest Points For", group:"Scoring (Points For)", sortKey:"pointsFor", sortDir:"asc", type:"season",
-      columns:[ {key:"pointsFor",label:"Pts For",format:"points",polarity:"negativePrimary"},
+      columns:[ {key:"pointsFor",label:"PF",format:"points",polarity:"negativePrimary"},
                 {key:"games",label:"M",format:"integer"},
                 {key:"ppmFor",label:"PPM",format:"ppm",polarity:"negative"},
                 {key:"year",label:"Year",format:"year"} ]},
     { label:"Highest Points Per Matchup (PPM)", group:"Scoring (Points For)", sortKey:"ppmFor", sortDir:"desc", type:"season",
-      columns:[ {key:"ppmFor",label:"PPM",format:"ppm",polarity:"positivePrimary"},
-                {key:"pointsFor",label:"Pts For",format:"points"},
+      columns:[ {key:"ppmFor",label:"PPM",format:"marg",polarity:"positivePrimary"},
+                {key:"pointsFor",label:"PF",format:"points"},
                 {key:"games",label:"M",format:"integer"},
                 {key:"year",label:"Year",format:"year"} ]},
     { label:"Lowest Points Per Matchup (PPM)", group:"Scoring (Points For)", sortKey:"ppmFor", sortDir:"asc", type:"season",
       columns:[ {key:"ppmFor",label:"PPM",format:"ppm",polarity:"negativePrimary"},
-                {key:"pointsFor",label:"Pts For",format:"points"},
+                {key:"pointsFor",label:"PF",format:"points"},
                 {key:"games",label:"M",format:"integer"},
                 {key:"year",label:"Year",format:"year"} ]},
 
     { label:"Most Points Against", group:"Scoring (Points Against)", sortKey:"pointsAgainst", sortDir:"desc", type:"season",
-      columns:[ {key:"pointsAgainst",label:"Pts Against",format:"points",polarity:"negativePrimary"},
+      columns:[ {key:"pointsAgainst",label:"PA",format:"points",polarity:"negativePrimary"},
                 {key:"games",label:"M",format:"integer"},
-                {key:"ppmAgainst",label:"PPM Against",format:"ppm",polarity:"negative"},
+                {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"negative"},
                 {key:"year",label:"Year",format:"year"} ]},
     { label:"Fewest Points Against", group:"Scoring (Points Against)", sortKey:"pointsAgainst", sortDir:"asc", type:"season",
-      columns:[ {key:"pointsAgainst",label:"Pts Against",format:"points",polarity:"positivePrimary"},
+      columns:[ {key:"pointsAgainst",label:"PA",format:"points",polarity:"positivePrimary"},
                 {key:"games",label:"M",format:"integer"},
-                {key:"ppmAgainst",label:"PPM Against",format:"ppm",polarity:"positive"},
+                {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"positive"},
                 {key:"year",label:"Year",format:"year"} ]},
 
     { label:"Highest Winning Percentage", group:"Results (Win % & Record)", sortKey:"winPct", sortDir:"desc", type:"season",
@@ -502,7 +517,12 @@
                 {key:"tiesInt",label:"T",format:"integer"},
                 {key:"winPct",label:"Win %",format:"percent"},
                 {key:"year",label:"Year",format:"year"} ]}
-  ];
+  
+    ,
+    // STREAKS
+    { label:"Longest Winning Streak", group:"Streaks", type:"seasonStreak", streakType:"win" },
+    { label:"Longest Losing Streak", group:"Streaks", type:"seasonStreak", streakType:"lose" }
+];
 
   // WEEKLY (single-matchup / weekly records)
   const WEEKLY_CATEGORY_DEFS = [
@@ -517,14 +537,14 @@
                 {key:"scoreAgainst",label:"Opp Score",format:"points"},
                 {key:"yearWeek",label:"Year / Week",format:"text"} ]},
     { label:"Biggest Margin of Victory", group:"Results (Single Matchup)", sortKey:"margin", sortDir:"desc", type:"weekly",
-      columns:[ {key:"margin",label:"MOV",format:"ppm",polarity:"positivePrimary"},
+      columns:[ {key:"margin",label:"MARG",format:"marg",polarity:"positivePrimary"},
                 {key:"scoreFor",label:"Score",format:"points"},
                 {key:"scoreAgainst",label:"Opp Score",format:"points"},
                 {key:"opponent",label:"Opponent",format:"text"},
                 {key:"yearWeek",label:"Year / Week",format:"text"} ]},
     { label:"Closest Win", group:"Results (Single Matchup)", sortKey:"margin", sortDir:"asc", type:"weekly",
       filterKey:"isWin", filterValue:true,
-      columns:[ {key:"margin",label:"MOV",format:"ppm",polarity:"warningPrimary"},
+      columns:[ {key:"margin",label:"MARG",format:"marg",polarity:"warningPrimary"},
                 {key:"scoreFor",label:"Score",format:"points"},
                 {key:"scoreAgainst",label:"Opp Score",format:"points"},
                 {key:"opponent",label:"Opponent",format:"text"},
@@ -762,7 +782,111 @@
     return out;
   }
 
-  // === WEEKLY rows ===
+  
+  // Season streak containers
+  let seasonStreaksByMatchupType = {}; // { matchupType: { win:[], lose:[] } }
+
+  // === SEASON streaks (per-year, per-manager) ===
+  function buildSeasonStreaks(matches){
+    const out = {};
+    MATCHUP_TYPES.forEach(t => out[t] = { win: [], lose: [] });
+
+    const seq = {}; // { type: { year: { manager: [ {week,isWin,isLoss} ] } } }
+    MATCHUP_TYPES.forEach(t => seq[t] = {});
+
+    matches.forEach(m => {
+      const types = getMatchupTypesForMatch(m);
+      const participants = [
+        { manager: m.manager1, scored: m.score1, against: m.score2 },
+        { manager: m.manager2, scored: m.score2, against: m.score1 }
+      ];
+
+      types.forEach(type => {
+        const y = String(m.year);
+        if (!seq[type][y]) seq[type][y] = {};
+        participants.forEach(p => {
+          if (!seq[type][y][p.manager]) seq[type][y][p.manager] = [];
+          seq[type][y][p.manager].push({
+            year: m.year,
+            week: m.week,
+            isWin: p.scored > p.against,
+            isLoss: p.scored < p.against
+          });
+        });
+      });
+    });
+
+    MATCHUP_TYPES.forEach(type => {
+      Object.keys(seq[type]).forEach(yStr => {
+        const managers = seq[type][yStr] || {};
+        Object.keys(managers).forEach(manager => {
+          const arr = managers[manager].slice().sort((a,b)=>a.week-b.week);
+
+          let startIdx = null;
+          for (let i=0;i<arr.length;i++){
+            if (arr[i].isWin){
+              if (startIdx === null) startIdx = i;
+            } else if (startIdx !== null){
+              const endIdx = i-1;
+              out[type].win.push({
+                manager,
+                length: endIdx-startIdx+1,
+                startYear: arr[startIdx].year,
+                startWeek: arr[startIdx].week,
+                endYear: arr[endIdx].year,
+                endWeek: arr[endIdx].week
+              });
+              startIdx = null;
+            }
+          }
+          if (startIdx !== null){
+            const endIdx = arr.length-1;
+            out[type].win.push({
+              manager,
+              length: endIdx-startIdx+1,
+              startYear: arr[startIdx].year,
+              startWeek: arr[startIdx].week,
+              endYear: arr[endIdx].year,
+              endWeek: arr[endIdx].week
+            });
+          }
+
+          startIdx = null;
+          for (let i=0;i<arr.length;i++){
+            if (arr[i].isLoss){
+              if (startIdx === null) startIdx = i;
+            } else if (startIdx !== null){
+              const endIdx = i-1;
+              out[type].lose.push({
+                manager,
+                length: endIdx-startIdx+1,
+                startYear: arr[startIdx].year,
+                startWeek: arr[startIdx].week,
+                endYear: arr[endIdx].year,
+                endWeek: arr[endIdx].week
+              });
+              startIdx = null;
+            }
+          }
+          if (startIdx !== null){
+            const endIdx = arr.length-1;
+            out[type].lose.push({
+              manager,
+              length: endIdx-startIdx+1,
+              startYear: arr[startIdx].year,
+              startWeek: arr[startIdx].week,
+              endYear: arr[endIdx].year,
+              endWeek: arr[endIdx].week
+            });
+          }
+        });
+      });
+    });
+
+    return out;
+  }
+
+// === WEEKLY rows ===
   function buildWeeklyRows(matches){
     const out = {};
     MATCHUP_TYPES.forEach(t => out[t] = []);
@@ -812,15 +936,16 @@
       const w = stats.winsInt || 0;
       const l = stats.lossesInt || 0;
       const t = stats.tiesInt || 0;
-      return t ? `${w}-${l}-${t}` : `${w}-${l}`;
+      return `${w}-${l}-${t}`;
     }
     if (value === null || value === undefined || Number.isNaN(value)) return "-";
 
     switch(format){
       case "percent": return (value * 100).toFixed(2);
       case "ppm": return value.toFixed(1);
+      case "marg": return (value >= 0 ? "+" : "") + value.toFixed(1);
       case "points":
-        return value.toLocaleString("en-US",{ minimumFractionDigits:1, maximumFractionDigits:1 });
+        return value.toLocaleString("en-US",{ minimumFractionDigits:2, maximumFractionDigits:2 });
       case "year": return String(value);
       case "text": return String(value);
       case "integer":
@@ -833,10 +958,10 @@
     switch(label){
       case "Rank": return "Rank among managers for this stat";
       case "Manager": return "Manager name";
-      case "Pts For": return "Total points scored (Points For)";
-      case "Pts Against": return "Total points conceded (Points Against)";
+      case "PF": return "Total points scored (Points For)";
+      case "PA": return "Total points conceded (Points Against)";
       case "PPM": return "Points Per Matchup (average points scored per matchup)";
-      case "PPM Against": return "Points Per Matchup Against (average points conceded per matchup)";
+      case "PAPM": return "Points Against Per Matchup (average points conceded per matchup)";
       case "M": return "Total number of matchups played";
       case "W": return "Total wins";
       case "L": return "Total losses";
@@ -852,7 +977,7 @@
       case "Score": return "Manager score in this matchup";
       case "Opp Score": return "Opponent score in this matchup";
       case "Opponent": return "Opponent manager";
-      case "MOV": return "Margin of Victory (Score - Opp Score)";
+      case "MARG": return "Margin (Score - Opp Score)";
       case "Year / Week": return "Season year and week";
       default: return label;
     }
@@ -905,6 +1030,9 @@
 
   function setScopeUI(scope){
     currentScope = scope;
+
+    // scope class on body for styling
+    document.body.classList.toggle("weekly-scope", scope === "Weekly");
 
     // tabs
     document.querySelectorAll(".scope-btn").forEach(btn => {
@@ -1062,7 +1190,7 @@
       const th = document.createElement("th");
       th.textContent = featuredCol.label;
       th.title = getHeaderTitle(featuredCol.label);
-      th.className = "th-right";
+      th.className = "th-right featured-col";
       th.dataset.colKey = featuredCol.key === "record" ? "winPct" : featuredCol.key;
       headerRow.appendChild(th);
     }
@@ -1095,7 +1223,7 @@
       // Featured cell
       if (featuredCol){
         const td = document.createElement("td");
-        td.className = "stat-cell";
+        td.className = "stat-cell featured-col";
         const metricKey = featuredCol.key === "record" ? "record" : featuredCol.key;
         const rawValue = (metricKey === "record") ? null : getMetric(stats, metricKey);
         const displayValue = (metricKey === "record")
@@ -1245,7 +1373,7 @@
     managerTh.dataset.colKey = "manager";
 
     const lenTh = document.createElement("th");
-    lenTh.className = "th-right";
+    lenTh.className = "th-right featured-col";
     lenTh.textContent = def.streakType === "win" ? "Win Streak" : "Loss Streak";
     lenTh.title = getHeaderTitle(def.streakType === "win" ? "Win Streak" : "Loss Streak");
     lenTh.dataset.colKey = "length";
@@ -1400,7 +1528,7 @@
       const th = document.createElement("th");
       th.textContent = col.label;
       th.title = getHeaderTitle(col.label);
-      th.className = "th-right";
+      th.className = "th-left";
       th.dataset.colKey = (col.key === "record") ? "winPct" : col.key;
       headerRow.appendChild(th);
     }
@@ -1427,7 +1555,7 @@
       // Featured
       if (featuredCol){
         const td = document.createElement("td");
-        td.className = "stat-cell";
+        td.className = "stat-cell featured-col";
         const metricKey = featuredCol.key;
         const rawValue = (metricKey === "record") ? null : (metricKey === "year" ? r.year : getMetric(r, metricKey));
         const displayValue =
@@ -1483,6 +1611,149 @@
       }
 
       currentSort = { scope:"Season", type:"season", matchupType, categoryLabel:def.label, columnKey:newColumnKey, direction:newDir };
+      renderLeaderboard(matchupType, def.label);
+    };
+  }
+
+
+  // SEASON streak render (same table format as Career streaks)
+  function renderSeasonStreak(matchupType, def){
+    const headerRow = document.getElementById("headerRow");
+    const tbody = document.getElementById("leaderboardBody");
+    const noDataMessage = document.getElementById("noDataMessage");
+
+    const scopeStreaks = seasonStreaksByMatchupType[matchupType] || { win: [], lose: [] };
+    const allRaw = def.streakType === "win" ? scopeStreaks.win : scopeStreaks.lose;
+
+    if (!allRaw || allRaw.length === 0){
+      setNoData("Note · No season streak data for this combination yet");
+      return;
+    }
+
+    const rowsWithLabels = allRaw.map(s => {
+      let spanLabel;
+      if (s.startWeek === s.endWeek) spanLabel = `${s.startYear} Wk ${s.startWeek}`;
+      else spanLabel = `${s.startYear} Wk ${s.startWeek}–Wk ${s.endWeek}`;
+      return { ...s, spanLabel };
+    });
+
+    const rankingOrder = rowsWithLabels.slice().sort((a,b) => {
+      if (b.length !== a.length) return b.length - a.length;
+      if (b.startYear !== a.startYear) return b.startYear - a.startYear;
+      if (b.endWeek !== a.endWeek) return b.endWeek - a.endWeek;
+      return a.manager.localeCompare(b.manager);
+    });
+
+    const rankMap = new Map();
+    let prevLen = null;
+    let currentRank = 0;
+    rankingOrder.forEach((s, idx) => {
+      if (prevLen === null || s.length !== prevLen){ currentRank = idx+1; prevLen = s.length; }
+      rankMap.set(s, currentRank);
+    });
+
+    let columnKey = "length";
+    let direction = "desc";
+    if (currentSort.scope === "Season" && currentSort.matchupType === matchupType && currentSort.categoryLabel === def.label && currentSort.type === "seasonStreak" && currentSort.columnKey){
+      columnKey = currentSort.columnKey;
+      direction = currentSort.direction || "desc";
+    }
+
+    const sorted = rowsWithLabels.slice().sort((a,b) => {
+      if (columnKey === "manager"){
+        const cmp = a.manager.localeCompare(b.manager);
+        return direction === "asc" ? cmp : -cmp;
+      } else if (columnKey === "spanLabel"){
+        const cmp = a.spanLabel.localeCompare(b.spanLabel);
+        return direction === "asc" ? cmp : -cmp;
+      } else {
+        if (a.length === b.length){
+          if (a.startYear !== b.startYear) return b.startYear - a.startYear;
+          if (a.endWeek !== b.endWeek) return b.endWeek - a.endWeek;
+          return a.manager.localeCompare(b.manager);
+        }
+        return direction === "asc" ? a.length - b.length : b.length - a.length;
+      }
+    });
+
+    const top = sorted.slice(0, 10);
+
+    headerRow.innerHTML = "";
+
+    const rankTh = document.createElement("th");
+    rankTh.className = "th-left";
+    rankTh.textContent = "Rank";
+    rankTh.title = getHeaderTitle("Rank");
+    rankTh.dataset.colKey = "rank";
+
+    const managerTh = document.createElement("th");
+    managerTh.className = "th-left";
+    managerTh.textContent = "Manager";
+    managerTh.title = getHeaderTitle("Manager");
+    managerTh.dataset.colKey = "manager";
+
+    const lenTh = document.createElement("th");
+    lenTh.className = "th-right featured-col";
+    lenTh.textContent = def.streakType === "win" ? "Win Streak" : "Loss Streak";
+    lenTh.title = getHeaderTitle(def.streakType === "win" ? "Win Streak" : "Loss Streak");
+    lenTh.dataset.colKey = "length";
+
+    const spanTh = document.createElement("th");
+    spanTh.className = "th-right";
+    spanTh.textContent = "Span";
+    spanTh.title = getHeaderTitle("Span");
+    spanTh.dataset.colKey = "spanLabel";
+
+    headerRow.appendChild(rankTh);
+    headerRow.appendChild(managerTh);
+    headerRow.appendChild(lenTh);
+    headerRow.appendChild(spanTh);
+
+    tbody.innerHTML = "";
+    top.forEach(s => {
+      const tr = document.createElement("tr");
+      if (rankMap.get(s) === 1) tr.classList.add("top-rank");
+
+      const rankTd = document.createElement("td");
+      rankTd.className = "rank-cell";
+      rankTd.textContent = rankMap.get(s);
+
+      const managerTd = document.createElement("td");
+      managerTd.className = "manager-cell";
+      managerTd.textContent = s.manager;
+
+      const lenTd = document.createElement("td");
+      lenTd.className = "stat-cell featured-col " + (def.streakType === "win" ? "value-positive" : "value-negative");
+      lenTd.textContent = String(s.length);
+
+      const spanTd = document.createElement("td");
+      spanTd.className = "stat-cell";
+      spanTd.textContent = s.spanLabel;
+
+      tr.appendChild(rankTd);
+      tr.appendChild(managerTd);
+      tr.appendChild(lenTd);
+      tr.appendChild(spanTd);
+      tbody.appendChild(tr);
+    });
+
+    noDataMessage.style.display = "none";
+
+    headerRow.onclick = (e) => {
+      const th = e.target.closest("th");
+      if (!th) return;
+      const colKey = th.dataset.colKey;
+      if (!colKey) return;
+
+      let newColumnKey = (colKey === "rank") ? "length" : colKey;
+      let newDir = "desc";
+      if (currentSort.scope === "Season" && currentSort.matchupType === matchupType && currentSort.categoryLabel === def.label && currentSort.type === "seasonStreak" && currentSort.columnKey === newColumnKey){
+        newDir = currentSort.direction === "asc" ? "desc" : "asc";
+      } else {
+        newDir = (newColumnKey === "manager" || newColumnKey === "spanLabel") ? "asc" : "desc";
+      }
+
+      currentSort = { scope:"Season", type:"seasonStreak", matchupType, categoryLabel:def.label, columnKey:newColumnKey, direction:newDir };
       renderLeaderboard(matchupType, def.label);
     };
   }
@@ -1574,7 +1845,7 @@
       const th = document.createElement("th");
       th.textContent = col.label;
       th.title = getHeaderTitle(col.label);
-      th.className = "th-right";
+      th.className = "th-left";
       th.dataset.colKey = col.key;
       headerRow.appendChild(th);
     }
@@ -1600,7 +1871,7 @@
       // Featured
       if (featuredCol){
         const td = document.createElement("td");
-        td.className = "stat-cell";
+        td.className = "stat-cell featured-col";
 
         // special polarity for closest win
         if (featuredCol.polarity === "positivePrimary") td.classList.add("value-positive");
@@ -1615,7 +1886,7 @@
       contextCols.forEach(col => {
         const td = document.createElement("td");
         td.className = "stat-cell";
-        td.style.textAlign = (col.format === "text") ? "left" : "right";
+        td.style.textAlign = "left";
 
         const v = r[col.key];
         if (col.format === "text") td.textContent = String(v);
@@ -1693,8 +1964,11 @@
     }
 
     if (currentScope === "Season"){
-      subtitleEl.textContent = "Best single-season stat lines across all managers";
-      renderSeasonLeaderboard(matchupType, def);
+      subtitleEl.textContent = (def.type === "seasonStreak")
+        ? "Season streaks with exact start–end span"
+        : "Best single-season stat lines across all managers";
+      if (def.type === "seasonStreak") renderSeasonStreak(matchupType, def);
+      else renderSeasonLeaderboard(matchupType, def);
       return;
     }
 
@@ -1729,6 +2003,7 @@
     aggregatesByScope = buildCareerAggregates(rawMatchups);
     seasonAggByMatchupType = buildSeasonAggregates(rawMatchups);
     weeklyRowsByMatchupType = buildWeeklyRows(rawMatchups);
+    seasonStreaksByMatchupType = buildSeasonStreaks(rawMatchups);
 
     const matchupSelect = document.getElementById("matchupTypeSelect");
     const categorySelect = document.getElementById("categorySelect");
