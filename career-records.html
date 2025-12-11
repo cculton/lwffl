@@ -93,30 +93,30 @@
       text-transform: uppercase;
     }
 
+    /* Dropdowns – more readable across browsers (including Safari) */
     select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
       padding: 10px 12px;
       border-radius: 10px;
-      border: 1px solid var(--border-subtle);
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background-color: #0b1120;
+      color: #f9fafb;
       font-size: 0.95rem;
-      background: radial-gradient(circle at top left, rgba(15,23,42,0.92), rgba(15,23,42,0.99));
-      color: var(--text-main);
-      cursor: pointer;
+      font-weight: 500;
+      line-height: 1.4;
       outline: none;
-      transition:
-        border-color 0.18s ease,
-        box-shadow 0.18s ease,
-        background 0.18s ease,
-        transform 0.08s ease;
-      appearance: none;
-      position: relative;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.7);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     select:focus {
       border-color: var(--accent);
       box-shadow:
-        0 0 0 1px rgba(56, 189, 248, 0.55),
-        0 0 20px rgba(56, 189, 248, 0.3);
-      transform: translateY(-1px);
+        0 0 0 1px rgba(56, 189, 248, 0.7),
+        0 0 12px rgba(56, 189, 248, 0.45);
     }
 
     optgroup {
@@ -124,6 +124,13 @@
       color: var(--text-soft);
       font-style: normal;
       font-size: 0.8rem;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    select option {
+      background-color: #020617;
+      color: #f9fafb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     .hint {
@@ -133,7 +140,7 @@
     }
 
     .leaderboard-card {
-      background: radial-gradient(circle at top, rgba(15,23,42,0.97), rgba(15,23,42,0.99));
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.97), rgba(15, 23, 42, 0.99));
       border-radius: 14px;
       border: 1px solid rgba(31, 41, 55, 0.95);
       box-shadow:
@@ -233,7 +240,7 @@
     }
 
     .leaderboard-table tbody tr:hover {
-      background: rgba(15,23,42, 0.98);
+      background: rgba(15, 23, 42, 0.98);
       transform: translateY(-1px);
     }
 
@@ -254,7 +261,7 @@
       text-align: left;
     }
 
-    .owner-cell {
+    .manager-cell {
       font-weight: 500;
       white-space: nowrap;
       text-align: left;
@@ -341,7 +348,7 @@
     <div class="container">
       <header class="header">
         <h1>Career Leaders</h1>
-        <p>Legion of Whom Fantasy Football League · 2014–Present</p>
+        <p>Legion of Whom Fantasy Football League</p>
       </header>
 
       <section class="controls">
@@ -355,7 +362,7 @@
         </div>
         <div class="control-group">
           <div class="hint">
-            Career records with contextual stats (games, PPM, win %, seasons, streak spans).
+            Career records with contextual stats (games, PPM, win %, streaks).
           </div>
         </div>
       </section>
@@ -382,7 +389,7 @@
         </table>
 
         <div class="no-data" id="noDataMessage" style="display: none;">
-          <span>Note · No data for this combination yet</span>
+          <span>Note · No data for this category &amp; matchup type yet</span>
         </div>
 
         <div class="footer-note">
@@ -571,7 +578,7 @@
         type: "aggregate",
         columns: [
           { key: "weeklyHighCount", label: "Weekly Highs", format: "integer", polarity: "positivePrimary" },
-          { key: "weeklyHighRate", label: "High %", format: "percent" },
+          { key: "weeklyHighRate", label: "Weekly High Rate", format: "percent" },
           { key: "games", label: "G", format: "integer" }
         ]
       },
@@ -583,7 +590,7 @@
         type: "aggregate",
         columns: [
           { key: "weeklyHighCount", label: "Weekly Highs", format: "integer", polarity: "negativePrimary" },
-          { key: "weeklyHighRate", label: "High %", format: "percent" },
+          { key: "weeklyHighRate", label: "Weekly High Rate", format: "percent" },
           { key: "games", label: "G", format: "integer" }
         ]
       },
@@ -640,12 +647,12 @@
       matches.forEach(m => {
         const scopes = getScopesForMatch(m);
         const participants = [
-          { owner: m.manager1, scored: m.score1, allowed: m.score2 },
-          { owner: m.manager2, scored: m.score2, allowed: m.score1 }
+          { manager: m.manager1, scored: m.score1, allowed: m.score2 },
+          { manager: m.manager2, scored: m.score2, allowed: m.score1 }
         ];
 
         scopes.forEach(scope => {
-          const ownersStats = result[scope];
+          const managersStats = result[scope];
           const weekScores = weekScoresByScope[scope];
           const seqMap = seqByScope[scope];
 
@@ -653,11 +660,11 @@
           if (!weekScores[weekKey]) weekScores[weekKey] = [];
 
           participants.forEach(p => {
-            weekScores[weekKey].push({ owner: p.owner, score: p.scored });
+            weekScores[weekKey].push({ manager: p.manager, score: p.scored });
 
-            if (!ownersStats[p.owner]) {
-              ownersStats[p.owner] = {
-                owner: p.owner,
+            if (!managersStats[p.manager]) {
+              managersStats[p.manager] = {
+                manager: p.manager,
                 games: 0,
                 pointsFor: 0,
                 pointsAgainst: 0,
@@ -670,10 +677,10 @@
                 lastYear: null,
                 lastWeek: null
               };
-              seqMap[p.owner] = [];
+              seqMap[p.manager] = [];
             }
 
-            const s = ownersStats[p.owner];
+            const s = managersStats[p.manager];
             s.games += 1;
             s.pointsFor += p.scored;
             s.pointsAgainst += p.allowed;
@@ -700,7 +707,7 @@
               s.lastWeek = m.week;
             }
 
-            seqMap[p.owner].push({
+            seqMap[p.manager].push({
               year: m.year,
               week: m.week,
               isWin,
@@ -712,7 +719,7 @@
 
       // Weekly highs & streaks
       MATCHUP_TYPES.forEach(scope => {
-        const ownersStats = result[scope];
+        const managersStats = result[scope];
         const weekScores = weekScoresByScope[scope];
         const seqMap = seqByScope[scope];
         const scopeStreaks = streaksByScope[scope];
@@ -723,15 +730,15 @@
           if (!arr || arr.length === 0) return;
           const maxScore = Math.max(...arr.map(x => x.score));
           arr.forEach(x => {
-            if (x.score === maxScore && ownersStats[x.owner]) {
-              ownersStats[x.owner].weeklyHighCount += 1;
+            if (x.score === maxScore && managersStats[x.manager]) {
+              managersStats[x.manager].weeklyHighCount += 1;
             }
           });
         });
 
         // Streaks
-        Object.keys(seqMap).forEach(owner => {
-          const seq = seqMap[owner].slice().sort((a, b) => {
+        Object.keys(seqMap).forEach(manager => {
+          const seq = seqMap[manager].slice().sort((a, b) => {
             if (a.year !== b.year) return a.year - b.year;
             return a.week - b.week;
           });
@@ -750,7 +757,7 @@
               const start = seq[startIdx];
               const end = seq[endIdx];
               winStreaks.push({
-                owner,
+                manager,
                 length: endIdx - startIdx + 1,
                 startYear: start.year,
                 startWeek: start.week,
@@ -765,7 +772,7 @@
             const start = seq[startIdx];
             const end = seq[endIdx];
             winStreaks.push({
-              owner,
+              manager,
               length: endIdx - startIdx + 1,
               startYear: start.year,
               startWeek: start.week,
@@ -785,7 +792,7 @@
               const start = seq[startIdx];
               const end = seq[endIdx];
               loseStreaks.push({
-                owner,
+                manager,
                 length: endIdx - startIdx + 1,
                 startYear: start.year,
                 startWeek: start.week,
@@ -800,7 +807,7 @@
             const start = seq[startIdx];
             const end = seq[endIdx];
             loseStreaks.push({
-              owner,
+              manager,
               length: endIdx - startIdx + 1,
               startYear: start.year,
               startWeek: start.week,
@@ -811,8 +818,8 @@
 
           const longestWin = winStreaks.reduce((max, s) => Math.max(max, s.length), 0);
           const longestLose = loseStreaks.reduce((max, s) => Math.max(max, s.length), 0);
-          ownersStats[owner].longestWinStreak = longestWin;
-          ownersStats[owner].longestLoseStreak = longestLose;
+          managersStats[manager].longestWinStreak = longestWin;
+          managersStats[manager].longestLoseStreak = longestLose;
 
           scopeStreaks.win.push(...winStreaks);
           scopeStreaks.lose.push(...loseStreaks);
@@ -936,7 +943,7 @@
         if (av !== bv) return def.sortDir === "asc" ? av - bv : bv - av;
         if (a.lastYear !== b.lastYear) return b.lastYear - a.lastYear;
         if (a.lastWeek !== b.lastWeek) return b.lastWeek - a.lastWeek;
-        return a.owner.localeCompare(b.owner);
+        return a.manager.localeCompare(b.manager);
       });
 
       const rankMap = {};
@@ -948,7 +955,7 @@
           currentRank = index + 1;
           prevValue = v;
         }
-        rankMap[stats.owner] = currentRank;
+        rankMap[stats.manager] = currentRank;
       });
 
       let columnKey = def.sortKey;
@@ -964,8 +971,8 @@
       }
 
       const sorted = allStats.slice().sort((a, b) => {
-        if (columnKey === "owner") {
-          const cmp = a.owner.localeCompare(b.owner);
+        if (columnKey === "manager") {
+          const cmp = a.manager.localeCompare(b.manager);
           return direction === "asc" ? cmp : -cmp;
         } else {
           const av = getMetric(a, columnKey);
@@ -973,7 +980,7 @@
           if (av === bv) {
             if (a.lastYear !== b.lastYear) return b.lastYear - a.lastYear;
             if (a.lastWeek !== b.lastWeek) return b.lastWeek - a.lastWeek;
-            return a.owner.localeCompare(b.owner);
+            return a.manager.localeCompare(b.manager);
           }
           return direction === "asc" ? av - bv : bv - av;
         }
@@ -984,12 +991,12 @@
       rankTh.className = "th-left";
       rankTh.textContent = "Rank";
       rankTh.dataset.colKey = "rank";
-      const ownerTh = document.createElement("th");
-      ownerTh.className = "th-left";
-      ownerTh.textContent = "Owner";
-      ownerTh.dataset.colKey = "owner";
+      const managerTh = document.createElement("th");
+      managerTh.className = "th-left";
+      managerTh.textContent = "Manager";
+      managerTh.dataset.colKey = "manager";
       headerRow.appendChild(rankTh);
-      headerRow.appendChild(ownerTh);
+      headerRow.appendChild(managerTh);
 
       def.columns.forEach(col => {
         const th = document.createElement("th");
@@ -1002,18 +1009,18 @@
       tbody.innerHTML = "";
       sorted.forEach(stats => {
         const tr = document.createElement("tr");
-        if (rankMap[stats.owner] === 1) tr.classList.add("top-rank");
+        if (rankMap[stats.manager] === 1) tr.classList.add("top-rank");
 
         const rankTd = document.createElement("td");
         rankTd.className = "rank-cell";
-        rankTd.textContent = rankMap[stats.owner];
+        rankTd.textContent = rankMap[stats.manager];
 
-        const ownerTd = document.createElement("td");
-        ownerTd.className = "owner-cell";
-        ownerTd.textContent = stats.owner;
+        const managerTd = document.createElement("td");
+        managerTd.className = "manager-cell";
+        managerTd.textContent = stats.manager;
 
         tr.appendChild(rankTd);
-        tr.appendChild(ownerTd);
+        tr.appendChild(managerTd);
 
         def.columns.forEach(col => {
           const td = document.createElement("td");
@@ -1046,7 +1053,7 @@
 
         let newColumnKey;
         if (colKey === "rank") newColumnKey = def.sortKey;
-        else if (colKey === "owner") newColumnKey = "owner";
+        else if (colKey === "manager") newColumnKey = "manager";
         else newColumnKey = colKey;
 
         let newDir = "desc";
@@ -1058,7 +1065,7 @@
         ) {
           newDir = currentSort.direction === "asc" ? "desc" : "asc";
         } else {
-          if (newColumnKey === "owner") newDir = "asc";
+          if (newColumnKey === "manager") newDir = "asc";
           else if (newColumnKey === def.sortKey) newDir = def.sortDir;
           else newDir = "desc";
         }
@@ -1085,14 +1092,20 @@
       const scopeStreaks = streaksByScope[matchupType] || { win: [], lose: [] };
       const allRaw = def.streakType === "win" ? scopeStreaks.win : scopeStreaks.lose;
 
-      // playoff low-end caps
       let raw = allRaw;
+
+      // playoff caps: wins >=3, losses >=2
       if (matchupType === "Playoff Matchups") {
         if (def.streakType === "win") {
           raw = allRaw.filter(s => s.length >= 3);
         } else {
           raw = allRaw.filter(s => s.length >= 2);
         }
+      }
+
+      // regular season longest winning streak: min 8
+      if (matchupType === "Regular Season Matchups" && def.streakType === "win") {
+        raw = raw.filter(s => s.length >= 8);
       }
 
       if (!raw || raw.length === 0) {
@@ -1104,15 +1117,6 @@
       }
 
       const rowsWithLabels = raw.map(s => {
-        let seasonsLabel;
-        if (matchupType === "Playoff Matchups") {
-          seasonsLabel = `${s.startYear}`;
-        } else {
-          seasonsLabel = s.startYear === s.endYear
-            ? `${s.startYear}`
-            : `${s.startYear}–${s.endYear}`;
-        }
-
         let spanLabel;
         if (s.startYear === s.endYear) {
           if (s.startWeek === s.endWeek) {
@@ -1124,14 +1128,14 @@
           spanLabel = `${s.startYear} Wk ${s.startWeek} → ${s.endYear} Wk ${s.endWeek}`;
         }
 
-        return { ...s, seasonsLabel, spanLabel };
+        return { ...s, spanLabel };
       });
 
       const rankingOrder = rowsWithLabels.slice().sort((a, b) => {
         if (b.length !== a.length) return b.length - a.length;
         if (b.endYear !== a.endYear) return b.endYear - a.endYear;
         if (b.endWeek !== a.endWeek) return b.endWeek - a.endWeek;
-        return a.owner.localeCompare(b.owner);
+        return a.manager.localeCompare(b.manager);
       });
 
       const rankMap = new Map();
@@ -1159,11 +1163,8 @@
       }
 
       const sorted = rowsWithLabels.slice().sort((a, b) => {
-        if (columnKey === "owner") {
-          const cmp = a.owner.localeCompare(b.owner);
-          return direction === "asc" ? cmp : -cmp;
-        } else if (columnKey === "seasonsLabel") {
-          const cmp = a.seasonsLabel.localeCompare(b.seasonsLabel);
+        if (columnKey === "manager") {
+          const cmp = a.manager.localeCompare(b.manager);
           return direction === "asc" ? cmp : -cmp;
         } else if (columnKey === "spanLabel") {
           const cmp = a.spanLabel.localeCompare(b.spanLabel);
@@ -1174,7 +1175,7 @@
           if (av === bv) {
             if (b.endYear !== a.endYear) return b.endYear - a.endYear;
             if (b.endWeek !== a.endWeek) return b.endWeek - a.endWeek;
-            return a.owner.localeCompare(b.owner);
+            return a.manager.localeCompare(b.manager);
           }
           return direction === "asc" ? av - bv : bv - av;
         }
@@ -1187,27 +1188,22 @@
       rankTh.className = "th-left";
       rankTh.textContent = "Rank";
       rankTh.dataset.colKey = "rank";
-      const ownerTh = document.createElement("th");
-      ownerTh.className = "th-left";
-      ownerTh.textContent = "Owner";
-      ownerTh.dataset.colKey = "owner";
+      const managerTh = document.createElement("th");
+      managerTh.className = "th-left";
+      managerTh.textContent = "Manager";
+      managerTh.dataset.colKey = "manager";
       const lenTh = document.createElement("th");
       lenTh.className = "th-right";
       lenTh.textContent = "Games";
       lenTh.dataset.colKey = "length";
-      const seasonTh = document.createElement("th");
-      seasonTh.className = "th-left";
-      seasonTh.textContent = "Season(s)";
-      seasonTh.dataset.colKey = "seasonsLabel";
       const spanTh = document.createElement("th");
       spanTh.className = "th-right";
       spanTh.textContent = "Span";
       spanTh.dataset.colKey = "spanLabel";
 
       headerRow.appendChild(rankTh);
-      headerRow.appendChild(ownerTh);
+      headerRow.appendChild(managerTh);
       headerRow.appendChild(lenTh);
-      headerRow.appendChild(seasonTh);
       headerRow.appendChild(spanTh);
 
       tbody.innerHTML = "";
@@ -1219,26 +1215,21 @@
         rankTd.className = "rank-cell";
         rankTd.textContent = rankMap.get(s);
 
-        const ownerTd = document.createElement("td");
-        ownerTd.className = "owner-cell";
-        ownerTd.textContent = s.owner;
+        const managerTd = document.createElement("td");
+        managerTd.className = "manager-cell";
+        managerTd.textContent = s.manager;
 
         const lenTd = document.createElement("td");
         lenTd.className = "stat-cell " + (def.streakType === "win" ? "value-positive" : "value-negative");
         lenTd.textContent = s.length.toString();
-
-        const seasonsTd = document.createElement("td");
-        seasonsTd.className = "owner-cell";
-        seasonsTd.textContent = s.seasonsLabel;
 
         const spanTd = document.createElement("td");
         spanTd.className = "stat-cell";
         spanTd.textContent = s.spanLabel;
 
         tr.appendChild(rankTd);
-        tr.appendChild(ownerTd);
+        tr.appendChild(managerTd);
         tr.appendChild(lenTd);
-        tr.appendChild(seasonsTd);
         tr.appendChild(spanTd);
 
         tbody.appendChild(tr);
@@ -1266,7 +1257,7 @@
         ) {
           newDir = currentSort.direction === "asc" ? "desc" : "asc";
         } else {
-          if (newColumnKey === "owner" || newColumnKey === "seasonsLabel" || newColumnKey === "spanLabel") {
+          if (newColumnKey === "manager" || newColumnKey === "spanLabel") {
             newDir = "asc";
           } else {
             newDir = "desc";
@@ -1318,7 +1309,7 @@
 
       if (def.type === "streak") {
         subtitleEl.textContent =
-          "Career streaks with seasons and exact start–end span";
+          "Career streaks with exact start–end span";
         renderStreakLeaderboard(matchupType, def);
       } else {
         subtitleEl.textContent =
