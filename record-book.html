@@ -282,6 +282,54 @@
       .leaderboard-table{ min-width: 520px; }
     }
   
+    
+    .pagination{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(31,41,55,0.75);
+    }
+    .page-btn{
+      border: 1px solid rgba(55,65,81,0.9);
+      background: rgba(15,23,42,0.85);
+      color: #f9fafb;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 650;
+      letter-spacing: 0.06em;
+      cursor:pointer;
+      transition: transform .08s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    .page-btn:disabled{
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .page-btn:hover:not(:disabled){
+      transform: translateY(-1px);
+      border-color: rgba(56,189,248,0.7);
+      box-shadow: 0 0 0 1px rgba(56,189,248,0.25);
+    }
+    .page-meta{
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      white-space:nowrap;
+    }
+    .page-status{
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      letter-spacing: 0.06em;
+      white-space:nowrap;
+    }
+
     /* Featured stat column highlight */
     .featured-col{
       background: rgba(56, 189, 248, 0.08);
@@ -294,6 +342,16 @@
     body.weekly-scope .leaderboard-table th,
     body.weekly-scope .leaderboard-table td{
       text-align: left !important;
+    }
+
+    /* Global: left-align all table headers/cells across scopes */
+    .leaderboard-table th,
+    .leaderboard-table td{
+      text-align: left !important;
+    }
+    .stat-cell{
+      text-align: left !important;
+      font-variant-numeric: tabular-nums;
     }
 
   </style>
@@ -348,6 +406,13 @@
             <thead><tr id="headerRow"></tr></thead>
             <tbody id="leaderboardBody"></tbody>
           </table>
+        </div>
+
+        <div class="pagination" id="pagination" aria-label="Pagination">
+          <button class="page-btn" id="prevPage" type="button">Prev</button>
+          <div class="page-meta" id="pageMeta">Page 1 of 1</div>
+          <button class="page-btn" id="nextPage" type="button">Next</button>
+          <div class="page-status" id="pageStatus">Showing 0–0 of 0</div>
         </div>
 
         <div class="no-data" id="noDataMessage">
@@ -1083,6 +1148,58 @@
   };
 
   // ---------------------------
+  // Pagination (all scopes)
+  // ---------------------------
+  const paginationState = {
+    currentPage: 1,
+    pageSize: 25,
+    totalItems: 0
+  };
+
+  function paginateRows(rows){
+    const total = rows.length;
+    paginationState.totalItems = total;
+
+    const totalPages = Math.max(1, Math.ceil(total / paginationState.pageSize));
+    if (paginationState.currentPage > totalPages) paginationState.currentPage = totalPages;
+    if (paginationState.currentPage < 1) paginationState.currentPage = 1;
+
+    const startIdx = (paginationState.currentPage - 1) * paginationState.pageSize;
+    const endIdx = Math.min(total, startIdx + paginationState.pageSize);
+    const pageRows = rows.slice(startIdx, endIdx);
+
+    updatePaginationUI(totalPages, startIdx, endIdx, total);
+    return pageRows;
+  }
+
+  function updatePaginationUI(totalPages, startIdx, endIdx, total){
+    const wrap = document.getElementById("pagination");
+    const prev = document.getElementById("prevPage");
+    const next = document.getElementById("nextPage");
+    const meta = document.getElementById("pageMeta");
+    const status = document.getElementById("pageStatus");
+
+    if (!wrap || !prev || !next || !meta || !status) return;
+
+    // Hide pagination when empty
+    if (total === 0){
+      wrap.style.display = "none";
+      return;
+    }
+
+    wrap.style.display = "flex";
+    meta.textContent = `Page ${paginationState.currentPage} of ${totalPages}`;
+    status.textContent = `Showing ${startIdx + 1}–${endIdx} of ${total}`;
+    prev.disabled = paginationState.currentPage <= 1;
+    next.disabled = paginationState.currentPage >= totalPages;
+  }
+
+  function resetToPage1(){
+    paginationState.currentPage = 1;
+  }
+
+
+  // ---------------------------
   // Render helpers
   // ---------------------------
 
@@ -1097,6 +1214,9 @@
     noDataMessage.style.display = "block";
     noDataMessage.firstElementChild.textContent = "Select a matchup type and stat category to see leaderboard data.";
     pillLabel.textContent = `${currentScope} · —`;
+
+    const pg = document.getElementById("pagination");
+    if (pg) pg.style.display = "none";
   }
 
   function setNoData(msg){
@@ -1108,6 +1228,9 @@
     tbody.innerHTML = "";
     noDataMessage.style.display = "block";
     noDataMessage.firstElementChild.textContent = msg;
+
+    const pg = document.getElementById("pagination");
+    if (pg) pg.style.display = "none";
   }
 
   // CAREER aggregate leaderboard render
@@ -1205,7 +1328,8 @@
     });
 
     tbody.innerHTML = "";
-    sorted.forEach(stats => {
+    const pageRows = paginateRows(sorted);
+    pageRows.forEach(stats => {
       const tr = document.createElement("tr");
       if (rankMap[stats.manager] === 1) tr.classList.add("top-rank");
 
@@ -1277,6 +1401,7 @@
       }
 
       currentSort = { scope:"Career", type:"aggregate", matchupType, categoryLabel:def.label, columnKey:newColumnKey, direction:newDir };
+      resetToPage1();
       renderLeaderboard(matchupType, def.label);
     };
   }
@@ -1357,7 +1482,7 @@
       }
     });
 
-    const top = sorted.slice(0, 10);
+    const top = paginateRows(sorted);
 
     headerRow.innerHTML = "";
     const rankTh = document.createElement("th");
@@ -1434,6 +1559,7 @@
       }
 
       currentSort = { scope:"Career", type:"streak", matchupType, categoryLabel:def.label, columnKey:newColumnKey, direction:newDir };
+      resetToPage1();
       renderLeaderboard(matchupType, def.label);
     };
   }
@@ -1500,7 +1626,7 @@
     });
 
     // limit for readability
-    const top = sorted.slice(0, 25);
+    const top = paginateRows(sorted);
 
     const headerRow = document.getElementById("headerRow");
     const tbody = document.getElementById("leaderboardBody");
@@ -1611,6 +1737,7 @@
       }
 
       currentSort = { scope:"Season", type:"season", matchupType, categoryLabel:def.label, columnKey:newColumnKey, direction:newDir };
+      resetToPage1();
       renderLeaderboard(matchupType, def.label);
     };
   }
@@ -1676,7 +1803,7 @@
       }
     });
 
-    const top = sorted.slice(0, 10);
+    const top = paginateRows(sorted);
 
     headerRow.innerHTML = "";
 
@@ -1754,6 +1881,7 @@
       }
 
       currentSort = { scope:"Season", type:"seasonStreak", matchupType, categoryLabel:def.label, columnKey:newColumnKey, direction:newDir };
+      resetToPage1();
       renderLeaderboard(matchupType, def.label);
     };
   }
@@ -1817,7 +1945,7 @@
       return direction === "asc" ? av - bv : bv - av;
     });
 
-    const top = sorted.slice(0, 25);
+    const top = paginateRows(sorted);
 
     const headerRow = document.getElementById("headerRow");
     const tbody = document.getElementById("leaderboardBody");
@@ -1921,6 +2049,7 @@
       }
 
       currentSort = { scope:"Weekly", type:"weekly", matchupType, categoryLabel:def.label, columnKey:newColumnKey, direction:newDir };
+      resetToPage1();
       renderLeaderboard(matchupType, def.label);
     };
   }
@@ -2009,6 +2138,7 @@
     const categorySelect = document.getElementById("categorySelect");
 
     function update(){
+      resetToPage1();
       const matchupType = matchupSelect.value;
       const categoryLabel = categorySelect.value;
 
@@ -2037,9 +2167,37 @@
     matchupSelect.addEventListener("change", update);
     categorySelect.addEventListener("change", update);
 
+
+    // Pagination controls
+    const prevBtn = document.getElementById("prevPage");
+    const nextBtn = document.getElementById("nextPage");
+
+    function rerenderCurrent(){
+      const matchupType = matchupSelect.value;
+      const categoryLabel = categorySelect.value;
+      if (!matchupType || !categoryLabel){
+        neutralState();
+        return;
+      }
+      renderLeaderboard(matchupType, categoryLabel);
+    }
+
+    if (prevBtn) prevBtn.addEventListener("click", () => {
+      if (paginationState.currentPage > 1){
+        paginationState.currentPage -= 1;
+        rerenderCurrent();
+      }
+    });
+
+    if (nextBtn) nextBtn.addEventListener("click", () => {
+      paginationState.currentPage += 1;
+      rerenderCurrent();
+    });
+
     // Scope switching
     document.querySelectorAll(".scope-btn").forEach(btn => {
       btn.addEventListener("click", () => {
+        resetToPage1();
         setScopeUI(btn.dataset.scope);
 
         // keep matchup type selection if already selected
