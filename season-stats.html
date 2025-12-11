@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Season By Season Stats – LWFFL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-main: #020617;
+      --card-bg: #020617;
+      --accent: #38bdf8;
+      --border-subtle: #1f2937;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --text-soft: #6b7280;
+      --positive: #22c55e;
+      --negative: #ef4444;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #020617 0%, #020617 35%, #020617 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    .shell {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .container {
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.18), transparent 55%),
+        var(--card-bg);
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      box-shadow:
+        0 40px 80px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+      padding: 28px 24px 28px;
+      backdrop-filter: blur(14px);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #f9fafb;
+    }
+
+    .header p {
+      color: var(--text-soft);
+      font-size: 0.9rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+      align-items: flex-end;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 6px;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background-color: #0b1120;
+      color: #f9fafb;
+      font-size: 0.95rem;
+      font-weight: 500;
+      line-height: 1.4;
+      outline: none;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.7);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    select:focus {
+      border-color: var(--accent);
+      box-shadow:
+        0 0 0 1px rgba(56, 189, 248, 0.7),
+        0 0 12px rgba(56, 189, 248, 0.45);
+    }
+
+    optgroup {
+      background-color: #020617;
+      color: var(--text-soft);
+      font-style: normal;
+      font-size: 0.8rem;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    select option {
+      background-color: #020617;
+      color: #f9fafb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      text-align: right;
+    }
+
+    .leaderboard-card {
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.97), rgba(15, 23, 42, 0.99));
+      border-radius: 14px;
+      border: 1px solid rgba(31, 41, 55, 0.95);
+      box-shadow:
+        0 20px 40px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(15, 23, 42, 0.95);
+      padding: 18px 16px 16px;
+    }
+
+    .leaderboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .leaderboard-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #e5e7eb;
+      margin-bottom: 6px;
+    }
+
+    .leaderboard-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.9);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+      opacity: 0.8;
+    }
+
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .leaderboard-table thead {
+      background: linear-gradient(90deg, #020617, #020617);
+    }
+
+    .leaderboard-table th {
+      padding: 8px 10px;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #9ca3af;
+      border-bottom: 1px solid rgba(55, 65, 81, 0.9);
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .th-left {
+      text-align: left;
+    }
+
+    .th-right {
+      text-align: right;
+    }
+
+    .leaderboard-table tbody tr {
+      transition: background 0.15s ease, transform 0.08s ease;
+    }
+
+    .leaderboard-table tbody tr:nth-child(odd) {
+      background: #020617;
+    }
+
+    .leaderboard-table tbody tr:nth-child(even) {
+      background: #020617;
+    }
+
+    .leaderboard-table tbody tr:hover {
+      background: rgba(15, 23, 42, 0.98);
+      transform: translateY(-1px);
+    }
+
+    .leaderboard-table td {
+      padding: 9px 10px;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.96);
+      color: var(--text-main);
+    }
+
+    .leaderboard-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .rank-cell {
+      font-weight: 600;
+      color: var(--text-muted);
+      width: 60px;
+      text-align: left;
+    }
+
+    .year-cell {
+      width: 70px;
+      text-align: left;
+      color: var(--text-main);
+    }
+
+    .manager-cell {
+      font-weight: 500;
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    .stat-cell {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .value-positive {
+      color: var(--positive);
+      font-weight: 600;
+    }
+
+    .value-negative {
+      color: var(--negative);
+      font-weight: 600;
+    }
+
+    .top-rank {
+      background: radial-gradient(circle at left, rgba(56, 189, 248, 0.16), transparent 60%);
+      box-shadow: inset 2px 0 0 rgba(56, 189, 248, 0.8);
+    }
+
+    .no-data {
+      font-size: 0.9rem;
+      color: var(--text-soft);
+      padding: 14px 8px 4px;
+    }
+
+    .no-data span {
+      border-radius: 999px;
+      border: 1px dashed rgba(75,85,99,0.9);
+      padding: 6px 10px;
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      background: rgba(15,23,42,0.85);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .footer-note {
+      margin-top: 14px;
+      font-size: 0.75rem;
+      color: var(--text-soft);
+      text-align: right;
+    }
+
+    @media (max-width: 900px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .hint {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 22px 14px 20px;
+      }
+
+      .header h1 {
+        font-size: 1.4rem;
+      }
+
+      .leaderboard-title {
+        font-size: 1rem;
+      }
+
+      .leaderboard-table th,
+      .leaderboard-table td {
+        padding: 7px 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="container">
+      <header class="header">
+        <h1>Season By Season Stats</h1>
+        <p>Legion of Whom Fantasy Football League</p>
+      </header>
+
+      <section class="controls">
+        <div class="control-group">
+          <label for="managerSelect">Manager</label>
+          <select id="managerSelect">
+            <option value="__all__">All managers</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="yearSelect">Season</label>
+          <select id="yearSelect">
+            <option value="__all__">All seasons</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <div class="hint">
+            Season-by-season records with contextual stats (matchups, PF/PA, margins, transactions).
+          </div>
+        </div>
+      </section>
+
+      <section class="leaderboard-card">
+        <div class="leaderboard-header">
+          <div>
+            <div class="leaderboard-title" id="leaderboardTitle">
+              All Seasons · All Managers
+            </div>
+            <div class="leaderboard-subtitle" id="leaderboardSubtitle">
+              One row per manager-season
+            </div>
+          </div>
+          <div class="pill">
+            <span class="pill-dot"></span>
+            <span id="pillLabel">All seasons · all managers</span>
+          </div>
+        </div>
+
+        <table class="leaderboard-table" aria-live="polite">
+          <thead>
+            <tr id="headerRow"></tr>
+          </thead>
+          <tbody id="leaderboardBody"></tbody>
+        </table>
+
+        <div class="no-data" id="noDataMessage" style="display: none;">
+          <span>Note · No data for this combination yet</span>
+        </div>
+
+        <div class="footer-note">
+          Data source: <strong>season-stats.json</strong> in this repo.
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    let allSeasons = [];
+    let currentSort = {
+      columnKey: "year",
+      direction: "desc"
+    };
+
+    const headerDefs = [
+      { key: "rank", label: "Rank", align: "left" },
+      { key: "year", label: "Season", align: "left" },
+      { key: "manager", label: "Manager", align: "left" },
+      { key: "record", label: "Record", align: "right" },
+      { key: "games", label: "M", align: "right" },
+      { key: "points_for", label: "Pts For", align: "right" },
+      { key: "points_against", label: "Pts Against", align: "right" },
+      { key: "ppm_for", label: "PPM", align: "right" },
+      { key: "ppm_against", label: "PPM Against", align: "right" },
+      { key: "final_standing", label: "Final Stand", align: "right" },
+      { key: "division_finish", label: "Div Finish", align: "right" },
+      { key: "weekly_margin", label: "Weekly Margin", align: "right" },
+      { key: "transaction_count", label: "Txns", align: "right" }
+    ];
+
+    function getHeaderTitle(label) {
+      switch (label) {
+        case "Rank": return "Rank within the current filter";
+        case "Season": return "NFL / league season year";
+        case "Manager": return "Manager name";
+        case "Record": return "Season record (wins–losses–ties)";
+        case "M": return "Total number of matchups played that season";
+        case "Pts For": return "Total points scored by this team that season";
+        case "Pts Against": return "Total points scored against this team that season";
+        case "PPM": return "Points scored per matchup (points for ÷ matchups)";
+        case "PPM Against": return "Points allowed per matchup (points against ÷ matchups)";
+        case "Final Stand": return "Final league standing at end of season";
+        case "Div Finish": return "Division finishing position";
+        case "Weekly Margin": return "Average weekly scoring margin (points for − points against)";
+        case "Txns": return "Number of transactions made that season";
+        default: return label;
+      }
+    }
+
+    function formatNumber(value, digits = 1) {
+      if (value === null || value === undefined || Number.isNaN(value)) return "—";
+      return value.toLocaleString("en-US", {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+      });
+    }
+
+    function formatInteger(value) {
+      if (value === null || value === undefined || Number.isNaN(value)) return "—";
+      return value.toLocaleString("en-US", { maximumFractionDigits: 0 });
+    }
+
+    function decorateRow(raw) {
+      const wins = raw.wins ?? 0;
+      const losses = raw.losses ?? 0;
+      const ties = raw.ties ?? 0;
+      const games = wins + losses + ties;
+      const pf = raw.points_for ?? null;
+      const pa = raw.points_against ?? null;
+
+      const ppmFor = games && pf !== null ? pf / games : null;
+      const ppmAgainst = games && pa !== null ? pa / games : null;
+
+      const record = ties ? `${wins}-${losses}-${ties}` : `${wins}-${losses}`;
+
+      return {
+        ...raw,
+        games,
+        ppm_for: ppmFor,
+        ppm_against: ppmAgainst,
+        record
+      };
+    }
+
+    function populateFilters() {
+      const managerSelect = document.getElementById("managerSelect");
+      const yearSelect = document.getElementById("yearSelect");
+
+      const managers = Array.from(
+        new Set(
+          allSeasons
+            .map(r => r.manager)
+            .filter(m => m && m.trim().length > 0)
+        )
+      ).sort((a, b) => a.localeCompare(b));
+
+      managers.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m;
+        opt.textContent = m;
+        managerSelect.appendChild(opt);
+      });
+
+      const years = Array.from(
+        new Set(allSeasons.map(r => r.year))
+      ).sort((a, b) => a - b);
+
+      years.forEach(y => {
+        const opt = document.createElement("option");
+        opt.value = String(y);
+        opt.textContent = y;
+        yearSelect.appendChild(opt);
+      });
+    }
+
+    function getFilteredRows() {
+      const managerValue = document.getElementById("managerSelect").value;
+      const yearValue = document.getElementById("yearSelect").value;
+
+      return allSeasons
+        .map(decorateRow)
+        .filter(r => {
+          if (managerValue !== "__all__" && r.manager !== managerValue) return false;
+          if (yearValue !== "__all__" && String(r.year) !== yearValue) return false;
+          return true;
+        });
+    }
+
+    function compareValues(a, b, key, direction) {
+      const dir = direction === "asc" ? 1 : -1;
+      const va = a[key];
+      const vb = b[key];
+
+      if (va === null || va === undefined) return 1 * dir;
+      if (vb === null || vb === undefined) return -1 * dir;
+
+      if (typeof va === "string" || typeof vb === "string") {
+        const cmp = String(va).localeCompare(String(vb));
+        return cmp * dir;
+      }
+
+      if (va === vb) return 0;
+      return va > vb ? dir : -dir;
+    }
+
+    function getDefaultDirectionForColumn(colKey) {
+      if (colKey === "manager") return "asc";
+      if (colKey === "year") return "desc";
+      if (colKey === "final_standing" || colKey === "division_finish") return "asc";
+      return "desc";
+    }
+
+    function renderTable() {
+      const headerRow = document.getElementById("headerRow");
+      const tbody = document.getElementById("leaderboardBody");
+      const noDataMessage = document.getElementById("noDataMessage");
+      const titleEl = document.getElementById("leaderboardTitle");
+      const pillLabel = document.getElementById("pillLabel");
+
+      const filtered = getFilteredRows();
+
+      // Header text / pill label
+      const managerValue = document.getElementById("managerSelect").value;
+      const yearValue = document.getElementById("yearSelect").value;
+
+      let titleText = "";
+      if (managerValue === "__all__" && yearValue === "__all__") {
+        titleText = "All Seasons · All Managers";
+      } else if (managerValue === "__all__") {
+        titleText = `Season ${yearValue} · All Managers`;
+      } else if (yearValue === "__all__") {
+        titleText = `All Seasons · ${managerValue}`;
+      } else {
+        titleText = `${yearValue} Season · ${managerValue}`;
+      }
+      titleEl.textContent = titleText;
+
+      let pillText = "";
+      const mgrLabel = managerValue === "__all__" ? "all managers" : managerValue;
+      const yrLabel = yearValue === "__all__" ? "all seasons" : yearValue;
+      pillText = `${yrLabel} · ${mgrLabel}`;
+      pillLabel.textContent = pillText;
+
+      if (!filtered.length) {
+        headerRow.innerHTML = "";
+        tbody.innerHTML = "";
+        noDataMessage.style.display = "block";
+        noDataMessage.firstElementChild.textContent = "Note · No data for this combination yet";
+        return;
+      }
+
+      // Sort
+      const sortKey = currentSort.columnKey || "year";
+      const direction = currentSort.direction || "desc";
+
+      filtered.sort((a, b) => {
+        if (sortKey === "rank") {
+          // fall back to year desc, then final standing asc, then manager
+          if (a.year !== b.year) return (b.year - a.year);
+          const fa = a.final_standing ?? Number.POSITIVE_INFINITY;
+          const fb = b.final_standing ?? Number.POSITIVE_INFINITY;
+          if (fa !== fb) return fa - fb;
+          return a.manager.localeCompare(b.manager);
+        }
+
+        const primary = compareValues(a, b, sortKey, direction);
+        if (primary !== 0) return primary;
+
+        // Secondary tiebreaks: year desc, final standing asc, manager asc
+        if (a.year !== b.year) return b.year - a.year;
+        const fa = a.final_standing ?? Number.POSITIVE_INFINITY;
+        const fb = b.final_standing ?? Number.POSITIVE_INFINITY;
+        if (fa !== fb) return fa - fb;
+        return a.manager.localeCompare(b.manager);
+      });
+
+      // Build header
+      headerRow.innerHTML = "";
+      headerDefs.forEach(def => {
+        const th = document.createElement("th");
+        th.textContent = def.label;
+        th.title = getHeaderTitle(def.label);
+        th.dataset.colKey = def.key;
+        th.className = def.align === "left" ? "th-left" : "th-right";
+        headerRow.appendChild(th);
+      });
+
+      // Build body
+      tbody.innerHTML = "";
+      filtered.forEach((row, index) => {
+        const tr = document.createElement("tr");
+        if (index === 0) tr.classList.add("top-rank");
+
+        const rankTd = document.createElement("td");
+        rankTd.className = "rank-cell";
+        rankTd.textContent = index + 1;
+
+        const yearTd = document.createElement("td");
+        yearTd.className = "year-cell";
+        yearTd.textContent = row.year ?? "—";
+
+        const managerTd = document.createElement("td");
+        managerTd.className = "manager-cell";
+        managerTd.textContent = row.manager || "—";
+
+        const recordTd = document.createElement("td");
+        recordTd.className = "stat-cell";
+        recordTd.textContent = row.record || "—";
+
+        const gamesTd = document.createElement("td");
+        gamesTd.className = "stat-cell";
+        gamesTd.textContent = formatInteger(row.games);
+
+        const pfTd = document.createElement("td");
+        pfTd.className = "stat-cell value-positive";
+        pfTd.textContent = formatNumber(row.points_for, 1);
+
+        const paTd = document.createElement("td");
+        paTd.className = "stat-cell value-negative";
+        paTd.textContent = formatNumber(row.points_against, 1);
+
+        const ppmForTd = document.createElement("td");
+        ppmForTd.className = "stat-cell value-positive";
+        ppmForTd.textContent = row.ppm_for === null ? "—" : formatNumber(row.ppm_for, 1);
+
+        const ppmAgainstTd = document.createElement("td");
+        ppmAgainstTd.className = "stat-cell value-negative";
+        ppmAgainstTd.textContent = row.ppm_against === null ? "—" : formatNumber(row.ppm_against, 1);
+
+        const finalTd = document.createElement("td");
+        finalTd.className = "stat-cell";
+        finalTd.textContent = row.final_standing != null ? formatInteger(row.final_standing) : "—";
+
+        const divTd = document.createElement("td");
+        divTd.className = "stat-cell";
+        divTd.textContent = row.division_finish != null ? formatInteger(row.division_finish) : "—";
+
+        const marginTd = document.createElement("td");
+        marginTd.className = "stat-cell";
+        if (row.weekly_margin != null) {
+          if (row.weekly_margin > 0) marginTd.classList.add("value-positive");
+          if (row.weekly_margin < 0) marginTd.classList.add("value-negative");
+          marginTd.textContent = formatNumber(row.weekly_margin, 1);
+        } else {
+          marginTd.textContent = "—";
+        }
+
+        const txTd = document.createElement("td");
+        txTd.className = "stat-cell";
+        txTd.textContent = row.transaction_count != null
+          ? formatInteger(row.transaction_count)
+          : "—";
+
+        tr.appendChild(rankTd);
+        tr.appendChild(yearTd);
+        tr.appendChild(managerTd);
+        tr.appendChild(recordTd);
+        tr.appendChild(gamesTd);
+        tr.appendChild(pfTd);
+        tr.appendChild(paTd);
+        tr.appendChild(ppmForTd);
+        tr.appendChild(ppmAgainstTd);
+        tr.appendChild(finalTd);
+        tr.appendChild(divTd);
+        tr.appendChild(marginTd);
+        tr.appendChild(txTd);
+
+        tbody.appendChild(tr);
+      });
+
+      noDataMessage.style.display = "none";
+
+      // Header click sorting
+      headerRow.onclick = (e) => {
+        const th = e.target.closest("th");
+        if (!th) return;
+        const colKey = th.dataset.colKey;
+        if (!colKey) return;
+
+        if (colKey === "rank") {
+          // rank toggles back to default sort
+          currentSort = { columnKey: "year", direction: "desc" };
+        } else {
+          let newDir = "desc";
+          if (currentSort.columnKey === colKey) {
+            newDir = currentSort.direction === "asc" ? "desc" : "asc";
+          } else {
+            newDir = getDefaultDirectionForColumn(colKey);
+          }
+          currentSort = { columnKey: colKey, direction: newDir };
+        }
+        renderTable();
+      };
+    }
+
+    async function loadSeasonStats() {
+      try {
+        const res = await fetch("season-stats.json");
+        if (!res.ok) {
+          console.error("Failed to load season-stats.json:", res.status, res.statusText);
+          return [];
+        }
+        return await res.json();
+      } catch (err) {
+        console.error("Error loading season-stats.json", err);
+        return [];
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      allSeasons = await loadSeasonStats();
+      populateFilters();
+
+      const managerSelect = document.getElementById("managerSelect");
+      const yearSelect = document.getElementById("yearSelect");
+
+      managerSelect.addEventListener("change", () => {
+        renderTable();
+      });
+      yearSelect.addEventListener("change", () => {
+        renderTable();
+      });
+
+      renderTable();
+    });
+  </script>
+</body>
+</html>
