@@ -441,7 +441,7 @@
   // Weekly containers
   let weeklyRowsByMatchupType = {}; // { matchupType: [row...] }
 
-  const MATCHUP_TYPES = ["Regular Season + Playoffs","Regular Season Only","Playoffs Only"];
+  const MATCHUP_TYPES = ["All Matchups","Regular Season Matchups","Playoff Matchups"];
 
   // ---------------------------
   // Category definitions
@@ -631,9 +631,9 @@
 
   function getMatchupTypesForMatch(m){
     const types = new Set();
-    types.add("Regular Season + Playoffs");
-    if (isPlayoffGame(m)) types.add("Playoffs Only");
-    else types.add("Regular Season Only");
+    types.add("All Matchups");
+    if (isPlayoffGame(m)) types.add("Playoff Matchups");
+    else types.add("Regular Season Matchups");
     return types;
   }
 
@@ -1418,11 +1418,11 @@
     let raw = allRaw;
 
     // playoff caps: wins >=3, losses >=2
-    if (matchupType === "Playoffs Only"){
+    if (matchupType === "Playoff Matchups"){
       raw = (def.streakType === "win") ? allRaw.filter(s => s.length >= 3) : allRaw.filter(s => s.length >= 2);
     }
     // regular season longest winning streak: min 8
-    if (matchupType === "Regular Season Only" && def.streakType === "win"){
+    if (matchupType === "Regular Season Matchups" && def.streakType === "win"){
       raw = raw.filter(s => s.length >= 8);
     }
 
@@ -2073,7 +2073,7 @@
     // Career-only: Weekly highs not valid for playoffs (kept)
     if (
       currentScope === "Career" &&
-      matchupType === "Playoffs Only" &&
+      matchupType === "Playoff Matchups" &&
       def.group === "Weekly Dominance"
     ){
       setNoData("Note · Weekly high scores are only tracked for Regular Season matchups.");
@@ -2126,8 +2126,6 @@
 
   document.addEventListener("DOMContentLoaded", async () => {
     populateMatchupDropdown();
-    // Default matchup type on first load
-    matchupSelect.value = "Regular Season + Playoffs";
     populateCategoryDropdown("Career");
 
     rawMatchups = await loadMatchups();
@@ -2221,4 +2219,5 @@
 </script>
 </body>
 </html>
+
 
