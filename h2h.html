@@ -494,6 +494,11 @@
       select1.innerHTML = '<option value="">Select a manager…</option>';
       select2.innerHTML = '<option value="">Select a manager…</option>';
 
+      const allOption2 = document.createElement("option");
+      allOption2.value = "ALL";
+      allOption2.textContent = "All Opponents";
+      select2.appendChild(allOption2);
+      
       managers.forEach(manager => {
         const option1 = document.createElement("option");
         option1.value = manager;
@@ -505,11 +510,6 @@
         option2.textContent = manager;
         select2.appendChild(option2);
       });
-
-      const allOption2 = document.createElement("option");
-      allOption2.value = "ALL";
-      allOption2.textContent = "All Opponents";
-      select2.appendChild(allOption2);
 
       // Enable selects now that data is loaded
       select1.disabled = false;
