@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Legion of Whom FFL – Dashboard</title>
+  <title>Legion of Whom FFL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     * {
@@ -15,77 +15,55 @@
       --bg-main: #020617;
       --card-bg: #020617;
       --accent: #38bdf8;
-      --accent-soft: rgba(56, 189, 248, 0.18);
-      --border-subtle: #1f2937;
       --text-main: #e5e7eb;
       --text-muted: #9ca3af;
       --text-soft: #6b7280;
-      --positive: #22c55e;
-      --negative: #ef4444;
     }
 
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at top, #020617 0%, #020617 35%, #020617 100%);
+      background: radial-gradient(circle at top, #020617 0%, #020617 35%, #020617 100%);
       color: var(--text-main);
       min-height: 100vh;
       padding: 24px 16px;
       display: flex;
+      align-items: center;
       justify-content: center;
-      align-items: stretch;
     }
 
     .shell {
-      max-width: 1160px;
+      max-width: 720px;
       width: 100%;
     }
 
-    .frame {
+    .card {
       background:
         radial-gradient(circle at top left, rgba(56,189,248,0.12), transparent 55%),
         radial-gradient(circle at bottom right, rgba(59,130,246,0.16), transparent 55%),
         var(--card-bg);
       border-radius: 20px;
-      border: 1px solid rgba(148,163,184,0.3);
+      border: 1px solid rgba(148,163,184,0.35);
       box-shadow:
-        0 40px 80px rgba(0,0,0,0.85),
+        0 36px 80px rgba(0,0,0,0.85),
         0 0 0 1px rgba(15,23,42,0.95);
-      padding: 26px 26px 22px;
+      padding: 28px 22px 24px;
+      text-align: center;
       backdrop-filter: blur(14px);
-      display: flex;
-      flex-direction: column;
-      gap: 22px;
-      min-height: calc(100vh - 48px);
-    }
-
-    /* Top bar / "nav" */
-    .nav-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .logo-mark {
-      display: flex;
-      align-items: center;
-      gap: 10px;
     }
 
     .logo-circle {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       border-radius: 999px;
-      border: 2px solid rgba(56,189,248,0.75);
+      border: 2px solid rgba(56,189,248,0.8);
       display: flex;
       align-items: center;
       justify-content: center;
+      margin: 0 auto 10px;
       background: radial-gradient(circle at top, rgba(8,47,73,0.9), rgba(15,23,42,0.95));
       box-shadow:
         0 0 0 4px rgba(15,23,42,1),
-        0 0 30px rgba(56,189,248,0.45);
+        0 0 26px rgba(56,189,248,0.45);
       font-size: 0.9rem;
       font-weight: 700;
       letter-spacing: 0.18em;
@@ -93,186 +71,70 @@
       color: #e0f2fe;
     }
 
-    .logo-text-main {
-      font-size: 0.95rem;
-      font-weight: 700;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: #e5e7eb;
-    }
-
-    .logo-text-sub {
-      font-size: 0.72rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--text-soft);
-    }
-
-    .nav-right {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .tag-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(55,65,81,0.9);
-      background: rgba(15,23,42,0.9);
-      font-size: 0.72rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-
-    .tag-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: var(--accent);
-      box-shadow: 0 0 0 3px rgba(56,189,248,0.4);
-    }
-
-    .season-tag {
-      border-color: rgba(34,197,94,0.75);
-      color: #bbf7d0;
-      background: rgba(22,163,74,0.08);
-    }
-
-    .season-tag .tag-dot {
-      background: #22c55e;
-      box-shadow: 0 0 0 3px rgba(34,197,94,0.35);
-    }
-
-    /* Hero content */
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.1fr);
-      gap: 24px;
-      align-items: stretch;
-    }
-
-    .hero-main {
-      padding: 18px 18px 18px;
-      border-radius: 16px;
-      border: 1px solid rgba(31,41,55,0.98);
-      background:
-        radial-gradient(circle at top left, rgba(15,23,42,0.96), rgba(15,23,42,0.99));
-      box-shadow:
-        0 20px 50px rgba(15,23,42,0.95),
-        inset 0 0 0 1px rgba(15,23,42,0.9);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .hero-title {
+    h1 {
       font-size: 1.7rem;
-      line-height: 1.2;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      font-weight: 700;
-      color: #f9fafb;
-      margin-bottom: 8px;
-    }
-
-    .hero-subtitle {
-      font-size: 0.9rem;
-      color: var(--text-soft);
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      margin-bottom: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
     }
 
-    .hero-blurb {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      max-width: 540px;
-    }
-
-    .hero-blurb strong {
-      color: #e5e7eb;
-      font-weight: 600;
-    }
-
-    .hero-metrics {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 6px;
-    }
-
-    .metric-pill {
-      border-radius: 999px;
-      border: 1px solid rgba(55,65,81,0.95);
-      background: rgba(15,23,42,0.96);
-      padding: 6px 11px;
-      font-size: 0.76rem;
-      letter-spacing: 0.12em;
+    .subtitle {
+      font-size: 0.8rem;
       text-transform: uppercase;
-      display: inline-flex;
-      align-items: baseline;
-      gap: 6px;
+      letter-spacing: 0.16em;
       color: var(--text-soft);
+      margin-bottom: 18px;
     }
 
-    .metric-pill strong {
-      color: #e5e7eb;
-      font-weight: 600;
+    .meta-line {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 22px;
     }
 
-    .hero-footnote {
-      font-size: 0.76rem;
-      color: var(--text-soft);
-      margin-top: 6px;
-    }
-
-    /* App cards */
-    .hero-links {
+    .links {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 12px;
-      margin-top: 8px;
+      gap: 10px;
+      margin-bottom: 18px;
     }
 
-    .app-card {
+    .app-link {
+      display: block;
+      border-radius: 12px;
+      border: 1px solid rgba(55,65,81,0.9);
+      padding: 11px 12px;
+      background: radial-gradient(circle at left, rgba(15,23,42,0.98), rgba(15,23,42,1));
+      color: var(--text-main);
+      text-decoration: none;
+      text-align: left;
+      transition: border-color 0.12s ease-out, box-shadow 0.12s ease-out, transform 0.12s ease-out, background 0.12s ease-out;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
-      padding: 11px 13px;
-      border-radius: 12px;
-      border: 1px solid rgba(55,65,81,0.9);
-      background: radial-gradient(circle at left, rgba(15,23,42,0.98), rgba(15,23,42,0.99));
-      text-decoration: none;
-      color: var(--text-main);
-      transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, border-color 0.12s ease-out, background 0.12s ease-out;
+      gap: 8px;
     }
 
-    .app-card:hover {
-      transform: translateY(-1px);
+    .app-link:hover {
       border-color: rgba(56,189,248,0.9);
       box-shadow:
         0 12px 30px rgba(15,23,42,0.9),
         0 0 0 1px rgba(15,23,42,1);
+      transform: translateY(-1px);
       background: radial-gradient(circle at left, rgba(15,23,42,1), rgba(15,23,42,0.98));
     }
 
     .app-main {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       min-width: 0;
     }
 
     .app-icon {
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
       border-radius: 10px;
       border: 1px solid rgba(55,65,81,0.95);
       background: radial-gradient(circle at top, rgba(15,23,42,0.98), rgba(15,23,42,1));
@@ -287,338 +149,94 @@
     }
 
     .app-title {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: #e5e7eb;
       margin-bottom: 2px;
     }
 
     .app-desc {
       font-size: 0.8rem;
       color: var(--text-soft);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .app-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      align-items: flex-end;
+    .chevron {
+      font-size: 1rem;
+      color: var(--text-soft);
     }
 
-    .app-meta-pill {
-      border-radius: 999px;
-      border: 1px solid rgba(55,65,81,0.9);
-      padding: 4px 8px;
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--text-muted);
-    }
-
-    .app-meta-tag {
+    .footnote {
       font-size: 0.75rem;
       color: var(--text-soft);
     }
 
-    .app-meta-pill.positive {
-      border-color: rgba(34,197,94,0.9);
-      color: #bbf7d0;
-      background: rgba(22,163,74,0.06);
-    }
-
-    .app-meta-pill.blue {
-      border-color: rgba(56,189,248,0.9);
-      color: #e0f2fe;
-      background: rgba(8,47,73,0.5);
-    }
-
-    .app-meta-pill.gold {
-      border-color: rgba(234,179,8,0.9);
-      color: #facc15;
-      background: rgba(113,63,18,0.4);
-    }
-
-    /* Right-hand column */
-    .hero-side {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .panel {
-      border-radius: 16px;
-      border: 1px solid rgba(31,41,55,0.98);
-      background:
-        radial-gradient(circle at top right, rgba(15,23,42,0.98), rgba(15,23,42,1));
-      padding: 14px 14px 14px;
-    }
-
-    .panel-title {
-      font-size: 0.85rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-soft);
-      margin-bottom: 8px;
-    }
-
-    .panel-body {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-
-    .panel-body strong {
-      color: #e5e7eb;
-      font-weight: 600;
-    }
-
-    .panel-list {
-      margin-top: 6px;
-      padding-left: 16px;
-    }
-
-    .panel-list li {
-      margin-bottom: 4px;
-    }
-
-    .panel-code {
-      margin-top: 6px;
-      padding: 8px 9px;
-      border-radius: 8px;
-      background: rgba(15,23,42,0.96);
-      border: 1px solid rgba(31,41,55,0.98);
+    .footnote code {
+      font-size: 0.75rem;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 0.75rem;
-      color: #e5e7eb;
-      overflow-x: auto;
-    }
-
-    .footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-top: auto;
-      padding-top: 10px;
-      border-top: 1px solid rgba(31,41,55,0.9);
-      font-size: 0.78rem;
-      color: var(--text-soft);
-      flex-wrap: wrap;
-    }
-
-    .footer span strong {
-      color: #e5e7eb;
-      font-weight: 600;
-    }
-
-    .footer-links {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .footer a {
       color: var(--accent);
-      text-decoration: none;
-      font-size: 0.78rem;
     }
 
-    .footer a:hover {
-      text-decoration: underline;
-    }
-
-    @media (max-width: 900px) {
-      .frame {
-        padding: 22px 18px 18px;
-        min-height: auto;
+    @media (max-width: 600px) {
+      .card {
+        padding: 22px 16px 20px;
       }
 
-      .hero {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .nav-row {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .hero-main {
-        padding: 16px 14px 14px;
-      }
-
-      .hero-title {
+      h1 {
         font-size: 1.4rem;
       }
 
-      .hero-links .app-card {
+      .app-link {
         padding: 9px 10px;
       }
 
-      .panel {
-        padding: 12px 11px 11px;
+      .app-desc {
+        white-space: normal;
       }
     }
   </style>
 </head>
 <body>
   <div class="shell">
-    <div class="frame">
-      <!-- Top "nav" row -->
-      <div class="nav-row">
-        <div class="logo-mark">
-          <div class="logo-circle">
-            <span>LW</span>
-          </div>
-          <div>
-            <div class="logo-text-main">Legion of Whom FFL</div>
-            <div class="logo-text-sub">Est. 2014 · Dynasty of chaos & spreadsheets</div>
-          </div>
-        </div>
+    <div class="card">
+      <div class="logo-circle">LW</div>
+      <h1>Legion of Whom FFL</h1>
+      <div class="subtitle">Records & Matchup Hub</div>
 
-        <div class="nav-right">
-          <div class="tag-pill season-tag">
-            <span class="tag-dot"></span>
-            <span>Live league data</span>
-          </div>
-          <div class="tag-pill">
-            <span class="tag-dot"></span>
-            <span>Backed by league-scores.json</span>
-          </div>
-        </div>
+      <div class="meta-line">
+        2014–Present · Single source of truth for league history
       </div>
 
-      <!-- Main hero layout -->
-      <div class="hero">
-        <!-- Left: headline + core app links -->
-        <section class="hero-main">
-          <div>
-            <div class="hero-title">League Records & Matchup History</div>
-            <div class="hero-subtitle">All managers · All seasons · All receipts</div>
-            <p class="hero-blurb">
-              A central hub for the <strong>Legion of Whom</strong> fantasy league.
-              Browse every head-to-head battle, career record, and weekly explosion –
-              all calculated from a single JSON league database.
-            </p>
-
-            <div class="hero-metrics">
-              <div class="metric-pill">
-                <span>Seasons</span>
-                <strong>2014–Present</strong>
-              </div>
-              <div class="metric-pill">
-                <span>Managers</span>
-                <strong>Multi-era</strong>
-              </div>
-              <div class="metric-pill">
-                <span>Data Source</span>
-                <strong>league-scores.json</strong>
-              </div>
+      <div class="links">
+        <a href="h2h.html" class="app-link">
+          <div class="app-main">
+            <div class="app-icon">⚔️</div>
+            <div class="app-text">
+              <div class="app-title">Head-to-Head Matchups</div>
+              <div class="app-desc">Series records, points, and streaks between managers.</div>
             </div>
           </div>
+          <div class="chevron">›</div>
+        </a>
 
-          <div>
-            <div class="hero-links">
-              <a href="h2h.html" class="app-card">
-                <div class="app-main">
-                  <div class="app-icon">⚔️</div>
-                  <div class="app-text">
-                    <div class="app-title">Head-to-Head Matchup History</div>
-                    <div class="app-desc">
-                      See every matchup between any two managers. Filter by regular season or playoffs,
-                      track series records, points, and streaks.
-                    </div>
-                  </div>
-                </div>
-                <div class="app-meta">
-                  <div class="app-meta-pill blue">Interactive H2H</div>
-                  <div class="app-meta-tag">Dynamic from <code>league-scores.json</code></div>
-                </div>
-              </a>
-
-              <a href="career-records.html" class="app-card">
-                <div class="app-main">
-                  <div class="app-icon">📊</div>
-                  <div class="app-text">
-                    <div class="app-title">Career Leaders Dashboard</div>
-                    <div class="app-desc">
-                      Career points, win %, weekly highs, streaks & more – for all matchups,
-                      regular season only, or playoffs.
-                    </div>
-                  </div>
-                </div>
-                <div class="app-meta">
-                  <div class="app-meta-pill gold">Career Records</div>
-                  <div class="app-meta-tag">Sortable leaderboards with full context</div>
-                </div>
-              </a>
-            </div>
-
-            <p class="hero-footnote">
-              Everything on these pages is derived from the same matchup file, so
-              updating <code>league-scores.json</code> keeps the entire league
-              history in sync.
-            </p>
-          </div>
-        </section>
-
-        <!-- Right: info / instructions panels -->
-        <section class="hero-side">
-          <div class="panel">
-            <div class="panel-title">How this site works</div>
-            <div class="panel-body">
-              Both the <strong>H2H app</strong> and the <strong>Career Leaders</strong> page
-              read from a single JSON file:
-              <div class="panel-code">
-                league-scores.json
-              </div>
-              <ul class="panel-list">
-                <li>One entry per matchup (year, week, managers, scores, playoffs flag).</li>
-                <li>Career stats, streaks, and weekly highs are computed on the fly.</li>
-                <li>No manual recalcs – just update the JSON and redeploy.</li>
-              </ul>
+        <a href="career-records.html" class="app-link">
+          <div class="app-main">
+            <div class="app-icon">📊</div>
+            <div class="app-text">
+              <div class="app-title">Career Leaders</div>
+              <div class="app-desc">Points, win %, weekly highs, streaks & more.</div>
             </div>
           </div>
-
-          <div class="panel">
-            <div class="panel-title">Keeping it updated</div>
-            <div class="panel-body">
-              Typical weekly workflow:
-              <ul class="panel-list">
-                <li>1. Add new games to <strong>league-scores.json</strong>.</li>
-                <li>2. Commit &amp; push to the GitHub repo.</li>
-                <li>3. Netlify (or your host) auto-deploys the new stats.</li>
-              </ul>
-              <p style="margin-top: 6px;">
-                Need a new view or record type later?
-                It can be computed from the same JSON – no new data format required.
-              </p>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-title">Quick links</div>
-            <div class="panel-body">
-              <ul class="panel-list">
-                <li><a href="h2h.html" style="color:var(--accent);text-decoration:none;">⚔️ Head-to-Head Matchup History</a></li>
-                <li><a href="career-records.html" style="color:var(--accent);text-decoration:none;">📊 Career Leaders Dashboard</a></li>
-              </ul>
-            </div>
-          </div>
-        </section>
+          <div class="chevron">›</div>
+        </a>
       </div>
 
-      <!-- Footer -->
-      <footer class="footer">
-        <span>
-          <strong>Legion of Whom FFL</strong> · Powered by JSON and way too much competitiveness.
-        </span>
-        <div class="footer-links">
-          <span>Frontend · custom dark theme</span>
-        </div>
-      </footer>
+      <div class="footnote">
+        All pages read from <code>league-scores.json</code>. Update that file, redeploy, and everything stays in sync.
+      </div>
     </div>
   </div>
 </body>
