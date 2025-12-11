@@ -153,7 +153,7 @@
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      margin-bottom: 12px;
+      margin-bottom: 16px; /* slightly more breathing room */
       gap: 12px;
       flex-wrap: wrap;
     }
@@ -164,6 +164,7 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: #e5e7eb;
+      margin-bottom: 6px; /* more space above subtitle */
     }
 
     .leaderboard-subtitle {
@@ -362,7 +363,7 @@
         </div>
         <div class="control-group">
           <div class="hint">
-            Career records with contextual stats (games, PPM, win %, streaks).
+            Career records with contextual stats (matchups, PPM, win %, streaks).
           </div>
         </div>
       </section>
@@ -372,7 +373,7 @@
           <div>
             <div class="leaderboard-title" id="leaderboardTitle">Most Points For · All Matchups</div>
             <div class="leaderboard-subtitle" id="leaderboardSubtitle">
-              Career leaders with matchup context
+              Career leaders across all eligible matchups
             </div>
           </div>
           <div class="pill">
@@ -422,7 +423,7 @@
         type: "aggregate",
         columns: [
           { key: "pointsFor", label: "Pts For", format: "points", polarity: "positivePrimary" },
-          { key: "games", label: "G", format: "integer" },
+          { key: "games", label: "M", format: "integer" },
           { key: "ppmFor", label: "PPM", format: "ppm", polarity: "positive" }
         ]
       },
@@ -434,7 +435,7 @@
         type: "aggregate",
         columns: [
           { key: "pointsFor", label: "Pts For", format: "points", polarity: "negativePrimary" },
-          { key: "games", label: "G", format: "integer" },
+          { key: "games", label: "M", format: "integer" },
           { key: "ppmFor", label: "PPM", format: "ppm", polarity: "negative" }
         ]
       },
@@ -447,7 +448,7 @@
         columns: [
           { key: "ppmFor", label: "PPM", format: "ppm", polarity: "positivePrimary" },
           { key: "pointsFor", label: "Pts For", format: "points" },
-          { key: "games", label: "G", format: "integer" }
+          { key: "games", label: "M", format: "integer" }
         ]
       },
       {
@@ -459,7 +460,7 @@
         columns: [
           { key: "ppmFor", label: "PPM", format: "ppm", polarity: "negativePrimary" },
           { key: "pointsFor", label: "Pts For", format: "points" },
-          { key: "games", label: "G", format: "integer" }
+          { key: "games", label: "M", format: "integer" }
         ]
       },
 
@@ -472,7 +473,7 @@
         type: "aggregate",
         columns: [
           { key: "pointsAgainst", label: "Pts Against", format: "points", polarity: "negativePrimary" },
-          { key: "games", label: "G", format: "integer" },
+          { key: "games", label: "M", format: "integer" },
           { key: "ppmAgainst", label: "PPM Against", format: "ppm", polarity: "negative" }
         ]
       },
@@ -484,7 +485,7 @@
         type: "aggregate",
         columns: [
           { key: "pointsAgainst", label: "Pts Against", format: "points", polarity: "positivePrimary" },
-          { key: "games", label: "G", format: "integer" },
+          { key: "games", label: "M", format: "integer" },
           { key: "ppmAgainst", label: "PPM Against", format: "ppm", polarity: "positive" }
         ]
       },
@@ -497,7 +498,7 @@
         columns: [
           { key: "ppmAgainst", label: "PPM Against", format: "ppm", polarity: "negativePrimary" },
           { key: "pointsAgainst", label: "Pts Against", format: "points" },
-          { key: "games", label: "G", format: "integer" }
+          { key: "games", label: "M", format: "integer" }
         ]
       },
       {
@@ -509,7 +510,7 @@
         columns: [
           { key: "ppmAgainst", label: "PPM Against", format: "ppm", polarity: "positivePrimary" },
           { key: "pointsAgainst", label: "Pts Against", format: "points" },
-          { key: "games", label: "G", format: "integer" }
+          { key: "games", label: "M", format: "integer" }
         ]
       },
 
@@ -523,7 +524,7 @@
         columns: [
           { key: "winPct", label: "Win %", format: "percent", polarity: "positivePrimary" },
           { key: "record", label: "Record", format: "record" },
-          { key: "games", label: "G", format: "integer" }
+          { key: "games", label: "M", format: "integer" }
         ]
       },
       {
@@ -535,7 +536,7 @@
         columns: [
           { key: "winPct", label: "Win %", format: "percent", polarity: "negativePrimary" },
           { key: "record", label: "Record", format: "record" },
-          { key: "games", label: "G", format: "integer" }
+          { key: "games", label: "M", format: "integer" }
         ]
       },
 
@@ -551,7 +552,7 @@
           { key: "lossesInt", label: "L", format: "integer" },
           { key: "tiesInt", label: "T", format: "integer" },
           { key: "winPct", label: "Win %", format: "percent" },
-          { key: "games", label: "G", format: "integer" }
+          { key: "games", label: "M", format: "integer" }
         ]
       },
       {
@@ -565,7 +566,7 @@
           { key: "winsInt", label: "W", format: "integer" },
           { key: "tiesInt", label: "T", format: "integer" },
           { key: "winPct", label: "Win %", format: "percent" },
-          { key: "games", label: "G", format: "integer" }
+          { key: "games", label: "M", format: "integer" }
         ]
       },
 
@@ -579,7 +580,7 @@
         columns: [
           { key: "weeklyHighCount", label: "Weekly Highs", format: "integer", polarity: "positivePrimary" },
           { key: "weeklyHighRate", label: "Weekly High Rate", format: "percent" },
-          { key: "games", label: "G", format: "integer" }
+          { key: "games", label: "M", format: "integer" }
         ]
       },
       {
@@ -591,7 +592,7 @@
         columns: [
           { key: "weeklyHighCount", label: "Weekly Highs", format: "integer", polarity: "negativePrimary" },
           { key: "weeklyHighRate", label: "Weekly High Rate", format: "percent" },
-          { key: "games", label: "G", format: "integer" }
+          { key: "games", label: "M", format: "integer" }
         ]
       },
 
@@ -879,6 +880,32 @@
       }
     }
 
+    // === Header tooltip helper ===
+
+    function getHeaderTitle(label) {
+      switch (label) {
+        case "Rank": return "Rank among managers for this stat";
+        case "Manager": return "Manager name";
+        case "Pts For": return "Total points scored (Points For)";
+        case "Pts Against": return "Total points allowed (Points Against)";
+        case "PPM": return "Points Per Matchup (average points scored per matchup)";
+        case "PPM Against": return "Points Per Matchup Allowed (average points allowed per matchup)";
+        case "M": return "Total number of matchups played";
+        case "W": return "Total wins";
+        case "L": return "Total losses";
+        case "T": return "Total ties";
+        case "Win %": return "Winning percentage";
+        case "Record": return "Overall record (wins-losses-ties)";
+        case "Weekly Highs": return "Number of times this manager had the highest score in a week";
+        case "Weekly High Rate": return "Percentage of matchups where this manager recorded the weekly high score";
+        case "Win Streak": return "Length of the winning streak (consecutive wins)";
+        case "Loss Streak": return "Length of the losing streak (consecutive losses)";
+        case "Span": return "Season and week range covered by the streak";
+        default:
+          return label;
+      }
+    }
+
     // === Dropdowns ===
 
     function populateDropdowns() {
@@ -990,17 +1017,22 @@
       const rankTh = document.createElement("th");
       rankTh.className = "th-left";
       rankTh.textContent = "Rank";
+      rankTh.title = getHeaderTitle("Rank");
       rankTh.dataset.colKey = "rank";
+
       const managerTh = document.createElement("th");
       managerTh.className = "th-left";
       managerTh.textContent = "Manager";
+      managerTh.title = getHeaderTitle("Manager");
       managerTh.dataset.colKey = "manager";
+
       headerRow.appendChild(rankTh);
       headerRow.appendChild(managerTh);
 
       def.columns.forEach(col => {
         const th = document.createElement("th");
         th.textContent = col.label;
+        th.title = getHeaderTitle(col.label);
         th.className = "th-right";
         th.dataset.colKey = col.key === "record" ? "winPct" : col.key;
         headerRow.appendChild(th);
@@ -1187,18 +1219,25 @@
       const rankTh = document.createElement("th");
       rankTh.className = "th-left";
       rankTh.textContent = "Rank";
+      rankTh.title = getHeaderTitle("Rank");
       rankTh.dataset.colKey = "rank";
+
       const managerTh = document.createElement("th");
       managerTh.className = "th-left";
       managerTh.textContent = "Manager";
+      managerTh.title = getHeaderTitle("Manager");
       managerTh.dataset.colKey = "manager";
+
       const lenTh = document.createElement("th");
       lenTh.className = "th-right";
-      lenTh.textContent = "Games";
+      lenTh.textContent = def.streakType === "win" ? "Win Streak" : "Loss Streak";
+      lenTh.title = getHeaderTitle(def.streakType === "win" ? "Win Streak" : "Loss Streak");
       lenTh.dataset.colKey = "length";
+
       const spanTh = document.createElement("th");
       spanTh.className = "th-right";
       spanTh.textContent = "Span";
+      spanTh.title = getHeaderTitle("Span");
       spanTh.dataset.colKey = "spanLabel";
 
       headerRow.appendChild(rankTh);
@@ -1220,7 +1259,9 @@
         managerTd.textContent = s.manager;
 
         const lenTd = document.createElement("td");
-        lenTd.className = "stat-cell " + (def.streakType === "win" ? "value-positive" : "value-negative");
+        lenTd.className =
+          "stat-cell " +
+          (def.streakType === "win" ? "value-positive" : "value-negative");
         lenTd.textContent = s.length.toString();
 
         const spanTd = document.createElement("td");
@@ -1303,7 +1344,7 @@
         noDataMessage.firstElementChild.textContent =
           "Note · Weekly high scores are only tracked for Regular Season matchups.";
         subtitleEl.textContent =
-          "This stat is only computed for regular season games.";
+          "This stat is only computed for regular season matchups.";
         return;
       }
 
