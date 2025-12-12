@@ -332,23 +332,25 @@
       </div>
 
       <div id="seasonResult" class="result-card">
-        <div class="main-stat-label">Historical Probability</div>
+        <div style="display: flex; align-items: baseline; justify-content: center; gap: 8px; margin-bottom: 10px;">
+          <div class="main-stat-label" style="margin-bottom: 0;">Historical Probability</div>
+          <div style="font-size: 0.8rem; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;">
+            Based on <span id="seasonSampleSize" style="color:var(--text-main);">0</span> Teams
+          </div>
+        </div>
         
         <div class="odds-grid">
           <div class="odds-card">
             <div class="odds-title">Make Playoffs</div>
             <div class="odds-val" id="probPlayoffs">-</div>
-            <div class="odds-sub">Based on <span id="sampleSize1">0</span> teams</div>
           </div>
           <div class="odds-card">
             <div class="odds-title">Reach Championship</div>
             <div class="odds-val" id="probFinals">-</div>
-            <div class="odds-sub">Based on <span id="sampleSize2">0</span> teams</div>
           </div>
           <div class="odds-card">
             <div class="odds-title">Win Championship</div>
             <div class="odds-val" id="probChamp">-</div>
-            <div class="odds-sub">Based on <span id="sampleSize3">0</span> teams</div>
           </div>
         </div>
 
@@ -538,9 +540,8 @@
     updateOddsUI('probFinals', nFinals, n);
     updateOddsUI('probChamp', nChamp, n);
 
-    document.getElementById('sampleSize1').textContent = n;
-    document.getElementById('sampleSize2').textContent = n;
-    document.getElementById('sampleSize3').textContent = n;
+    // Update the new single consolidated count
+    document.getElementById('seasonSampleSize').textContent = n;
 
     document.getElementById('seasonResult').classList.add('show');
     
@@ -564,10 +565,10 @@
   function initChart() {
     const ctx = document.getElementById('scoreChart').getContext('2d');
     
-    // Generate buckets
+    // Generate buckets - Extended to 190 per request
     const bucketSize = 10;
     const bins = {};
-    for(let i=40; i<=180; i+=bucketSize) bins[i] = 0;
+    for(let i=40; i<=190; i+=bucketSize) bins[i] = 0;
     
     leagueMeta.scores.forEach(s => {
       const b = Math.floor(s / bucketSize) * bucketSize;
