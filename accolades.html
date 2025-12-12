@@ -115,10 +115,13 @@
       letter-spacing:0.18em;
       color:#9ca3af;
       border-bottom: 1px solid rgba(55,65,81,0.9);
-      white-space:nowrap;
       cursor:pointer;
       user-select:none;
       text-align:left;
+      
+      /* Updated to allow wrapping per request */
+      white-space: normal;
+      vertical-align: bottom;
     }
 
     .leaderboard-table tbody tr{ transition: background 0.15s ease, transform 0.08s ease; }
@@ -288,10 +291,12 @@
     { key: "manager", label: "Manager", tooltip: "Team manager name." },
     { key: "championships", label: "Champ", tooltip: "Championships won" },
     { key: "championshipApps", label: "Champ App", tooltip: "Championship matchup appearances"},
-    { key: "scoringTitles", label: "Scor Titl", tooltip: "Regular season scoring titles (most points for)"},
     { key: "semifinalApps", label: "SF App", tooltip: "Semifinal appearances" },
     { key: "firstRoundApps", label: "1st Rd App", tooltip: "First-round appearances"},
     { key: "playoffApps", label: "PO App", tooltip: "Playoff appearances"},
+    // Reordered and added columns per request
+    { key: "scoringTitles", label: "Scor Titl", tooltip: "Regular season scoring titles (most points for)"}, 
+    { key: "divisionTitles", label: "Div Titl", tooltip: "Regular season division titles (1st place in division)"},
     { key: "avgFinish", label: "Avg Fin", tooltip: "Average final standing finish across completed seasons"},
     { key: "seasons", label: "Seas", tooltip: "Seasons in LWFFL"}
   ];
@@ -390,6 +395,7 @@
       championships: 0,
       championshipApps: 0,
       scoringTitles: 0,
+      divisionTitles: 0,
       semifinalApps: 0,
       firstRoundApps: 0,
       playoffApps: 0,
@@ -509,6 +515,20 @@
             map[mgr].scoringTitles += 1;
           }
         });
+      }
+    });
+  }
+
+  function applyDivisionTitles(map, seasonStats){
+    (seasonStats || []).forEach(row => {
+      if (!row || !row.manager) return;
+      const mgr = row.manager;
+      // Check for division standing of 1 (supporting both snake and camel case)
+      const ds = Number(row.division_standing ?? row.divisionStanding);
+      
+      if (ds === 1) {
+        if (!map[mgr]) map[mgr] = ensureRow(mgr);
+        map[mgr].divisionTitles += 1;
       }
     });
   }
@@ -652,6 +672,9 @@
 
     // Calculate Scoring Titles (regular season)
     applyScoringTitles(rawMatchups, map);
+
+    // Calculate Division Titles
+    applyDivisionTitles(map, seasonStatsRaw);
 
     // Apply avg finish from season-stats.json
     applyAvgFinishFromSeasonStats(map, seasonStatsRaw);
