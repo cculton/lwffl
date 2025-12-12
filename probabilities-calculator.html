@@ -265,7 +265,7 @@
     </div>
 
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('weekly')">Single Game</button>
+      <button class="tab-btn active" onclick="switchTab('weekly')">Single Week Predictor</button>
       <button class="tab-btn" onclick="switchTab('season')">Season Predictor</button>
     </div>
 
@@ -312,7 +312,7 @@
 
     <div id="seasonSection" class="section">
       <p class="instruction-text">
-        Enter a win total or PPG to compare against <span id="seasonCount" class="highlight">0</span> historical seasons.
+        Enter a win total or PPM to compare against <span id="seasonCount" class="highlight">0</span> historical seasons.
         The model identifies teams with <strong>similar profiles</strong> to project playoff and championship odds.
       </p>
 
@@ -341,19 +341,17 @@
             <div class="odds-sub">Based on <span id="sampleSize1">0</span> teams</div>
           </div>
           <div class="odds-card">
-            <div class="odds-title">Reach Finals</div>
+            <div class="odds-title">Reach Championship</div>
             <div class="odds-val" id="probFinals">-</div>
-            <div class="odds-sub">Made Championship</div>
           </div>
           <div class="odds-card">
             <div class="odds-title">Win Title</div>
             <div class="odds-val" id="probChamp">-</div>
-            <div class="odds-sub">Won Championship</div>
           </div>
         </div>
 
         <div class="info-text" id="seasonInterp">
-          Enter your total wins or average points per game to see how teams with similar profiles fared in league history.
+          Enter your total wins or average points per matchup to see how teams with similar profiles fared in league history.
         </div>
       </div>
     </div>
@@ -451,9 +449,9 @@
 
     historyModel = seasonStats.map(s => {
       const wins = s.wins || 0;
-      const games = (s.wins||0) + (s.losses||0) + (s.ties||0);
+      const matchups = (s.wins||0) + (s.losses||0) + (s.ties||0);
       const points = s.points_for || 0;
-      const ppg = games > 0 ? (points / games) : 0;
+      const ppg = matchups > 0 ? (points / matchups) : 0;
       const rank = s.final_standing || 99;
 
       const isChamp = (rank === 1);
