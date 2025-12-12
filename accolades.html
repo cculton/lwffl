@@ -288,6 +288,7 @@
     { key: "manager", label: "Manager", tooltip: "Team manager name." },
     { key: "championships", label: "Champ", tooltip: "Championships won" },
     { key: "championshipApps", label: "Champ App", tooltip: "Championship matchup appearances"},
+    { key: "scoringTitles", label: "Scor Titl", tooltip: "Regular season scoring titles (most points for)"},
     { key: "semifinalApps", label: "SF App", tooltip: "Semifinal appearances" },
     { key: "firstRoundApps", label: "1st Rd App", tooltip: "First-round appearances"},
     { key: "playoffApps", label: "PO App", tooltip: "Playoff appearances"},
@@ -388,6 +389,7 @@
       manager,
       championships: 0,
       championshipApps: 0,
+      scoringTitles: 0,
       semifinalApps: 0,
       firstRoundApps: 0,
       playoffApps: 0,
@@ -471,6 +473,44 @@
     });
 
     return map;
+  }
+
+  function applyScoringTitles(matches, map){
+    const points = {}; // { year: { manager: total } }
+
+    (matches || []).forEach(m => {
+      if (!m || isPlayoffGame(m)) return;
+      const y = Number(m.year);
+      const s1 = Number(m.score1);
+      const s2 = Number(m.score2);
+
+      if (!points[y]) points[y] = {};
+      
+      if (m.manager1 && !Number.isNaN(s1)){
+        points[y][m.manager1] = (points[y][m.manager1] || 0) + s1;
+      }
+      if (m.manager2 && !Number.isNaN(s2)){
+        points[y][m.manager2] = (points[y][m.manager2] || 0) + s2;
+      }
+    });
+
+    Object.keys(points).forEach(year => {
+      const yearData = points[year];
+      let maxP = -1;
+      Object.values(yearData).forEach(p => {
+        if (p > maxP) maxP = p;
+      });
+
+      if (maxP > 0){
+        Object.keys(yearData).forEach(mgr => {
+          if (Math.abs(yearData[mgr] - maxP) < 0.01){
+            // Ensure row exists
+            if (!map[mgr]) map[mgr] = ensureRow(mgr);
+            map[mgr].scoringTitles += 1;
+          }
+        });
+      }
+    });
   }
 
   function applyAvgFinishFromSeasonStats(map, seasonStats){
@@ -609,6 +649,9 @@
 
     // Build from league-scores.json
     const map = buildAccoladesFromLeagueScores(rawMatchups);
+
+    // Calculate Scoring Titles (regular season)
+    applyScoringTitles(rawMatchups, map);
 
     // Apply avg finish from season-stats.json
     applyAvgFinishFromSeasonStats(map, seasonStatsRaw);
