@@ -1114,15 +1114,11 @@
     if (scope === "Career"){
       hint.textContent = "Career records with contextual stats (matchups, PPM, win %, streaks).";
       titleEl.textContent = "Career Leaders";
-      subtitleEl.textContent = "Career leaders across all eligible matchups";
-    } else if (scope === "Season"){
       hint.textContent = "Season records (best single-season performances) with contextual stats.";
       titleEl.textContent = "Season Leaders";
-      subtitleEl.textContent = "Best single-season stat lines across all managers";
     } else {
       hint.textContent = "Weekly records (single-matchup highs/lows and game-level results).";
       titleEl.textContent = "Weekly Records";
-      subtitleEl.textContent = "Single-matchup records across all eligible matchups";
     }
 
     pillLabel.textContent = `${scope} · —`;
@@ -2084,7 +2080,6 @@
     if (currentScope === "Career"){
       subtitleEl.textContent = (def.type === "streak")
         ? "Career streaks with exact start–end span"
-        : "Career leaders across all eligible matchups";
 
       if (def.type === "streak") renderCareerStreak(matchupType, def);
       else renderCareerAggregate(matchupType, def);
