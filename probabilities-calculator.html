@@ -343,10 +343,12 @@
           <div class="odds-card">
             <div class="odds-title">Reach Championship</div>
             <div class="odds-val" id="probFinals">-</div>
+            <div class="odds-sub">Based on <span id="sampleSize2">0</span> teams</div>
           </div>
           <div class="odds-card">
             <div class="odds-title">Win Championship</div>
             <div class="odds-val" id="probChamp">-</div>
+            <div class="odds-sub">Based on <span id="sampleSize3">0</span> teams</div>
           </div>
         </div>
 
@@ -480,11 +482,9 @@
     if (z > 0) prob = 1 - prob;
     
     const percent = (prob * 100).toFixed(1);
-    // Removed Percentile Calculation
     const diff = (val - leagueMeta.mean).toFixed(1);
 
     document.getElementById('winProbDisplay').textContent = `${percent}%`;
-    // Removed Percentile UI Update
     document.getElementById('vsAvgDisplay').textContent = (diff > 0 ? "+" : "") + diff;
     document.getElementById('weeklyResult').classList.add('show');
 
@@ -496,8 +496,6 @@
 
     updateChart(val);
   };
-
-  // Removed getPercentile() helper function as it is no longer used
 
   // --- Calculation: Season ---
   window.calcSeason = function() {
@@ -541,6 +539,9 @@
     updateOddsUI('probChamp', nChamp, n);
 
     document.getElementById('sampleSize1').textContent = n;
+    document.getElementById('sampleSize2').textContent = n;
+    document.getElementById('sampleSize3').textContent = n;
+
     document.getElementById('seasonResult').classList.add('show');
     
     document.getElementById('seasonInterp').innerHTML = 
