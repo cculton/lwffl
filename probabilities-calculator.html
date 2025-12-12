@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Win Probability & Odds – LWFFL</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-main: #020617;
+      --card-bg: #020617;
+      --accent: #38bdf8;
+      --border-subtle: #1f2937;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --text-soft: #6b7280;
+      --positive: #22c55e;
+      --negative: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #020617 0%, #020617 35%, #020617 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    .shell { max-width: 1000px; margin: 0 auto; }
+
+    .container {
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.18), transparent 55%),
+        var(--card-bg);
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      box-shadow: 0 40px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(15,23,42,0.9);
+      padding: 32px 24px;
+      backdrop-filter: blur(14px);
+    }
+
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 {
+      font-size: 2rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #f9fafb;
+    }
+    .header p {
+      color: var(--text-soft);
+      font-size: 0.9rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(55,65,81,0.9);
+      background: rgba(15,23,42,0.6);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: rgba(56,189,248,0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 15px rgba(56,189,248,0.2);
+    }
+
+    .section { display: none; animation: fadeIn 0.4s ease; }
+    .section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Inputs */
+    .input-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 24px;
+      align-items: flex-end;
+      background: rgba(30, 41, 59, 0.4);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(55,65,81,0.5);
+    }
+    .input-group { flex: 1; }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    
+    input[type="number"] {
+      width: 100%;
+      padding: 12px 15px;
+      background: #0b1120;
+      border: 1px solid rgba(75, 85, 99, 0.8);
+      border-radius: 8px;
+      color: #f9fafb;
+      font-size: 1.1em;
+      transition: border-color 0.2s;
+    }
+    input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px rgba(56,189,248,0.5); }
+
+    button.action-btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, rgba(56,189,248,0.1) 0%, rgba(59,130,246,0.2) 100%);
+      border: 1px solid rgba(56,189,248,0.5);
+      color: var(--accent);
+      border-radius: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.2s;
+      height: 48px;
+    }
+    button.action-btn:hover {
+      background: rgba(56,189,248,0.25);
+      box-shadow: 0 0 20px rgba(56,189,248,0.3);
+      transform: translateY(-1px);
+    }
+
+    /* Results */
+    .result-card {
+      background: radial-gradient(circle at top, rgba(15,23,42,0.9), rgba(2,6,23,0.95));
+      border: 1px solid rgba(55,65,81,0.6);
+      border-radius: 14px;
+      padding: 30px;
+      text-align: center;
+      margin-bottom: 24px;
+      display: none;
+    }
+    .result-card.show { display: block; }
+
+    .main-stat-label { color: var(--text-soft); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 10px; }
+    .main-stat-val { 
+      font-size: 3.5rem; 
+      font-weight: 800; 
+      color: #f9fafb; 
+      line-height: 1;
+      margin-bottom: 5px;
+      background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .main-stat-sub { font-size: 1.2rem; color: var(--accent); font-weight: 600; margin-bottom: 20px; }
+
+    .context-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 15px;
+      margin-top: 24px;
+      border-top: 1px solid rgba(55,65,81,0.5);
+      padding-top: 20px;
+    }
+    .context-box {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(55,65,81,0.4);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .context-title { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; letter-spacing: 0.05em; }
+    .context-data { font-size: 1.2rem; font-weight: 700; color: #e5e7eb; }
+
+    /* Chart */
+    .chart-box {
+      position: relative;
+      height: 300px;
+      background: rgba(2, 6, 23, 0.5);
+      border: 1px solid rgba(55, 65, 81, 0.5);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .info-text {
+      background: rgba(56, 189, 248, 0.08);
+      border-left: 3px solid var(--accent);
+      padding: 15px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    /* Season Predictor Specifics */
+    .odds-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .odds-card {
+      background: rgba(15,23,42,0.8);
+      border: 1px solid rgba(55,65,81,0.6);
+      border-radius: 12px;
+      padding: 20px 10px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+    .odds-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+    .odds-title { font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.1em; }
+    .odds-val { font-size: 2rem; font-weight: 800; color: #f9fafb; }
+    .odds-sub { font-size: 0.75rem; color: var(--text-soft); margin-top: 4px; }
+
+    .odds-high { color: var(--positive); }
+    .odds-med { color: var(--warning); }
+    .odds-low { color: var(--negative); }
+
+    .loading { color: var(--text-soft); text-align: center; padding: 40px; }
+
+    @media (max-width: 600px) {
+      .input-row { flex-direction: column; align-items: stretch; }
+      .odds-grid { grid-template-columns: 1fr; }
+      .main-stat-val { font-size: 2.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="container">
+    <div class="header">
+      <h1>Probability & Odds</h1>
+      <p>Legion of Whom Fantasy Football League</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('weekly')">Single Game</button>
+      <button class="tab-btn" onclick="switchTab('season')">Season Predictor</button>
+    </div>
+
+    <div id="weeklySection" class="section active">
+      <div class="input-row">
+        <div class="input-group">
+          <label for="scoreInput">Your Score</label>
+          <input type="number" id="scoreInput" placeholder="e.g. 105.5" step="0.1">
+        </div>
+        <button class="action-btn" onclick="calcWeekly()">Calculate Win %</button>
+      </div>
+
+      <div id="weeklyResult" class="result-card">
+        <div class="main-stat-label">Win Probability</div>
+        <div class="main-stat-val" id="winProbDisplay">-</div>
+        <div class="main-stat-sub" id="percentileDisplay">Percentile: -</div>
+        
+        <div class="info-text" id="weeklyInterp">Enter a score to see how it stacks up against historical data.</div>
+
+        <div class="context-grid">
+          <div class="context-box">
+            <div class="context-title">League Average</div>
+            <div class="context-data" id="leagueMean">-</div>
+          </div>
+          <div class="context-box">
+            <div class="context-title">Standard Dev</div>
+            <div class="context-data" id="leagueStd">-</div>
+          </div>
+          <div class="context-box">
+            <div class="context-title">Vs Average</div>
+            <div class="context-data" id="vsAvgDisplay">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-box">
+        <canvas id="scoreChart"></canvas>
+      </div>
+    </div>
+
+    <div id="seasonSection" class="section">
+      <div class="input-row">
+        <div class="input-group">
+          <label for="winsInput">Season Wins</label>
+          <input type="number" id="winsInput" placeholder="e.g. 8" min="0" max="14">
+        </div>
+        <div class="input-group">
+          <label style="text-transform:none; font-size:0.75rem; color:var(--text-soft); text-align:center; padding-top:10px;">— OR —</label>
+        </div>
+        <div class="input-group">
+          <label for="ppgInput">Points Per Game (PPG)</label>
+          <input type="number" id="ppgInput" placeholder="e.g. 115.5" step="0.1">
+        </div>
+        <button class="action-btn" onclick="calcSeason()">Get Odds</button>
+      </div>
+
+      <div id="seasonResult" class="result-card">
+        <div class="main-stat-label">Historical Probability</div>
+        
+        <div class="odds-grid">
+          <div class="odds-card">
+            <div class="odds-title">Make Playoffs</div>
+            <div class="odds-val" id="probPlayoffs">-</div>
+            <div class="odds-sub">Based on <span id="sampleSize1">0</span> teams</div>
+          </div>
+          <div class="odds-card">
+            <div class="odds-title">Reach Finals</div>
+            <div class="odds-val" id="probFinals">-</div>
+            <div class="odds-sub">Made Championship Game</div>
+          </div>
+          <div class="odds-card">
+            <div class="odds-title">Win Title</div>
+            <div class="odds-val" id="probChamp">-</div>
+            <div class="odds-sub">Won League</div>
+          </div>
+        </div>
+
+        <div class="info-text" id="seasonInterp">
+          Enter your total wins or average points per game to see how similar teams fared in league history.
+        </div>
+      </div>
+    </div>
+
+    <div id="loading" class="loading">Loading database...</div>
+
+  </div>
+</div>
+
+<script>
+  // --- Global Data Containers ---
+  let rawMatchups = [];
+  let seasonStats = [];
+  let leagueMeta = { mean: 0, std: 0, scores: [] };
+  let historyModel = []; // Array of { wins, ppg, madePlayoffs, madeFinals, madeChamp }
+  let chartInstance = null;
+
+  // --- Init ---
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const [scoresRes, statsRes] = await Promise.all([
+        fetch('league-scores.json'),
+        fetch('season-stats.json')
+      ]);
+      
+      if(!scoresRes.ok || !statsRes.ok) throw new Error("File load error");
+
+      rawMatchups = await scoresRes.json();
+      seasonStats = await statsRes.json();
+
+      processWeeklyData();
+      processHistoricalModel();
+      
+      document.getElementById('loading').style.display = 'none';
+      
+      // Init Chart
+      initChart();
+
+    } catch (err) {
+      console.error(err);
+      document.getElementById('loading').textContent = "Error loading data files. Ensure JSONs are present.";
+    }
+  });
+
+  // --- Tab Switching ---
+  window.switchTab = function(tab) {
+    document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    
+    if (tab === 'weekly') {
+      document.getElementById('weeklySection').classList.add('active');
+      document.querySelector('button[onclick="switchTab(\'weekly\')"]').classList.add('active');
+    } else {
+      document.getElementById('seasonSection').classList.add('active');
+      document.querySelector('button[onclick="switchTab(\'season\')"]').classList.add('active');
+    }
+  };
+
+  // --- Data Processing: Weekly ---
+  function processWeeklyData() {
+    const scores = [];
+    rawMatchups.forEach(m => {
+      if (m.score1) scores.push(Number(m.score1));
+      if (m.score2) scores.push(Number(m.score2));
+    });
+
+    const sum = scores.reduce((a, b) => a + b, 0);
+    const mean = sum / scores.length;
+    const variance = scores.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / scores.length;
+    const std = Math.sqrt(variance);
+
+    leagueMeta = { mean, std, scores: scores.sort((a,b)=>a-b) };
+
+    document.getElementById('leagueMean').textContent = mean.toFixed(2);
+    document.getElementById('leagueStd').textContent = std.toFixed(2);
+  }
+
+  // --- Data Processing: Historical Model ---
+  function processHistoricalModel() {
+    // 1. Identify Playoff Teams from Matchups
+    // A team made playoffs if they played in a game labeled "Playoff" (except maybe consolations, but standard json usually labels true playoffs)
+    // Actually, safer method: Check season-stats final_standing.
+    // If standing <= 4 (or 6), likely playoff.
+    // Accolades logic used playoff weeks. Let's use `league-scores` to find who played in playoff weeks.
+    
+    const playoffTeams = {}; // { year: Set(managers) }
+    const finalsTeams = {}; // { year: Set(managers) }
+    
+    rawMatchups.forEach(m => {
+      if (m.playoffs && m.playoffs !== "N/A") {
+        const y = m.year;
+        if (!playoffTeams[y]) playoffTeams[y] = new Set();
+        if (m.manager1) playoffTeams[y].add(m.manager1);
+        if (m.manager2) playoffTeams[y].add(m.manager2);
+
+        // Heuristic: Finals is usually the latest week played in a year
+        // We will refine finals via season-stats final_standing <= 2
+      }
+    });
+
+    historyModel = seasonStats.map(s => {
+      const wins = s.wins || 0;
+      const games = (s.wins||0) + (s.losses||0) + (s.ties||0);
+      const points = s.points_for || 0;
+      const ppg = games > 0 ? (points / games) : 0;
+      const rank = s.final_standing || 99;
+
+      // Logic: 
+      // Champ: Rank 1
+      // Finals: Rank 1 or 2
+      // Playoffs: Rank <= 6 (Assuming 12 team league with 6 team playoff is standard)
+      // Alternatively use the set we built from matchups if ranking is missing.
+      
+      const isChamp = (rank === 1);
+      const isFinals = (rank <= 2);
+      const isPlayoffs = (rank <= 6); // Standard 12-team logic
+
+      return { wins, ppg, isPlayoffs, isFinals, isChamp, year: s.year, manager: s.manager };
+    });
+  }
+
+  // --- Calculation: Weekly ---
+  window.calcWeekly = function() {
+    const val = parseFloat(document.getElementById('scoreInput').value);
+    if (isNaN(val)) return;
+
+    // Normal CDF
+    const z = (val - leagueMeta.mean) / leagueMeta.std;
+    // Approximation of CDF
+    const t = 1 / (1 + .2316419 * Math.abs(z));
+    const d = .3989423 * Math.exp(-z * z / 2);
+    let prob = d * t * (.3193815 + t * (-.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+    if (z > 0) prob = 1 - prob;
+    
+    const percent = (prob * 100).toFixed(1);
+    const percentile = getPercentile(val);
+    const diff = (val - leagueMeta.mean).toFixed(1);
+
+    document.getElementById('winProbDisplay').textContent = `${percent}%`;
+    document.getElementById('percentileDisplay').textContent = `Percentile: ${percentile}th`;
+    document.getElementById('vsAvgDisplay').textContent = (diff > 0 ? "+" : "") + diff;
+    document.getElementById('weeklyResult').classList.add('show');
+
+    // Update Interpretation
+    const el = document.getElementById('weeklyInterp');
+    if (prob > 0.8) el.innerHTML = `<span style="color:var(--positive)">Elite!</span> Use this score to crush opponents.`;
+    else if (prob > 0.5) el.innerHTML = `<span style="color:var(--accent)">Solid.</span> A win is likely but not guaranteed.`;
+    else el.innerHTML = `<span style="color:var(--negative)">Risky.</span> You'll need some luck to win with this score.`;
+
+    updateChart(val);
+  };
+
+  function getPercentile(score) {
+    const sorted = leagueMeta.scores;
+    let count = 0;
+    for(let s of sorted) {
+      if (s < score) count++;
+    }
+    return ((count / sorted.length) * 100).toFixed(0);
+  }
+
+  // --- Calculation: Season ---
+  window.calcSeason = function() {
+    const wInput = document.getElementById('winsInput').value;
+    const pInput = document.getElementById('ppgInput').value;
+    
+    if (!wInput && !pInput) {
+      alert("Please enter Wins OR PPG.");
+      return;
+    }
+
+    let subset = [];
+    let label = "";
+
+    if (wInput) {
+      const w = parseInt(wInput);
+      // Filter: Exact wins, or small range if sample is tiny? 
+      // Let's use exact wins, but if N < 5, widen range by +/- 1
+      subset = historyModel.filter(t => t.wins === w);
+      if (subset.length < 5) {
+        subset = historyModel.filter(t => t.wins >= w - 1 && t.wins <= w + 1);
+      }
+      label = `${w} Wins`;
+    } else {
+      const p = parseFloat(pInput);
+      // Filter: PPG +/- 5%
+      const range = p * 0.05;
+      subset = historyModel.filter(t => t.ppg >= p - range && t.ppg <= p + range);
+      label = `${p} PPG`;
+    }
+
+    if (subset.length === 0) {
+      alert("No historical teams found with similar stats.");
+      return;
+    }
+
+    const n = subset.length;
+    const nPlayoffs = subset.filter(x => x.isPlayoffs).length;
+    const nFinals = subset.filter(x => x.isFinals).length;
+    const nChamp = subset.filter(x => x.isChamp).length;
+
+    updateOddsUI('probPlayoffs', nPlayoffs, n);
+    updateOddsUI('probFinals', nFinals, n);
+    updateOddsUI('probChamp', nChamp, n);
+
+    document.getElementById('sampleSize1').textContent = n;
+    document.getElementById('seasonResult').classList.add('show');
+    
+    document.getElementById('seasonInterp').innerHTML = 
+      `Historically, teams with stats similar to <strong>${label}</strong> made the playoffs 
+      <strong style="color:var(--accent)">${Math.round((nPlayoffs/n)*100)}%</strong> of the time.`;
+  }
+
+  function updateOddsUI(id, count, total) {
+    const pct = (count / total) * 100;
+    const el = document.getElementById(id);
+    el.textContent = `${pct.toFixed(0)}%`;
+    
+    el.className = 'odds-val'; // reset
+    if (pct >= 70) el.classList.add('odds-high');
+    else if (pct >= 40) el.classList.add('odds-med');
+    else el.classList.add('odds-low');
+  }
+
+  // --- Charting ---
+  function initChart() {
+    const ctx = document.getElementById('scoreChart').getContext('2d');
+    
+    // Generate buckets
+    const bucketSize = 10;
+    const bins = {};
+    for(let i=40; i<=180; i+=bucketSize) bins[i] = 0;
+    
+    leagueMeta.scores.forEach(s => {
+      const b = Math.floor(s / bucketSize) * bucketSize;
+      if (bins[b] !== undefined) bins[b]++;
+    });
+
+    const labels = Object.keys(bins);
+    const data = Object.values(bins);
+
+    Chart.defaults.color = '#9ca3af';
+    Chart.defaults.borderColor = '#1f2937';
+
+    chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Frequency',
+          data: data,
+          backgroundColor: 'rgba(56, 189, 248, 0.3)',
+          borderColor: '#38bdf8',
+          borderWidth: 1,
+          borderRadius: 4,
+          hoverBackgroundColor: '#38bdf8'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: 'rgba(55,65,81,0.2)' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  function updateChart(userScore) {
+    if (!chartInstance) return;
+    
+    const bucket = Math.floor(userScore / 10) * 10;
+    
+    // Highlight the user's bucket
+    const bgColors = chartInstance.data.labels.map(l => 
+      parseInt(l) === bucket ? '#22c55e' : 'rgba(56, 189, 248, 0.3)'
+    );
+    const borderColors = chartInstance.data.labels.map(l => 
+      parseInt(l) === bucket ? '#22c55e' : '#38bdf8'
+    );
+
+    chartInstance.data.datasets[0].backgroundColor = bgColors;
+    chartInstance.data.datasets[0].borderColor = borderColors;
+    chartInstance.update();
+  }
+
+</script>
+</body>
+</html>
