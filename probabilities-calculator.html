@@ -90,6 +90,19 @@
     .section.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
+    /* Instructions */
+    .instruction-text {
+      text-align: center;
+      color: var(--text-soft);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+      line-height: 1.5;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .highlight { color: var(--text-main); font-weight: 600; }
+
     /* Inputs */
     .input-row {
       display: flex;
@@ -257,6 +270,11 @@
     </div>
 
     <div id="weeklySection" class="section active">
+      <p class="instruction-text">
+        Enter a fantasy score to calculate its win probability based on <span id="weeklyCount" class="highlight">0</span> historical matchups. 
+        The model fits a normal distribution to every score recorded in league history.
+      </p>
+
       <div class="input-row">
         <div class="input-group">
           <label for="scoreInput">Your Score</label>
@@ -294,6 +312,11 @@
     </div>
 
     <div id="seasonSection" class="section">
+      <p class="instruction-text">
+        Enter a win total or PPG to compare against <span id="seasonCount" class="highlight">0</span> historical seasons.
+        The model identifies teams with <strong>similar profiles</strong> to project playoff and championship odds.
+      </p>
+
       <div class="input-row">
         <div class="input-group">
           <label for="winsInput">Season Wins</label>
@@ -331,7 +354,7 @@
         </div>
 
         <div class="info-text" id="seasonInterp">
-          Enter your total wins or average points per game to see how similar teams fared in league history.
+          Enter your total wins or average points per game to see how teams with similar profiles fared in league history.
         </div>
       </div>
     </div>
@@ -346,7 +369,7 @@
   let rawMatchups = [];
   let seasonStats = [];
   let leagueMeta = { mean: 0, std: 0, scores: [] };
-  let historyModel = []; // Array of { wins, ppg, madePlayoffs, madeFinals, madeChamp }
+  let historyModel = []; 
   let chartInstance = null;
 
   // --- Init ---
@@ -365,6 +388,10 @@
       processWeeklyData();
       processHistoricalModel();
       
+      // Update dynamic counts in instructions
+      document.getElementById('weeklyCount').textContent = rawMatchups.length;
+      document.getElementById('seasonCount').textContent = seasonStats.length;
+
       document.getElementById('loading').style.display = 'none';
       
       // Init Chart
@@ -411,14 +438,8 @@
 
   // --- Data Processing: Historical Model ---
   function processHistoricalModel() {
-    // 1. Identify Playoff Teams from Matchups
-    // A team made playoffs if they played in a game labeled "Playoff" (except maybe consolations, but standard json usually labels true playoffs)
-    // Actually, safer method: Check season-stats final_standing.
-    // If standing <= 4 (or 6), likely playoff.
-    // Accolades logic used playoff weeks. Let's use `league-scores` to find who played in playoff weeks.
-    
-    const playoffTeams = {}; // { year: Set(managers) }
-    const finalsTeams = {}; // { year: Set(managers) }
+    // Determine playoff teams via matchups
+    const playoffTeams = {}; 
     
     rawMatchups.forEach(m => {
       if (m.playoffs && m.playoffs !== "N/A") {
@@ -426,9 +447,6 @@
         if (!playoffTeams[y]) playoffTeams[y] = new Set();
         if (m.manager1) playoffTeams[y].add(m.manager1);
         if (m.manager2) playoffTeams[y].add(m.manager2);
-
-        // Heuristic: Finals is usually the latest week played in a year
-        // We will refine finals via season-stats final_standing <= 2
       }
     });
 
@@ -439,15 +457,13 @@
       const ppg = games > 0 ? (points / games) : 0;
       const rank = s.final_standing || 99;
 
-      // Logic: 
-      // Champ: Rank 1
-      // Finals: Rank 1 or 2
-      // Playoffs: Rank <= 6 (Assuming 12 team league with 6 team playoff is standard)
-      // Alternatively use the set we built from matchups if ranking is missing.
-      
       const isChamp = (rank === 1);
       const isFinals = (rank <= 2);
-      const isPlayoffs = (rank <= 6); // Standard 12-team logic
+      // Fallback if final_standing isn't reliable for Playoffs: check if they played in playoff matchups
+      let isPlayoffs = (rank <= 6); 
+      if (playoffTeams[s.year] && playoffTeams[s.year].has(s.manager)) {
+        isPlayoffs = true;
+      }
 
       return { wins, ppg, isPlayoffs, isFinals, isChamp, year: s.year, manager: s.manager };
     });
@@ -508,8 +524,6 @@
 
     if (wInput) {
       const w = parseInt(wInput);
-      // Filter: Exact wins, or small range if sample is tiny? 
-      // Let's use exact wins, but if N < 5, widen range by +/- 1
       subset = historyModel.filter(t => t.wins === w);
       if (subset.length < 5) {
         subset = historyModel.filter(t => t.wins >= w - 1 && t.wins <= w + 1);
@@ -517,14 +531,13 @@
       label = `${w} Wins`;
     } else {
       const p = parseFloat(pInput);
-      // Filter: PPG +/- 5%
-      const range = p * 0.05;
+      const range = p * 0.05; // +/- 5%
       subset = historyModel.filter(t => t.ppg >= p - range && t.ppg <= p + range);
       label = `${p} PPG`;
     }
 
     if (subset.length === 0) {
-      alert("No historical teams found with similar stats.");
+      alert("No historical teams found with similar profiles.");
       return;
     }
 
@@ -541,7 +554,7 @@
     document.getElementById('seasonResult').classList.add('show');
     
     document.getElementById('seasonInterp').innerHTML = 
-      `Historically, teams with stats similar to <strong>${label}</strong> made the playoffs 
+      `Historically, teams with <strong>similar profiles</strong> (${label}) made the playoffs 
       <strong style="color:var(--accent)">${Math.round((nPlayoffs/n)*100)}%</strong> of the time.`;
   }
 
