@@ -441,7 +441,7 @@
   // Weekly containers
   let weeklyRowsByMatchupType = {}; // { matchupType: [row...] }
 
-  const MATCHUP_TYPES = ["All Matchups","Regular Season Matchups","Playoff Matchups"];
+  const MATCHUP_TYPES = ["Regular Season + Playoffs","Regular Season Only","Playoff Matchups"];
 
   // ---------------------------
   // Category definitions
@@ -631,9 +631,9 @@
 
   function getMatchupTypesForMatch(m){
     const types = new Set();
-    types.add("All Matchups");
+    types.add("Regular Season + Playoffs");
     if (isPlayoffGame(m)) types.add("Playoff Matchups");
-    else types.add("Regular Season Matchups");
+    else types.add("Regular Season Only");
     return types;
   }
 
@@ -1418,7 +1418,7 @@
     let raw = allRaw;
 
     // playoff caps: wins >=3, losses >=2
-    if (matchupType === "Playoff Matchups"){
+    if (matchupType === "Playoffs Only"){
       raw = (def.streakType === "win") ? allRaw.filter(s => s.length >= 3) : allRaw.filter(s => s.length >= 2);
     }
     // regular season longest winning streak: min 8
@@ -2073,7 +2073,7 @@
     // Career-only: Weekly highs not valid for playoffs (kept)
     if (
       currentScope === "Career" &&
-      matchupType === "Playoff Matchups" &&
+      matchupType === "Playoffs Only" &&
       def.group === "Weekly Dominance"
     ){
       setNoData("Note · Weekly high scores are only tracked for Regular Season matchups.");
