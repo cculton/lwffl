@@ -1,697 +1,457 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>LWFFL League Amendments</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
-        :root {
-            --bg: #020617;
-            --bg-elevated: #020617;
-            --card-bg: radial-gradient(circle at top left, #111827 0%, #020617 55%, #000000 100%);
-            --border-subtle: rgba(148, 163, 184, 0.35);
-            --accent: #22c55e;
-            --accent-soft: rgba(34, 197, 94, 0.15);
-            --accent-alt: #38bdf8;
-            --text-main: #e5e7eb;
-            --text-muted: #9ca3af;
-            --table-header-bg: rgba(15, 23, 42, 0.95);
-            --chip-bg: rgba(15, 23, 42, 0.8);
-            --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.55);
-            --radius-xl: 18px;
-            --radius-lg: 12px;
-            --radius-pill: 999px;
-        }
+  <meta charset="UTF-8" />
+  <title>Amendment History · LWFFL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #020617;
+      --bg-card: #020617;
+      --border-subtle: rgba(148, 163, 184, 0.25);
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --accent: #22c55e;
+    }
 
-        * {
-            box-sizing: border-box;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        body {
-            margin: 0;
-            min-height: 100vh;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background:
-                radial-gradient(circle at top, rgba(55, 65, 81, 0.7), transparent 55%),
-                radial-gradient(circle at bottom, rgba(15, 23, 42, 0.9), #000000 70%);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            padding: 24px 12px;
-        }
+    html, body {
+      height: 100%;
+    }
 
-        .container {
-            width: 100%;
-            max-width: 1100px;
-            background: var(--card-bg);
-            border-radius: var(--radius-xl);
-            border: 1px solid rgba(148, 163, 184, 0.4);
-            box-shadow: var(--shadow-soft);
-            padding: 24px 22px 26px;
-            position: relative;
-            overflow: hidden;
-        }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #020617 0, #020617 45%, #000 100%);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
 
-        @media (min-width: 768px) {
-            .container {
-                padding: 28px 26px 28px;
-            }
-        }
+    /* Top bar – match H2H style */
+    .page-header {
+      width: 100%;
+      padding: 20px 16px 18px;
+      border-bottom: 1px solid rgba(30, 64, 175, 0.5);
+      background: radial-gradient(circle at top, #020617 0%, #020617 40%, #020617 100%);
+      text-align: center;
+    }
 
-        /* Subtle gradient edge glow */
-        .container::before {
-            content: "";
-            position: absolute;
-            inset: -1px;
-            border-radius: inherit;
-            border: 1px solid transparent;
-            background:
-                linear-gradient(120deg, rgba(34, 197, 94, 0.25), rgba(59, 130, 246, 0.15), rgba(56, 189, 248, 0.2))
-                border-box;
-            mix-blend-mode: screen;
-            opacity: 0.2;
-            pointer-events: none;
-        }
+    .page-header h1 {
+      font-size: 1.8rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #f9fafb;
+      margin-bottom: 4px;
+    }
 
-        .container-inner {
-            position: relative;
-            z-index: 1;
-        }
+    .page-header p {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #9ca3af;
+    }
 
-        .header {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 20px;
-        }
+    .shell {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 12px 24px;
+      flex: 1 0 auto;
+    }
 
-        .title-row {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 10px;
-        }
+    .card {
+      background: linear-gradient(145deg, #020617 0%, #020617 50%, #020617 100%);
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow:
+        0 18px 35px rgba(15, 23, 42, 0.7),
+        0 0 0 1px rgba(15, 23, 42, 0.8);
+      padding: 22px 22px 18px;
+    }
 
-        .title-row h1 {
-            margin: 0;
-            font-size: 1.6rem;
-            letter-spacing: 0.03em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+    @media (min-width: 720px) {
+      .card {
+        padding: 26px 28px 22px;
+      }
+    }
 
-        .title-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 3px 10px;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.9);
-            border: 1px solid rgba(148, 163, 184, 0.5);
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
+    .header {
+      margin-bottom: 18px;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+      padding-bottom: 12px;
+    }
 
-        .title-pill span.dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 999px;
-            background: var(--accent);
-            box-shadow: 0 0 10px rgba(34, 197, 94, 0.85);
-        }
+    .header p {
+      margin-top: 4px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
 
-        .subtitle {
-            margin: 0;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
+    .header-meta {
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
 
-        .subtitle span.league-name {
-            color: var(--accent-alt);
-            font-weight: 500;
-        }
+    .header-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-        .meta-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 6px;
-        }
+    .header-meta span::before {
+      content: "";
+      width: 4px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.6);
+    }
 
-        .meta-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 10px;
-            border-radius: var(--radius-pill);
-            background: var(--chip-bg);
-            border: 1px solid rgba(148, 163, 184, 0.4);
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
+    .description {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
 
-        .meta-chip span.label {
-            font-weight: 500;
-            color: #e5e7eb;
-        }
+    .description strong {
+      color: var(--text-main);
+      font-weight: 500;
+    }
 
-        .meta-chip span.value {
-            opacity: 0.9;
-        }
+    .table-card {
+      margin-top: 18px;
+      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.9), #020617 55%);
+      border-radius: 14px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      padding: 14px 14px 10px;
+    }
 
-        /* Table Card */
-        .table-card {
-            margin-top: 18px;
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-subtle);
-            background: radial-gradient(circle at 0% 0%, rgba(30, 64, 175, 0.32), transparent 55%),
-                        radial-gradient(circle at 100% 100%, rgba(34, 197, 94, 0.18), transparent 55%),
-                        rgba(15, 23, 42, 0.96);
-            padding: 16px 14px 18px;
-        }
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
 
-        @media (min-width: 768px) {
-            .table-card {
-                padding: 18px 18px 20px;
-            }
-        }
+    .table-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #e5e7eb;
+    }
 
-        .table-card-header {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
+    .table-subtitle {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
 
-        .table-card-header-title {
-            font-size: 1rem;
-            font-weight: 600;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            align-items: center;
-        }
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(148, 163, 184, 0.7) transparent;
+    }
 
-        .table-card-header-title span.emphasis {
-            color: var(--accent);
-        }
+    .table-wrapper::-webkit-scrollbar {
+      height: 6px;
+    }
 
-        .table-card-header-sub {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
+    .table-wrapper::-webkit-scrollbar-track {
+      background: transparent;
+    }
 
-        .category-legend {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
+    .table-wrapper::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.65);
+      border-radius: 999px;
+    }
 
-        .legend-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 3px 8px;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.9);
-            border: 1px solid rgba(148, 163, 184, 0.4);
-        }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+      font-size: 0.88rem;
+    }
 
-        .legend-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 999px;
-        }
+    thead {
+      background: linear-gradient(
+        to right,
+        rgba(15, 23, 42, 0.95),
+        rgba(17, 24, 39, 0.9)
+      );
+    }
 
-        .legend-dot.green {
-            background: #22c55e;
-        }
+    th, td {
+      padding: 9px 10px;
+      text-align: left;
+      white-space: nowrap;
+    }
 
-        .legend-dot.red {
-            background: #ef4444;
-        }
+    th {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-weight: 600;
+      color: #9ca3af;
+      border-bottom: 1px solid rgba(75, 85, 99, 0.9);
+    }
 
-        .legend-dot.blue {
-            background: #38bdf8;
-        }
+    tbody tr {
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+    }
 
-        /* Responsive table wrapper */
-        .table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            border-radius: 10px;
-            border: 1px solid rgba(31, 41, 55, 0.9);
-            background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.9));
-        }
+    tbody tr:nth-child(odd) {
+      background: rgba(15, 23, 42, 0.6);
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 620px;
-            font-size: 0.86rem;
-        }
+    tbody tr:nth-child(even) {
+      background: rgba(15, 23, 42, 0.3);
+    }
 
-        @media (max-width: 600px) {
-            table {
-                font-size: 0.8rem;
-                min-width: 520px;
-            }
-        }
+    tbody tr:hover {
+      background: rgba(31, 41, 55, 0.95);
+    }
 
-        thead {
-            background: linear-gradient(to right, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.98));
-        }
+    td {
+      color: #e5e7eb;
+    }
 
-        thead th {
-            padding: 10px 10px;
-            text-align: left;
-            font-weight: 600;
-            color: #cbd5f5;
-            border-bottom: 1px solid rgba(55, 65, 81, 0.9);
-            white-space: nowrap;
-        }
+    td.year-col {
+      color: #9ca3af;
+      font-variant-numeric: tabular-nums;
+    }
 
-        tbody tr {
-            border-bottom: 1px solid rgba(31, 41, 55, 0.85);
-        }
+    td.amendment-col {
+      font-weight: 500;
+    }
 
-        tbody tr:last-of-type {
-            border-bottom: none;
-        }
+    td.category-col {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #a5b4fc;
+    }
 
-        tbody td {
-            padding: 9px 10px;
-            color: #e5e7eb;
-            vertical-align: top;
-        }
+    td.description-col {
+      white-space: normal;
+      max-width: 420px;
+    }
 
-        tbody tr:nth-child(odd) {
-            background: rgba(15, 23, 42, 0.96);
-        }
+    td.status-col {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
 
-        tbody tr:nth-child(even) {
-            background: rgba(15, 23, 42, 0.92);
-        }
+    .status-passed {
+      color: var(--accent);
+    }
 
-        tbody tr:hover {
-            background: radial-gradient(circle at left, rgba(34, 197, 94, 0.14), rgba(15, 23, 42, 0.98));
-        }
+    .status-implemented {
+      color: #38bdf8;
+    }
 
-        .col-year {
-            width: 60px;
-            font-variant-numeric: tabular-nums;
-            color: #9ca3af;
-        }
+    @media (max-width: 768px) {
+      .shell {
+        padding: 14px 10px 18px;
+      }
 
-        .col-name {
-            min-width: 220px;
-            font-weight: 500;
-        }
+      .card {
+        padding: 18px 14px 14px;
+      }
 
-        .col-category {
-            min-width: 110px;
-            color: #a5b4fc;
-            font-size: 0.8rem;
-        }
+      .table-card {
+        padding: 12px 10px 8px;
+      }
 
-        .col-status {
-            white-space: nowrap;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
+      table {
+        font-size: 0.8rem;
+        min-width: 640px;
+      }
 
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            padding: 2px 9px;
-            border-radius: 999px;
-            font-size: 0.75rem;
-            border: 1px solid transparent;
-        }
-
-        .status-pass {
-            color: #bbf7d0;
-            background: rgba(34, 197, 94, 0.12);
-            border-color: rgba(34, 197, 94, 0.5);
-        }
-
-        .status-fail {
-            color: #fecaca;
-            background: rgba(239, 68, 68, 0.12);
-            border-color: rgba(239, 68, 68, 0.6);
-        }
-
-        .status-implemented {
-            color: #bfdbfe;
-            background: rgba(59, 130, 246, 0.14);
-            border-color: rgba(59, 130, 246, 0.6);
-        }
-
-        .col-description {
-            color: var(--text-muted);
-            font-size: 0.8rem;
-        }
-
-        .chip-inline {
-            display: inline-flex;
-            align-items: center;
-            padding: 1px 7px;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.8);
-            font-size: 0.7rem;
-            border: 1px solid rgba(148, 163, 184, 0.4);
-            margin-left: 4px;
-            color: #9ca3af;
-        }
-
-        footer {
-            margin-top: 14px;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .footer-note {
-            opacity: 0.8;
-        }
-    </style>
+      th, td {
+        padding: 7px 8px;
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-    <div class="container-inner">
-        <header class="header">
-            <div class="title-row">
-                <h1>
-                    League Amendments
-                    <span class="title-pill">
-                        <span class="dot"></span>
-                        <span>Governance Log • Since 2017</span>
-                    </span>
-                </h1>
-            </div>
-            <p class="subtitle">
-                <span class="league-name">Legion of Whom Fantasy Football League</span> · A running history of rules,
-                structure, and scoring changes that shape how the league plays.
-            </p>
-            <div class="meta-row">
-                <div class="meta-chip">
-                    <span class="label">Scope</span>
-                    <span class="value">Standings, playoffs, scoring, waivers, rosters, finances, and draft format</span>
-                </div>
-                <div class="meta-chip">
-                    <span class="label">Use</span>
-                    <span class="value">Reference when questions come up about “when” and “why” rules changed</span>
-                </div>
-            </div>
-        </header>
+  <div class="page-header">
+    <h1>AMENDMENT HISTORY</h1>
+    <p>LEGION OF WHOM FANTASY FOOTBALL LEAGUE · 2017–PRESENT</p>
+  </div>
+
+  <div class="shell">
+    <div class="card">
+      <header class="header">
+        <p>This page tracks <strong>passed</strong> league amendments and implemented rules, listed from <strong>most recent</strong> to <strong>oldest</strong>. Failed proposals and vote counts are intentionally omitted.</p>
+        <div class="header-meta">
+          <span>Draft, structure, scoring, waivers, finances, and roster configuration.</span>
+        </div>
+      </header>
 
         <section class="table-card">
-            <div class="table-card-header">
-                <div class="table-card-header-title">
-                    <span>Amendment Timeline</span>
-                    <span class="emphasis">2017–2025</span>
-                </div>
-                <div class="table-card-header-sub">
-                    Each row is a formal vote or commissioner decision that materially changed how the league operates.
-                </div>
-            </div>
-
-            <div class="category-legend">
-                <div class="legend-pill">
-                    <span class="legend-dot green"></span>
-                    <span>Passed / Implemented</span>
-                </div>
-                <div class="legend-pill">
-                    <span class="legend-dot red"></span>
-                    <span>Failed</span>
-                </div>
-                <div class="legend-pill">
-                    <span class="legend-dot blue"></span>
-                    <span>Context chips (tiebreakers, COVID, etc.)</span>
-                </div>
-            </div>
-
             <div class="table-wrapper">
-                <table>
+                <table class="amendment-table">
                     <thead>
                     <tr>
-                        <th class="col-year">Year</th>
-                        <th class="col-name">Amendment / Proposal</th>
-                        <th class="col-category">Category</th>
-                        <th class="col-description">Brief Description</th>
-                        <th class="col-status">Status / Result</th>
+                        <th>Year</th>
+                        <th>Amendment – Proposal</th>
+                        <th>Category</th>
+                        <th>Brief Description</th>
+                        <th>Status</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <!-- 2017 -->
+                    <!-- Most recent → oldest. Only passed / implemented items. -->
                     <tr>
-                        <td class="col-year">2017</td>
-                        <td class="col-name">Proposal #1 – Add H2H as 2nd Tiebreaker</td>
-                        <td class="col-category">Standings</td>
-                        <td class="col-description">
-                            Sets league tiebreakers as:
-                            (1) Points For, (2) Head-to-Head, (3) Points Against, (4) Coin flip.
-                            <span class="chip-inline">Regular-season ranking logic</span>
+                        <td class="year-col">2025</td>
+                        <td class="amendment-col">Amendment #14 – TE/WR Flex</td>
+                        <td class="category-col">Roster</td>
+                        <td class="description-col">
+                            Removed the dedicated TE spot and replaced it with a WR/TE flex position.
                         </td>
-                        <td class="col-status">
-                            <span class="status-pill status-pass">PASSED (8–0)</span>
-                        </td>
+                        <td class="status-col status-passed">Passed</td>
                     </tr>
                     <tr>
-                        <td class="col-year">2017</td>
-                        <td class="col-name">Proposal #3 – Top Seed Chooses Playoff Opponent v1</td>
-                        <td class="col-category">Playoffs</td>
-                        <td class="col-description">
-                            Early version: top active seed chooses their playoff opponent in the first two rounds.
-                            <span class="chip-inline">Superseded by 2021 “modern” version</span>
+                        <td class="year-col">2025</td>
+                        <td class="amendment-col">Amendment #13 – Permanent Auction Draft</td>
+                        <td class="category-col">Draft</td>
+                        <td class="description-col">
+                            Made the auction draft the permanent default format going forward.
                         </td>
-                        <td class="col-status">
-                            <span class="status-pill status-fail">FAILED (5–4)</span>
-                        </td>
-                    </tr>
-
-                    <!-- 2018 -->
-                    <tr>
-                        <td class="col-year">2018</td>
-                        <td class="col-name">Amendment #1 – “Thursday Night” Trade Rule</td>
-                        <td class="col-category">Trades</td>
-                        <td class="col-description">
-                            Adds accelerated same-day review for TNF trades agreed to / submitted by noon
-                            and requested by 1 p.m., so deals can clear before kickoff.
-                        </td>
-                        <td class="col-status">
-                            <span class="status-pill status-pass">PASSED (7–0)</span>
-                        </td>
+                        <td class="status-col status-passed">Passed</td>
                     </tr>
                     <tr>
-                        <td class="col-year">2018</td>
-                        <td class="col-name">Amendment #2 – Buy-In $20 → $40</td>
-                        <td class="col-category">Finances</td>
-                        <td class="col-description">
-                            Doubles the league buy-in from $20 to $40 with proportional payout adjustments.
+                        <td class="year-col">2024</td>
+                        <td class="amendment-col">Amendment #12 – Re-Proposal – One-Year Auction Draft</td>
+                        <td class="category-col">Draft</td>
+                        <td class="description-col">
+                            Used an auction draft for that season only, with permanence reconsidered later.
                         </td>
-                        <td class="col-status">
-                            <span class="status-pill status-pass">PASSED (10–1)</span>
-                        </td>
-                    </tr>
-
-                    <!-- 2020 -->
-                    <tr>
-                        <td class="col-year">2020</td>
-                        <td class="col-name">Amendment – Buy-In $40 → $50</td>
-                        <td class="col-category">Finances</td>
-                        <td class="col-description">
-                            Raises the buy-in again from $40 to $50 as the league pot grows over time.
-                        </td>
-                        <td class="col-status">
-                            <span class="status-pill status-pass">PASSED</span>
-                        </td>
+                        <td class="status-col status-passed">Passed</td>
                     </tr>
                     <tr>
-                        <td class="col-year">2020</td>
-                        <td class="col-name">Amendment – COVID Contingency Plan</td>
-                        <td class="col-category">Finances</td>
-                        <td class="col-description">
-                            Defines refunds and payouts if the NFL season is shut down:
-                            separate handling for shutdown before Week 8, between Weeks 8–13,
-                            or after Week 13.
-                            <span class="chip-inline">Pandemic-era safety net</span>
+                        <td class="year-col">2021</td>
+                        <td class="amendment-col">Amendment #11 – Choice of Opponent in Playoffs</td>
+                        <td class="category-col">Playoffs</td>
+                        <td class="description-col">
+                            Created new playoff structure hwere highest remaining seed selects their playoff opponent in the first round and semifinals.
                         </td>
-                        <td class="col-status">
-                            <span class="status-pill status-pass">PASSED</span>
-                        </td>
+                        <td class="status-col status-passed">Passed</td>
                     </tr>
                     <tr>
-                        <td class="col-year">2020</td>
-                        <td class="col-name">Extra IR Slot(s) for COVID</td>
-                        <td class="col-category">Roster</td>
-                        <td class="col-description">
-                            Adds at least one extra IR slot to accommodate players sidelined by COVID protocols.
-                            <span class="chip-inline">Commissioner decision</span>
+                        <td class="year-col">2021</td>
+                        <td class="amendment-col">Amendment #10 – 3-Division Realignment</td>
+                        <td class="category-col">Structure</td>
+                        <td class="description-col">
+                            Moved the league to three divisions and updated schedule and playoff seeding around division winners.
                         </td>
-                        <td class="col-status">
-                            <span class="status-pill status-implemented">IMPLEMENTED</span>
-                        </td>
-                    </tr>
-
-                    <!-- 2021 -->
-                    <tr>
-                        <td class="col-year">2021</td>
-                        <td class="col-name">Amendment #1 – Buy-In to $75</td>
-                        <td class="col-category">Finances</td>
-                        <td class="col-description">
-                            Increases buy-in from $50 to $75, further scaling prize pools with league maturity.
-                        </td>
-                        <td class="col-status">
-                            <span class="status-pill status-pass">PASSED</span>
-                        </td>
+                        <td class="status-col status-passed">Passed</td>
                     </tr>
                     <tr>
-                        <td class="col-year">2021</td>
-                        <td class="col-name">Amendment #2 – Waiver Logic Change</td>
-                        <td class="col-category">Waivers</td>
-                        <td class="col-description">
-                            Moves to a hybrid system:
-                            first weekly waiver run via FAAB / auction, then rest of the week is open add/drop
-                            instead of waivers all week.
+                        <td class="year-col">2021</td>
+                        <td class="amendment-col">Amendment #9 – Instantaneous Trade Processing</td>
+                        <td class="category-col">Trades</td>
+                        <td class="description-col">
+                            Trades process immediately when accepted; commissioner handles suspected collusion manually.
                         </td>
-                        <td class="col-status">
-                            <span class="status-pill status-pass">PASSED</span>
-                        </td>
+                        <td class="status-col status-passed">Passed</td>
                     </tr>
                     <tr>
-                        <td class="col-year">2021</td>
-                        <td class="col-name">Amendment #3 – Kicker Scoring Overhaul</td>
-                        <td class="col-category">Scoring</td>
-                        <td class="col-description">
-                            Adds a 60+ yard FG tier and tweaks points / penalties for
-                            various field-goal ranges and missed kicks / PATs.
+                        <td class="year-col">2021</td>
+                        <td class="amendment-col">Amendment #8 – Kicker Scoring Overhaul</td>
+                        <td class="category-col">Scoring</td>
+                        <td class="description-col">
+                            Added a 60+ yard FG tier and adjusted scoring and penalties across FG ranges and missed kicks/PATs.
                         </td>
-                        <td class="col-status">
-                            <span class="status-pill status-pass">PASSED</span>
-                        </td>
+                        <td class="status-col status-passed">Passed</td>
                     </tr>
                     <tr>
-                        <td class="col-year">2021</td>
-                        <td class="col-name">Amendment #4 – Remove Automatic Trade-Review Period</td>
-                        <td class="col-category">Trades</td>
-                        <td class="col-description">
-                            Trades now process immediately upon acceptance; collusion and bad-faith moves
-                            are handled manually by the commissioner if needed.
+                        <td class="year-col">2021</td>
+                        <td class="amendment-col">Amendment #7 – FAAB Process Change</td>
+                        <td class="category-col">Waivers</td>
+                        <td class="description-col">
+                            First weekly run uses FAAB; the rest of the week is free agent add/drop instead of all-week FAAB processing.
                         </td>
-                        <td class="col-status">
-                            <span class="status-pill status-pass">PASSED</span>
-                        </td>
+                        <td class="status-col status-passed">Passed</td>
                     </tr>
                     <tr>
-                        <td class="col-year">2021</td>
-                        <td class="col-name">Amendment #5 – 3-Division Realignment</td>
-                        <td class="col-category">Structure</td>
-                        <td class="col-description">
-                            Realigns the league into 3 divisions and updates schedule & seeding logic
-                            (three division winners slotted as top playoff seeds, etc.).
+                        <td class="year-col">2021</td>
+                        <td class="amendment-col">Amendment #6 – Buy-In $50 → $75</td>
+                        <td class="category-col">Finances</td>
+                        <td class="description-col">
+                            Raised the buy-in from $50 to $75 with payouts adjusted accordingly.
                         </td>
-                        <td class="col-status">
-                            <span class="status-pill status-pass">PASSED</span>
-                        </td>
+                        <td class="status-col status-passed">Passed</td>
                     </tr>
                     <tr>
-                        <td class="col-year">2021</td>
-                        <td class="col-name">Amendment #6 – Top Seed Chooses Opponent (modern)</td>
-                        <td class="col-category">Playoffs</td>
-                        <td class="col-description">
-                            Modern version of the “pick your opponent” rule:
-                            the highest remaining seed chooses its playoff opponent in each of the first two rounds.
+                        <td class="year-col">2020</td>
+                        <td class="amendment-col">LM Decision – Extra IR Slot(s) for COVID</td>
+                        <td class="category-col">Roster</td>
+                        <td class="description-col">
+                            Adds at least one additional IR spot to help handle COVID-related player absences.
                         </td>
-                        <td class="col-status">
-                            <span class="status-pill status-pass">PASSED</span>
-                        </td>
-                    </tr>
-
-                    <!-- 2024 -->
-                    <tr>
-                        <td class="col-year">2024</td>
-                        <td class="col-name">Amendment #1 – Switch to Auction Draft (Permanent)</td>
-                        <td class="col-category">Draft</td>
-                        <td class="col-description">
-                            Attempts to permanently replace snake drafts with an auction format (e.g., $200 budget).
-                            Fell one vote short.
-                        </td>
-                        <td class="col-status">
-                            <span class="status-pill status-fail">FAILED (stalled one vote short)</span>
-                        </td>
+                        <td class="status-col status-implemented">Implemented (LM)</td>
                     </tr>
                     <tr>
-                        <td class="col-year">2024</td>
-                        <td class="col-name">Re-Proposal – One-Year Auction Draft</td>
-                        <td class="col-category">Draft</td>
-                        <td class="col-description">
-                            Compromise approach: run an auction draft for that season only, with the
-                            understanding that permanence will be revisited afterward.
+                        <td class="year-col">2020</td>
+                        <td class="amendment-col">Amendment #5 – COVID Contingency Plan</td>
+                        <td class="category-col">Finances</td>
+                        <td class="description-col">
+                            Defined refunds and payout rules for different scenarios if the NFL season was shortened or canceled.
                         </td>
-                        <td class="col-status">
-                            <span class="status-pill status-pass">PASSED</span>
-                        </td>
-                    </tr>
-
-                    <!-- 2025 -->
-                    <tr>
-                        <td class="col-year">2025</td>
-                        <td class="col-name">Amendment #1 – Permanent Auction Draft</td>
-                        <td class="col-category">Draft</td>
-                        <td class="col-description">
-                            Second attempt at making auction the default format going forward;
-                            this time the permanent switch is approved.
-                        </td>
-                        <td class="col-status">
-                            <span class="status-pill status-pass">PASSED</span>
-                        </td>
+                        <td class="status-col status-passed">Passed</td>
                     </tr>
                     <tr>
-                        <td class="col-year">2025</td>
-                        <td class="col-name">Amendment #2 – Replace TE with TE/WR Flex</td>
-                        <td class="col-category">Roster</td>
-                        <td class="col-description">
-                            Removes the dedicated TE starting slot and replaces it with a TE/WR flex position,
-                            increasing lineup flexibility.
+                        <td class="year-col">2020</td>
+                        <td class="amendment-col">Amendment #4 – Buy-In $40 → $50</td>
+                        <td class="category-col">Finances</td>
+                        <td class="description-col">
+                            Increased the buy-in from $40 to $50 with proportional prize adjustments.
                         </td>
-                        <td class="col-status">
-                            <span class="status-pill status-pass">PASSED (7–0)</span>
-                        </td>
+                        <td class="status-col status-passed">Passed</td>
                     </tr>
                     <tr>
-                        <td class="col-year">2025</td>
-                        <td class="col-name">Amendment #3 – “Travis Hunter” Scoring Categories</td>
-                        <td class="col-category">Scoring</td>
-                        <td class="col-description">
-                            Proposes adding rare D/ST-style scoring for offensive players
-                            (pick-sixes, blocked kicks, etc.) in the spirit of Travis Hunter-type usage.
+                        <td class="year-col">2018</td>
+                        <td class="amendment-col">Amendment #3 – Buy-In $20 → $40</td>
+                        <td class="category-col">Finances</td>
+                        <td class="description-col">
+                            Doubled the buy-in from $20 to $40 while maintaining proportional payout structure.
                         </td>
-                        <td class="col-status">
-                            <span class="status-pill status-fail">FAILED (7–2)</span>
+                        <td class="status-col status-passed">Passed</td>
+                    </tr>
+                    <tr>
+                        <td class="year-col">2018</td>
+                        <td class="amendment-col">Amendment #2 – “Thursday Night” Trade Rule</td>
+                        <td class="category-col">Trades</td>
+                        <td class="description-col">
+                            Allowed accelerated same-day review for Thursday night trades submitted by noon and requested by early afternoon.
                         </td>
+                        <td class="status-col status-passed">Passed</td>
+                    </tr>
+                    <tr>
+                        <td class="year-col">2017</td>
+                        <td class="amendment-col">Amendment #1 – Add H2H as 2nd Tiebreaker</td>
+                        <td class="category-col">Standings</td>
+                        <td class="description-col">
+                            Sets tiebreakers as: (1) Points For, (2) Head-to-Head, (3) Points Against, (4) Coin Flip.
+                        </td>
+                        <td class="status-col status-passed">Passed</td>
                     </tr>
                     </tbody>
                 </table>
             </div>
         </section>
-
-        <footer>
-            <div class="footer-note">
-                This page is meant as the single source of truth for LWFFL rule changes. Update it whenever a new amendment is proposed and voted on.
-            </div>
-        </footer>
     </div>
 </div>
 </body>
