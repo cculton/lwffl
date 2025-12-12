@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Accolades – LWFFL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root{
+      --bg-main:#020617;
+      --card-bg:#020617;
+      --accent:#38bdf8;
+      --border-subtle:#1f2937;
+      --text-main:#e5e7eb;
+      --text-muted:#9ca3af;
+      --text-soft:#6b7280;
+      --positive:#22c55e;
+    }
+
+    body{
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #020617 0%, #020617 35%, #020617 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    .shell{ max-width: 1100px; margin: 0 auto; }
+
+    .container{
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,0.12), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(59,130,246,0.18), transparent 55%),
+        var(--card-bg);
+      border-radius: 18px;
+      border: 1px solid rgba(148,163,184,0.3);
+      box-shadow: 0 40px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(15,23,42,0.9);
+      padding: 28px 24px;
+    }
+
+    .header{
+      text-align:center;
+      margin-bottom: 18px;
+    }
+
+    .header h1{
+      font-size: 2rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color:#f9fafb;
+    }
+
+    .header p{
+      color: var(--text-soft);
+      font-size: 0.85rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    .leaderboard-card{
+      background: rgba(15,23,42,0.96);
+      border-radius: 14px;
+      border: 1px solid rgba(31,41,55,0.95);
+      padding: 18px 16px;
+    }
+
+    .leaderboard-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      margin-bottom: 12px;
+      flex-wrap:wrap;
+      gap:12px;
+    }
+
+    .leaderboard-title{
+      font-size:1.1rem;
+      font-weight:600;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+    }
+
+    .leaderboard-subtitle{
+      font-size:0.8rem;
+      color: var(--text-soft);
+      letter-spacing:0.16em;
+      text-transform:uppercase;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 9px;
+      border-radius:999px;
+      border:1px solid rgba(55,65,81,0.9);
+      background: rgba(15,23,42,0.9);
+      font-size:0.72rem;
+      letter-spacing:0.12em;
+      text-transform:uppercase;
+      color: var(--text-muted);
+    }
+
+    .pill-dot{
+      width:6px;
+      height:6px;
+      border-radius:999px;
+      background: var(--accent);
+    }
+
+    .table-wrap{
+      width:100%;
+      overflow-x:auto;
+      border-radius:10px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width: 820px;
+      font-size:0.9rem;
+    }
+
+    th{
+      padding:8px 10px;
+      font-size:0.75rem;
+      letter-spacing:0.18em;
+      text-transform:uppercase;
+      color: var(--text-muted);
+      border-bottom:1px solid rgba(55,65,81,0.9);
+      cursor:pointer;
+      white-space:nowrap;
+      text-align:left;
+    }
+
+    td{
+      padding:9px 10px;
+      border-bottom:1px solid rgba(31,41,55,0.9);
+      white-space:nowrap;
+      text-align:left;
+      font-variant-numeric: tabular-nums;
+    }
+
+    tbody tr:hover{
+      background: rgba(15,23,42,0.98);
+    }
+
+    .rank-cell{
+      color: var(--text-muted);
+      font-weight:600;
+      width:60px;
+    }
+
+    .manager-cell{
+      font-weight:500;
+    }
+
+    .featured-col{
+      background: rgba(56,189,248,0.08);
+      font-weight:600;
+      color: var(--positive);
+    }
+
+    .top-rank{
+      box-shadow: inset 2px 0 0 rgba(56,189,248,0.8);
+    }
+
+    .pagination{
+      display:flex;
+      justify-content:flex-end;
+      gap:12px;
+      margin-top:10px;
+      font-size:0.78rem;
+      color: var(--text-soft);
+    }
+
+    .page-btn{
+      border:1px solid rgba(55,65,81,0.9);
+      background: rgba(15,23,42,0.85);
+      color:#f9fafb;
+      padding:6px 10px;
+      border-radius:8px;
+      cursor:pointer;
+    }
+
+    .page-btn:disabled{
+      opacity:0.4;
+      cursor:not-allowed;
+    }
+  </style>
+</head>
+
+<body>
+<div class="shell">
+  <div class="container">
+    <header class="header">
+      <h1>Accolades</h1>
+      <p>Career Honors & Postseason Résumé · 2014–Present</p>
+    </header>
+
+    <section class="leaderboard-card">
+      <div class="leaderboard-header">
+        <div>
+          <div class="leaderboard-title">Career Accolades</div>
+          <div class="leaderboard-subtitle">Season outcomes & playoff history</div>
+        </div>
+        <div class="pill">
+          <span class="pill-dot"></span>
+          Career Totals
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr id="headerRow"></tr>
+          </thead>
+          <tbody id="body"></tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <button class="page-btn" id="prev">Prev</button>
+        <span id="pageInfo"></span>
+        <button class="page-btn" id="next">Next</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const PAGE_SIZE = 25;
+let currentPage = 1;
+let sortKey = "championships";
+let sortDir = "desc";
+let rows = [];
+
+const COLUMNS = [
+  { key:"rank", label:"Rank" },
+  { key:"manager", label:"Manager" },
+  { key:"championships", label:"Championships", featured:true },
+  { key:"scoringTitles", label:"Scoring Titles" },
+  { key:"playoffApps", label:"Playoffs" },
+  { key:"semifinalApps", label:"Semifinals" },
+  { key:"firstRoundApps", label:"Round 1" },
+  { key:"avgFinalStanding", label:"Avg Finish" },
+  { key:"seasons", label:"Seasons" }
+];
+
+function compare(a,b){
+  const va = a[sortKey], vb = b[sortKey];
+  if (va === vb) return 0;
+  if (va == null) return 1;
+  if (vb == null) return -1;
+  return sortDir === "asc" ? va - vb : vb - va;
+}
+
+function render(){
+  const sorted = [...rows].sort(compare);
+  sorted.forEach((r,i)=>r.rank=i+1);
+
+  const start = (currentPage-1)*PAGE_SIZE;
+  const pageRows = sorted.slice(start,start+PAGE_SIZE);
+
+  const body = document.getElementById("body");
+  body.innerHTML = "";
+
+  pageRows.forEach(r=>{
+    const tr = document.createElement("tr");
+    if (r.rank === 1) tr.classList.add("top-rank");
+
+    COLUMNS.forEach(c=>{
+      const td = document.createElement("td");
+      td.textContent = c.key==="avgFinalStanding" && r[c.key]!=null
+        ? r[c.key].toFixed(2)
+        : r[c.key] ?? "-";
+      if (c.key==="rank") td.className="rank-cell";
+      if (c.key==="manager") td.className="manager-cell";
+      if (c.featured) td.classList.add("featured-col");
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+
+  document.getElementById("pageInfo").textContent =
+    `Page ${currentPage} of ${Math.ceil(sorted.length/PAGE_SIZE)}`;
+}
+
+function buildHeaders(){
+  const header = document.getElementById("headerRow");
+  header.innerHTML = "";
+  COLUMNS.forEach(c=>{
+    const th = document.createElement("th");
+    th.textContent = c.label;
+    if (c.featured) th.classList.add("featured-col");
+    th.onclick = ()=>{
+      if (sortKey === c.key) sortDir = sortDir==="asc"?"desc":"asc";
+      else { sortKey = c.key; sortDir="desc"; }
+      currentPage = 1;
+      render();
+    };
+    header.appendChild(th);
+  });
+}
+
+async function loadJSON(path){
+  const res = await fetch(path);
+  return res.ok ? res.json() : [];
+}
+
+(async()=>{
+  const games = await loadJSON("league-scores.json");
+  const seasons = await loadJSON("season-stats.json");
+
+  const map = {};
+
+  seasons.forEach(r=>{
+    const m = map[r.manager] ??= { manager:r.manager, championships:0, scoringTitles:0, avgFinalStanding:null, seasons:0 };
+    m.seasons++;
+    if (r.final_standing === 1) m.championships++;
+  });
+
+  const byYear = {};
+  seasons.forEach(r=>{
+    byYear[r.year] ??= [];
+    byYear[r.year].push(r);
+  });
+
+  Object.values(byYear).forEach(list=>{
+    const max = Math.max(...list.map(x=>x.points_for));
+    list.filter(x=>x.points_for===max).forEach(x=>{
+      map[x.manager].scoringTitles++;
+    });
+  });
+
+  games.forEach(g=>{
+    if (!g.playoffs || g.playoffs==="N/A") return;
+    [g.manager1,g.manager2].forEach(m=>{
+      const r = map[m] ??= { manager:m, championships:0, scoringTitles:0, avgFinalStanding:null, seasons:0 };
+      r.playoffApps = (r.playoffApps||0)+1;
+    });
+  });
+
+  rows = Object.values(map).map(r=>({
+    rank:0,
+    manager:r.manager,
+    championships:r.championships||0,
+    scoringTitles:r.scoringTitles||0,
+    playoffApps:r.playoffApps||0,
+    semifinalApps:0,
+    firstRoundApps:0,
+    avgFinalStanding:r.avgFinalStanding,
+    seasons:r.seasons||0
+  }));
+
+  buildHeaders();
+  render();
+})();
+</script>
+</body>
+</html>
