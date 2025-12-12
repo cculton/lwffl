@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Postseason Resumes – LWFFL</title>
+  <title>Postseason Accomplishments – LWFFL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
@@ -244,7 +244,7 @@
   <div class="shell">
     <div class="container">
       <header class="header">
-        <h1>Postseason Resumes</h1>
+        <h1>Postseason Accomplishments</h1>
         <p>Legion of Whom Fantasy Football League · 2014–Present</p>
       </header>
 
@@ -273,7 +273,7 @@
         </div>
 
         <div class="no-data" id="noDataMessage">
-          <span>Loading accolades…</span>
+          <span>Loading accomplishments…</span>
         </div>
 
         <div class="footer-note">
@@ -408,7 +408,7 @@
     };
   }
 
-  function buildAccoladesFromLeagueScores(matches){
+  function buildFromLeagueScores(matches){
     const map = {};
     const yearsByManager = {};
     const playoffByManagerYear = {}; // { mgr: { year: {r1,r2,r3} } }
@@ -670,7 +670,7 @@
     seasonStatsRaw = await loadJSON("season-stats.json");
 
     // Build from league-scores.json
-    const map = buildAccoladesFromLeagueScores(rawMatchups);
+    const map = buildFromLeagueScores(rawMatchups);
 
     // Calculate Scoring Titles (regular season)
     applyScoringTitles(rawMatchups, map);
