@@ -278,7 +278,7 @@
       <div class="input-row">
         <div class="input-group">
           <label for="scoreInput">Your Score</label>
-          <input type="number" id="scoreInput" placeholder="e.g. 105.5" step="0.1">
+          <input type="number" id="scoreInput" placeholder="e.g., 105.5" step="0.1">
         </div>
         <button class="action-btn" onclick="calcWeekly()">Calculate Win %</button>
       </div>
@@ -286,7 +286,6 @@
       <div id="weeklyResult" class="result-card">
         <div class="main-stat-label">Win Probability</div>
         <div class="main-stat-val" id="winProbDisplay">-</div>
-        <div class="main-stat-sub" id="percentileDisplay">Percentile: -</div>
         
         <div class="info-text" id="weeklyInterp">Enter a score to see how it stacks up against historical data.</div>
 
@@ -320,13 +319,13 @@
       <div class="input-row">
         <div class="input-group">
           <label for="winsInput">Season Wins</label>
-          <input type="number" id="winsInput" placeholder="e.g. 8" min="0" max="14">
+          <input type="number" id="winsInput" placeholder="e.g., 8" min="0" max="14">
         </div>
         <div class="input-group">
           <label style="text-transform:none; font-size:0.75rem; color:var(--text-soft); text-align:center; padding-top:10px;">— OR —</label>
         </div>
         <div class="input-group">
-          <label for="ppgInput">Points Per Game (PPG)</label>
+          <label for="ppgInput">Points Per Matchup (PPM)</label>
           <input type="number" id="ppgInput" placeholder="e.g. 115.5" step="0.1">
         </div>
         <button class="action-btn" onclick="calcSeason()">Get Odds</button>
@@ -344,12 +343,12 @@
           <div class="odds-card">
             <div class="odds-title">Reach Finals</div>
             <div class="odds-val" id="probFinals">-</div>
-            <div class="odds-sub">Made Championship Game</div>
+            <div class="odds-sub">Made Championship</div>
           </div>
           <div class="odds-card">
             <div class="odds-title">Win Title</div>
             <div class="odds-val" id="probChamp">-</div>
-            <div class="odds-sub">Won League</div>
+            <div class="odds-sub">Won Championship</div>
           </div>
         </div>
 
@@ -483,11 +482,11 @@
     if (z > 0) prob = 1 - prob;
     
     const percent = (prob * 100).toFixed(1);
-    const percentile = getPercentile(val);
+    // Removed Percentile Calculation
     const diff = (val - leagueMeta.mean).toFixed(1);
 
     document.getElementById('winProbDisplay').textContent = `${percent}%`;
-    document.getElementById('percentileDisplay').textContent = `Percentile: ${percentile}th`;
+    // Removed Percentile UI Update
     document.getElementById('vsAvgDisplay').textContent = (diff > 0 ? "+" : "") + diff;
     document.getElementById('weeklyResult').classList.add('show');
 
@@ -500,14 +499,7 @@
     updateChart(val);
   };
 
-  function getPercentile(score) {
-    const sorted = leagueMeta.scores;
-    let count = 0;
-    for(let s of sorted) {
-      if (s < score) count++;
-    }
-    return ((count / sorted.length) * 100).toFixed(0);
-  }
+  // Removed getPercentile() helper function as it is no longer used
 
   // --- Calculation: Season ---
   window.calcSeason = function() {
