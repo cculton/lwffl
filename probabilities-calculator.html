@@ -493,7 +493,7 @@
 
     // Update Interpretation
     const el = document.getElementById('weeklyInterp');
-    if (prob > 0.8) el.innerHTML = `<span style="color:var(--positive)">Elite!</span> Use this score to crush opponents.`;
+    if (prob > 0.8) el.innerHTML = `<span style="color:var(--positive)">Elite!</span>You should win based on this score.`;
     else if (prob > 0.5) el.innerHTML = `<span style="color:var(--accent)">Solid.</span> A win is likely but not guaranteed.`;
     else el.innerHTML = `<span style="color:var(--negative)">Risky.</span> You'll need some luck to win with this score.`;
 
