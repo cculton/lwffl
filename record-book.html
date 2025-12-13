@@ -445,7 +445,7 @@
   // Weekly containers
   let weeklyRowsByMatchupType = {}; // { matchupType: [row...] }
 
-  const MATCHUP_TYPES = ["All Matchups","Regular Season Only","Playoffs Only"];
+  const MATCHUP_TYPES = ["Regular Season + Playoffs","Regular Season Only","Playoffs Only"];
 
   // ---------------------------
   // Category definitions
@@ -657,7 +657,7 @@
 
   function getMatchupTypesForMatch(m){
     const types = new Set();
-    types.add("All Matchups");
+    types.add("Regular Season + Playoffs");
     if (isPlayoffGame(m)) types.add("Playoffs Only");
     else types.add("Regular Season Only");
     return types;
