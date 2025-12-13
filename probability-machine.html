@@ -138,10 +138,10 @@
     }
     input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px rgba(56,189,248,0.5); }
     
-    /* New Feature: Lighten placeholder text */
+    /* Placeholder styling */
     ::placeholder {
       color: rgba(156, 163, 175, 0.4) !important;
-      opacity: 1; /* Firefox fix */
+      opacity: 1; 
     }
 
     button.action-btn {
@@ -175,7 +175,7 @@
     }
     .result-card.show { display: block; }
 
-    /* New Feature: Season Footer Style */
+    /* Season Footer Style */
     .result-footer {
       margin-top: 24px;
       padding-top: 20px;
@@ -295,7 +295,7 @@
       <div class="input-row">
         <div class="input-group">
           <label for="scoreInput">Your Score</label>
-          <input type="number" id="scoreInput" placeholder="e.g., 105.5" step="0.1" style="max-width: 160px;">
+          <input type="number" id="scoreInput" placeholder="e.g., 105.5" step="0.1">
         </div>
         <button class="action-btn" onclick="calcWeekly()">Calculate Win %</button>
       </div>
@@ -500,11 +500,24 @@
     document.getElementById('vsAvgDisplay').textContent = (diff > 0 ? "+" : "") + diff;
     document.getElementById('weeklyResult').classList.add('show');
 
-    // Update Interpretation
+    // Update Interpretation: New 6-Tier Logic
     const el = document.getElementById('weeklyInterp');
-    if (prob > 0.8) el.innerHTML = `<span style="color:var(--positive)">Elite!</span>You should win based on this score.`;
-    else if (prob > 0.5) el.innerHTML = `<span style="color:var(--accent)">Solid.</span> A win is likely but not guaranteed.`;
-    else el.innerHTML = `<span style="color:var(--negative)">Risky.</span> You'll need some luck to win with this score.`;
+    let html = '';
+    
+    if (prob >= 0.90) {
+        html = `<span style="color:var(--positive)">Dominant.</span> Absolute powerhouse score.`;
+    } else if (prob >= 0.75) {
+        html = `<span style="color:var(--positive)">Strong Favorite.</span> You should win this handily.`;
+    } else if (prob >= 0.60) {
+        html = `<span style="color:#38bdf8">Solid.</span> Odds are definitely in your favor.`;
+    } else if (prob >= 0.40) {
+        html = `<span style="color:var(--warning)">Coin Flip.</span> This could go either way.`;
+    } else if (prob >= 0.20) {
+        html = `<span style="color:var(--negative)">Underdog.</span> You'll need your opponent to struggle.`;
+    } else {
+        html = `<span style="color:var(--negative)">Miracle Needed.</span> Start praying to the fantasy gods.`;
+    }
+    el.innerHTML = html;
 
     updateChart(val);
   };
@@ -584,6 +597,11 @@
     const labels = Object.keys(bins);
     const data = Object.values(bins);
 
+    // Create Color Arrays to Hide 0 values
+    // If value is 0, make it transparent. Otherwise default color.
+    const bgColors = data.map(v => v > 0 ? 'rgba(56, 189, 248, 0.3)' : 'transparent');
+    const borderColors = data.map(v => v > 0 ? '#38bdf8' : 'transparent');
+
     Chart.defaults.color = '#9ca3af';
     Chart.defaults.borderColor = '#1f2937';
 
@@ -594,12 +612,12 @@
         datasets: [{
           label: 'Frequency',
           data: data,
-          backgroundColor: 'rgba(56, 189, 248, 0.3)',
-          borderColor: '#38bdf8',
+          backgroundColor: bgColors,
+          borderColor: borderColors,
           borderWidth: 1,
           borderRadius: 4,
           hoverBackgroundColor: '#38bdf8',
-          minBarLength: 5 // Ensure single scores are visible
+          minBarLength: 5 // Ensures 1s are visible, while 0s are hidden via transparent color
         }]
       },
       options: {
@@ -618,14 +636,20 @@
     if (!chartInstance) return;
     
     const bucket = Math.floor(userScore / 10) * 10;
+    const data = chartInstance.data.datasets[0].data;
     
-    // Highlight the user's bucket
-    const bgColors = chartInstance.data.labels.map(l => 
-      parseInt(l) === bucket ? '#22c55e' : 'rgba(56, 189, 248, 0.3)'
-    );
-    const borderColors = chartInstance.data.labels.map(l => 
-      parseInt(l) === bucket ? '#22c55e' : '#38bdf8'
-    );
+    // Highlight the user's bucket, keep 0s transparent
+    const bgColors = chartInstance.data.labels.map((l, i) => {
+      const val = data[i];
+      if (val === 0) return 'transparent';
+      return parseInt(l) === bucket ? '#22c55e' : 'rgba(56, 189, 248, 0.3)';
+    });
+
+    const borderColors = chartInstance.data.labels.map((l, i) => {
+      const val = data[i];
+      if (val === 0) return 'transparent';
+      return parseInt(l) === bucket ? '#22c55e' : '#38bdf8';
+    });
 
     chartInstance.data.datasets[0].backgroundColor = bgColors;
     chartInstance.data.datasets[0].borderColor = borderColors;
