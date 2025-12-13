@@ -435,7 +435,7 @@
   let aggregatesByScope = {};
   let streaksByScope = {};
 
-  // Career accolades (from season-stats.json + playoff participation)
+  // Career accolades (from final-standings.json + playoff participation)
   let seasonStatsRaw = [];
   let accoladesByMatchupType = {};
 
@@ -2023,14 +2023,14 @@
 
   async function loadSeasonStats(){
     try{
-      const res = await fetch("season-stats.json");
+      const res = await fetch("final-standings.json");
       if (!res.ok){
-        console.error("Failed to load season-stats.json:", res.status, res.statusText);
+        console.error("Failed to load final-standings.json:", res.status, res.statusText);
         return [];
       }
       return await res.json();
     } catch(err){
-      console.error("Error loading season-stats.json", err);
+      console.error("Error loading final-standings.json", err);
       return [];
     }
   }
