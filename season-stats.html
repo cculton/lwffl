@@ -34,7 +34,7 @@
     }
 
     .shell {
-      max-width: 1200px;
+      max-width: 1200px; /* Increased slightly for extra columns */
       margin: 0 auto;
     }
 
@@ -84,7 +84,6 @@
     .control-group {
       display: flex;
       flex-direction: column;
-      position: relative; /* Needed for dropdown positioning */
     }
 
     label {
@@ -96,118 +95,44 @@
       text-transform: uppercase;
     }
 
-    /* --- Custom Multi-Select Styles --- */
-    .multi-select-box {
-      background-color: #0b1120;
-      border: 1px solid rgba(75, 85, 99, 0.9);
-      border-radius: 10px;
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
       padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background-color: #0b1120;
       color: #f9fafb;
       font-size: 0.95rem;
       font-weight: 500;
+      line-height: 1.4;
+      outline: none;
       cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      user-select: none;
       box-shadow: 0 1px 3px rgba(15, 23, 42, 0.7);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    .multi-select-box:hover {
+    select:focus {
       border-color: var(--accent);
+      box-shadow:
+        0 0 0 1px rgba(56, 189, 248, 0.7),
+        0 0 12px rgba(56, 189, 248, 0.45);
     }
 
-    .multi-select-label {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-right: 10px;
+    optgroup {
+      background-color: #020617;
+      color: var(--text-soft);
+      font-style: normal;
+      font-size: 0.8rem;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    .dropdown-arrow {
-      font-size: 0.7rem;
-      color: var(--text-muted);
+    select option {
+      background-color: #020617;
+      color: #f9fafb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background-color: #0b1120;
-      border: 1px solid rgba(56, 189, 248, 0.5);
-      border-radius: 10px;
-      margin-top: 6px;
-      z-index: 50;
-      max-height: 300px;
-      overflow-y: auto;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.8);
-    }
-
-    .dropdown-menu.open {
-      display: block;
-    }
-
-    .dropdown-item {
-      padding: 8px 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      border-bottom: 1px solid rgba(31, 41, 55, 0.5);
-      transition: background 0.1s;
-    }
-
-    .dropdown-item:last-child {
-      border-bottom: none;
-    }
-
-    .dropdown-item:hover {
-      background-color: rgba(56, 189, 248, 0.15);
-    }
-
-    .dropdown-item input[type="checkbox"] {
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      border: 1px solid var(--text-muted);
-      border-radius: 3px;
-      background: transparent;
-      cursor: pointer;
-      display: grid;
-      place-content: center;
-    }
-
-    .dropdown-item input[type="checkbox"]::before {
-      content: "";
-      width: 10px;
-      height: 10px;
-      transform: scale(0);
-      transition: 120ms transform ease-in-out;
-      box-shadow: inset 1em 1em var(--accent);
-      transform-origin: center;
-      clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
-    }
-
-    .dropdown-item input[type="checkbox"]:checked::before {
-      transform: scale(1);
-    }
-
-    .dropdown-item input[type="checkbox"]:checked {
-      border-color: var(--accent);
-    }
-    
-    .select-all-row {
-      background-color: rgba(15, 23, 42, 0.95);
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      border-bottom: 1px solid rgba(56, 189, 248, 0.3);
-      font-weight: 600;
-      color: var(--accent);
-    }
-    /* -------------------------------- */
 
     .hint {
       font-size: 0.8rem;
@@ -250,6 +175,7 @@
       text-transform: uppercase;
     }
 
+    /* NEW: Wrapper for horizontal scrolling on mobile */
     .table-wrap {
       width: 100%;
       overflow-x: auto;
@@ -261,6 +187,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 0.9rem;
+      /* Min-width ensures columns don't crush on small screens */
       min-width: 1100px; 
       border-radius: 10px;
       overflow: hidden;
@@ -271,7 +198,7 @@
     }
 
     .leaderboard-table th {
-      padding: 10px 10px; 
+      padding: 10px 10px; /* Slight padding increase */
       font-size: 0.78rem;
       text-transform: uppercase;
       letter-spacing: 0.18em;
@@ -392,12 +319,15 @@
       .container {
         padding: 22px 14px 20px;
       }
+
       .header h1 {
         font-size: 1.4rem;
       }
+
       .leaderboard-title {
         font-size: 1rem;
       }
+
       .leaderboard-table th,
       .leaderboard-table td {
         padding: 7px 6px;
@@ -414,29 +344,21 @@
       </header>
 
       <section class="controls">
-        <div class="control-group" id="managerControl">
-          <label>Manager</label>
-          <div class="multi-select-box" onclick="toggleDropdown('manager')">
-            <span class="multi-select-label" id="managerLabel">All Managers</span>
-            <span class="dropdown-arrow">▼</span>
-          </div>
-          <div class="dropdown-menu" id="managerDropdown">
-            </div>
+        <div class="control-group">
+          <label for="managerSelect">Manager</label>
+          <select id="managerSelect">
+            <option value="__all__">All Managers</option>
+          </select>
         </div>
-
-        <div class="control-group" id="yearControl">
-          <label>Season</label>
-          <div class="multi-select-box" onclick="toggleDropdown('year')">
-            <span class="multi-select-label" id="yearLabel">All Seasons</span>
-            <span class="dropdown-arrow">▼</span>
-          </div>
-          <div class="dropdown-menu" id="yearDropdown">
-            </div>
+        <div class="control-group">
+          <label for="yearSelect">Season</label>
+          <select id="yearSelect">
+            <option value="__all__">All Seasons</option>
+          </select>
         </div>
-
         <div class="control-group">
           <div class="hint">
-            Select multiple options to compare specific eras or rivals.
+            Use filters to explore seasons.
           </div>
         </div>
       </section>
@@ -448,7 +370,7 @@
               All Seasons · All Managers
             </div>
             <div class="leaderboard-subtitle" id="leaderboardSubtitle">
-              Filtered Data View
+              Filter by manager and season
             </div>
           </div>
         </div>
@@ -480,10 +402,7 @@
       direction: "desc"
     };
 
-    // Filter States
-    let selectedManagers = []; // empty implies ALL
-    let selectedYears = [];    // empty implies ALL
-
+    // Updated Header Defs
     const headerDefs = [
       { key: "rank", label: "Rank" },
       { key: "year", label: "Season" },
@@ -496,9 +415,9 @@
       { key: "points_against", label: "PA" },
       { key: "ppm_for", label: "PPM" },
       { key: "ppm_against", label: "PAPM" },
-      { key: "weekly_margin", label: "MARG" },
-      { key: "division_finish", label: "DF" },
-      { key: "playoff_seed", label: "PS" },
+      { key: "weekly_margin", label: "MARG" },  // Moved & Renamed (was WM)
+      { key: "division_finish", label: "DF" },  // Moved
+      { key: "playoff_seed", label: "PS" },     // New
       { key: "final_standing", label: "FS" },
       { key: "transaction_count", label: "TRANS" }
     ];
@@ -563,174 +482,46 @@
       };
     }
 
-    // --- Multi-Select Logic ---
+    function populateFilters() {
+      const managerSelect = document.getElementById("managerSelect");
+      const yearSelect = document.getElementById("yearSelect");
 
-    function toggleDropdown(type) {
-      const menu = document.getElementById(`${type}Dropdown`);
-      const isOpen = menu.classList.contains("open");
-      // Close all first
-      document.querySelectorAll(".dropdown-menu").forEach(el => el.classList.remove("open"));
-      if (!isOpen) {
-        menu.classList.add("open");
-      }
-    }
-
-    // Close dropdowns when clicking outside
-    document.addEventListener("click", (e) => {
-      if (!e.target.closest(".control-group")) {
-        document.querySelectorAll(".dropdown-menu").forEach(el => el.classList.remove("open"));
-      }
-    });
-
-    function createDropdownItem(text, value, type, isSelectAll = false) {
-      const div = document.createElement("div");
-      div.className = "dropdown-item";
-      if (isSelectAll) div.classList.add("select-all-row");
-      
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.value = value;
-      
-      // Initial check state
-      if (isSelectAll) {
-        const list = type === 'manager' ? selectedManagers : selectedYears;
-        checkbox.checked = (list.length === 0); // Empty list = All Selected
-        checkbox.addEventListener("change", () => handleSelectAll(type, checkbox.checked));
-      } else {
-        const list = type === 'manager' ? selectedManagers : selectedYears;
-        // If list is empty (ALL), check everything visually
-        checkbox.checked = list.length === 0 || list.includes(value);
-        checkbox.addEventListener("change", () => handleItemSelect(type, value, checkbox.checked));
-      }
-
-      const label = document.createElement("span");
-      label.textContent = text;
-
-      div.appendChild(checkbox);
-      div.appendChild(label);
-      div.onclick = (e) => {
-        if (e.target !== checkbox) {
-          checkbox.checked = !checkbox.checked;
-          checkbox.dispatchEvent(new Event("change"));
-        }
-      };
-
-      return div;
-    }
-
-    function handleSelectAll(type, isChecked) {
-      if (type === 'manager') selectedManagers = []; // Clear to imply ALL
-      if (type === 'year') selectedYears = [];       // Clear to imply ALL
-      
-      refreshDropdownUI(type);
-      renderTable();
-    }
-
-    function handleItemSelect(type, value, isChecked) {
-      let list = type === 'manager' ? selectedManagers : selectedYears;
-      let allPossible = type === 'manager' 
-        ? Array.from(new Set(allSeasons.map(r => r.manager))).filter(Boolean)
-        : Array.from(new Set(allSeasons.map(r => String(r.year))));
-      
-      // If list was empty (ALL mode), and we uncheck one, we must populate list with everything else
-      if (list.length === 0 && !isChecked) {
-        list = allPossible.filter(item => item !== value);
-      } 
-      // If list was empty (ALL mode) and we check one... wait, standard logic:
-      // If currently "ALL", all checkboxes are visually checked. 
-      // Unchecking one enters "Specific" mode.
-      else if (list.length === 0 && isChecked) {
-         // This state shouldn't happen via UI click because they are already checked.
-         // But if logic shifts:
-         // If we are in "Specific" mode:
-      } else {
-         if (isChecked) {
-           list.push(value);
-         } else {
-           list = list.filter(item => item !== value);
-         }
-      }
-
-      // If we selected everything manually, revert to empty (ALL) state
-      if (list.length === allPossible.length) {
-        list = [];
-      }
-
-      // Update global state
-      if (type === 'manager') selectedManagers = list;
-      else selectedYears = list;
-
-      refreshDropdownUI(type);
-      renderTable();
-    }
-
-    function refreshDropdownUI(type) {
-      // Re-render checkboxes based on current state
-      // This is simpler than toggling DOM elements individually
-      if (type === 'manager') populateManagerDropdown();
-      else populateYearDropdown();
-      updateLabel(type);
-    }
-
-    function updateLabel(type) {
-      const labelEl = document.getElementById(`${type}Label`);
-      const list = type === 'manager' ? selectedManagers : selectedYears;
-      
-      if (list.length === 0) {
-        labelEl.textContent = type === 'manager' ? "All Managers" : "All Seasons";
-      } else if (list.length === 1) {
-        labelEl.textContent = list[0];
-      } else {
-        labelEl.textContent = `${list.length} Selected`;
-      }
-    }
-
-    function populateManagerDropdown() {
-      const container = document.getElementById("managerDropdown");
-      container.innerHTML = "";
-      
       const managers = Array.from(
         new Set(
-          allSeasons.map(r => r.manager).filter(m => m && m.trim().length > 0)
+          allSeasons
+            .map(r => r.manager)
+            .filter(m => m && m.trim().length > 0)
         )
       ).sort((a, b) => a.localeCompare(b));
 
-      // Select All Option
-      container.appendChild(createDropdownItem("Select All", "all", "manager", true));
-
       managers.forEach(m => {
-        container.appendChild(createDropdownItem(m, m, "manager"));
+        const opt = document.createElement("option");
+        opt.value = m;
+        opt.textContent = m;
+        managerSelect.appendChild(opt);
       });
-    }
-
-    function populateYearDropdown() {
-      const container = document.getElementById("yearDropdown");
-      container.innerHTML = "";
 
       const years = Array.from(
         new Set(allSeasons.map(r => r.year))
-      ).sort((a, b) => b - a);
-
-      // Select All Option
-      container.appendChild(createDropdownItem("Select All", "all", "year", true));
+      ).sort((a, b) => b - a); // DESCENDING
 
       years.forEach(y => {
-        container.appendChild(createDropdownItem(String(y), String(y), "year"));
+        const opt = document.createElement("option");
+        opt.value = String(y);
+        opt.textContent = y;
+        yearSelect.appendChild(opt);
       });
     }
 
     function getFilteredRows() {
+      const managerValue = document.getElementById("managerSelect").value;
+      const yearValue = document.getElementById("yearSelect").value;
+
       return allSeasons
         .map(decorateRow)
         .filter(r => {
-          // Check Managers
-          if (selectedManagers.length > 0 && !selectedManagers.includes(r.manager)) {
-            return false;
-          }
-          // Check Years
-          if (selectedYears.length > 0 && !selectedYears.includes(String(r.year))) {
-             return false;
-          }
+          if (managerValue !== "__all__" && r.manager !== managerValue) return false;
+          if (yearValue !== "__all__" && String(r.year) !== yearValue) return false;
           return true;
         });
     }
@@ -768,13 +559,20 @@
 
       const filtered = getFilteredRows();
 
-      // Dynamic Title
-      const mCount = selectedManagers.length === 0 ? "All Managers" : 
-                     selectedManagers.length === 1 ? selectedManagers[0] : "Multiple Managers";
-      const yCount = selectedYears.length === 0 ? "All Seasons" : 
-                     selectedYears.length === 1 ? `${selectedYears[0]} Season` : "Multiple Seasons";
-      
-      titleEl.textContent = `${yCount} · ${mCount}`;
+      const managerValue = document.getElementById("managerSelect").value;
+      const yearValue = document.getElementById("yearSelect").value;
+
+      let titleText = "";
+      if (managerValue === "__all__" && yearValue === "__all__") {
+        titleText = "All Seasons · All Managers";
+      } else if (managerValue === "__all__") {
+        titleText = `${yearValue} Season · All Managers`;
+      } else if (yearValue === "__all__") {
+        titleText = `All Seasons · ${managerValue}`;
+      } else {
+        titleText = `${yearValue} Season · ${managerValue}`;
+      }
+      titleEl.textContent = titleText;
 
       if (!filtered.length) {
         headerRow.innerHTML = "";
@@ -901,7 +699,7 @@
         if (isSort("ppm_against")) ppmAgainstTd.classList.add("sorted-col-cell");
         tr.appendChild(ppmAgainstTd);
 
-        // MARG
+        // MARG (Weekly Margin)
         const marginTd = document.createElement("td");
         if (row.weekly_margin != null) {
           let formatted = formatNumber(row.weekly_margin, 1);
@@ -918,19 +716,19 @@
         if (isSort("weekly_margin")) marginTd.classList.add("sorted-col-cell");
         tr.appendChild(marginTd);
 
-        // DF
+        // DF (Division Finish)
         const divTd = document.createElement("td");
         divTd.textContent = row.division_finish != null ? formatInteger(row.division_finish) : "—";
         if (isSort("division_finish")) divTd.classList.add("sorted-col-cell");
         tr.appendChild(divTd);
 
-        // PS
+        // PS (Playoff Seed)
         const seedTd = document.createElement("td");
         seedTd.textContent = row.playoff_seed != null ? formatInteger(row.playoff_seed) : "—";
         if (isSort("playoff_seed")) seedTd.classList.add("sorted-col-cell");
         tr.appendChild(seedTd);
 
-        // FS
+        // FS (Final Standing)
         const finalTd = document.createElement("td");
         finalTd.textContent = row.final_standing != null ? formatInteger(row.final_standing) : "—";
         if (isSort("final_standing")) finalTd.classList.add("sorted-col-cell");
@@ -976,6 +774,7 @@
         ]);
         
         // Merge seeds into standings
+        // Create a lookup: "Manager_Year" -> seed value
         const seedMap = {};
         seeds.forEach(s => {
           if (s.manager && s.year) {
@@ -1000,12 +799,18 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
       allSeasons = await loadData();
-      
-      // Initialize Dropdowns
-      populateManagerDropdown();
-      populateYearDropdown();
+      populateFilters();
 
-      // Initial Render
+      const managerSelect = document.getElementById("managerSelect");
+      const yearSelect = document.getElementById("yearSelect");
+
+      managerSelect.addEventListener("change", () => {
+        renderTable();
+      });
+      yearSelect.addEventListener("change", () => {
+        renderTable();
+      });
+
       renderTable();
     });
   </script>
