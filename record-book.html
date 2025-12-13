@@ -455,7 +455,7 @@
                 {key:"games",label:"M",format:"integer"},
                 {key:"ppmFor",label:"PPM",format:"ppm",polarity:"negative"} ]},
     { label:"Highest Points Per Matchup (PPM)", group:"Scoring (Points For)", sortKey:"ppmFor", sortDir:"desc", type:"aggregate",
-      columns:[ {key:"ppmFor",label:"PPM",format:"ppm",polarity:"positivePrimary"},
+      columns:[ {key:"ppmFor",label:"PPM",format:"ppm",polarity:"positivePrimary"}, // format fixed
                 {key:"pointsFor",label:"PF",format:"points"},
                 {key:"games",label:"M",format:"integer"} ]},
     { label:"Lowest Points Per Matchup (PPM)", group:"Scoring (Points For)", sortKey:"ppmFor", sortDir:"asc", type:"aggregate",
@@ -473,11 +473,11 @@
                 {key:"games",label:"M",format:"integer"},
                 {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"positive"} ]},
     { label:"Highest Points Against Per Matchup (PAPM)", group:"Scoring (Points Against)", sortKey:"ppmAgainst", sortDir:"desc", type:"aggregate",
-      columns:[ {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"negativePrimary"},
+      columns:[ {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"negativePrimary"}, // format fixed
                 {key:"pointsAgainst",label:"PA",format:"points"},
                 {key:"games",label:"M",format:"integer"} ]},
     { label:"Lowest Points Against Per Matchup (PAPM)", group:"Scoring (Points Against)", sortKey:"ppmAgainst", sortDir:"asc", type:"aggregate",
-      columns:[ {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"positivePrimary"},
+      columns:[ {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"positivePrimary"}, // format fixed
                 {key:"pointsAgainst",label:"PA",format:"points"},
                 {key:"games",label:"M",format:"integer"} ]},
 
@@ -555,7 +555,7 @@
                 {key:"ppmFor",label:"PPM",format:"ppm",polarity:"negative"},
                 {key:"year",label:"Year",format:"year"} ]},
     { label:"Highest Points Per Matchup (PPM)", group:"Scoring (Points For)", sortKey:"ppmFor", sortDir:"desc", type:"season",
-      columns:[ {key:"ppmFor",label:"PPM",format:"ppm",polarity:"positivePrimary"}, 
+      columns:[ {key:"ppmFor",label:"PPM",format:"ppm",polarity:"positivePrimary"}, // format fixed
                 {key:"pointsFor",label:"PF",format:"points"},
                 {key:"games",label:"M",format:"integer"},
                 {key:"year",label:"Year",format:"year"} ]},
@@ -626,6 +626,7 @@
                 {key:"yearWeek",label:"Year / Week",format:"text"} ]},
     { label:"Closest Win", group:"Results (Single Matchup)", sortKey:"margin", sortDir:"asc", type:"weekly",
       filterKey:"isWin", filterValue:true,
+      // margin format changed to marg2 for 2 decimals
       columns:[ {key:"margin",label:"MARG",format:"marg2",polarity:"warningPrimary"},
                 {key:"scoreFor",label:"Score",format:"points"},
                 {key:"scoreAgainst",label:"Opp Score",format:"points"},
@@ -644,17 +645,9 @@
   // Helpers
   // ---------------------------
 
-  function areValuesEqual(a, b) {
-    if (a === b) return true;
-    if (a === null || b === null || a === undefined || b === undefined) return a === b;
-    if (typeof a === 'number' && typeof b === 'number') {
-      return Math.abs(a - b) < 0.000001;
-    }
-    return false;
-  }
-
   function isPlayoffGame(m){ return m.playoffs && m.playoffs !== "N/A"; }
 
+  // UPDATED Helper for new Matchup Types
   function getMatchupTypesForMatch(m){
     const types = new Set();
     types.add("Regular Season + Playoffs");
@@ -1381,14 +1374,8 @@
     rankingOrder.forEach((s, idx) => {
       const stats = enrichAggregate({ ...s });
       const v = stats[def.sortKey];
-      
-      // Robust ranking logic using areValuesEqual
-      if (idx === 0) {
-        currentRank = 1;
-      } else if (!areValuesEqual(v, lastValue)) {
-        currentRank = idx + 1;
-      }
-      
+      if (idx === 0) currentRank = 1;
+      else if (v !== lastValue) currentRank = idx + 1;
       lastValue = v;
       rows.push({ rank: currentRank, ...stats });
     });
@@ -1524,11 +1511,8 @@
     let lastLen = null;
     let rank = 0;
     ordered.forEach((s, idx) => {
-      if (idx === 0) {
-        rank = 1;
-      } else if (s.length !== lastLen) {
-        rank = idx + 1;
-      }
+      if (idx === 0) rank = 1;
+      else if (s.length !== lastLen) rank = idx + 1;
       lastLen = s.length;
       rows.push({ rank, ...s });
     });
@@ -1630,14 +1614,8 @@
     let rank = 0;
     ordered.forEach((s, idx) => {
       const v = s[def.sortKey];
-      
-      // Robust ranking logic
-      if (idx === 0) {
-        rank = 1;
-      } else if (!areValuesEqual(v, lastVal)) {
-        rank = idx + 1;
-      }
-      
+      if (idx === 0) rank = 1;
+      else if (v !== lastVal) rank = idx + 1;
       lastVal = v;
       rows.push({ rank, ...s });
     });
@@ -1816,14 +1794,8 @@
     let rank = 0;
     ordered.forEach((s, idx) => {
       const v = s[def.sortKey];
-      
-      // Robust ranking logic
-      if (idx === 0) {
-        rank = 1;
-      } else if (!areValuesEqual(v, lastVal)) {
-        rank = idx + 1;
-      }
-      
+      if (idx === 0) rank = 1;
+      else if (v !== lastVal) rank = idx + 1;
       lastVal = v;
       rows.push({ rank, ...s });
     });
@@ -1862,3 +1834,219 @@
         } else {
           sortState.key = col.key;
           sortState.dir = (col.key === def.sortKey) ? (def.sortDir || "desc") : "desc";
+        }
+        paginationState.currentPage = 1;
+        renderWeeklyLeaderboard(matchupType, def);
+      });
+      headerRow.appendChild(th);
+    });
+
+    tbody.innerHTML = "";
+    document.getElementById("noDataMessage").style.display = "none";
+    document.getElementById("pagination").style.display = "flex";
+
+    paged.forEach(r => {
+      const tr = document.createElement("tr");
+      if (r.rank === 1) tr.classList.add("top-rank");
+
+      const tdRank = document.createElement("td");
+      tdRank.className = "rank-cell";
+      tdRank.textContent = r.rank;
+      tr.appendChild(tdRank);
+
+      const tdMgr = document.createElement("td");
+      tdMgr.className = "manager-cell";
+      tdMgr.textContent = r.manager;
+      tr.appendChild(tdMgr);
+
+      def.columns.forEach((col, idx) => {
+        const td = document.createElement("td");
+        td.className = "stat-cell" + (idx === 0 ? " featured-col" : "");
+        const display = formatValue(r[col.key], col.format, r);
+        if (col.polarity === "positivePrimary") td.classList.add("value-positive");
+        if (col.polarity === "negativePrimary") td.classList.add("value-negative");
+        td.textContent = display;
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ---------------------------
+  // Main render
+  // ---------------------------
+
+  function renderLeaderboard(matchupType, categoryLabel){
+    const defs = DEFS_BY_SCOPE[currentScope] || [];
+    const def = defs.find(d => d.label === categoryLabel);
+    if (!def) return;
+
+    const titleEl = document.getElementById("leaderboardTitle");
+    const subtitleEl = document.getElementById("leaderboardSubtitle");
+    const pillLabel = document.getElementById("pillLabel");
+
+    titleEl.textContent = def.label;
+    pillLabel.textContent = `${currentScope} · ${matchupType}`;
+
+    if (
+      currentScope === "Career" &&
+      matchupType === "Playoffs Only" &&
+      def.group === "Weekly Dominance"
+    ){
+      setNoData("Note · Weekly high scores are only tracked for Regular Season matchups.");
+      subtitleEl.textContent = "";
+      return;
+    }
+
+    if (currentScope === "Career"){
+      subtitleEl.textContent = (def.type === "streak")
+        ? "Career streaks with exact start–end span"
+        : "Career leaders across all eligible matchups";
+
+      if (def.type === "streak") renderCareerStreak(matchupType, def);
+      else renderCareerAggregate(matchupType, def);
+      return;
+    }
+
+    if (currentScope === "Season"){
+      subtitleEl.textContent = (def.type === "seasonStreak")
+        ? "Season streaks with exact start–end span"
+        : "Best single-season stat lines across all managers";
+      if (def.type === "seasonStreak") renderSeasonStreak(matchupType, def);
+      else renderSeasonLeaderboard(matchupType, def);
+      return;
+    }
+
+    subtitleEl.textContent = "Single-matchup records across all eligible matchups";
+    renderWeeklyLeaderboard(matchupType, def);
+  }
+
+  // ---------------------------
+  // Load JSON & init
+  // ---------------------------
+
+  async function loadMatchups(){
+    try{
+      const res = await fetch("league-scores.json");
+      if (!res.ok){
+        console.error("Failed to load league-scores.json:", res.status, res.statusText);
+        return [];
+      }
+      return await res.json();
+    } catch(err){
+      console.error("Error loading league-scores.json", err);
+      return [];
+    }
+  }
+
+  async function loadSeasonStats(){
+    try{
+      const res = await fetch("final-standings.json");
+      if (!res.ok){
+        console.error("Failed to load final-standings.json:", res.status, res.statusText);
+        return [];
+      }
+      return await res.json();
+    } catch(err){
+      console.error("Error loading final-standings.json", err);
+      return [];
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    populateMatchupDropdown();
+    populateCategoryDropdown("Career");
+
+    rawMatchups = await loadMatchups();
+    aggregatesByScope = buildCareerAggregates(rawMatchups);
+    seasonAggByMatchupType = buildSeasonAggregates(rawMatchups);
+    weeklyRowsByMatchupType = buildWeeklyRows(rawMatchups);
+    seasonStreaksByMatchupType = buildSeasonStreaks(rawMatchups);
+
+    seasonStatsRaw = await loadSeasonStats();
+    accoladesByMatchupType = buildCareerAccolades(rawMatchups, seasonStatsRaw);
+
+    const matchupSelect = document.getElementById("matchupTypeSelect");
+    const categorySelect = document.getElementById("categorySelect");
+
+    // DEFAULT SETTINGS ON LOAD
+    matchupSelect.value = "Regular Season + Playoffs";
+    categorySelect.value = "Most Points For";
+
+    function rerenderCurrent(){
+      const matchupType = matchupSelect.value;
+      const categoryLabel = categorySelect.value;
+      if (!matchupType || !categoryLabel){
+        neutralState();
+        return;
+      }
+      renderLeaderboard(matchupType, categoryLabel);
+    }
+
+    const prevBtn = document.getElementById("prevPage");
+    const nextBtn = document.getElementById("nextPage");
+
+    if (prevBtn) prevBtn.addEventListener("click", () => {
+      if (paginationState.currentPage > 1){
+        paginationState.currentPage -= 1;
+        rerenderCurrent();
+      }
+    });
+
+    if (nextBtn) nextBtn.addEventListener("click", () => {
+      paginationState.currentPage += 1;
+      rerenderCurrent();
+    });
+
+    // scope tabs
+    document.querySelectorAll(".scope-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const scope = btn.dataset.scope;
+        // logic to check if current cat exists in new scope
+        const previousCategory = categorySelect.value;
+        
+        sortState.key = null;
+        sortState.dir = null;
+        paginationState.currentPage = 1;
+        
+        setScopeUI(scope);
+
+        // check availability
+        let found = false;
+        for (let i = 0; i < categorySelect.options.length; i++) {
+          if (categorySelect.options[i].value === previousCategory) {
+            found = true;
+            break;
+          }
+        }
+
+        if (found) {
+          categorySelect.value = previousCategory;
+          rerenderCurrent();
+        } else {
+          neutralState();
+        }
+      });
+    });
+
+    matchupSelect.addEventListener("change", () => {
+      paginationState.currentPage = 1;
+      sortState.key = null;
+      sortState.dir = null;
+      rerenderCurrent();
+    });
+
+    categorySelect.addEventListener("change", () => {
+      paginationState.currentPage = 1;
+      sortState.key = null;
+      sortState.dir = null;
+      rerenderCurrent();
+    });
+
+    // Initial Render
+    rerenderCurrent();
+  });
+</script>
+</body>
+</html>
