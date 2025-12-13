@@ -333,7 +333,7 @@
 
       <div id="seasonResult" class="result-card">
         <div style="display: flex; align-items: baseline; justify-content: center; gap: 8px; margin-bottom: 10px;">
-          <div class="main-stat-label" style="margin-bottom: 0;">Historical Probability based on <span id="seasonSampleSize" style="color:var(--text-main);">0</span> Teams</div>
+          <div class="main-stat-label" style="margin-bottom: 0;">Historical probability based on <span id="seasonSampleSize" style="color:var(--text-main);">0</span> teams with similar profiles</div>
         </div>
       </div>        
         <div class="odds-grid">
@@ -541,10 +541,6 @@
     document.getElementById('seasonSampleSize').textContent = n;
 
     document.getElementById('seasonResult').classList.add('show');
-    
-    document.getElementById('seasonInterp').innerHTML = 
-      `Historically, teams with <strong>similar profiles</strong> (${label}) made the playoffs 
-      <strong style="color:var(--accent)">${Math.round((nPlayoffs/n)*100)}%</strong> of the time.`;
   }
 
   function updateOddsUI(id, count, total) {
