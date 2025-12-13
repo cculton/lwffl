@@ -445,7 +445,7 @@
   // Weekly containers
   let weeklyRowsByMatchupType = {}; // { matchupType: [row...] }
 
-  const MATCHUP_TYPES = ["All Matchups","Regular Season Matchups","Playoff Matchups"];
+  const MATCHUP_TYPES = ["All Matchups","Regular Season Only","Playoffs Only"];
 
   // ---------------------------
   // Category definitions
@@ -658,8 +658,8 @@
   function getMatchupTypesForMatch(m){
     const types = new Set();
     types.add("All Matchups");
-    if (isPlayoffGame(m)) types.add("Playoff Matchups");
-    else types.add("Regular Season Matchups");
+    if (isPlayoffGame(m)) types.add("Playoffs Only");
+    else types.add("Regular Season Only");
     return types;
   }
 
@@ -1970,11 +1970,11 @@
     // Career-only: Weekly highs not valid for playoffs (kept)
     if (
       currentScope === "Career" &&
-      matchupType === "Playoff Matchups" &&
+      matchupType === "Playoffs Only" &&
       def.group === "Weekly Dominance"
     ){
-      setNoData("Note · Weekly high scores are only tracked for Regular Season matchups.");
-      subtitleEl.textContent = "This stat is only computed for regular season matchups.";
+      setNoData("Note · Weekly high scores are only tracked for Regular Season Only.");
+      subtitleEl.textContent = "This stat is only computed for Regular Season Only.";
       return;
     }
 
