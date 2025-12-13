@@ -277,7 +277,7 @@
         </div>
 
         <div class="footer-note">
-          Data sources: <strong>league-scores.json</strong> (live) · <strong>season-stats.json</strong> (season-final)
+          Data sources: <strong>league-scores.json</strong> (live) · <strong>final-standings.json</strong> (season-final)
         </div>
       </section>
     </div>
@@ -525,7 +525,7 @@
       if (!row || !row.manager) return;
       const mgr = row.manager;
       
-      // Use the correct key 'division_finish' from your season-stats.json
+      // Use the correct key 'division_finish' from your final-standings.json
       const finish = Number(row.division_finish ?? row.divisionFinish);
       
       if (finish === 1) {
@@ -667,7 +667,7 @@
     document.getElementById("pagination").style.display = "none";
 
     rawMatchups = await loadJSON("league-scores.json");
-    seasonStatsRaw = await loadJSON("season-stats.json");
+    seasonStatsRaw = await loadJSON("final-standings.json");
 
     // Build from league-scores.json
     const map = buildFromLeagueScores(rawMatchups);
@@ -678,7 +678,7 @@
     // Calculate Division Titles
     applyDivisionTitles(map, seasonStatsRaw);
 
-    // Apply avg finish from season-stats.json
+    // Apply avg finish from final-standings.json
     applyAvgFinishFromSeasonStats(map, seasonStatsRaw);
 
     // Final rows
