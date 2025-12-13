@@ -34,7 +34,7 @@
     }
 
     .shell {
-      max-width: 1100px;
+      max-width: 1200px; /* Increased slightly for extra columns */
       margin: 0 auto;
     }
 
@@ -175,10 +175,20 @@
       text-transform: uppercase;
     }
 
+    /* NEW: Wrapper for horizontal scrolling on mobile */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 10px;
+    }
+
     .leaderboard-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.9rem;
+      /* Min-width ensures columns don't crush on small screens */
+      min-width: 1100px; 
       border-radius: 10px;
       overflow: hidden;
     }
@@ -188,7 +198,7 @@
     }
 
     .leaderboard-table th {
-      padding: 8px 10px;
+      padding: 10px 10px; /* Slight padding increase */
       font-size: 0.78rem;
       text-transform: uppercase;
       letter-spacing: 0.18em;
@@ -232,7 +242,7 @@
     .rank-cell {
       font-weight: 600;
       color: var(--text-muted);
-      width: 60px;
+      width: 50px;
     }
 
     .year-cell {
@@ -365,19 +375,21 @@
           </div>
         </div>
 
-        <table class="leaderboard-table" aria-live="polite">
-          <thead>
-            <tr id="headerRow"></tr>
-          </thead>
-          <tbody id="leaderboardBody"></tbody>
-        </table>
+        <div class="table-wrap">
+          <table class="leaderboard-table" aria-live="polite">
+            <thead>
+              <tr id="headerRow"></tr>
+            </thead>
+            <tbody id="leaderboardBody"></tbody>
+          </table>
+        </div>
 
         <div class="no-data" id="noDataMessage" style="display: none;">
           <span>Note · No data for this combination yet</span>
         </div>
 
         <div class="footer-note">
-          Data source: <strong>final-standings.json</strong> in this repo.
+          Data source: <strong>final-standings.json</strong> & <strong>playoff-seeds.json</strong>
         </div>
       </section>
     </div>
@@ -390,6 +402,7 @@
       direction: "desc"
     };
 
+    // Updated Header Defs
     const headerDefs = [
       { key: "rank", label: "Rank" },
       { key: "year", label: "Season" },
@@ -402,9 +415,10 @@
       { key: "points_against", label: "PA" },
       { key: "ppm_for", label: "PPM" },
       { key: "ppm_against", label: "PAPM" },
+      { key: "weekly_margin", label: "MARG" },  // Moved & Renamed (was WM)
+      { key: "division_finish", label: "DF" },  // Moved
+      { key: "playoff_seed", label: "PS" },     // New
       { key: "final_standing", label: "FS" },
-      { key: "division_finish", label: "DF" },
-      { key: "weekly_margin", label: "WM" },
       { key: "transaction_count", label: "TRANS" }
     ];
 
@@ -421,9 +435,10 @@
         case "PA": return "Total points scored against this team that season";
         case "PPM": return "Points scored per matchup (points for ÷ matchups)";
         case "PAPM": return "Points against per matchup (points against ÷ matchups)";
-        case "FS": return "Final league standing at end of season";
+        case "MARG": return "Average weekly scoring margin (points for − points against)";
         case "DF": return "Division finishing position";
-        case "WM": return "Average weekly scoring margin (points for − points against)";
+        case "PS": return "Playoff Seed (if applicable)";
+        case "FS": return "Final league standing at end of season";
         case "TRANS": return "Number of transactions made that season";
         default: return label;
       }
@@ -531,7 +546,7 @@
     function getDefaultDirectionForColumn(colKey) {
       if (colKey === "manager") return "asc";
       if (colKey === "year") return "desc";
-      if (colKey === "final_standing" || colKey === "division_finish") return "asc";
+      if (colKey === "final_standing" || colKey === "division_finish" || colKey === "playoff_seed") return "asc";
       if (colKey === "points_for") return "desc";
       return "desc";
     }
@@ -551,7 +566,6 @@
       if (managerValue === "__all__" && yearValue === "__all__") {
         titleText = "All Seasons · All Managers";
       } else if (managerValue === "__all__") {
-        // FIXED: "Year Season" ordering
         titleText = `${yearValue} Season · All Managers`;
       } else if (yearValue === "__all__") {
         titleText = `All Seasons · ${managerValue}`;
@@ -609,69 +623,83 @@
 
         const sortedKey = currentSort.columnKey;
 
+        // Helper to check sort
+        const isSort = (key) => sortedKey === key;
+
+        // Rank
         const rankTd = document.createElement("td");
         rankTd.className = "rank-cell";
         rankTd.textContent = index + 1;
-        if (sortedKey === "rank") rankTd.classList.add("sorted-col-cell");
+        if (isSort("rank")) rankTd.classList.add("sorted-col-cell");
+        tr.appendChild(rankTd);
 
+        // Season
         const yearTd = document.createElement("td");
         yearTd.className = "year-cell";
         yearTd.textContent = row.year ?? "—";
-        if (sortedKey === "year") yearTd.classList.add("sorted-col-cell");
+        if (isSort("year")) yearTd.classList.add("sorted-col-cell");
+        tr.appendChild(yearTd);
 
+        // Manager
         const managerTd = document.createElement("td");
         managerTd.className = "manager-cell";
         managerTd.textContent = row.manager || "—";
-        if (sortedKey === "manager") managerTd.classList.add("sorted-col-cell");
+        if (isSort("manager")) managerTd.classList.add("sorted-col-cell");
+        tr.appendChild(managerTd);
 
+        // W
         const winsTd = document.createElement("td");
         winsTd.textContent = formatInteger(row.wins);
-        if (sortedKey === "wins") winsTd.classList.add("sorted-col-cell");
+        if (isSort("wins")) winsTd.classList.add("sorted-col-cell");
+        tr.appendChild(winsTd);
 
+        // L
         const lossesTd = document.createElement("td");
         lossesTd.textContent = formatInteger(row.losses);
-        if (sortedKey === "losses") lossesTd.classList.add("sorted-col-cell");
+        if (isSort("losses")) lossesTd.classList.add("sorted-col-cell");
+        tr.appendChild(lossesTd);
 
+        // T
         const tiesTd = document.createElement("td");
         tiesTd.textContent = formatInteger(row.ties);
-        if (sortedKey === "ties") tiesTd.classList.add("sorted-col-cell");
+        if (isSort("ties")) tiesTd.classList.add("sorted-col-cell");
+        tr.appendChild(tiesTd);
 
+        // M
         const gamesTd = document.createElement("td");
         gamesTd.textContent = formatInteger(row.games);
-        if (sortedKey === "games") gamesTd.classList.add("sorted-col-cell");
+        if (isSort("games")) gamesTd.classList.add("sorted-col-cell");
+        tr.appendChild(gamesTd);
 
+        // PF
         const pfTd = document.createElement("td");
         pfTd.classList.add("value-positive");
         pfTd.textContent = formatNumber(row.points_for, 1);
-        if (sortedKey === "points_for") pfTd.classList.add("sorted-col-cell");
+        if (isSort("points_for")) pfTd.classList.add("sorted-col-cell");
+        tr.appendChild(pfTd);
 
+        // PA
         const paTd = document.createElement("td");
         paTd.classList.add("value-negative");
         paTd.textContent = formatNumber(row.points_against, 1);
-        if (sortedKey === "points_against") paTd.classList.add("sorted-col-cell");
+        if (isSort("points_against")) paTd.classList.add("sorted-col-cell");
+        tr.appendChild(paTd);
 
+        // PPM
         const ppmForTd = document.createElement("td");
         ppmForTd.classList.add("value-positive");
-        ppmForTd.textContent =
-          row.ppm_for === null ? "—" : formatNumber(row.ppm_for, 1);
-        if (sortedKey === "ppm_for") ppmForTd.classList.add("sorted-col-cell");
+        ppmForTd.textContent = row.ppm_for === null ? "—" : formatNumber(row.ppm_for, 1);
+        if (isSort("ppm_for")) ppmForTd.classList.add("sorted-col-cell");
+        tr.appendChild(ppmForTd);
 
+        // PAPM
         const ppmAgainstTd = document.createElement("td");
         ppmAgainstTd.classList.add("value-negative");
-        ppmAgainstTd.textContent =
-          row.ppm_against === null ? "—" : formatNumber(row.ppm_against, 1);
-        if (sortedKey === "ppm_against") ppmAgainstTd.classList.add("sorted-col-cell");
+        ppmAgainstTd.textContent = row.ppm_against === null ? "—" : formatNumber(row.ppm_against, 1);
+        if (isSort("ppm_against")) ppmAgainstTd.classList.add("sorted-col-cell");
+        tr.appendChild(ppmAgainstTd);
 
-        const finalTd = document.createElement("td");
-        finalTd.textContent =
-          row.final_standing != null ? formatInteger(row.final_standing) : "—";
-        if (sortedKey === "final_standing") finalTd.classList.add("sorted-col-cell");
-
-        const divTd = document.createElement("td");
-        divTd.textContent =
-          row.division_finish != null ? formatInteger(row.division_finish) : "—";
-        if (sortedKey === "division_finish") divTd.classList.add("sorted-col-cell");
-
+        // MARG (Weekly Margin)
         const marginTd = document.createElement("td");
         if (row.weekly_margin != null) {
           let formatted = formatNumber(row.weekly_margin, 1);
@@ -685,27 +713,31 @@
         } else {
           marginTd.textContent = "—";
         }
-        if (sortedKey === "weekly_margin") marginTd.classList.add("sorted-col-cell");
-
-        const txTd = document.createElement("td");
-        txTd.textContent =
-          row.transaction_count != null ? formatInteger(row.transaction_count) : "—";
-        if (sortedKey === "transaction_count") txTd.classList.add("sorted-col-cell");
-
-        tr.appendChild(rankTd);
-        tr.appendChild(yearTd);
-        tr.appendChild(managerTd);
-        tr.appendChild(winsTd);
-        tr.appendChild(lossesTd);
-        tr.appendChild(tiesTd);
-        tr.appendChild(gamesTd);
-        tr.appendChild(pfTd);
-        tr.appendChild(paTd);
-        tr.appendChild(ppmForTd);
-        tr.appendChild(ppmAgainstTd);
-        tr.appendChild(finalTd);
-        tr.appendChild(divTd);
+        if (isSort("weekly_margin")) marginTd.classList.add("sorted-col-cell");
         tr.appendChild(marginTd);
+
+        // DF (Division Finish)
+        const divTd = document.createElement("td");
+        divTd.textContent = row.division_finish != null ? formatInteger(row.division_finish) : "—";
+        if (isSort("division_finish")) divTd.classList.add("sorted-col-cell");
+        tr.appendChild(divTd);
+
+        // PS (Playoff Seed)
+        const seedTd = document.createElement("td");
+        seedTd.textContent = row.playoff_seed != null ? formatInteger(row.playoff_seed) : "—";
+        if (isSort("playoff_seed")) seedTd.classList.add("sorted-col-cell");
+        tr.appendChild(seedTd);
+
+        // FS (Final Standing)
+        const finalTd = document.createElement("td");
+        finalTd.textContent = row.final_standing != null ? formatInteger(row.final_standing) : "—";
+        if (isSort("final_standing")) finalTd.classList.add("sorted-col-cell");
+        tr.appendChild(finalTd);
+
+        // TRANS
+        const txTd = document.createElement("td");
+        txTd.textContent = row.transaction_count != null ? formatInteger(row.transaction_count) : "—";
+        if (isSort("transaction_count")) txTd.classList.add("sorted-col-cell");
         tr.appendChild(txTd);
 
         tbody.appendChild(tr);
@@ -734,22 +766,39 @@
       };
     }
 
-    async function loadSeasonStats() {
+    async function loadData() {
       try {
-        const res = await fetch("final-standings.json");
-        if (!res.ok) {
-          console.error("Failed to load final-standings.json:", res.status, res.statusText);
-          return [];
-        }
-        return await res.json();
+        const [standings, seeds] = await Promise.all([
+          fetch("final-standings.json").then(r => r.json()),
+          fetch("playoff-seeds.json").then(r => r.json())
+        ]);
+        
+        // Merge seeds into standings
+        // Create a lookup: "Manager_Year" -> seed value
+        const seedMap = {};
+        seeds.forEach(s => {
+          if (s.manager && s.year) {
+            seedMap[`${s.manager}_${s.year}`] = s.seed;
+          }
+        });
+
+        const merged = standings.map(row => {
+          const key = `${row.manager}_${row.year}`;
+          return {
+            ...row,
+            playoff_seed: seedMap[key] || null
+          };
+        });
+
+        return merged;
       } catch (err) {
-        console.error("Error loading final-standings.json", err);
+        console.error("Error loading JSON data", err);
         return [];
       }
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
-      allSeasons = await loadSeasonStats();
+      allSeasons = await loadData();
       populateFilters();
 
       const managerSelect = document.getElementById("managerSelect");
