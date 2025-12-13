@@ -1,0 +1,363 @@
+[
+  {
+    "year": 2014,
+    "manager": "Ryan Carson",
+    "seed": "1"
+  },
+  {
+    "year": 2014,
+    "manager": "Jordan Williams",
+    "seed": 2
+  },
+  {
+    "year": 2014,
+    "manager": "Bryce Rickenbaker",
+    "seed": 3
+  },
+  {
+    "year": 2014,
+    "manager": "Cobey Culton",
+    "seed": 4
+  },
+  {
+    "year": 2014,
+    "manager": "Will Shoe",
+    "seed": 5
+  },
+  {
+    "year": 2014,
+    "manager": "Samuel Wheeler",
+    "seed": 6
+  },
+  {
+    "year": 2015,
+    "manager": "Chad Denton",
+    "seed": 1
+  },
+  {
+    "year": 2015,
+    "manager": "Adam Goho",
+    "seed": 2
+  },
+  {
+    "year": 2015,
+    "manager": "Will Shoe",
+    "seed": 3
+  },
+  {
+    "year": 2015,
+    "manager": "Bryce Rickenbaker",
+    "seed": 4
+  },
+  {
+    "year": 2015,
+    "manager": "Ryan Turnau",
+    "seed": 5
+  },
+  {
+    "year": 2015,
+    "manager": "Cobey Culton",
+    "seed": 6
+  },
+  {
+    "year": 2016,
+    "manager": "Adam Goho",
+    "seed": 1
+  },
+  {
+    "year": 2016,
+    "manager": "Matt Dengler",
+    "seed": 2
+  },
+  {
+    "year": 2016,
+    "manager": "Tom Hos",
+    "seed": 3
+  },
+  {
+    "year": 2016,
+    "manager": "Ryan Turnau",
+    "seed": 4
+  },
+  {
+    "year": 2016,
+    "manager": "Connor Glair",
+    "seed": 5
+  },
+  {
+    "year": 2016,
+    "manager": "Bryce Rickenbaker",
+    "seed": 6
+  },
+  {
+    "year": 2017,
+    "manager": "Cobey Culton",
+    "seed": 1
+  },
+  {
+    "year": 2017,
+    "manager": "Ryan Carson",
+    "seed": 2
+  },
+  {
+    "year": 2017,
+    "manager": "Ryan Davidson",
+    "seed": 3
+  },
+  {
+    "year": 2017,
+    "manager": "Matt Dengler",
+    "seed": 4
+  },
+  {
+    "year": 2017,
+    "manager": "Will Shoe",
+    "seed": 5
+  },
+  {
+    "year": 2017,
+    "manager": "Bryce Rickenbaker",
+    "seed": 6
+  },
+  {
+    "year": 2018,
+    "manager": "Matt Dengler",
+    "seed": 1
+  },
+  {
+    "year": 2018,
+    "manager": "Connor Glair",
+    "seed": 2
+  },
+  {
+    "year": 2018,
+    "manager": "Cobey Culton",
+    "seed": 3
+  },
+  {
+    "year": 2018,
+    "manager": "Ryan Carson",
+    "seed": 4
+  },
+  {
+    "year": 2018,
+    "manager": "Adam Goho",
+    "seed": 5
+  },
+  {
+    "year": 2018,
+    "manager": "Chad Denton",
+    "seed": 6
+  },
+  {
+    "year": 2019,
+    "manager": "Matt Dengler",
+    "seed": 1
+  },
+  {
+    "year": 2019,
+    "manager": "Connor Glair",
+    "seed": 2
+  },
+  {
+    "year": 2019,
+    "manager": "Cobey Culton",
+    "seed": 3
+  },
+  {
+    "year": 2019,
+    "manager": "Ryan Carson",
+    "seed": 4
+  },
+  {
+    "year": 2019,
+    "manager": "Adam Goho",
+    "seed": 5
+  },
+  {
+    "year": 2019,
+    "manager": "Chad Denton",
+    "seed": 6
+  },
+
+  {
+    "year": 2020,
+    "manager": "Cobey Culton",
+    "seed": 1
+  },
+  {
+    "year": 2020,
+    "manager": "Matt Dengler",
+    "seed": 2
+  },
+  {
+    "year": 2020,
+    "manager": "Connor Glair",
+    "seed": 3
+  },
+  {
+    "year": 2020,
+    "manager": "Ryan Carson",
+    "seed": 4
+  },
+  {
+    "year": 2020,
+    "manager": "Ryan Turnau",
+    "seed": 5
+  },
+  {
+    "year": 2020,
+    "manager": "Bryce Rickenbaker",
+    "seed": 6
+  },
+  {
+    "year": 2021,
+    "manager": "Adam Goho",
+    "seed": 1
+  },
+  {
+    "year": 2021,
+    "manager": "Samuel Wheeler",
+    "seed": 2
+  },
+  {
+    "year": 2021,
+    "manager": "Chad Dentonr",
+    "seed": 3
+  },
+  {
+    "year": 2021,
+    "manager": "Ryan Carson",
+    "seed": 4
+  },
+  {
+    "year": 2021,
+    "manager": "Matt Dengler",
+    "seed": 5
+  },
+  {
+    "year": 2021,
+    "manager": "Connor Glair",
+    "seed": 6
+  },
+  {
+    "year": 2022,
+    "manager": "Nick Sparks",
+    "seed": 1
+  },
+  {
+    "year": 2022,
+    "manager": "Cobey Culton",
+    "seed": 2
+  },
+  {
+    "year": 2022,
+    "manager": "Adam Goho",
+    "seed": 3
+  },
+  {
+    "year": 2022,
+    "manager": "Will Shoe",
+    "seed": 4
+  },
+  {
+    "year": 2022,
+    "manager": "Matt Dengler",
+    "seed": 5
+  },
+  {
+    "year": 2022,
+    "manager": "Connor Glair",
+    "seed": 6
+  },
+  {
+    "year": 2023,
+    "manager": "Nick Sparks",
+    "seed": 1
+  },
+  {
+    "year": 2023,
+    "manager": "Cobey Culton",
+    "seed": 2
+  },
+  {
+    "year": 2023,
+    "manager": "Adam Goho",
+    "seed": 3
+  },
+  {
+    "year": 2023,
+    "manager": "Will Shoe",
+    "seed": 4
+  },
+  {
+    "year": 2023,
+    "manager": "Matt Dengler",
+    "seed": 5
+  },
+  {
+    "year": 2023,
+    "manager": "Connor Glair",
+    "seed": 6
+  },
+  {
+    "year": 2024,
+    "manager": "Matt Dengler",
+    "seed": 1
+  },
+  {
+    "year": 2024,
+    "manager": "Ryan Carson",
+    "seed": 2
+  },
+  {
+    "year": 2024,
+    "manager": "Samuel Wheeler",
+    "seed": 3
+  },
+  {
+    "year": 2024,
+    "manager": "Will Shoe",
+    "seed": 4
+  },
+  {
+    "year": 2024,
+    "manager": "Cobey Culton",
+    "seed": 5
+  },
+  {
+    "year": 2024,
+    "manager": "Ryan Turnau",
+    "seed": 6
+  },
+  {
+    "year": 2025,
+    "manager": "Ryan Turnau",
+    "seed": 1
+  },
+  {
+    "year": 2025,
+    "manager": "Stuart Sundseth",
+    "seed": 2
+  },
+  {
+    "year": 2025,
+    "manager": "Cobey Culton",
+    "seed": 3
+  },
+  {
+    "year": 2025,
+    "manager": "Tom Hos",
+    "seed": 4
+  },
+  {
+    "year": 2025,
+    "manager": "Adam Goho",
+    "seed": 5
+  },
+  {
+    "year": 2025,
+    "manager": "Samuel Wheeler",
+    "seed": 6
+  }
+]
