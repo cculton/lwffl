@@ -103,7 +103,6 @@
       width:100%;
       border-collapse: collapse;
       font-size:0.9rem;
-      /* Increased min-width to ensure columns are neatly spaced on mobile via scroll */
       min-width: 1000px; 
       border-radius:10px;
       overflow:hidden;
@@ -111,7 +110,7 @@
     .leaderboard-table thead{ background: linear-gradient(90deg, #020617, #020617); }
     
     .leaderboard-table th{
-      padding: 12px 14px; /* Increased padding for better spacing */
+      padding: 12px 14px;
       font-size:0.78rem;
       text-transform:uppercase;
       letter-spacing:0.15em;
@@ -119,7 +118,7 @@
       border-bottom: 1px solid rgba(55,65,81,0.9);
       cursor:pointer;
       user-select:none;
-      text-align:left; /* Strict left alignment */
+      text-align:left;
       white-space: normal;
       vertical-align: bottom;
       line-height: 1.2;
@@ -131,10 +130,10 @@
     .leaderboard-table tbody tr:hover{ background: rgba(15,23,42,0.98); transform: translateY(-1px); }
 
     .leaderboard-table td{
-      padding: 12px 14px; /* Matches header padding */
+      padding: 12px 14px;
       border-bottom: 1px solid rgba(31,41,55,0.96);
       color: var(--text-main);
-      text-align:left; /* Strict left alignment */
+      text-align:left;
       white-space:nowrap;
       font-variant-numeric: tabular-nums;
     }
@@ -149,7 +148,6 @@
       box-shadow: inset 2px 0 0 rgba(56,189,248,0.8);
     }
 
-    /* Sorted-column highlight (subtle) */
     .featured-col{
       background: rgba(56, 189, 248, 0.08);
     }
@@ -294,9 +292,10 @@
     { key: "semifinalApps", label: "SF App", tooltip: "Semifinal appearances" },
     { key: "firstRoundApps", label: "1st Rd App", tooltip: "First-round appearances"},
     { key: "playoffApps", label: "PO App", tooltip: "Playoff appearances"},
-    { key: "avgSeed", label: "Avg PS", tooltip: "Average Playoff Seed (qualifying seasons only)"}, // New Column
     { key: "scoringTitles", label: "Scor Titl", tooltip: "Regular season scoring titles (most points for)"}, 
     { key: "divisionTitles", label: "Div Titl", tooltip: "Regular season division titles (1st place in division)"},
+    // MOVED: Avg PS is now here, directly to the left of Avg Fin
+    { key: "avgSeed", label: "Avg PS", tooltip: "Average Playoff Seed (qualifying seasons only)"}, 
     { key: "avgFinish", label: "Avg Fin", tooltip: "Average final standing finish across completed seasons"},
     { key: "seasons", label: "Seas", tooltip: "Seasons in LWFFL"}
   ];
@@ -401,7 +400,7 @@
       firstRoundApps: 0,
       playoffApps: 0,
       avgFinish: null,
-      avgSeed: null, // New field
+      avgSeed: null,
       seasons: 0,
       // tiebreak determinism
       lastYear: 0,
