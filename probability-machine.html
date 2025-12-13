@@ -388,7 +388,7 @@
     try {
       const [scoresRes, statsRes] = await Promise.all([
         fetch('league-scores.json'),
-        fetch('final-standing.json')
+        fetch('final-standings.json')
       ]);
       
       if(!scoresRes.ok || !statsRes.ok) throw new Error("File load error");
