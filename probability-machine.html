@@ -137,6 +137,12 @@
       transition: border-color 0.2s;
     }
     input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px rgba(56,189,248,0.5); }
+    
+    /* New Feature: Lighten placeholder text */
+    ::placeholder {
+      color: rgba(156, 163, 175, 0.4) !important;
+      opacity: 1; /* Firefox fix */
+    }
 
     button.action-btn {
       padding: 12px 24px;
@@ -168,6 +174,17 @@
       display: none;
     }
     .result-card.show { display: block; }
+
+    /* New Feature: Season Footer Style */
+    .result-footer {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(55,65,81,0.5);
+      color: var(--text-soft);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
 
     .main-stat-label { color: var(--text-soft); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 10px; }
     .main-stat-val { 
@@ -260,7 +277,7 @@
 <div class="shell">
   <div class="container">
     <div class="header">
-      <h1>Probability Machine/h1>
+      <h1>Probability Machine</h1>
       <p>Legion of Whom Fantasy Football League</p>
     </div>
 
@@ -278,7 +295,7 @@
       <div class="input-row">
         <div class="input-group">
           <label for="scoreInput">Your Score</label>
-          <input type="number" id="scoreInput" placeholder="e.g., 105.5" step="0.1">
+          <input type="number" id="scoreInput" placeholder="e.g., 105.5" step="0.1" style="max-width: 160px;">
         </div>
         <button class="action-btn" onclick="calcWeekly()">Calculate Win %</button>
       </div>
@@ -332,10 +349,6 @@
       </div>
 
       <div id="seasonResult" class="result-card">
-        <div style="display: flex; align-items: baseline; justify-content: center; gap: 8px; margin-bottom: 10px;">
-          <div class="main-stat-label" style="margin-bottom: 0;">Historical probability based on <span id="seasonSampleSize" style="color:var(--text-main);">0</span> teams with similar profiles</div>
-        </div>
-      </div>        
         <div class="odds-grid">
           <div class="odds-card">
             <div class="odds-title">Make Playoffs</div>
@@ -349,6 +362,10 @@
             <div class="odds-title">Win Championship</div>
             <div class="odds-val" id="probChamp">-</div>
           </div>
+        </div>
+        
+        <div class="result-footer">
+           Historical probability based on <span id="seasonSampleSize" style="color:var(--text-main); font-weight:700;">0</span> teams with similar profiles
         </div>
       </div>
     </div>
@@ -382,9 +399,9 @@
       processWeeklyData();
       processHistoricalModel();
       
-      // Update dynamic counts in instructions
-      document.getElementById('weeklyCount').textContent = rawMatchups.length;
-      document.getElementById('seasonCount').textContent = seasonStats.length;
+      // Update dynamic counts with commas
+      document.getElementById('weeklyCount').textContent = rawMatchups.length.toLocaleString();
+      document.getElementById('seasonCount').textContent = seasonStats.length.toLocaleString();
 
       document.getElementById('loading').style.display = 'none';
       
@@ -533,8 +550,8 @@
     updateOddsUI('probFinals', nFinals, n);
     updateOddsUI('probChamp', nChamp, n);
 
-    // Update the new single consolidated count
-    document.getElementById('seasonSampleSize').textContent = n;
+    // Update the consolidated count with commas
+    document.getElementById('seasonSampleSize').textContent = n.toLocaleString();
 
     document.getElementById('seasonResult').classList.add('show');
   }
@@ -554,10 +571,10 @@
   function initChart() {
     const ctx = document.getElementById('scoreChart').getContext('2d');
     
-    // Generate buckets - Extended to 190 per request
+    // Generate buckets - Start from 0 per request
     const bucketSize = 10;
     const bins = {};
-    for(let i=40; i<=190; i+=bucketSize) bins[i] = 0;
+    for(let i=0; i<=190; i+=bucketSize) bins[i] = 0;
     
     leagueMeta.scores.forEach(s => {
       const b = Math.floor(s / bucketSize) * bucketSize;
@@ -581,7 +598,8 @@
           borderColor: '#38bdf8',
           borderWidth: 1,
           borderRadius: 4,
-          hoverBackgroundColor: '#38bdf8'
+          hoverBackgroundColor: '#38bdf8',
+          minBarLength: 5 // Ensure single scores are visible
         }]
       },
       options: {
