@@ -103,23 +103,23 @@
       width:100%;
       border-collapse: collapse;
       font-size:0.9rem;
-      min-width: 860px;
+      /* Increased min-width to ensure columns are neatly spaced on mobile via scroll */
+      min-width: 1000px; 
       border-radius:10px;
       overflow:hidden;
     }
     .leaderboard-table thead{ background: linear-gradient(90deg, #020617, #020617); }
+    
     .leaderboard-table th{
-      padding: 8px 10px;
+      padding: 12px 14px; /* Increased padding for better spacing */
       font-size:0.78rem;
       text-transform:uppercase;
-      letter-spacing:0.18em;
+      letter-spacing:0.15em;
       color:#9ca3af;
       border-bottom: 1px solid rgba(55,65,81,0.9);
       cursor:pointer;
       user-select:none;
-      text-align:left;
-      
-      /* Updated to allow wrapping per request */
+      text-align:left; /* Strict left alignment */
       white-space: normal;
       vertical-align: bottom;
       line-height: 1.2;
@@ -131,16 +131,16 @@
     .leaderboard-table tbody tr:hover{ background: rgba(15,23,42,0.98); transform: translateY(-1px); }
 
     .leaderboard-table td{
-      padding: 9px 10px;
+      padding: 12px 14px; /* Matches header padding */
       border-bottom: 1px solid rgba(31,41,55,0.96);
       color: var(--text-main);
-      text-align:left;
+      text-align:left; /* Strict left alignment */
       white-space:nowrap;
       font-variant-numeric: tabular-nums;
     }
     .leaderboard-table tbody tr:last-child td{ border-bottom:none; }
 
-    .rank-cell{ font-weight:600; color: var(--text-muted); width:60px; text-align:left; }
+    .rank-cell{ font-weight:600; color: var(--text-muted); width:50px; text-align:left; }
     .manager-cell{ font-weight:500; white-space:nowrap; text-align:left; }
     .stat-cell{ text-align:left !important; }
 
@@ -234,8 +234,7 @@
       .container{ padding: 22px 14px 20px; }
       .header h1{ font-size: 1.4rem; }
       .leaderboard-title{ font-size: 1rem; }
-      .leaderboard-table th, .leaderboard-table td{ padding: 7px 6px; }
-      .leaderboard-table{ min-width: 860px; }
+      .leaderboard-table th, .leaderboard-table td{ padding: 10px 10px; }
     }
   </style>
 </head>
@@ -277,7 +276,7 @@
         </div>
 
         <div class="footer-note">
-          Data sources: <strong>league-scores.json</strong> (live) · <strong>final-standings.json</strong> (season-final)
+          Data sources: <strong>league-scores.json</strong> (live) · <strong>final-standings.json</strong> (season-final) · <strong>playoff-seeds.json</strong>
         </div>
       </section>
     </div>
@@ -295,7 +294,7 @@
     { key: "semifinalApps", label: "SF App", tooltip: "Semifinal appearances" },
     { key: "firstRoundApps", label: "1st Rd App", tooltip: "First-round appearances"},
     { key: "playoffApps", label: "PO App", tooltip: "Playoff appearances"},
-    // Reordered per request:
+    { key: "avgSeed", label: "Avg PS", tooltip: "Average Playoff Seed (qualifying seasons only)"}, // New Column
     { key: "scoringTitles", label: "Scor Titl", tooltip: "Regular season scoring titles (most points for)"}, 
     { key: "divisionTitles", label: "Div Titl", tooltip: "Regular season division titles (1st place in division)"},
     { key: "avgFinish", label: "Avg Fin", tooltip: "Average final standing finish across completed seasons"},
@@ -307,6 +306,7 @@
   // ---------------------------
   let rawMatchups = [];
   let seasonStatsRaw = [];
+  let playoffSeedsRaw = [];
   let rows = [];
 
   const paginationState = { pageSize: 25, currentPage: 1, totalRows: 0, totalPages: 1 };
@@ -330,7 +330,7 @@
 
   function formatCell(key, value){
     if (value === null || value === undefined || Number.isNaN(value)) return "-";
-    if (key === "avgFinish") return Number(value).toFixed(2);
+    if (key === "avgFinish" || key === "avgSeed") return Number(value).toFixed(2);
     if (typeof value === "number") return Number(value).toLocaleString("en-US", { maximumFractionDigits: 0 });
     return String(value);
   }
@@ -401,6 +401,7 @@
       firstRoundApps: 0,
       playoffApps: 0,
       avgFinish: null,
+      avgSeed: null, // New field
       seasons: 0,
       // tiebreak determinism
       lastYear: 0,
@@ -458,7 +459,6 @@
         if (!Number.isNaN(s1) && !Number.isNaN(s2) && m.manager1 && m.manager2){
           if (s1 > s2) map[m.manager1].championships += 1;
           else if (s2 > s1) map[m.manager2].championships += 1;
-          // ties are ignored (shouldn't happen)
         }
       }
     });
@@ -511,7 +511,6 @@
       if (maxP > 0){
         Object.keys(yearData).forEach(mgr => {
           if (Math.abs(yearData[mgr] - maxP) < 0.01){
-            // Ensure row exists
             if (!map[mgr]) map[mgr] = ensureRow(mgr);
             map[mgr].scoringTitles += 1;
           }
@@ -524,10 +523,7 @@
     (seasonStats || []).forEach(row => {
       if (!row || !row.manager) return;
       const mgr = row.manager;
-      
-      // Use the correct key 'division_finish' from your final-standings.json
       const finish = Number(row.division_finish ?? row.divisionFinish);
-      
       if (finish === 1) {
         if (!map[mgr]) map[mgr] = ensureRow(mgr);
         map[mgr].divisionTitles += 1;
@@ -555,8 +551,26 @@
       if (!map[mgr]) map[mgr] = ensureRow(mgr);
       map[mgr].avgFinish = counts[mgr] ? (sums[mgr] / counts[mgr]) : null;
     });
+  }
 
-    return map;
+  function applyAvgPlayoffSeed(map, seedData) {
+    const totals = {}; // { manager: { sum: 0, count: 0 } }
+
+    (seedData || []).forEach(row => {
+      const mgr = row.manager;
+      const s = Number(row.seed);
+      if (mgr && !Number.isNaN(s) && s > 0) {
+        if (!totals[mgr]) totals[mgr] = { sum: 0, count: 0 };
+        totals[mgr].sum += s;
+        totals[mgr].count++;
+      }
+    });
+
+    Object.keys(totals).forEach(mgr => {
+      if (!map[mgr]) map[mgr] = ensureRow(mgr);
+      const data = totals[mgr];
+      map[mgr].avgSeed = data.count > 0 ? (data.sum / data.count) : null;
+    });
   }
 
   function buildHeaders(){
@@ -566,11 +580,8 @@
     COLUMNS.forEach(col => {
       const th = document.createElement("th");
       th.textContent = col.label;
-
-      // Hover details
       th.title = col.tooltip || "";
 
-      // Sorted-column highlight
       if (col.key === sortState.key) th.classList.add("featured-col");
 
       th.addEventListener("click", () => {
@@ -578,9 +589,8 @@
           sortState.dir = (sortState.dir === "asc") ? "desc" : "asc";
         } else {
           sortState.key = col.key;
-          // Default direction: rank/manager asc, avgFinish asc, everything else desc
           if (col.key === "manager") sortState.dir = "asc";
-          else if (col.key === "avgFinish") sortState.dir = "asc";
+          else if (col.key === "avgFinish" || col.key === "avgSeed") sortState.dir = "asc";
           else sortState.dir = "desc";
         }
         paginationState.currentPage = 1;
@@ -602,22 +612,18 @@
       const cmp = compareValues(a[sortState.key], b[sortState.key], sortState.dir);
       if (cmp !== 0) return cmp;
 
-      // deterministic tiebreak
       const ra = (a.lastYear || 0) * 100 + (a.lastWeek || 0);
       const rb = (b.lastYear || 0) * 100 + (b.lastWeek || 0);
       return rb - ra;
     });
 
-    // Rank based on current sorted list
     sorted.forEach((r, idx) => { r.rank = idx + 1; });
 
     setPagination(sorted.length);
     const paged = paginateRows(sorted);
 
-    // Headers (to update highlighted sorted col)
     buildHeaders();
 
-    // Body
     const tbody = document.getElementById("leaderboardBody");
     tbody.innerHTML = "";
     document.getElementById("noDataMessage").style.display = "none";
@@ -634,7 +640,6 @@
         else if (col.key === "manager") td.className = "manager-cell";
         else td.className = "stat-cell";
 
-        // Sorted-column highlight for cells
         if (col.key === sortState.key) td.classList.add("featured-col");
 
         td.textContent = formatCell(col.key, r[col.key]);
@@ -666,22 +671,24 @@
     document.getElementById("noDataMessage").style.display = "block";
     document.getElementById("pagination").style.display = "none";
 
-    rawMatchups = await loadJSON("league-scores.json");
-    seasonStatsRaw = await loadJSON("final-standings.json");
+    // FETCHING ALL DATA SOURCES, INCLUDING THE NEW playoff-seeds.json
+    const [scores, sStats, pSeeds] = await Promise.all([
+      loadJSON("league-scores.json"),
+      loadJSON("final-standings.json"),
+      loadJSON("playoff-seeds.json")
+    ]);
+    
+    rawMatchups = scores;
+    seasonStatsRaw = sStats;
+    playoffSeedsRaw = pSeeds;
 
-    // Build from league-scores.json
     const map = buildFromLeagueScores(rawMatchups);
 
-    // Calculate Scoring Titles (regular season)
     applyScoringTitles(rawMatchups, map);
-
-    // Calculate Division Titles
     applyDivisionTitles(map, seasonStatsRaw);
-
-    // Apply avg finish from final-standings.json
     applyAvgFinishFromSeasonStats(map, seasonStatsRaw);
+    applyAvgPlayoffSeed(map, playoffSeedsRaw); // NEW LOGIC
 
-    // Final rows
     rows = Object.values(map);
 
     if (!rows.length){
@@ -689,7 +696,6 @@
       return;
     }
 
-    // Wire pagination controls
     document.getElementById("prevPage").addEventListener("click", () => {
       if (paginationState.currentPage > 1){
         paginationState.currentPage -= 1;
@@ -703,7 +709,6 @@
       }
     });
 
-    // Initial render (default: Championships sorted + highlighted)
     paginationState.currentPage = 1;
     renderTable();
   });
