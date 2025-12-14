@@ -119,25 +119,45 @@
     select {
       width: 100%;
       padding: 12px 15px;
-      background: #0b1120;
+      background-color: #0b1120;
       border: 1px solid rgba(75, 85, 99, 0.8);
       border-radius: 8px;
       color: #f9fafb;
       font-size: 1.1em;
       transition: border-color 0.2s;
-      appearance: none;
+      appearance: none; /* Removes default OS styling */
+      -webkit-appearance: none;
+      -moz-appearance: none;
       cursor: pointer;
+      /* Add explicit arrow for cross-browser support */
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      background-size: 1em;
     }
+    
+    /* Ensure options have readable contrast */
+    select option {
+      background-color: #0b1120;
+      color: #f9fafb;
+    }
+    
     select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px rgba(56,189,248,0.5); }
 
-    /* Stats Banner */
+    /* Stats Banner Grid */
+    .stats-banner-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 24px;
+    }
+
     .stat-banner {
       background: radial-gradient(circle at center, rgba(56,189,248,0.15), transparent 70%);
       border: 1px solid rgba(56,189,248,0.3);
       border-radius: 12px;
       padding: 20px;
       text-align: center;
-      margin-bottom: 24px;
     }
     .stat-banner-label {
       color: var(--accent);
@@ -147,10 +167,10 @@
       margin-bottom: 5px;
     }
     .stat-banner-val {
-      font-size: 2.5rem;
+      font-size: 2.2rem;
       font-weight: 800;
       color: #fff;
-      font-family: monospace;
+      /* Removed monospace to match text font request */
     }
 
     /* Table */
@@ -185,7 +205,7 @@
     .data-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.9rem;
+      font-size: 0.95rem; /* Slightly bumped */
       min-width: 600px;
     }
 
@@ -213,8 +233,25 @@
 
     .data-table tbody tr:hover { background: rgba(56, 189, 248, 0.05); }
 
-    .rank-col { width: 50px; color: var(--text-soft); font-weight: 600; }
-    .val-col { font-family: monospace; font-size: 1rem; color: #f9fafb; }
+    /* Footer Row Styles */
+    .table-footer-row {
+      background-color: rgba(56, 189, 248, 0.1);
+      font-weight: 700;
+      border-top: 2px solid var(--accent);
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+    }
+    .table-footer-row td {
+      color: #f9fafb;
+      border-bottom: none;
+    }
+
+    /* Column Styles - Matching text font (no monospace) */
+    .val-col { 
+      font-size: 1rem; 
+      color: #f9fafb; 
+    }
     .highlight-val { color: var(--accent); font-weight: 700; }
     
     .diff-pos { color: var(--positive); }
@@ -224,7 +261,8 @@
 
     @media (max-width: 600px) {
       .input-row { flex-direction: column; align-items: stretch; }
-      .stat-banner-val { font-size: 2rem; }
+      .stat-banner-val { font-size: 1.8rem; }
+      .stats-banner-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -257,11 +295,21 @@
       </div>
 
       <div id="managerStatsArea" style="display:none;">
-        <div class="stat-banner">
-          <div class="stat-banner-label">Average Score</div>
-          <div class="stat-banner-val" id="managerAvgDisplay">0.00</div>
-          <div style="font-size:0.8rem; color:var(--text-soft); margin-top:5px;">
-            Based on <span id="managerGameCount">0</span> games
+        
+        <div class="stats-banner-grid">
+          <div class="stat-banner">
+            <div class="stat-banner-label">Average Score</div>
+            <div class="stat-banner-val" id="managerAvgDisplay">0.00</div>
+            <div style="font-size:0.8rem; color:var(--text-soft); margin-top:5px;">
+              Based on <span id="managerGameCount">0</span> games
+            </div>
+          </div>
+          <div class="stat-banner">
+            <div class="stat-banner-label">Current Streak</div>
+            <div class="stat-banner-val" id="managerStreakDisplay">-</div>
+            <div style="font-size:0.8rem; color:var(--text-soft); margin-top:5px;">
+              For this week across years
+            </div>
           </div>
         </div>
 
@@ -281,6 +329,8 @@
                 </tr>
               </thead>
               <tbody></tbody>
+              <tfoot id="managerTableFooter">
+                </tfoot>
             </table>
           </div>
         </div>
@@ -300,7 +350,7 @@
                 <th onclick="sortLeagueTable('avg')">League Average</th>
                 <th onclick="sortLeagueTable('max')">Highest Score</th>
                 <th onclick="sortLeagueTable('min')">Lowest Score</th>
-                <th onclick="sortLeagueTable('games')">Games Played</th>
+                <th onclick="sortLeagueTable('matchups')">Matchups</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -437,12 +487,40 @@
       }
     });
 
+    // 1. Calculate Average
     const avg = managerData.length > 0 ? totalScore / managerData.length : 0;
     
     document.getElementById('managerAvgDisplay').textContent = avg.toFixed(2);
     document.getElementById('managerGameCount').textContent = managerData.length;
 
-    renderManagerTable();
+    // 2. Calculate Streak
+    // Sort data chronologically to find latest streak
+    const sortedForStreak = [...managerData].sort((a,b) => b.year - a.year);
+    let streakCount = 0;
+    let streakType = "";
+    
+    if (sortedForStreak.length > 0) {
+      streakType = sortedForStreak[0].result; // "W", "L", or "T"
+      for (const game of sortedForStreak) {
+        if (game.result === streakType) {
+          streakCount++;
+        } else {
+          break;
+        }
+      }
+    }
+    
+    const streakDisplay = streakCount > 0 ? `${streakType}${streakCount}` : "-";
+    const streakEl = document.getElementById('managerStreakDisplay');
+    streakEl.textContent = streakDisplay;
+    
+    // Streak Color Styling
+    streakEl.className = 'stat-banner-val'; // reset
+    if (streakType === 'W') streakEl.classList.add('diff-pos');
+    if (streakType === 'L') streakEl.classList.add('diff-neg');
+
+    // 3. Render Table
+    renderManagerTable(totalScore, avg);
   }
 
   window.sortManagerTable = function(key) {
@@ -450,29 +528,35 @@
       mgrSort.dir = mgrSort.dir === 'desc' ? 'asc' : 'desc';
     } else {
       mgrSort.key = key;
-      mgrSort.dir = 'desc'; // Default desc
+      mgrSort.dir = 'desc'; 
       if(key === 'year' || key === 'opponent') mgrSort.dir = 'asc';
     }
-    renderManagerTable();
+    // Retrieve stored total/avg to re-render footer correctly
+    // Re-calculating briefly for simplicity
+    const total = managerData.reduce((acc, cur) => acc + cur.score, 0);
+    const avg = managerData.length ? total / managerData.length : 0;
+    renderManagerTable(total, avg);
   }
 
-  function renderManagerTable() {
+  function renderManagerTable(totalScore, avgScore) {
     const tbody = document.querySelector('#managerTable tbody');
+    const tfoot = document.querySelector('#managerTableFooter');
+    
     tbody.innerHTML = '';
+    tfoot.innerHTML = '';
 
+    // Sort
     managerData.sort((a, b) => {
       let valA = a[mgrSort.key];
       let valB = b[mgrSort.key];
-      
-      // Tie handler
       if (valA === valB) return 0;
-
       if (typeof valA === 'string') {
         return mgrSort.dir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
       }
       return mgrSort.dir === 'desc' ? (valB - valA) : (valA - valB);
     });
 
+    // Body
     managerData.forEach(row => {
       const tr = document.createElement('tr');
       const diffClass = row.diff > 0 ? 'diff-pos' : (row.diff < 0 ? 'diff-neg' : '');
@@ -482,11 +566,24 @@
         <td class="val-col">${row.year}</td>
         <td class="val-col highlight-val">${row.score.toFixed(2)}</td>
         <td class="val-col ${diffClass}">${row.result}</td>
-        <td class="val-col" style="font-family:sans-serif;">${row.opponent}</td>
+        <td class="val-col">${row.opponent}</td>
         <td class="val-col ${diffClass}">${diffSign}${row.diff.toFixed(2)}</td>
       `;
       tbody.appendChild(tr);
     });
+
+    // Locked Footer Row
+    const trFoot = document.createElement('tr');
+    trFoot.className = 'table-footer-row';
+    trFoot.innerHTML = `
+      <td class="val-col">TOTAL</td>
+      <td class="val-col highlight-val">${totalScore.toFixed(2)}</td>
+      <td class="val-col" colspan="3" style="text-align:right;">
+        <span style="font-weight:400; color:var(--text-muted); margin-right:10px;">AVERAGE:</span>
+        <span class="highlight-val">${avgScore.toFixed(2)}</span>
+      </td>
+    `;
+    tfoot.appendChild(trFoot);
   }
 
   // --- League Scope Logic ---
@@ -506,7 +603,7 @@
         const s2 = Number(m.score2);
 
         if (!isNaN(s1)) {
-          sum += s1; count++;
+          sum += s1; count++; // count games (teams)
           if (s1 > max) max = s1;
           if (s1 < min) min = s1;
         }
@@ -518,12 +615,13 @@
       });
 
       if (count > 0) {
+        // "Matchups" typically implies Head-to-Head pairings, so games / 2
         leagueData.push({
           week: w,
           avg: sum / count,
           max: max,
           min: min,
-          games: count
+          matchups: count / 2 
         });
       }
     }
@@ -558,7 +656,7 @@
         <td class="val-col highlight-val">${row.avg.toFixed(2)}</td>
         <td class="val-col diff-pos">${row.max.toFixed(2)}</td>
         <td class="val-col diff-neg">${row.min.toFixed(2)}</td>
-        <td class="val-col" style="color:var(--text-soft)">${row.games}</td>
+        <td class="val-col" style="color:var(--text-soft)">${row.matchups}</td>
       `;
       tbody.appendChild(tr);
     });
