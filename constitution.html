@@ -33,9 +33,10 @@
       min-height: 100vh;
       padding: 24px 16px;
       line-height: 1.7;
+      overflow-x: hidden; /* Prevent body scroll from wide tables */
     }
 
-    .shell{ max-width: 1200px; margin: 0 auto; }
+    .shell{ max-width: 1200px; margin: 0 auto; width: 100%; }
 
     /* Header */
     .header{ text-align:center; margin-bottom: 40px; }
@@ -115,6 +116,7 @@
       display: flex;
       flex-direction: column;
       gap: 32px;
+      min-width: 0; /* Prevents flex items from overflowing container */
     }
 
     .section-card {
@@ -137,6 +139,7 @@
       display: flex;
       align-items: baseline;
       gap: 12px;
+      flex-wrap: wrap; /* Allows wrapping on small screens */
     }
     
     .section-num {
@@ -195,13 +198,14 @@
       margin-bottom: 24px;
       border-radius: 8px;
       border: 1px solid var(--border-subtle);
+      -webkit-overflow-scrolling: touch; /* smooth scroll on iOS */
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.9rem;
-      min-width: 500px;
+      min-width: 500px; /* Forces scroll on small screens */
     }
 
     th {
@@ -272,6 +276,7 @@
         margin-bottom: 20px;
       }
 
+      /* Transform TOC into a grid of buttons on mobile */
       .toc-list {
         display: flex;
         flex-wrap: wrap;
@@ -281,10 +286,14 @@
       .toc-list li { width: 48%; }
       
       .header h1 { font-size: 1.6rem; }
+      
+      .section-card { padding: 20px; }
     }
     
     @media (max-width: 600px) {
-      .toc-list li { width: 100%; }
+      .toc-list li { width: 100%; } /* TOC becomes full width stack */
+      .section-header { font-size: 1.25rem; }
+      .payout-label { font-size: 0.9rem; }
     }
   </style>
 </head>
