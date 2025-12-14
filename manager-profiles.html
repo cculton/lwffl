@@ -24,8 +24,11 @@
       --negative: #ef4444;
       --warning: #f59e0b;
       --gold: #fbbf24;
+      --gold-bg: rgba(251, 191, 36, 0.15);
       --silver: #cbd5e1;
-      --bronze: #b45309;
+      --silver-bg: rgba(203, 213, 225, 0.15);
+      --bronze: #d97706;
+      --bronze-bg: rgba(217, 119, 6, 0.15);
       
       --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -52,7 +55,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 32px;
+      margin-bottom: 24px;
       gap: 16px;
       flex-wrap: wrap;
     }
@@ -92,16 +95,7 @@
     select:hover { border-color: var(--accent); background-color: rgba(30, 41, 59, 0.9); }
     select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
 
-    /* --- Grid Layout --- */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      grid-template-rows: auto auto;
-      gap: 24px;
-      margin-bottom: 40px;
-    }
-
-    /* --- Card Components --- */
+    /* --- Common Card Style --- */
     .card {
       background: var(--card-bg);
       border: 1px solid var(--border-subtle);
@@ -110,10 +104,8 @@
       position: relative;
       overflow: hidden;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+      margin-bottom: 24px;
     }
-    
-    /* Subtle gloss effect */
     .card::before {
       content: "";
       position: absolute;
@@ -121,104 +113,136 @@
       background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
     }
 
-    /* 1. Hero Card */
+    /* 1. Horizontal Hero Card */
     .hero-card {
-      grid-row: span 2;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      text-align: center;
-      background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.05), transparent 60%), var(--card-bg);
+      justify-content: space-between;
+      gap: 32px;
+      background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.08), transparent 60%), var(--card-bg);
+      padding: 32px 40px;
     }
 
-    .avatar-wrapper {
-      position: relative;
-      margin-bottom: 20px;
+    /* Left: Avatar & Identity */
+    .hero-identity {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex: 1;
     }
-    
+
     .avatar {
-      width: 110px;
-      height: 110px;
+      width: 90px;
+      height: 90px;
+      min-width: 90px;
       border-radius: 50%;
       background: linear-gradient(135deg, #0f172a, #1e293b);
       border: 2px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.8rem;
+      font-size: 2.2rem;
       font-weight: 800;
       color: var(--accent);
       box-shadow: 0 8px 24px rgba(0,0,0,0.4);
     }
 
+    .hero-text { display: flex; flex-direction: column; }
+
     .hero-name {
-      font-size: 2rem;
+      font-size: 2.2rem;
       font-weight: 800;
-      line-height: 1.1;
+      line-height: 1;
       margin-bottom: 6px;
       letter-spacing: -0.02em;
+      color: #fff;
     }
 
     .hero-tenure {
       display: inline-block;
-      padding: 4px 12px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 99px;
       color: var(--text-muted);
-      font-size: 0.8rem;
+      font-size: 0.9rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      margin-bottom: 24px;
     }
 
+    /* Middle: Trophy Case (Clear Badges) */
+    .trophy-case {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      flex: 1.5;
+      justify-content: flex-start;
+      border-left: 1px solid var(--border-subtle);
+      padding-left: 32px;
+    }
+
+    .trophy-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      border: 1px solid transparent;
+    }
+
+    .trophy-badge.gold {
+      background: var(--gold-bg);
+      color: var(--gold);
+      border-color: rgba(251, 191, 36, 0.3);
+    }
+    
+    .trophy-badge.silver {
+      background: var(--silver-bg);
+      color: var(--silver);
+      border-color: rgba(203, 213, 225, 0.3);
+    }
+    
+    .trophy-badge.bronze {
+      background: var(--bronze-bg);
+      color: var(--bronze);
+      border-color: rgba(217, 119, 6, 0.3);
+    }
+
+    .empty-case {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      font-style: italic;
+    }
+
+    /* Right: OVR Rating */
     .ovr-badge {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 28px;
-      position: relative;
+      border-left: 1px solid var(--border-subtle);
+      padding-left: 32px;
     }
     
-    /* Decorative ring */
     .ovr-ring {
-      width: 80px; height: 80px;
+      width: 70px; height: 70px;
       border-radius: 50%;
-      border: 4px solid var(--accent);
+      border: 3px solid var(--accent);
       display: flex; 
       align-items: center; justify-content: center;
       box-shadow: 0 0 20px var(--accent-dim);
+      background: rgba(15, 23, 42, 0.8);
     }
     
-    .ovr-val { font-size: 2.2rem; font-weight: 900; color: #fff; }
-    .ovr-label { font-size: 0.75rem; font-weight: 700; color: var(--accent); margin-top: 8px; letter-spacing: 0.1em; }
-
-    .trophy-case {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      width: 100%;
-      padding-top: 24px;
-      border-top: 1px solid var(--border-subtle);
-    }
-    
-    .trophy {
-      font-size: 1.25rem;
-      background: rgba(255,255,255,0.03);
-      padding: 8px;
-      border-radius: 8px;
-      transition: transform 0.2s;
-      cursor: help;
-    }
-    .trophy:hover { transform: translateY(-3px); background: rgba(255,255,255,0.08); }
+    .ovr-val { font-size: 2rem; font-weight: 900; color: #fff; }
+    .ovr-label { font-size: 0.7rem; font-weight: 700; color: var(--accent); margin-top: 8px; letter-spacing: 0.1em; }
 
     /* 2. Stats Strip */
     .stats-strip {
-      grid-column: 2;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 16px;
+      margin-bottom: 24px;
     }
 
     .stat-box {
@@ -229,6 +253,7 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
+      text-align: center;
     }
     
     .stat-label { 
@@ -250,12 +275,12 @@
     
     .stat-sub { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
 
-    /* 3. Analytics */
+    /* 3. Analytics Grid */
     .analytics-grid {
-      grid-column: 2;
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 24px;
+      margin-bottom: 24px;
     }
 
     .chart-card {
@@ -287,7 +312,7 @@
       min-height: 220px;
     }
 
-    /* 4. Rivalry Cards */
+    /* Rivalry Cards */
     .rivalry-col {
       display: flex;
       flex-direction: column;
@@ -303,7 +328,6 @@
       justify-content: space-between;
       align-items: center;
     }
-    
     .rival-card.nemesis { border-left-color: var(--negative); }
     .rival-card.pigeon { border-left-color: var(--positive); }
 
@@ -359,7 +383,6 @@
     .hm-cell[data-res="L"] { background: var(--negative); opacity: 0.8; }
     .hm-cell[data-res="T"] { background: var(--warning); opacity: 0.8; }
     
-    /* Tooltip for Heatmap */
     .hm-cell::after {
       content: attr(data-tooltip);
       position: absolute;
@@ -462,23 +485,15 @@
 
     /* Responsive */
     @media (max-width: 1024px) {
-      .dashboard-grid { grid-template-columns: 1fr; }
-      .hero-card { 
-        grid-row: auto; 
-        flex-direction: row; 
-        justify-content: space-between; 
-        padding: 30px;
-        text-align: left;
-      }
-      .avatar-wrapper { margin: 0; margin-right: 24px; }
-      .ovr-badge { margin: 0; margin-left: auto; }
-      .trophy-case { justify-content: flex-start; }
+      .hero-card { flex-wrap: wrap; padding: 24px; }
+      .trophy-case { border-left: none; padding-left: 0; border-top: 1px solid var(--border-subtle); padding-top: 20px; width: 100%; flex: 100%; }
+      .ovr-badge { border-left: none; padding-left: 0; border-left: 1px solid var(--border-subtle); padding-left: 20px; margin-left: auto; }
     }
 
     @media (max-width: 768px) {
-      .hero-card { flex-direction: column; text-align: center; gap: 20px; }
-      .avatar-wrapper { margin: 0; }
-      .ovr-badge { margin: 0; }
+      .hero-card { flex-direction: column; text-align: center; gap: 20px; align-items: center; }
+      .hero-identity { flex-direction: column; text-align: center; gap: 12px; }
+      .ovr-badge { border-left: none; padding-left: 0; margin-left: 0; border-top: 1px solid var(--border-subtle); padding-top: 20px; width: 100%; }
       .trophy-case { justify-content: center; }
       
       .stats-strip { grid-template-columns: 1fr 1fr; }
@@ -498,120 +513,117 @@
     </div>
   </div>
 
-  <div class="dashboard-grid">
-    
-    <div class="card hero-card">
-      <div class="avatar-wrapper">
-        <div class="avatar" id="heroAvatar"></div>
-      </div>
-      
-      <div style="flex:1">
+  <div class="card hero-card">
+    <div class="hero-identity">
+      <div class="avatar" id="heroAvatar"></div>
+      <div class="hero-text">
         <div class="hero-name" id="heroName"><span class="skeleton">Loading Name</span></div>
         <div class="hero-tenure" id="heroTenure"><span class="skeleton">Est 20XX</span></div>
-        <div class="trophy-case" id="trophyCase">
-          </div>
+      </div>
+    </div>
+
+    <div class="trophy-case" id="trophyCase">
       </div>
 
-      <div class="ovr-badge">
-        <div class="ovr-ring">
-          <span class="ovr-val" id="heroOvr">--</span>
+    <div class="ovr-badge">
+      <div class="ovr-ring">
+        <span class="ovr-val" id="heroOvr">--</span>
+      </div>
+      <span class="ovr-label">RATING</span>
+    </div>
+  </div>
+
+  <div class="stats-strip">
+    <div class="stat-box">
+      <span class="stat-label">Career Record</span>
+      <span class="stat-val" id="statRecord">-</span>
+      <span class="stat-sub" id="statWinPct">Win %</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-label">Avg Finish</span>
+      <span class="stat-val" id="statAvgFinish">-</span>
+      <span class="stat-sub">Rank</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-label">Avg Score</span>
+      <span class="stat-val" id="statAvgScore">-</span>
+      <span class="stat-sub">PTS/Game</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-label">Earnings</span>
+      <span class="stat-val" id="statEarnings" style="color:var(--gold)">-</span>
+      <span class="stat-sub">Total Won</span>
+    </div>
+  </div>
+
+  <div class="analytics-grid">
+    
+    <div class="card chart-card">
+      <div class="chart-header">
+        <div class="chart-icon">✦</div>
+        <h3>Luck Index (Quadrants)</h3>
+      </div>
+      <div class="chart-container">
+        <canvas id="luckChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card chart-card">
+      <div class="chart-header">
+        <div class="chart-icon">📊</div>
+        <h3>Scoring Spread (Low/High)</h3>
+      </div>
+      <div class="chart-container">
+        <canvas id="spreadChart"></canvas>
+      </div>
+    </div>
+
+    <div class="rivalry-col">
+      <div class="rival-card nemesis">
+        <div class="rival-meta">
+          <span class="rival-type">Nemesis (Lowest Win %)</span>
+          <span class="rival-name" id="nemesisName">-</span>
         </div>
-        <span class="ovr-label">RATING</span>
+        <span class="rival-stat" id="nemesisStat">-</span>
       </div>
-    </div>
-
-    <div class="stats-strip">
-      <div class="stat-box">
-        <span class="stat-label">Career Record</span>
-        <span class="stat-val" id="statRecord">-</span>
-        <span class="stat-sub" id="statWinPct">Win %</span>
-      </div>
-      <div class="stat-box">
-        <span class="stat-label">Avg Finish</span>
-        <span class="stat-val" id="statAvgFinish">-</span>
-        <span class="stat-sub">Rank</span>
-      </div>
-      <div class="stat-box">
-        <span class="stat-label">Avg Score</span>
-        <span class="stat-val" id="statAvgScore">-</span>
-        <span class="stat-sub">PTS/Game</span>
-      </div>
-      <div class="stat-box">
-        <span class="stat-label">Earnings</span>
-        <span class="stat-val" id="statEarnings" style="color:var(--gold)">-</span>
-        <span class="stat-sub">Total Won</span>
-      </div>
-    </div>
-
-    <div class="analytics-grid">
       
-      <div class="card chart-card">
+      <div class="rival-card pigeon">
+        <div class="rival-meta">
+          <span class="rival-type">Pigeon (Highest Win %)</span>
+          <span class="rival-name" id="pigeonName">-</span>
+        </div>
+        <span class="rival-stat" id="pigeonStat">-</span>
+      </div>
+
+      <div class="card chart-card" style="flex:1;">
         <div class="chart-header">
-          <div class="chart-icon">✦</div>
-          <h3>Luck Index (Quadrants)</h3>
+          <div class="chart-icon">🔥</div>
+          <h3>Clutch Factor (Reg vs Playoff)</h3>
         </div>
-        <div class="chart-container">
-          <canvas id="luckChart"></canvas>
-        </div>
-      </div>
-
-      <div class="card chart-card">
-        <div class="chart-header">
-          <div class="chart-icon">📊</div>
-          <h3>Scoring Spread (Low/High)</h3>
-        </div>
-        <div class="chart-container">
-          <canvas id="spreadChart"></canvas>
+        <div class="chart-container" style="height:150px;">
+          <canvas id="clutchChart"></canvas>
         </div>
       </div>
-
-      <div class="rivalry-col">
-        <div class="rival-card nemesis">
-          <div class="rival-meta">
-            <span class="rival-type">Nemesis (Lowest Win %)</span>
-            <span class="rival-name" id="nemesisName">-</span>
-          </div>
-          <span class="rival-stat" id="nemesisStat">-</span>
-        </div>
-        
-        <div class="rival-card pigeon">
-          <div class="rival-meta">
-            <span class="rival-type">Pigeon (Highest Win %)</span>
-            <span class="rival-name" id="pigeonName">-</span>
-          </div>
-          <span class="rival-stat" id="pigeonStat">-</span>
-        </div>
-
-        <div class="card chart-card" style="flex:1;">
-          <div class="chart-header">
-            <div class="chart-icon">🔥</div>
-            <h3>Clutch Factor (Reg vs Playoff)</h3>
-          </div>
-          <div class="chart-container" style="height:150px;">
-            <canvas id="clutchChart"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <div class="card chart-card">
-        <div class="chart-header">
-          <div class="chart-icon">📈</div>
-          <h3>Career Trajectory</h3>
-        </div>
-        <div class="chart-container">
-          <canvas id="careerChart"></canvas>
-        </div>
-      </div>
-
-      <div class="card heatmap-card">
-        <div class="chart-header">
-          <div class="chart-icon">📅</div>
-          <h3>The Heat Check (Weekly Results)</h3>
-        </div>
-        <div class="heatmap-grid" id="heatmapGrid"></div>
-      </div>
-
     </div>
+
+    <div class="card chart-card">
+      <div class="chart-header">
+        <div class="chart-icon">📈</div>
+        <h3>Career Trajectory</h3>
+      </div>
+      <div class="chart-container">
+        <canvas id="careerChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card heatmap-card">
+      <div class="chart-header">
+        <div class="chart-icon">📅</div>
+        <h3>The Heat Check (Weekly Results)</h3>
+      </div>
+      <div class="heatmap-grid" id="heatmapGrid"></div>
+    </div>
+
   </div>
 
   <div class="card">
@@ -775,12 +787,26 @@
     const caseEl = document.getElementById('trophyCase');
     caseEl.innerHTML = '';
     let champCount = 0;
+    
+    const trophies = [];
+    
     seasons.forEach(s => {
       const rank = s.final_standing ?? s.finalStanding;
-      if (rank === 1) { champCount++; caseEl.innerHTML += `<span class="trophy" title="${s.year} Champion">🏆</span>`; }
-      else if (rank === 2) caseEl.innerHTML += `<span class="trophy" title="${s.year} Runner-up">🥈</span>`;
-      else if (rank === 3) caseEl.innerHTML += `<span class="trophy" title="${s.year} 3rd Place">🥉</span>`;
+      if (rank === 1) { 
+        champCount++; 
+        trophies.push(`<span class="trophy-badge gold">🏆 ${s.year} Champion</span>`);
+      } else if (rank === 2) {
+        trophies.push(`<span class="trophy-badge silver">🥈 ${s.year} Runner-up</span>`);
+      } else if (rank === 3) {
+        trophies.push(`<span class="trophy-badge bronze">🥉 ${s.year} 3rd</span>`);
+      }
     });
+    
+    if(trophies.length > 0) {
+      caseEl.innerHTML = trophies.join('');
+    } else {
+      caseEl.innerHTML = `<span class="empty-case">No hardware... yet.</span>`;
+    }
 
     // OVR Formula
     const wins = games.filter(g => g.result === 'W').length;
