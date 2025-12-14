@@ -57,34 +57,6 @@
       text-transform: uppercase;
     }
 
-
-    /* Data error banner */
-    .data-error{
-      display:none;
-      margin: 14px auto 6px;
-      border: 1px solid rgba(245, 158, 11, 0.55);
-      background: rgba(245, 158, 11, 0.08);
-      border-radius: 14px;
-      padding: 12px 14px;
-      max-width: 980px;
-      text-align: left;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.35);
-    }
-    .data-error strong{
-      display:block;
-      font-size: 0.85rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #fde68a;
-      margin-bottom: 6px;
-    }
-    .data-error .detail{
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      line-height: 1.35;
-      word-break: break-word;
-    }
-
     /* Scope tabs */
     .scope-tabs{
       display:flex;
@@ -386,11 +358,6 @@
         <p>Legion of Whom Fantasy Football League  · 2014–Present</p>
       </header>
 
-      <div id="dataErrorBanner" class="data-error" role="status" aria-live="polite">
-        <strong data-role="message">Data load issue</strong>
-        <div class="detail" data-role="detail"></div>
-      </div>
-
       <nav class="scope-tabs" aria-label="Scope">
         <button class="scope-btn" data-scope="Career" aria-selected="true" type="button">Career</button>
         <button class="scope-btn" data-scope="Season" aria-selected="false" type="button">Season</button>
@@ -678,45 +645,6 @@
   // Helpers
   // ---------------------------
 
-  // Stable category keying (prevents "rename a label -> everything breaks")
-  function slugify(str){
-    return String(str || "")
-      .trim()
-      .toLowerCase()
-      .replace(/&/g, "and")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-  }
-
-  function getCategoryKey(def){
-    // Optional explicit id supported, otherwise derived from label
-    return def && def.id ? String(def.id) : slugify(def?.label);
-  }
-
-  function resetViewState(){
-    paginationState.currentPage = 1;
-    sortState.key = null;
-    sortState.dir = null;
-  }
-
-  function showDataError(message, detail){
-    const el = document.getElementById("dataErrorBanner");
-    if (!el) return;
-    el.style.display = "block";
-    const msg = el.querySelector("[data-role='message']");
-    const det = el.querySelector("[data-role='detail']");
-    if (msg) msg.textContent = message || "Data load issue.";
-    if (det) det.textContent = detail || "";
-  }
-
-  function clearDataError(){
-    const el = document.getElementById("dataErrorBanner");
-    if (!el) return;
-    el.style.display = "none";
-    const det = el.querySelector("[data-role='detail']");
-    if (det) det.textContent = "";
-  }
-
   function isPlayoffGame(m){ return m.playoffs && m.playoffs !== "N/A"; }
 
   // UPDATED Helper for new Matchup Types
@@ -728,40 +656,7 @@
     return types;
   }
 
-  function normalizeMatchups(rows){
-    // Defensive normalization so tiny upstream changes don’t brick the page.
-    const out = [];
-    (rows || []).forEach((r, i) => {
-      if (!r) return;
-      const year = Number(r.year);
-      const week = Number(r.week);
-      const manager1 = (r.manager1 ?? r.away_manager ?? r.awayManager ?? "").toString().trim();
-      const manager2 = (r.manager2 ?? r.home_manager ?? r.homeManager ?? "").toString().trim();
-      const score1 = Number(r.score1 ?? r.away_score ?? r.awayScore);
-      const score2 = Number(r.score2 ?? r.home_score ?? r.homeScore);
-
-      // Minimal required fields
-      if (!Number.isFinite(year) || !Number.isFinite(week) || !manager1 || !manager2 || !Number.isFinite(score1) || !Number.isFinite(score2)){
-        // Keep silent; but log a single warning to avoid console spam
-        if (i === 0) console.warn("Some matchup rows were skipped due to missing fields.");
-        return;
-      }
-
-      out.push({
-        ...r,
-        year,
-        week,
-        manager1,
-        manager2,
-        score1,
-        score2,
-        playoffs: r.playoffs ?? r.playoff ?? r.playoffRound ?? r.isPlayoffs ?? "N/A"
-      });
-    });
-    return out;
-  }
-
-  function ensureStatsObj(){(){
+  function ensureStatsObj(){
     return {
       games: 0,
       pointsFor: 0,
@@ -1278,7 +1173,7 @@
       group.label = groupLabel;
       defs.filter(d => d.group === groupLabel).forEach(def => {
         const opt = document.createElement("option");
-        opt.value = getCategoryKey(def);
+        opt.value = def.label;
         opt.textContent = def.label;
         group.appendChild(opt);
       });
@@ -1286,7 +1181,7 @@
     });
   }
 
-  function setScopeUI(scope){(scope){
+  function setScopeUI(scope){
     currentScope = scope;
 
     // scope class on body
@@ -1982,9 +1877,9 @@
   // Main render
   // ---------------------------
 
-  function renderLeaderboard(matchupType, categoryKey){
+  function renderLeaderboard(matchupType, categoryLabel){
     const defs = DEFS_BY_SCOPE[currentScope] || [];
-    const def = defs.find(d => getCategoryKey(d) === categoryKey);
+    const def = defs.find(d => d.label === categoryLabel);
     if (!def) return;
 
     const titleEl = document.getElementById("leaderboardTitle");
@@ -2033,54 +1928,17 @@
 
   async function loadMatchups(){
     try{
-      clearDataError();
-      const res = await fetch("league-scores.json", { cache: "no-store" });
+      const res = await fetch("league-scores.json");
       if (!res.ok){
-        const msg = `Failed to load league-scores.json (${res.status} ${res.statusText})`;
-        console.error(msg);
-        showDataError("Couldn’t load league data.", msg);
+        console.error("Failed to load league-scores.json:", res.status, res.statusText);
         return [];
       }
-      const data = await res.json();
-      if (!Array.isArray(data)){
-        const msg = "league-scores.json did not return an array.";
-        console.error(msg, data);
-        showDataError("League data format issue.", msg);
-        return [];
-      }
-      return normalizeMatchups(data);
+      return await res.json();
     } catch(err){
       console.error("Error loading league-scores.json", err);
-      showDataError("Couldn’t load league data.", String(err?.message || err));
       return [];
     }
   }
-
-  async function loadSeasonStats(){
-    try{
-      const res = await fetch("final-standings.json", { cache: "no-store" });
-      if (!res.ok){
-        const msg = `Failed to load final-standings.json (${res.status} ${res.statusText})`;
-        console.error(msg);
-        // standings are optional for some categories; show banner but keep page usable
-        showDataError("Season standings didn’t load (some categories may be empty).", msg);
-        return [];
-      }
-      const data = await res.json();
-      if (!Array.isArray(data)){
-        const msg = "final-standings.json did not return an array.";
-        console.error(msg, data);
-        showDataError("Season standings format issue.", msg);
-        return [];
-      }
-      return data;
-    } catch(err){
-      console.error("Error loading final-standings.json", err);
-      showDataError("Season standings didn’t load (some categories may be empty).", String(err?.message || err));
-      return [];
-    }
-  }
-
 
   async function loadSeasonStats(){
     try{
@@ -2114,16 +1972,16 @@
 
     // DEFAULT SETTINGS ON LOAD
     matchupSelect.value = "Regular Season + Playoffs";
-    categorySelect.value = slugify("Most Points For");
+    categorySelect.value = "Most Points For";
 
     function rerenderCurrent(){
       const matchupType = matchupSelect.value;
-      const categoryKey = categorySelect.value;
-      if (!matchupType || !categoryKey){
+      const categoryLabel = categorySelect.value;
+      if (!matchupType || !categoryLabel){
         neutralState();
         return;
       }
-      renderLeaderboard(matchupType, categoryKey);
+      renderLeaderboard(matchupType, categoryLabel);
     }
 
     const prevBtn = document.getElementById("prevPage");
@@ -2148,7 +2006,9 @@
         // logic to check if current cat exists in new scope
         const previousCategory = categorySelect.value;
         
-        resetViewState();
+        sortState.key = null;
+        sortState.dir = null;
+        paginationState.currentPage = 1;
         
         setScopeUI(scope);
 
@@ -2171,12 +2031,16 @@
     });
 
     matchupSelect.addEventListener("change", () => {
-      resetViewState();
+      paginationState.currentPage = 1;
+      sortState.key = null;
+      sortState.dir = null;
       rerenderCurrent();
     });
 
     categorySelect.addEventListener("change", () => {
-      resetViewState();
+      paginationState.currentPage = 1;
+      sortState.key = null;
+      sortState.dir = null;
       rerenderCurrent();
     });
 
