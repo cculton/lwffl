@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="robots" content="noindex, nofollow" />
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
   <title>Weekly Averages – LWFFL</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -19,8 +19,6 @@
       --positive: #22c55e;
       --negative: #ef4444;
       --warning: #f59e0b;
-      --sorted-header-bg: rgba(15, 23, 42, 0.95);
-      --sorted-cell-bg: rgba(15, 23, 42, 0.88);
     }
 
     body {
@@ -41,11 +39,11 @@
       border-radius: 18px;
       border: 1px solid rgba(148, 163, 184, 0.3);
       box-shadow: 0 40px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(15,23,42,0.9);
-      padding: 28px 24px 28px;
+      padding: 32px 24px;
       backdrop-filter: blur(14px);
     }
 
-    .header { text-align: center; margin-bottom: 24px; }
+    .header { text-align: center; margin-bottom: 30px; }
     .header h1 {
       font-size: 2rem;
       letter-spacing: 0.1em;
@@ -61,153 +59,145 @@
       text-transform: uppercase;
     }
 
-    /* Controls */
-    .controls {
+    /* Inputs - Matches Probability Machine Style */
+    .input-row {
       display: flex;
-      justify-content: center;
+      gap: 15px;
       margin-bottom: 24px;
+      align-items: flex-end;
+      background: rgba(30, 41, 59, 0.4);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(55,65,81,0.5);
     }
-    .control-group {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      max-width: 300px;
-    }
+    .input-group { flex: 1; }
     
     label {
-      margin-bottom: 6px;
+      display: block;
+      margin-bottom: 8px;
       color: var(--text-muted);
       font-weight: 600;
       font-size: 0.8rem;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
     }
-
+    
     select {
-      appearance: none;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid rgba(75, 85, 99, 0.9);
-      background-color: #0b1120;
-      color: #f9fafb;
-      font-size: 0.95rem;
-      font-weight: 500;
-      outline: none;
-      cursor: pointer;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.7);
       width: 100%;
+      padding: 12px 15px;
+      background: #0b1120;
+      border: 1px solid rgba(75, 85, 99, 0.8);
+      border-radius: 8px;
+      color: #f9fafb;
+      font-size: 1.1em;
+      transition: border-color 0.2s;
+      appearance: none;
+      cursor: pointer;
     }
-    select:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.7);
-    }
+    select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px rgba(56,189,248,0.5); }
 
-    /* Card & Table */
-    .leaderboard-card {
-      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.97), rgba(15, 23, 42, 0.99));
+    /* Instructions */
+    .instruction-text {
+      text-align: center;
+      color: var(--text-soft);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+      line-height: 1.5;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .highlight { color: var(--text-main); font-weight: 600; }
+
+    /* Results Card */
+    .result-card {
+      background: radial-gradient(circle at top, rgba(15,23,42,0.9), rgba(2,6,23,0.95));
+      border: 1px solid rgba(55,65,81,0.6);
       border-radius: 14px;
-      border: 1px solid rgba(31, 41, 55, 0.95);
-      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.95);
-      padding: 18px 16px 16px;
-      position: relative;
+      padding: 30px;
+      margin-bottom: 24px;
+      display: none; /* Hidden until loaded */
+    }
+    .result-card.show { display: block; }
+
+    .main-stat-label { 
+      color: var(--text-soft); 
+      font-size: 0.9rem; 
+      text-transform: uppercase; 
+      letter-spacing: 0.12em; 
+      margin-bottom: 10px; 
+      text-align: center;
     }
 
-    .leaderboard-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 16px;
-    }
-
-    .leaderboard-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #e5e7eb;
-    }
-
+    /* Table Styling */
     .table-wrap {
       width: 100%;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      border-radius: 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(55, 65, 81, 0.5);
     }
 
-    .leaderboard-table {
+    .data-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       min-width: 600px;
-      border-radius: 10px;
-      overflow: hidden;
     }
 
-    .leaderboard-table thead { background: linear-gradient(90deg, #020617, #020617); }
-    
-    .leaderboard-table th {
-      padding: 12px 14px;
-      font-size: 0.78rem;
+    .data-table thead {
+      background: rgba(30, 41, 59, 0.6);
+    }
+
+    .data-table th {
+      text-align: left;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      font-size: 0.75rem;
       text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: #9ca3af;
-      border-bottom: 1px solid rgba(55, 65, 81, 0.9);
+      letter-spacing: 0.1em;
+      border-bottom: 1px solid rgba(55,65,81,0.5);
       cursor: pointer;
       user-select: none;
-      text-align: left;
     }
     
-    .leaderboard-table td {
-      padding: 12px 14px;
-      border-bottom: 1px solid rgba(31, 41, 55, 0.96);
-      color: var(--text-main);
-      text-align: left;
+    .data-table th:hover { color: var(--accent); }
+
+    .data-table td {
+      padding: 12px 16px;
+      color: #e5e7eb;
+      border-bottom: 1px solid rgba(55, 65, 81, 0.3);
       font-variant-numeric: tabular-nums;
     }
 
-    .leaderboard-table tbody tr:hover { background: rgba(15, 23, 42, 0.98); }
-    .leaderboard-table tbody tr:nth-child(odd) { background: #020617; }
-    .leaderboard-table tbody tr:nth-child(even) { background: #020617; }
-
-    /* Footer / League Total Row */
-    .league-total-row {
-      background: rgba(56, 189, 248, 0.08) !important;
-      font-weight: 600;
-      border-top: 2px solid rgba(56, 189, 248, 0.3);
-      position: sticky;
-      bottom: 0;
-      z-index: 5;
+    .data-table tbody tr:hover {
+      background: rgba(56, 189, 248, 0.05);
     }
-    .league-total-row td {
+
+    .rank-col { width: 50px; color: var(--text-soft); font-weight: 600; }
+    .manager-col { font-weight: 500; color: #f9fafb; }
+    .stat-col { font-family: monospace; font-size: 1rem; }
+    .featured-col { color: var(--accent); font-weight: 700; background: rgba(56, 189, 248, 0.03); }
+    
+    /* Footer Row */
+    .league-footer {
+      background: rgba(56, 189, 248, 0.08);
+      font-weight: 700;
       color: var(--accent);
-      border-bottom: none;
     }
+    .league-footer td { border-bottom: none; }
 
-    .rank-cell { width: 50px; color: var(--text-muted); font-weight: 600; }
-    .manager-cell { color: #f9fafb; font-weight: 500; }
-    
-    .stat-cell { 
-      font-family: monospace; 
-      font-size: 1rem;
-    }
-    
-    .value-positive { color: var(--positive); }
-    .value-highlight { color: var(--accent); font-weight: 700; }
+    /* Comparison Colors */
+    .diff-pos { color: var(--positive); }
+    .diff-neg { color: var(--negative); }
+    .diff-neu { color: var(--text-soft); }
 
-    .featured-col { background: rgba(56, 189, 248, 0.08); }
-    .sorted-col-header { background: var(--sorted-header-bg); color: #e5e7eb; }
-
-    .no-data {
-      padding: 20px;
-      text-align: center;
-      color: var(--text-soft);
-      font-size: 0.9rem;
-    }
+    .loading { color: var(--text-soft); text-align: center; padding: 40px; }
 
     @media (max-width: 600px) {
-      .container { padding: 22px 14px; }
-      .header h1 { font-size: 1.6rem; }
-      .leaderboard-table th, .leaderboard-table td { padding: 10px; }
+      .input-row { flex-direction: column; align-items: stretch; }
+      .container { padding: 24px 16px; }
     }
   </style>
 </head>
@@ -215,219 +205,316 @@
 
 <div class="shell">
   <div class="container">
-    <header class="header">
+    <div class="header">
       <h1>Weekly Averages</h1>
-      <p>Historical Performance By Week · 2014–Present</p>
-    </header>
+      <p>Legion of Whom Fantasy Football League</p>
+    </div>
 
-    <section class="controls">
-      <div class="control-group">
-        <label for="weekSelect">Select Week</label>
-        <select id="weekSelect">
+    <p class="instruction-text">
+      Select a specific week to see historical performance averages. 
+      <br>Use the <strong>"Compare With"</strong> dropdown to see how scoring differs between two weeks.
+    </p>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label for="primaryWeek">Primary Week</label>
+        <select id="primaryWeek">
           </select>
       </div>
-    </section>
-
-    <section class="leaderboard-card">
-      <div class="leaderboard-header">
-        <div class="leaderboard-title" id="tableTitle">Week 1 Averages</div>
+      <div class="input-group">
+        <label for="compareWeek" style="color:var(--accent);">Compare With (Optional)</label>
+        <select id="compareWeek">
+          <option value="">-- None --</option>
+          </select>
       </div>
+    </div>
 
+    <div id="resultsArea" class="result-card">
+      <div class="main-stat-label" id="tableTitle">Week 1 Historical Stats</div>
+      
       <div class="table-wrap">
-        <table class="leaderboard-table" aria-live="polite">
+        <table class="data-table">
           <thead>
-            <tr id="headerRow">
-              <th data-key="rank">Rank</th>
-              <th data-key="manager">Manager</th>
-              <th data-key="average" class="featured-col">Average Score</th>
-              <th data-key="total">Total Points</th>
-              <th data-key="games">Games Played</th>
-            </tr>
+            <tr id="tableHeader">
+              </tr>
           </thead>
-          <tbody id="leaderboardBody">
+          <tbody id="tableBody">
             </tbody>
-          <tfoot id="leagueFooter">
+          <tfoot id="tableFooter">
             </tfoot>
         </table>
       </div>
+    </div>
 
-      <div id="noDataMessage" class="no-data" style="display:none;">
-        Loading data...
-      </div>
-    </section>
+    <div id="loading" class="loading">Loading database...</div>
+
   </div>
 </div>
 
 <script>
   let rawMatchups = [];
-  let currentWeek = 1;
-  let currentSort = { key: 'average', dir: 'desc' };
+  let currentSort = { key: 'avg1', dir: 'desc' }; // Default sort by Primary Average
 
-  // Fetch Data
   document.addEventListener('DOMContentLoaded', async () => {
     try {
       const res = await fetch('league-scores.json');
-      if (!res.ok) throw new Error("Failed to load league-scores.json");
+      if (!res.ok) throw new Error("File load error");
       rawMatchups = await res.json();
+
+      initDropdowns();
+      updateTable(); // Initial Render
       
-      initWeekDropdown();
-      renderTable();
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('resultsArea').classList.add('show');
+
     } catch (err) {
       console.error(err);
-      document.getElementById('noDataMessage').textContent = "Error loading data.";
-      document.getElementById('noDataMessage').style.display = 'block';
+      document.getElementById('loading').textContent = "Error loading data. Ensure league-scores.json is present.";
     }
   });
 
-  // Setup Dropdown (Weeks 1-17)
-  function initWeekDropdown() {
-    const select = document.getElementById('weekSelect');
-    // Find max week in data just in case, default to 17 standard
-    const maxWeek = rawMatchups.reduce((max, m) => Math.max(max, Number(m.week)), 0) || 17;
+  function initDropdowns() {
+    const primary = document.getElementById('primaryWeek');
+    const compare = document.getElementById('compareWeek');
     
-    for (let i = 1; i <= 17; i++) { // Cap at 17 for standard fantasy schedule
-      const opt = document.createElement('option');
-      opt.value = i;
-      opt.textContent = `Week ${i}`;
-      select.appendChild(opt);
+    // Standard 17 week fantasy season
+    for(let i=1; i<=17; i++) {
+      const opt1 = document.createElement('option');
+      opt1.value = i;
+      opt1.textContent = `Week ${i}`;
+      primary.appendChild(opt1);
+
+      const opt2 = document.createElement('option');
+      opt2.value = i;
+      opt2.textContent = `Week ${i}`;
+      compare.appendChild(opt2);
     }
 
-    select.addEventListener('change', (e) => {
-      currentWeek = parseInt(e.target.value);
-      document.getElementById('tableTitle').textContent = `Week ${currentWeek} Averages`;
-      renderTable();
-    });
+    primary.addEventListener('change', updateTable);
+    compare.addEventListener('change', updateTable);
   }
 
-  function processData(week) {
-    const managerStats = {};
-    let leagueTotalScore = 0;
-    let leagueTotalGames = 0;
+  function getStatsForWeek(weekNum) {
+    const stats = {};
+    let totalScore = 0;
+    let totalGames = 0;
 
     rawMatchups.forEach(m => {
-      if (Number(m.week) !== week) return;
+      if (Number(m.week) !== weekNum) return;
 
-      const p1 = m.manager1;
-      const s1 = Number(m.score1);
-      const p2 = m.manager2;
-      const s2 = Number(m.score2);
+      const processSide = (manager, score, opponentScore) => {
+        if (!manager) return;
+        const s = Number(score);
+        const o = Number(opponentScore);
+        if (isNaN(s)) return;
 
-      // Process Player 1
-      if (p1 && !isNaN(s1)) {
-        if (!managerStats[p1]) managerStats[p1] = { name: p1, total: 0, games: 0 };
-        managerStats[p1].total += s1;
-        managerStats[p1].games += 1;
-        leagueTotalScore += s1;
-        leagueTotalGames += 1;
-      }
+        if (!stats[manager]) stats[manager] = { 
+          name: manager, score: 0, games: 0, w:0, l:0, t:0 
+        };
 
-      // Process Player 2
-      if (p2 && !isNaN(s2)) {
-        if (!managerStats[p2]) managerStats[p2] = { name: p2, total: 0, games: 0 };
-        managerStats[p2].total += s2;
-        managerStats[p2].games += 1;
-        leagueTotalScore += s2;
-        leagueTotalGames += 1;
-      }
+        stats[manager].score += s;
+        stats[manager].games += 1;
+        
+        // W-L-T Calculation
+        if (s > o) stats[manager].w++;
+        else if (s < o) stats[manager].l++;
+        else stats[manager].t++;
+
+        totalScore += s;
+        totalGames++;
+      };
+
+      processSide(m.manager1, m.score1, m.score2);
+      processSide(m.manager2, m.score2, m.score1);
     });
 
-    const rows = Object.values(managerStats).map(m => ({
-      ...m,
-      average: m.games > 0 ? (m.total / m.games) : 0
+    // Calculate Averages
+    const processed = Object.values(stats).map(p => ({
+      ...p,
+      average: p.games > 0 ? p.score / p.games : 0
     }));
 
     return {
-      rows,
-      leagueAvg: leagueTotalGames > 0 ? (leagueTotalScore / leagueTotalGames) : 0,
-      leagueTotal: leagueTotalScore,
-      leagueGames: leagueTotalGames
+      data: processed,
+      leagueAvg: totalGames > 0 ? totalScore / totalGames : 0
     };
   }
 
-  function renderTable() {
-    const { rows, leagueAvg, leagueTotal, leagueGames } = processData(currentWeek);
-    const tbody = document.getElementById('leaderboardBody');
-    const footer = document.getElementById('leagueFooter');
+  function updateTable() {
+    const w1 = parseInt(document.getElementById('primaryWeek').value);
+    const w2Val = document.getElementById('compareWeek').value;
+    const isCompare = w2Val !== "";
+    const w2 = isCompare ? parseInt(w2Val) : null;
+
+    const set1 = getStatsForWeek(w1);
     
-    tbody.innerHTML = '';
-    footer.innerHTML = '';
+    let combinedData = [];
 
-    if (rows.length === 0) {
-      document.getElementById('noDataMessage').style.display = 'block';
-      document.getElementById('noDataMessage').textContent = "No matchups found for this week.";
-      return;
+    if (isCompare) {
+      const set2 = getStatsForWeek(w2);
+      // Merge data
+      // Create a map of all managers found in either set
+      const managers = new Set([...set1.data.map(d=>d.name), ...set2.data.map(d=>d.name)]);
+      
+      combinedData = Array.from(managers).map(m => {
+        const s1 = set1.data.find(x => x.name === m);
+        const s2 = set2.data.find(x => x.name === m);
+        
+        const avg1 = s1 ? s1.average : 0;
+        const avg2 = s2 ? s2.average : 0;
+        
+        return {
+          name: m,
+          avg1: avg1,
+          avg2: avg2,
+          diff: avg1 - avg2,
+          // For sorting convenience
+          sortVal: avg1 
+        };
+      });
+
+      document.getElementById('tableTitle').textContent = `Comparison: Week ${w1} vs Week ${w2}`;
+    } else {
+      // Single Week Mode
+      combinedData = set1.data.map(d => ({
+        name: d.name,
+        avg1: d.average,
+        total: d.score,
+        games: d.games,
+        record: `${d.w}-${d.l}-${d.t}`
+      }));
+      document.getElementById('tableTitle').textContent = `Week ${w1} Historical Performance`;
     }
-    document.getElementById('noDataMessage').style.display = 'none';
 
-    // Sort Rows
-    rows.sort((a, b) => {
+    renderHeader(isCompare, w1, w2);
+    renderBody(combinedData, isCompare);
+    renderFooter(set1.leagueAvg, isCompare ? getStatsForWeek(w2).leagueAvg : null, isCompare);
+  }
+
+  function renderHeader(isCompare, w1, w2) {
+    const thead = document.getElementById('tableHeader');
+    thead.innerHTML = '';
+
+    const cols = isCompare 
+      ? [
+          { k: 'rank', label: 'Rank' },
+          { k: 'name', label: 'Manager' },
+          { k: 'avg1', label: `Wk ${w1} Avg` },
+          { k: 'avg2', label: `Wk ${w2} Avg` },
+          { k: 'diff', label: '+/-' }
+        ]
+      : [
+          { k: 'rank', label: 'Rank' },
+          { k: 'name', label: 'Manager' },
+          { k: 'record', label: 'Record' },
+          { k: 'total', label: 'Total Pts' },
+          { k: 'games', label: 'Games' },
+          { k: 'avg1', label: 'Average' }
+        ];
+
+    cols.forEach(c => {
+      const th = document.createElement('th');
+      th.textContent = c.label;
+      if (c.k === currentSort.key) th.style.color = 'var(--accent)';
+      
+      th.onclick = () => {
+        if (currentSort.key === c.k) {
+          currentSort.dir = currentSort.dir === 'desc' ? 'asc' : 'desc';
+        } else {
+          currentSort.key = c.k;
+          currentSort.dir = 'desc'; // Default desc for stats
+          if (c.k === 'name') currentSort.dir = 'asc';
+        }
+        updateTable(); // Re-render with new sort
+      };
+      thead.appendChild(th);
+    });
+  }
+
+  function renderBody(data, isCompare) {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+
+    // Sort Data
+    data.sort((a, b) => {
       const valA = a[currentSort.key];
       const valB = b[currentSort.key];
-      // Tie comparison helper
-      if (Math.abs(valA - valB) < 0.0001) return 0;
+      
+      // Tie breaking
+      if (valA === valB) return 0;
+      
+      if (typeof valA === 'string') {
+        return currentSort.dir === 'asc' 
+          ? valA.localeCompare(valB) 
+          : valB.localeCompare(valA);
+      }
       return currentSort.dir === 'desc' ? (valB - valA) : (valA - valB);
     });
 
-    // Render Body
     let rank = 1;
-    rows.forEach((row, index) => {
-      // Handle ties in rank
-      if (index > 0 && Math.abs(row[currentSort.key] - rows[index-1][currentSort.key]) < 0.0001) {
-        // keep same rank
-      } else {
-        rank = index + 1;
+    data.forEach((row, idx) => {
+      // Handle Rank Ties
+      if (idx > 0 && row[currentSort.key] !== data[idx-1][currentSort.key]) {
+        rank = idx + 1;
       }
 
       const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="rank-cell">${rank}</td>
-        <td class="manager-cell">${row.name}</td>
-        <td class="stat-cell value-highlight featured-col">${row.average.toFixed(2)}</td>
-        <td class="stat-cell">${row.total.toLocaleString()}</td>
-        <td class="stat-cell">${row.games}</td>
-      `;
+      
+      if (isCompare) {
+        const diffClass = row.diff > 0 ? 'diff-pos' : (row.diff < 0 ? 'diff-neg' : 'diff-neu');
+        const diffSign = row.diff > 0 ? '+' : '';
+        
+        tr.innerHTML = `
+          <td class="rank-col">${rank}</td>
+          <td class="manager-col">${row.name}</td>
+          <td class="stat-col featured-col">${row.avg1.toFixed(2)}</td>
+          <td class="stat-col">${row.avg2.toFixed(2)}</td>
+          <td class="stat-col ${diffClass}">${diffSign}${row.diff.toFixed(2)}</td>
+        `;
+      } else {
+        tr.innerHTML = `
+          <td class="rank-col">${rank}</td>
+          <td class="manager-col">${row.name}</td>
+          <td class="stat-col">${row.record}</td>
+          <td class="stat-col">${row.total.toLocaleString()}</td>
+          <td class="stat-col">${row.games}</td>
+          <td class="stat-col featured-col">${row.avg1.toFixed(2)}</td>
+        `;
+      }
       tbody.appendChild(tr);
     });
-
-    // Render Footer (League Totals)
-    const footRow = document.createElement('tr');
-    footRow.className = 'league-total-row';
-    footRow.innerHTML = `
-      <td>—</td>
-      <td>LEAGUE AVERAGE</td>
-      <td class="stat-cell">${leagueAvg.toFixed(2)}</td>
-      <td class="stat-cell">${leagueTotal.toLocaleString()}</td>
-      <td class="stat-cell">${leagueGames}</td>
-    `;
-    footer.appendChild(footRow);
-
-    updateSortIcons();
   }
 
-  // Sorting Logic
-  document.querySelectorAll('th').forEach(th => {
-    th.addEventListener('click', () => {
-      const key = th.dataset.key;
-      if (currentSort.key === key) {
-        currentSort.dir = currentSort.dir === 'desc' ? 'asc' : 'desc';
-      } else {
-        currentSort.key = key;
-        currentSort.dir = 'desc'; // Default to high-to-low
-        if (key === 'manager') currentSort.dir = 'asc';
-      }
-      renderTable();
-    });
-  });
+  function renderFooter(avg1, avg2, isCompare) {
+    const foot = document.getElementById('tableFooter');
+    foot.innerHTML = '';
+    
+    const tr = document.createElement('tr');
+    tr.className = 'league-footer';
 
-  function updateSortIcons() {
-    document.querySelectorAll('th').forEach(th => {
-      th.classList.remove('sorted-col-header');
-      if (th.dataset.key === currentSort.key) {
-        th.classList.add('sorted-col-header');
-      }
-    });
+    if (isCompare) {
+      const diff = avg1 - avg2;
+      const diffSign = diff > 0 ? '+' : '';
+      tr.innerHTML = `
+        <td></td>
+        <td>LEAGUE AVG</td>
+        <td class="stat-col">${avg1.toFixed(2)}</td>
+        <td class="stat-col">${avg2.toFixed(2)}</td>
+        <td class="stat-col">${diffSign}${diff.toFixed(2)}</td>
+      `;
+    } else {
+      tr.innerHTML = `
+        <td></td>
+        <td>LEAGUE AVG</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="stat-col">${avg1.toFixed(2)}</td>
+      `;
+    }
+    foot.appendChild(tr);
   }
+
 </script>
-
 </body>
 </html>
