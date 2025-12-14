@@ -21,9 +21,13 @@
       --text-main: #e5e7eb;
       --text-muted: #9ca3af;
       --text-soft: #6b7280;
+
       --positive: #22c55e;
       --negative: #ef4444;
       --warning: #f59e0b;
+
+      /* Money: make $$$ green */
+      --money: #22c55e;
 
       /* Badges */
       --gold: #fbbf24;
@@ -117,11 +121,18 @@
         var(--card-bg);
     }
 
-    .hero-identity { display: flex; align-items: center; gap: 24px; flex: 1.2; }
+    .hero-identity {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex: 1.2;
+      min-width: 260px; /* helps avoid crushing */
+    }
 
     .avatar {
       width: 90px;
       height: 90px;
+      flex: 0 0 90px;       /* FIX: never shrink */
       border-radius: 50%;
       background: linear-gradient(135deg, rgba(56,189,248,0.2), rgba(2,6,23,0.8));
       border: 2px solid var(--accent);
@@ -135,8 +146,7 @@
       text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
 
-    .hero-text { display: flex; flex-direction: column; }
-
+    .hero-text { display: flex; flex-direction: column; min-width: 0; }
     .hero-name {
       font-size: 2rem;
       font-weight: 800;
@@ -145,6 +155,10 @@
       margin-bottom: 4px;
       color: #f9fafb;
       line-height: 1;
+      white-space: nowrap;           /* FIX: prevent wrap-crush */
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 520px;
     }
 
     .hero-tenure {
@@ -166,6 +180,7 @@
       border-left: 1px solid var(--border-subtle);
       border-right: 1px solid var(--border-subtle);
       padding: 0 32px;
+      min-width: 260px;
     }
 
     .trophy-badge {
@@ -179,38 +194,25 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
       border: 1px solid transparent;
+      white-space: nowrap;
     }
 
-    .trophy-badge.gold {
-      background: var(--gold-bg);
-      color: var(--gold);
-      border-color: rgba(251, 191, 36, 0.3);
-    }
-    .trophy-badge.silver {
-      background: var(--silver-bg);
-      color: var(--silver);
-      border-color: rgba(203, 213, 225, 0.3);
-    }
-    .trophy-badge.bronze {
-      background: var(--bronze-bg);
-      color: var(--bronze);
-      border-color: rgba(217, 119, 6, 0.3);
+    .trophy-badge.gold { background: var(--gold-bg); color: var(--gold); border-color: rgba(251, 191, 36, 0.3); }
+    .trophy-badge.silver { background: var(--silver-bg); color: var(--silver); border-color: rgba(203, 213, 225, 0.3); }
+    .trophy-badge.bronze { background: var(--bronze-bg); color: var(--bronze); border-color: rgba(217, 119, 6, 0.3); }
+
+    /* Scoring Title badge */
+    .trophy-badge.scoring {
+      background: rgba(34, 197, 94, 0.10);
+      color: var(--money);
+      border-color: rgba(34, 197, 94, 0.25);
     }
 
-    .empty-case {
-      font-size: 0.85rem;
-      color: var(--text-soft);
-      font-style: italic;
-    }
+    .empty-case { font-size: 0.85rem; color: var(--text-soft); font-style: italic; }
 
     /* Right: OVR Rating & Attributes */
-    .rating-container { display: flex; align-items: center; gap: 20px; }
-
-    .sub-ratings {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px 16px;
-    }
+    .rating-container { display: flex; align-items: center; gap: 20px; flex: 1; justify-content: flex-end; min-width: 260px; }
+    .sub-ratings { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; min-width: 180px; }
     .sub-stat {
       display: flex;
       justify-content: space-between;
@@ -221,10 +223,9 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    .sub-stat span:last-child { color: var(--accent); font-family: monospace; font-size: 0.9rem; }
+    .sub-stat span:last-child { color: var(--accent); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 0.9rem; }
 
-    .ovr-badge { display: flex; flex-direction: column; align-items: center; }
-
+    .ovr-badge { display: flex; flex-direction: column; align-items: center; flex: 0 0 auto; }
     .ovr-ring {
       width: 75px; height: 75px;
       border-radius: 50%;
@@ -233,19 +234,13 @@
       align-items: center; justify-content: center;
       box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
       background: rgba(2, 6, 23, 0.8);
+      flex: 0 0 auto;
     }
-
     .ovr-val { font-size: 2.2rem; font-weight: 900; color: #fff; }
     .ovr-label { font-size: 0.75rem; font-weight: 700; color: var(--accent); margin-top: 8px; letter-spacing: 0.2em; }
 
     /* 2. Stats Strip */
-    .stats-strip {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
+    .stats-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
     .stat-box {
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid var(--border-subtle);
@@ -257,36 +252,14 @@
       text-align: center;
       box-shadow: 0 4px 6px rgba(0,0,0,0.2);
     }
-
-    .stat-label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      font-weight: 700;
-      color: var(--text-muted);
-      letter-spacing: 0.1em;
-      margin-bottom: 6px;
-    }
-
-    .stat-val {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #f9fafb;
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-
+    .stat-label { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.1em; margin-bottom: 6px; }
+    .stat-val { font-size: 1.4rem; font-weight: 700; color: #f9fafb; line-height: 1; margin-bottom: 4px; }
     .stat-sub { font-size: 0.75rem; color: var(--text-soft); }
 
     /* 3. Analytics Grid */
-    .analytics-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
-      margin-bottom: 24px;
-    }
+    .analytics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 24px; }
 
     .chart-card { min-height: 350px; display: flex; flex-direction: column; }
-
     .chart-header {
       margin-bottom: 20px;
       display: flex;
@@ -295,7 +268,6 @@
       border-bottom: 1px solid var(--border-subtle);
       padding-bottom: 12px;
     }
-
     .chart-header h3 {
       font-size: 0.9rem;
       font-weight: 700;
@@ -304,9 +276,7 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-
     .chart-icon { color: var(--accent); font-size: 1.1rem; }
-
     .chart-container { position: relative; flex: 1; width: 100%; min-height: 220px; }
 
     /* Rivalry Cards */
@@ -324,132 +294,90 @@
     }
     .rival-card.nemesis { border-left-color: var(--negative); }
     .rival-card.pigeon { border-left-color: var(--positive); }
-
     .rival-meta { display: flex; flex-direction: column; }
-    .rival-type {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      color: var(--text-soft);
-      margin-bottom: 4px;
-    }
+    .rival-type { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; color: var(--text-soft); margin-bottom: 4px; }
     .rival-name { font-size: 1.1rem; font-weight: 600; color: #f9fafb; }
-
-    .rival-stat {
-      text-align: right;
-      font-family: 'Courier New', monospace;
-      font-weight: 700;
-      font-size: 1.1rem;
-    }
+    .rival-stat { text-align: right; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-weight: 700; font-size: 1.1rem; }
     .nemesis .rival-stat { color: var(--negative); }
     .pigeon .rival-stat { color: var(--positive); }
 
-    /* Heatmap */
-    .heatmap-card { grid-column: 1 / -1; }
-
-    .heatmap-grid {
-      display: grid;
-      grid-template-columns: 50px repeat(17, 1fr);
-      gap: 4px;
-      overflow-x: auto;
-      padding-bottom: 10px;
-    }
-
-    .hm-header {
-      font-size: 0.7rem;
-      color: var(--text-soft);
-      text-align: center;
-      margin-bottom: 6px;
-    }
-
-    .hm-year {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-muted);
+    /* Last 10 sparkline (replaces heatmap) */
+    .form-card { grid-column: 1 / -1; }
+    .form-row {
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
     }
-
-    .hm-cell {
-      aspect-ratio: 1;
-      border-radius: 3px;
+    .form-strip {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+    .form-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
       background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(148, 163, 184, 0.2);
       position: relative;
-      transition: transform 0.1s;
+      flex: 0 0 auto;
+      transition: transform 0.12s;
       outline: none;
     }
-    .hm-cell:hover, .hm-cell:focus { transform: scale(1.2); z-index: 5; border: 1px solid rgba(255,255,255,0.3); }
+    .form-dot[data-res="W"] { background: rgba(34, 197, 94, 0.95); border-color: rgba(34, 197, 94, 0.35); }
+    .form-dot[data-res="L"] { background: rgba(239, 68, 68, 0.95); border-color: rgba(239, 68, 68, 0.35); }
+    .form-dot[data-res="T"] { background: rgba(245, 158, 11, 0.95); border-color: rgba(245, 158, 11, 0.35); }
+    .form-dot:hover, .form-dot:focus { transform: scale(1.12); border-color: rgba(255,255,255,0.35); }
 
-    .hm-cell[data-res="W"] { background: var(--positive); opacity: 0.9; }
-    .hm-cell[data-res="L"] { background: var(--negative); opacity: 0.9; }
-    .hm-cell[data-res="T"] { background: var(--warning); opacity: 0.9; }
-
-    .hm-cell::after {
+    .form-dot::after {
       content: attr(data-tooltip);
       position: absolute;
-      bottom: 115%; left: 50%;
+      bottom: 140%;
+      left: 50%;
       transform: translateX(-50%);
       background: #000;
       border: 1px solid var(--border-subtle);
       color: #fff;
       padding: 6px 10px;
-      border-radius: 4px;
-      font-size: 0.7rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
       white-space: nowrap;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.15s;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.55);
       z-index: 10;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
-    .hm-cell:hover::after, .hm-cell:focus::after { opacity: 1; }
+    .form-dot:hover::after, .form-dot:focus::after { opacity: 1; }
 
-    /* --- Tabs & Tables --- */
-    .tabs-nav {
+    .form-meta {
       display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      border-bottom: 1px solid var(--border-subtle);
-      padding-bottom: 5px;
+      align-items: baseline;
+      gap: 12px;
+      white-space: nowrap;
     }
-
-    .tab-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      font-weight: 600;
+    .form-meta .label {
+      font-size: 0.75rem;
       text-transform: uppercase;
-      padding: 10px 16px;
-      cursor: pointer;
-      position: relative;
-      transition: color 0.2s;
+      letter-spacing: 0.12em;
+      font-weight: 800;
+      color: var(--text-muted);
     }
-    .tab-btn:hover { color: #f9fafb; }
-    .tab-btn.active { color: var(--accent); }
-    .tab-btn.active::after {
-      content: '';
-      position: absolute;
-      bottom: -6px; left: 0; right: 0;
-      height: 2px;
-      background: var(--accent);
-      border-radius: 3px 3px 0 0;
-    }
-    .tab-btn:focus { outline: none; box-shadow: 0 0 0 1px var(--accent); border-radius: 10px; }
-
-    .table-section { display: none; }
-    .table-section.active { display: block; animation: fadeUp 0.3s ease-out; }
-    @keyframes fadeUp { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
-
-    .table-wrap {
-      border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      overflow-x: auto;
+    .form-meta .rec {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-weight: 800;
+      color: #f9fafb;
+      font-size: 0.95rem;
     }
 
+    /* --- Tables --- */
+    .table-wrap { border: 1px solid var(--border-subtle); border-radius: 12px; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; min-width: 700px; font-size: 0.9rem; }
-
     th {
       background: rgba(15, 23, 42, 0.95);
       text-align: left;
@@ -460,11 +388,10 @@
       color: var(--text-muted);
       border-bottom: 1px solid var(--border-subtle);
     }
-
     td {
       padding: 12px 16px;
       border-bottom: 1px solid rgba(31, 41, 55, 0.5);
-      color: #e5e7eb;
+      color: #ffffff; /* Season log text white */
       font-variant-numeric: tabular-nums;
     }
     tr:last-child td { border-bottom: none; }
@@ -490,19 +417,33 @@
     /* Responsive */
     @media (max-width: 1024px) {
       .hero-card { flex-wrap: wrap; padding: 24px; gap: 24px; }
-      .trophy-case { border-left: none; padding-left: 0; border-right: none; padding-right: 0; border-top: 1px solid var(--border-subtle); padding-top: 20px; width: 100%; flex: 100%; }
-      .rating-container { width: 100%; justify-content: space-between; border-top: 1px solid var(--border-subtle); padding-top: 20px; }
+      .trophy-case {
+        border-left: none; padding-left: 0;
+        border-right: none; padding-right: 0;
+        border-top: 1px solid var(--border-subtle);
+        padding-top: 20px;
+        width: 100%;
+        flex: 100%;
+      }
+      .rating-container {
+        width: 100%;
+        justify-content: space-between;
+        border-top: 1px solid var(--border-subtle);
+        padding-top: 20px;
+      }
+      .hero-name { max-width: 100%; }
     }
 
     @media (max-width: 768px) {
       .hero-card { flex-direction: column; text-align: center; gap: 20px; align-items: center; }
-      .hero-identity { flex-direction: column; text-align: center; gap: 12px; }
-      .rating-container { flex-direction: column; gap: 20px; }
-      .trophy-case { justify-content: center; }
+      .hero-identity { flex-direction: column; text-align: center; gap: 12px; min-width: unset; }
+      .rating-container { flex-direction: column; gap: 20px; min-width: unset; }
+      .trophy-case { justify-content: center; min-width: unset; }
 
       .stats-strip { grid-template-columns: 1fr 1fr; }
       .analytics-grid { grid-template-columns: 1fr; }
       .chart-card { min-height: 320px; }
+      .form-row { justify-content: center; }
     }
   </style>
 </head>
@@ -562,13 +503,12 @@
       </div>
       <div class="stat-box">
         <span class="stat-label">Earnings</span>
-        <span class="stat-val" id="statEarnings" style="color:var(--gold)">-</span>
+        <span class="stat-val" id="statEarnings" style="color:var(--money)">-</span>
         <span class="stat-sub">Total Won</span>
       </div>
     </div>
 
     <div class="analytics-grid">
-
       <div class="card chart-card">
         <div class="chart-header">
           <div class="chart-icon">✦</div>
@@ -590,20 +530,21 @@
       </div>
 
       <div class="rivalry-col">
-        <div class="rival-card nemesis">
-          <div class="rival-meta">
-            <span class="rival-type">Nemesis (Lowest Win %)</span>
-            <span class="rival-name" id="nemesisName">-</span>
-          </div>
-          <span class="rival-stat" id="nemesisStat">-</span>
-        </div>
-
+        <!-- Swap order: Pigeon above Nemesis -->
         <div class="rival-card pigeon">
           <div class="rival-meta">
             <span class="rival-type">Pigeon (Highest Win %)</span>
             <span class="rival-name" id="pigeonName">-</span>
           </div>
           <span class="rival-stat" id="pigeonStat">-</span>
+        </div>
+
+        <div class="rival-card nemesis">
+          <div class="rival-meta">
+            <span class="rival-type">Nemesis (Lowest Win %)</span>
+            <span class="rival-name" id="nemesisName">-</span>
+          </div>
+          <span class="rival-stat" id="nemesisStat">-</span>
         </div>
 
         <div class="card chart-card" style="flex:1;">
@@ -627,56 +568,39 @@
         </div>
       </div>
 
-      <div class="card heatmap-card">
-        <div class="chart-header">
-          <div class="chart-icon">📅</div>
-          <h3>The Heat Check (Weekly Results)</h3>
+      <!-- Replace Heatmap with Last 10 Form Sparkline -->
+      <div class="card form-card">
+        <div class="chart-header" style="margin-bottom:14px;">
+          <div class="chart-icon">⚡</div>
+          <h3>Form (Last 10 Games)</h3>
         </div>
-        <div class="heatmap-grid" id="heatmapGrid"></div>
+        <div class="form-row">
+          <div class="form-strip" id="formStrip" aria-label="Last 10 games form strip"></div>
+          <div class="form-meta">
+            <span class="label">Last 10</span>
+            <span class="rec" id="formRecord">–</span>
+          </div>
+        </div>
       </div>
-
     </div>
 
+    <!-- Remove Game Log entirely: Season Log only -->
     <div class="card">
-      <div class="tabs-nav" role="tablist" aria-label="Profile tables">
-        <button class="tab-btn active" type="button" role="tab" aria-selected="true" aria-controls="tabSeasons" id="tabBtnSeasons" data-tab="seasons">Season Log</button>
-        <button class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="tabGames" id="tabBtnGames" data-tab="games">Game Log</button>
-      </div>
-
-      <div id="tabSeasons" class="table-section active" role="tabpanel" aria-labelledby="tabBtnSeasons">
-        <div class="table-wrap">
-          <table id="seasonTable">
-            <thead>
-              <tr>
-                <th>Year</th>
-                <th>Record</th>
-                <th>Finish</th>
-                <th>Points For</th>
-                <th>Points Against</th>
-                <th>Seed</th>
-                <th>Earnings</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div id="tabGames" class="table-section" role="tabpanel" aria-labelledby="tabBtnGames">
-        <div class="table-wrap">
-          <table id="gameTable">
-            <thead>
-              <tr>
-                <th>Year</th>
-                <th>Week</th>
-                <th>Opponent</th>
-                <th>Score</th>
-                <th>Result</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
+      <div class="table-wrap">
+        <table id="seasonTable">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Record</th>
+              <th>Finish</th>
+              <th>Points For</th>
+              <th>Points Against</th>
+              <th>Seed</th>
+              <th>Earnings</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
     </div>
 
@@ -756,6 +680,7 @@
       seedsByManagerYear: new Map(),
       gamesByManager: new Map(),
       weekBuckets: new Map(), // `${year}::${week}` -> [{manager, score, isPlayoff}]
+      scoringTitlesByManager: new Map(), // manager -> Set(years)
     };
 
     function buildIndexes() {
@@ -764,6 +689,7 @@
       idx.seedsByManagerYear.clear();
       idx.gamesByManager.clear();
       idx.weekBuckets.clear();
+      idx.scoringTitlesByManager.clear();
 
       const managerSet = new Set();
 
@@ -800,7 +726,6 @@
         idx.weekBuckets.get(bucketKey).push({ manager: g.manager1, score: g.score1, isPlayoff: (g.playoffs && g.playoffs !== "N/A") });
         idx.weekBuckets.get(bucketKey).push({ manager: g.manager2, score: g.score2, isPlayoff: (g.playoffs && g.playoffs !== "N/A") });
 
-        // manager game views
         const asGameFor = (name) => {
           const isAway = (g.manager1 === name);
           const myScore = isAway ? g.score1 : g.score2;
@@ -824,10 +749,29 @@
         });
       });
 
-      // Sort games per manager
       idx.gamesByManager.forEach(arr => arr.sort((a, b) => (b.year !== a.year ? b.year - a.year : b.week - a.week)));
-
       idx.managers = Array.from(managerSet).sort((a, b) => a.localeCompare(b));
+
+      // Scoring Titles: per year, highest points_for in standings
+      const byYear = new Map();
+      rawStandings.forEach(s => {
+        if (!Number.isFinite(s.year) || !s.manager) return;
+        if (!byYear.has(s.year)) byYear.set(s.year, []);
+        byYear.get(s.year).push(s);
+      });
+
+      for (const [year, rows] of byYear.entries()) {
+        let maxPF = -Infinity;
+        rows.forEach(r => { if (Number.isFinite(r.points_for)) maxPF = Math.max(maxPF, r.points_for); });
+        if (!Number.isFinite(maxPF) || maxPF <= 0) continue;
+
+        rows.forEach(r => {
+          if (r.points_for === maxPF) {
+            if (!idx.scoringTitlesByManager.has(r.manager)) idx.scoringTitlesByManager.set(r.manager, new Set());
+            idx.scoringTitlesByManager.get(r.manager).add(year);
+          }
+        });
+      }
     }
 
     // --- Ratings: SCOR / GM / CLT / STB + OVR ---
@@ -838,7 +782,6 @@
       idx.managers.forEach(m => { expectedWins[m] = 0; weeksPlayed[m] = 0; });
 
       for (const [, entries] of idx.weekBuckets.entries()) {
-        // de-dupe managers in case of dirty data
         const byManager = new Map();
         entries.forEach(e => {
           if (!e.manager) return;
@@ -867,12 +810,10 @@
         }
       }
 
-      // gather raw components
       const rows = idx.managers.map(m => {
         const seasons = idx.standingsByManager.get(m) || [];
         const games = idx.gamesByManager.get(m) || [];
 
-        // Actual results
         let wins = 0, ties = 0;
         let playGames = 0, playWins = 0;
         let totalPF = 0;
@@ -892,17 +833,12 @@
         const expW = expectedWins[m] || 0;
         const gmRaw = actualW - expW;
 
-        // SCOR via points per game
         const ppm = games.length ? totalPF / games.length : 0;
-
-        // CLT via playoff win%
         const cltRaw = playGames ? (playWins / playGames) : 0;
 
-        // STB via finish std dev (lower is better)
         const finishes = seasons.map(s => s.final_standing).filter(Number.isFinite);
         const stdDev = calcStdDev(finishes);
 
-        // Legacy for OVR seasoning (not displayed)
         const titles = seasons.filter(s => s.final_standing === 1).length;
         const runnerUps = seasons.filter(s => s.final_standing === 2).length;
         const thirds = seasons.filter(s => s.final_standing === 3).length;
@@ -915,7 +851,6 @@
         return { name: m, ppm, gmRaw, cltRaw, stdDev, legacyRaw };
       });
 
-      // normalize
       const ppmVals = rows.map(r => r.ppm).filter(Number.isFinite);
       const gmVals = rows.map(r => r.gmRaw).filter(Number.isFinite);
       const cltVals = rows.map(r => r.cltRaw).filter(Number.isFinite);
@@ -961,7 +896,6 @@
         opt.textContent = m;
         select.appendChild(opt);
       });
-
       select.addEventListener('change', (e) => loadManager(e.target.value));
     }
 
@@ -984,12 +918,12 @@
       renderHero(name, mySeasons);
       renderStats(mySeasons, myGames);
       renderRivalries(h2h);
-      renderTables(mySeasons, myGames, name);
+      renderSeasonTable(mySeasons, name);
       renderLuckChart(mySeasons);
       renderSpreadChart(myGames);
       renderClutchChart(myGames);
       renderCareerChart(mySeasons);
-      renderHeatmap(myGames);
+      renderFormStrip(myGames);
     }
 
     function renderHero(name, seasons) {
@@ -1004,17 +938,24 @@
         els.heroTenure.textContent = `EST. —`;
       }
 
-      // Trophies
+      // Trophies + scoring titles
       const caseEl = els.trophyCase;
       caseEl.innerHTML = '';
       const trophies = [];
+
       seasons.forEach(s => {
         const rank = s.final_standing;
-        if (rank === 1) trophies.push(`<span class="trophy-badge gold">🏆 ${s.year} Champion</span>`);
-        else if (rank === 2) trophies.push(`<span class="trophy-badge silver">🥈 ${s.year} Runner-up</span>`);
-        else if (rank === 3) trophies.push(`<span class="trophy-badge bronze">🥉 ${s.year} 3rd</span>`);
+        if (rank === 1) trophies.push({ y: s.year, html: `<span class="trophy-badge gold">🏆 ${s.year} Champion</span>` });
+        else if (rank === 2) trophies.push({ y: s.year, html: `<span class="trophy-badge silver">🥈 ${s.year} Runner-up</span>` });
+        else if (rank === 3) trophies.push({ y: s.year, html: `<span class="trophy-badge bronze">🥉 ${s.year} 3rd</span>` });
       });
-      caseEl.innerHTML = trophies.length ? trophies.join('') : `<span class="empty-case">No hardware... yet.</span>`;
+
+      const scoringYears = idx.scoringTitlesByManager.get(name) ? Array.from(idx.scoringTitlesByManager.get(name)) : [];
+      scoringYears.forEach(y => trophies.push({ y, html: `<span class="trophy-badge scoring">💰 ${y} Scoring Title</span>` }));
+
+      // sort newest first
+      trophies.sort((a, b) => (b.y ?? 0) - (a.y ?? 0));
+      caseEl.innerHTML = trophies.length ? trophies.map(t => t.html).join('') : `<span class="empty-case">No hardware... yet.</span>`;
 
       // Ratings
       const r = leagueRatings[name] || { ovr: 75, scor: 75, gm: 75, clt: 75, stb: 75 };
@@ -1061,7 +1002,9 @@
         const rank = s.final_standing;
         if (PAYOUTS[rank]) money += PAYOUTS[rank];
       });
+      // $$$ green everywhere
       els.statEarnings.textContent = moneyFmt(money);
+      els.statEarnings.style.color = 'var(--money)';
     }
 
     function renderRivalries(h2h) {
@@ -1082,11 +1025,10 @@
       els.pigeonStat.textContent = pigeon.rec || '-';
     }
 
-    function renderTables(seasons, games, managerName) {
-      // Season table
-      const tbodyS = document.querySelector('#seasonTable tbody');
-      tbodyS.innerHTML = '';
-      const fragS = document.createDocumentFragment();
+    function renderSeasonTable(seasons, managerName) {
+      const tbody = document.querySelector('#seasonTable tbody');
+      tbody.innerHTML = '';
+      const frag = document.createDocumentFragment();
 
       seasons.forEach(s => {
         const seed = idx.seedsByManagerYear.get(keyMY(managerName, s.year)) ?? '-';
@@ -1098,44 +1040,47 @@
           <td>${s.year ?? '-'}</td>
           <td>${s.wins}-${s.losses}-${s.ties}</td>
           <td>${Number.isFinite(rank) ? rank : '-'}</td>
-          <td style="color:var(--positive)">${Math.round(s.points_for || 0).toLocaleString()}</td>
-          <td style="color:var(--negative)">${Math.round(s.points_against || 0).toLocaleString()}</td>
+          <td>${Math.round(s.points_for || 0).toLocaleString()}</td>
+          <td>${Math.round(s.points_against || 0).toLocaleString()}</td>
           <td>${seed}</td>
-          <td style="color:${money > 0 ? 'var(--gold)' : 'inherit'}">${money > 0 ? moneyFmt(money) : '-'}</td>
+          <td style="color:${money > 0 ? 'var(--money)' : 'inherit'}">${money > 0 ? moneyFmt(money) : '-'}</td>
         `;
-        fragS.appendChild(tr);
+        frag.appendChild(tr);
       });
 
-      tbodyS.appendChild(fragS);
+      tbody.appendChild(frag);
+    }
 
-      // Game table (most recent 50)
-      const tbodyG = document.querySelector('#gameTable tbody');
-      tbodyG.innerHTML = '';
-      const fragG = document.createDocumentFragment();
+    function renderFormStrip(games) {
+      const strip = els.formStrip;
+      const recEl = els.formRecord;
+      strip.innerHTML = '';
 
-      const recentGames = [...games]
+      const last10 = [...games]
         .filter(g => Number.isFinite(g.year) && Number.isFinite(g.week))
         .sort((a, b) => (a.year !== b.year ? b.year - a.year : b.week - a.week))
-        .slice(0, 50);
+        .slice(0, 10);
 
-      recentGames.forEach(g => {
-        const tr = document.createElement('tr');
-        const resStyle =
-          g.result === 'W' ? 'color:var(--positive); font-weight:700;' :
-          g.result === 'L' ? 'color:var(--negative); font-weight:700;' :
-          'color:var(--warning); font-weight:700;';
+      let w = 0, l = 0, t = 0;
+      last10.forEach(g => {
+        if (g.result === 'W') w++;
+        else if (g.result === 'L') l++;
+        else t++;
 
-        tr.innerHTML = `
-          <td>${g.year}</td>
-          <td>Week ${g.week}</td>
-          <td>${g.opponent}</td>
-          <td>${g.score.toFixed(2)}</td>
-          <td style="${resStyle}">${g.result}</td>
-        `;
-        fragG.appendChild(tr);
+        const dot = document.createElement('div');
+        dot.className = 'form-dot';
+        dot.dataset.res = g.result;
+        dot.tabIndex = 0;
+
+        const opp = g.opponent || '?';
+        const score = Number.isFinite(g.score) ? g.score.toFixed(1) : '';
+        const oppScore = Number.isFinite(g.oppScore) ? g.oppScore.toFixed(1) : '';
+        dot.dataset.tooltip = `${g.year} Wk ${g.week}: ${g.result} vs ${opp} (${score}–${oppScore})`;
+
+        strip.appendChild(dot);
       });
 
-      tbodyG.appendChild(fragG);
+      recEl.textContent = last10.length ? `${w}-${l}-${t}` : '—';
     }
 
     // --- Charts ---
@@ -1224,7 +1169,6 @@
       if (charts.spread) charts.spread.destroy();
 
       const years = [...new Set(games.map(g => g.year).filter(Number.isFinite))].sort((a, b) => a - b);
-
       const lows = [];
       const highs = [];
 
@@ -1323,95 +1267,14 @@
       });
     }
 
-    function renderHeatmap(games) {
-      const grid = els.heatmapGrid;
-      grid.innerHTML = '';
-      const frag = document.createDocumentFragment();
-
-      const headerBlank = document.createElement('div');
-      headerBlank.className = 'hm-header';
-      frag.appendChild(headerBlank);
-
-      for (let w = 1; w <= 17; w++) {
-        const h = document.createElement('div');
-        h.className = 'hm-header';
-        h.textContent = w;
-        frag.appendChild(h);
-      }
-
-      const years = [...new Set(games.map(g => g.year).filter(Number.isFinite))].sort((a, b) => b - a);
-
-      const byYearWeek = new Map();
-      games.forEach(g => {
-        if (!Number.isFinite(g.year) || !Number.isFinite(g.week)) return;
-        byYearWeek.set(`${g.year}::${g.week}`, g);
-      });
-
-      years.forEach(y => {
-        const yLabel = document.createElement('div');
-        yLabel.className = 'hm-year';
-        yLabel.textContent = y;
-        frag.appendChild(yLabel);
-
-        for (let w = 1; w <= 17; w++) {
-          const game = byYearWeek.get(`${y}::${w}`);
-          const cell = document.createElement('div');
-          cell.className = 'hm-cell';
-          cell.tabIndex = 0;
-
-          if (game) {
-            cell.dataset.res = game.result;
-            cell.dataset.tooltip = `Wk ${w}: ${game.result} vs ${game.opponent || '?'} (${Math.round(game.score)})`;
-          } else {
-            cell.dataset.tooltip = `Wk ${w}: —`;
-          }
-
-          frag.appendChild(cell);
-        }
-      });
-
-      grid.appendChild(frag);
-    }
-
-    // --- Tabs (no inline onclick) ---
-    function initTabs() {
-      const btnSeasons = $('tabBtnSeasons');
-      const btnGames = $('tabBtnGames');
-
-      const setActive = (tab) => {
-        const isSeasons = tab === 'seasons';
-        btnSeasons.classList.toggle('active', isSeasons);
-        btnGames.classList.toggle('active', !isSeasons);
-        btnSeasons.setAttribute('aria-selected', String(isSeasons));
-        btnGames.setAttribute('aria-selected', String(!isSeasons));
-        $('tabSeasons').classList.toggle('active', isSeasons);
-        $('tabGames').classList.toggle('active', !isSeasons);
-      };
-
-      [btnSeasons, btnGames].forEach(btn => {
-        btn.addEventListener('click', () => setActive(btn.dataset.tab));
-        btn.addEventListener('keydown', (e) => {
-          if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-            e.preventDefault();
-            (btn === btnSeasons ? btnGames : btnSeasons).focus();
-          }
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            btn.click();
-          }
-        });
-      });
-    }
-
     // --- Initialization ---
     document.addEventListener('DOMContentLoaded', async () => {
-      // Cache elements
       [
         'managerSelect', 'heroAvatar', 'heroName', 'heroTenure', 'trophyCase', 'heroOvr',
         'ratingSCOR', 'ratingGM', 'ratingCLT', 'ratingSTB',
         'statRecord', 'statWinPct', 'statAvgFinish', 'statAvgScore', 'statEarnings',
         'nemesisName', 'nemesisStat', 'pigeonName', 'pigeonStat',
-        'heatmapGrid'
+        'formStrip', 'formRecord'
       ].forEach(id => els[id] = $(id));
 
       try {
@@ -1432,7 +1295,6 @@
         buildIndexes();
         calculateAllRatings();
         initManagerDropdown();
-        initTabs();
 
         const firstMgr = els.managerSelect.options?.[0]?.value;
         if (firstMgr) loadManager(firstMgr);
