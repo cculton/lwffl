@@ -5,14 +5,13 @@
   <meta name="robots" content="noindex, nofollow" />
   <title>Manager Profile – LWFFL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      /* Dark Navy Theme */
       --bg-main: #020617;
       --card-bg: #020617;
       --accent: #38bdf8;
@@ -24,8 +23,7 @@
       --positive: #22c55e;
       --negative: #ef4444;
       --warning: #f59e0b;
-      
-      /* Badges */
+
       --gold: #fbbf24;
       --gold-bg: rgba(251, 191, 36, 0.1);
       --silver: #cbd5e1;
@@ -44,13 +42,11 @@
 
     .shell { max-width: 1200px; margin: 0 auto; }
 
-    /* Scrollbar */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #020617; }
     ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #374151; }
 
-    /* --- Controls --- */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -68,10 +64,7 @@
       color: #f9fafb;
     }
 
-    .manager-select-wrapper {
-      position: relative;
-      min-width: 250px;
-    }
+    .manager-select-wrapper { position: relative; min-width: 250px; }
 
     select {
       width: 100%;
@@ -93,7 +86,6 @@
     }
     select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 1px var(--accent); }
 
-    /* --- Common Card Style --- */
     .card {
       background:
         radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%),
@@ -108,7 +100,6 @@
       backdrop-filter: blur(14px);
     }
 
-    /* 1. Horizontal Hero Card */
     .hero-card {
       display: flex;
       align-items: center;
@@ -120,12 +111,7 @@
         var(--card-bg);
     }
 
-    .hero-identity {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      flex: 1.2;
-    }
+    .hero-identity { display: flex; align-items: center; gap: 24px; flex: 1.2; }
 
     .avatar {
       width: 90px;
@@ -164,7 +150,6 @@
       letter-spacing: 0.15em;
     }
 
-    /* Middle: Trophy Case */
     .trophy-case {
       display: flex;
       flex-wrap: wrap;
@@ -189,40 +174,15 @@
       border: 1px solid transparent;
     }
 
-    .trophy-badge.gold {
-      background: var(--gold-bg);
-      color: var(--gold);
-      border-color: rgba(251, 191, 36, 0.3);
-    }
-    .trophy-badge.silver {
-      background: var(--silver-bg);
-      color: var(--silver);
-      border-color: rgba(203, 213, 225, 0.3);
-    }
-    .trophy-badge.bronze {
-      background: var(--bronze-bg);
-      color: var(--bronze);
-      border-color: rgba(217, 119, 6, 0.3);
-    }
+    .trophy-badge.gold { background: var(--gold-bg); color: var(--gold); border-color: rgba(251, 191, 36, 0.3); }
+    .trophy-badge.silver { background: var(--silver-bg); color: var(--silver); border-color: rgba(203, 213, 225, 0.3); }
+    .trophy-badge.bronze { background: var(--bronze-bg); color: var(--bronze); border-color: rgba(217, 119, 6, 0.3); }
 
-    .empty-case {
-      font-size: 0.85rem;
-      color: var(--text-soft);
-      font-style: italic;
-    }
+    .empty-case { font-size: 0.85rem; color: var(--text-soft); font-style: italic; }
 
-    /* Right: OVR Rating & Attributes */
-    .rating-container {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
+    .rating-container { display: flex; align-items: center; gap: 20px; }
 
-    .sub-ratings {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px 16px;
-    }
+    .sub-ratings { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
     .sub-stat {
       display: flex;
       justify-content: space-between;
@@ -235,26 +195,21 @@
     }
     .sub-stat span:last-child { color: var(--accent); font-family: monospace; font-size: 0.9rem; }
 
-    .ovr-badge {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    
+    .ovr-badge { display: flex; flex-direction: column; align-items: center; }
+
     .ovr-ring {
       width: 75px; height: 75px;
       border-radius: 50%;
       border: 3px solid var(--accent);
-      display: flex; 
+      display: flex;
       align-items: center; justify-content: center;
       box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
       background: rgba(2, 6, 23, 0.8);
     }
-    
+
     .ovr-val { font-size: 2.2rem; font-weight: 900; color: #fff; }
     .ovr-label { font-size: 0.75rem; font-weight: 700; color: var(--accent); margin-top: 8px; letter-spacing: 0.2em; }
 
-    /* 2. Stats Strip */
     .stats-strip {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -273,27 +228,26 @@
       text-align: center;
       box-shadow: 0 4px 6px rgba(0,0,0,0.2);
     }
-    
-    .stat-label { 
-      font-size: 0.7rem; 
-      text-transform: uppercase; 
-      font-weight: 700; 
-      color: var(--text-muted); 
-      letter-spacing: 0.1em; 
-      margin-bottom: 6px; 
+
+    .stat-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
     }
-    
-    .stat-val { 
-      font-size: 1.4rem; 
-      font-weight: 700; 
-      color: #f9fafb; 
+
+    .stat-val {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #f9fafb;
       line-height: 1;
-      margin-bottom: 4px; 
+      margin-bottom: 4px;
     }
-    
+
     .stat-sub { font-size: 0.75rem; color: var(--text-soft); }
 
-    /* 3. Analytics Grid */
     .analytics-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -301,12 +255,7 @@
       margin-bottom: 24px;
     }
 
-    .chart-card {
-      min-height: 350px;
-      display: flex;
-      flex-direction: column;
-    }
-
+    .chart-card { min-height: 350px; display: flex; flex-direction: column; }
     .chart-header {
       margin-bottom: 20px;
       display: flex;
@@ -315,7 +264,6 @@
       border-bottom: 1px solid var(--border-subtle);
       padding-bottom: 12px;
     }
-    
     .chart-header h3 {
       font-size: 0.9rem;
       font-weight: 700;
@@ -324,22 +272,10 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    
     .chart-icon { color: var(--accent); font-size: 1.1rem; }
+    .chart-container { position: relative; flex: 1; width: 100%; min-height: 220px; }
 
-    .chart-container {
-      position: relative;
-      flex: 1;
-      width: 100%;
-      min-height: 220px;
-    }
-
-    /* Rivalry Cards */
-    .rivalry-col {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+    .rivalry-col { display: flex; flex-direction: column; gap: 20px; }
 
     .rival-card {
       background: rgba(15, 23, 42, 0.8);
@@ -355,21 +291,27 @@
     .rival-card.pigeon { border-left-color: var(--positive); }
 
     .rival-meta { display: flex; flex-direction: column; }
-    .rival-type { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; color: var(--text-soft); margin-bottom: 4px; }
+    .rival-type {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--text-soft);
+      margin-bottom: 4px;
+    }
     .rival-name { font-size: 1.1rem; font-weight: 600; color: #f9fafb; }
-    
-    .rival-stat { 
-      text-align: right; 
-      font-family: 'Courier New', monospace; 
-      font-weight: 700; 
-      font-size: 1.1rem; 
+
+    .rival-stat {
+      text-align: right;
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+      font-size: 1.1rem;
     }
     .nemesis .rival-stat { color: var(--negative); }
     .pigeon .rival-stat { color: var(--positive); }
 
-    /* Heatmap */
     .heatmap-card { grid-column: 1 / -1; }
-    
+
     .heatmap-grid {
       display: grid;
       grid-template-columns: 50px repeat(17, 1fr);
@@ -377,35 +319,23 @@
       overflow-x: auto;
       padding-bottom: 10px;
     }
-    
-    .hm-header {
-      font-size: 0.7rem;
-      color: var(--text-soft);
-      text-align: center;
-      margin-bottom: 6px;
-    }
-    
-    .hm-year {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-    }
-    
+
+    .hm-header { font-size: 0.7rem; color: var(--text-soft); text-align: center; margin-bottom: 6px; }
+    .hm-year { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; }
+
     .hm-cell {
       aspect-ratio: 1;
       border-radius: 3px;
       background: rgba(255,255,255,0.05);
       position: relative;
       transition: transform 0.1s;
+      outline: none;
     }
-    .hm-cell:hover { transform: scale(1.2); z-index: 5; border: 1px solid rgba(255,255,255,0.3); }
-    
+    .hm-cell:hover, .hm-cell:focus { transform: scale(1.2); z-index: 5; border: 1px solid rgba(255,255,255,0.3); }
     .hm-cell[data-res="W"] { background: var(--positive); opacity: 0.9; }
     .hm-cell[data-res="L"] { background: var(--negative); opacity: 0.9; }
     .hm-cell[data-res="T"] { background: var(--warning); opacity: 0.9; }
-    
+
     .hm-cell::after {
       content: attr(data-tooltip);
       position: absolute;
@@ -418,15 +348,14 @@
       border-radius: 4px;
       font-size: 0.7rem;
       white-space: nowrap;
-      opacity: 0; 
+      opacity: 0;
       pointer-events: none;
       transition: opacity 0.15s;
       z-index: 10;
       box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
-    .hm-cell:hover::after { opacity: 1; }
+    .hm-cell:hover::after, .hm-cell:focus::after { opacity: 1; }
 
-    /* --- Tabs & Tables --- */
     .tabs-nav {
       display: flex;
       gap: 10px;
@@ -434,7 +363,7 @@
       border-bottom: 1px solid var(--border-subtle);
       padding-bottom: 5px;
     }
-    
+
     .tab-btn {
       background: transparent;
       border: none;
@@ -457,6 +386,7 @@
       background: var(--accent);
       border-radius: 3px 3px 0 0;
     }
+    .tab-btn:focus { outline: none; box-shadow: 0 0 0 1px var(--accent); border-radius: 10px; }
 
     .table-section { display: none; }
     .table-section.active { display: block; animation: fadeUp 0.3s ease-out; }
@@ -469,7 +399,6 @@
     }
 
     table { width: 100%; border-collapse: collapse; min-width: 700px; font-size: 0.9rem; }
-    
     th {
       background: rgba(15, 23, 42, 0.95);
       text-align: left;
@@ -480,7 +409,6 @@
       color: var(--text-muted);
       border-bottom: 1px solid var(--border-subtle);
     }
-    
     td {
       padding: 12px 16px;
       border-bottom: 1px solid rgba(31, 41, 55, 0.5);
@@ -490,7 +418,6 @@
     tr:last-child td { border-bottom: none; }
     tbody tr:hover { background: rgba(56, 189, 248, 0.03); }
 
-    /* Skeleton Loading */
     .skeleton {
       background: rgba(255,255,255,0.05);
       border-radius: 4px;
@@ -507,7 +434,6 @@
     }
     @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 
-    /* Responsive */
     @media (max-width: 1024px) {
       .hero-card { flex-wrap: wrap; padding: 24px; gap: 24px; }
       .trophy-case { border-left: none; padding-left: 0; border-right: none; padding-right: 0; border-top: 1px solid var(--border-subtle); padding-top: 20px; width: 100%; flex: 100%; }
@@ -521,7 +447,7 @@
       .rating-container { flex-direction: column; gap: 20px; }
       .ovr-badge { border-left: none; padding-left: 0; }
       .trophy-case { justify-content: center; }
-      
+
       .stats-strip { grid-template-columns: 1fr 1fr; }
       .analytics-grid { grid-template-columns: 1fr; }
       .chart-card { min-height: 320px; }
@@ -529,9 +455,8 @@
   </style>
 </head>
 <body>
-
 <div class="shell">
-  
+
   <div class="top-bar">
     <div class="page-title">Manager Profile</div>
     <div class="manager-select-wrapper">
@@ -548,8 +473,7 @@
       </div>
     </div>
 
-    <div class="trophy-case" id="trophyCase">
-      </div>
+    <div class="trophy-case" id="trophyCase"></div>
 
     <div class="rating-container">
       <div class="sub-ratings">
@@ -591,7 +515,6 @@
   </div>
 
   <div class="analytics-grid">
-    
     <div class="card chart-card">
       <div class="chart-header">
         <div class="chart-icon">✦</div>
@@ -620,7 +543,7 @@
         </div>
         <span class="rival-stat" id="nemesisStat">-</span>
       </div>
-      
+
       <div class="rival-card pigeon">
         <div class="rival-meta">
           <span class="rival-type">Pigeon (Highest Win %)</span>
@@ -657,16 +580,15 @@
       </div>
       <div class="heatmap-grid" id="heatmapGrid"></div>
     </div>
-
   </div>
 
   <div class="card">
-    <div class="tabs-nav">
-      <button class="tab-btn active" onclick="switchTab('seasons')">Season Log</button>
-      <button class="tab-btn" onclick="switchTab('games')">Game Log</button>
+    <div class="tabs-nav" role="tablist" aria-label="Profile tables">
+      <button class="tab-btn active" type="button" role="tab" aria-selected="true" aria-controls="tabSeasons" id="tabBtnSeasons" data-tab="seasons">Season Log</button>
+      <button class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="tabGames" id="tabBtnGames" data-tab="games">Game Log</button>
     </div>
 
-    <div id="tabSeasons" class="table-section active">
+    <div id="tabSeasons" class="table-section active" role="tabpanel" aria-labelledby="tabBtnSeasons">
       <div class="table-wrap">
         <table id="seasonTable">
           <thead>
@@ -685,7 +607,7 @@
       </div>
     </div>
 
-    <div id="tabGames" class="table-section">
+    <div id="tabGames" class="table-section" role="tabpanel" aria-labelledby="tabBtnGames">
       <div class="table-wrap">
         <table id="gameTable">
           <thead>
@@ -706,16 +628,230 @@
 </div>
 
 <script>
-  // --- Constants & Global State ---
+  // --- Constants ---
   const PAYOUTS = { 1: 450, 2: 175, 3: 100, 4: 75 };
+
+  // --- Global State ---
   let rawScores = [], rawStandings = [], rawSeeds = [];
-  let charts = {}; 
-  
-  // Rating Dictionary
-  let leagueRatings = {};
+  const charts = {};
+  const leagueRatings = {};
+
+  // --- Cached DOM ---
+  const $ = (id) => document.getElementById(id);
+  const els = {};
+
+  // --- Indexes (performance + simpler code) ---
+  const idx = {
+    managers: [],
+    standingsByManager: new Map(),
+    seedsByManagerYear: new Map(),      // key: `${manager}::${year}` -> seed
+    gamesByManager: new Map(),          // manager -> game objects
+  };
+
+  // --- Helpers ---
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const safeNum = (v, fallback=0) => Number.isFinite(Number(v)) ? Number(v) : fallback;
+  const moneyFmt = (n) => `$${Number(n || 0).toLocaleString()}`;
+  const keyMY = (m,y) => `${m}::${y}`;
+
+  function normalizeStandingsRow(s) {
+    // Canonical schema (avoid final_standing vs finalStanding issues)
+    return {
+      year: safeNum(s.year, null),
+      manager: (s.manager ?? '').trim(),
+      wins: safeNum(s.wins, 0),
+      losses: safeNum(s.losses, 0),
+      ties: safeNum(s.ties, 0),
+      final_standing: safeNum((s.final_standing ?? s.finalStanding), null),
+      division_finish: safeNum((s.division_finish ?? s.divisionFinish), null),
+      points_for: safeNum((s.points_for ?? s.pointsFor), 0),
+      points_against: safeNum((s.points_against ?? s.pointsAgainst), 0),
+    };
+  }
+
+  function normalizeScoreRow(g) {
+    return {
+      year: safeNum(g.year, null),
+      week: safeNum(g.week, null),
+      manager1: (g.manager1 ?? '').trim(),
+      manager2: (g.manager2 ?? '').trim(),
+      score1: safeNum(g.score1, NaN),
+      score2: safeNum(g.score2, NaN),
+      playoffs: g.playoffs ?? "N/A"
+    };
+  }
+
+  function buildIndexes() {
+    // Managers from standings
+    const managerSet = new Set();
+    idx.standingsByManager.clear();
+    idx.seedsByManagerYear.clear();
+    idx.gamesByManager.clear();
+
+    rawStandings.forEach(s => {
+      if (!s.manager) return;
+      managerSet.add(s.manager);
+      if (!idx.standingsByManager.has(s.manager)) idx.standingsByManager.set(s.manager, []);
+      idx.standingsByManager.get(s.manager).push(s);
+    });
+
+    rawSeeds.forEach(sd => {
+      const m = (sd.manager ?? '').trim();
+      const y = safeNum(sd.year, null);
+      if (!m || !y) return;
+      idx.seedsByManagerYear.set(keyMY(m, y), sd.seed);
+      managerSet.add(m);
+    });
+
+    // Build gamesByManager in one pass
+    rawScores.forEach(r => {
+      const g = normalizeScoreRow(r);
+      if (!g.manager1 || !g.manager2) return;
+      if (!Number.isFinite(g.score1) || !Number.isFinite(g.score2)) return;
+
+      const gameFor = (name) => {
+        const isAway = (g.manager1 === name);
+        const myScore = isAway ? g.score1 : g.score2;
+        const oppScore = isAway ? g.score2 : g.score1;
+        const opponent = isAway ? g.manager2 : g.manager1;
+        const result = myScore > oppScore ? 'W' : (myScore < oppScore ? 'L' : 'T');
+        return {
+          year: g.year,
+          week: g.week,
+          score: myScore,
+          oppScore,
+          opponent,
+          result,
+          isPlayoff: (g.playoffs && g.playoffs !== "N/A")
+        };
+      };
+
+      [g.manager1, g.manager2].forEach(name => {
+        managerSet.add(name);
+        if (!idx.gamesByManager.has(name)) idx.gamesByManager.set(name, []);
+        idx.gamesByManager.get(name).push(gameFor(name));
+      });
+    });
+
+    // Sort standings per manager
+    idx.standingsByManager.forEach(arr => arr.sort((a,b) => b.year - a.year));
+
+    // Keep a stable, friendly sorted manager list
+    idx.managers = Array.from(managerSet).sort((a,b) => a.localeCompare(b));
+  }
+
+  function calcStdDev(values) {
+    if (!values.length) return 0;
+    const mean = values.reduce((a,b)=>a+b,0) / values.length;
+    const variance = values.reduce((a,b)=>a+Math.pow(b-mean,2),0) / values.length;
+    return Math.sqrt(variance);
+  }
+
+  function winPctFromGames(games) {
+    if (!games.length) return 0;
+    const w = games.filter(g => g.result === 'W').length;
+    const t = games.filter(g => g.result === 'T').length;
+    return (w + t*0.5) / games.length;
+  }
+
+  // --- Deterministic rating distribution for any N ---
+  function rankToOvr(rankIdx, n) {
+    // Smoothly map ranks to 97..73 (top..bottom) for any league size
+    if (n <= 1) return 85;
+    const top = 97, bottom = 73;
+    const t = rankIdx / (n - 1); // 0 = best, 1 = worst
+    return Math.round(top + (bottom - top) * t);
+  }
+
+  // --- Madden Rating Algorithm (deterministic + no PF double-count) ---
+  function calculateAllRatings() {
+    const managers = idx.managers;
+    const rows = [];
+
+    // Precompute league ranges for OFF/DEF normalization
+    const ppmList = [];
+    const papgList = [];
+
+    managers.forEach(m => {
+      const seasons = idx.standingsByManager.get(m) || [];
+      const games = idx.gamesByManager.get(m) || [];
+      const seedsCount = seasons.reduce((acc,s)=> acc + (idx.seedsByManagerYear.has(keyMY(m,s.year)) ? 1 : 0), 0);
+
+      const titles = seasons.filter(s => s.final_standing === 1).length;
+      const divTitles = seasons.filter(s => s.division_finish === 1).length;
+
+      const winPct = winPctFromGames(games);
+
+      const playoffGames = games.filter(g => g.isPlayoff);
+      const playPct = playoffGames.length ? winPctFromGames(playoffGames) : 0;
+
+      // OFF: points per game from weekly scores (single source of truth)
+      const totalPF = games.reduce((a,g)=>a+g.score,0);
+      const ppm = games.length ? totalPF / games.length : 0;
+
+      // DEF proxy: lower opponent score is better (points allowed per game)
+      const totalPA = games.reduce((a,g)=>a+g.oppScore,0);
+      const papg = games.length ? totalPA / games.length : 0;
+
+      ppmList.push(ppm);
+      papgList.push(papg);
+
+      // Consistency via finish std dev (lower is better)
+      const finishes = seasons.map(s => s.final_standing).filter(v => Number.isFinite(v));
+      const stdDev = calcStdDev(finishes);
+
+      // Composite raw score (same spirit as yours, cleaned)
+      const scoreTitles = titles * 10;
+      const scorePlayoff = seedsCount * 2 + playPct * 5;
+      const scoreDom = winPct * 25 + divTitles * 3;
+      const scoreCons = Math.max(0, 15 - (stdDev * 2));
+      const scoreTenure = seasons.length * 1;
+      const scorePPM = Math.max(0, (ppm - 90) * 0.4);
+
+      const raw = 55 + scoreTitles + scorePlayoff + scoreDom + scoreCons + scoreTenure + scorePPM;
+
+      rows.push({ name: m, raw, ppm, papg, playPct, stdDev });
+    });
+
+    const ppmMin = Math.min(...ppmList.filter(Number.isFinite));
+    const ppmMax = Math.max(...ppmList.filter(Number.isFinite));
+    const paMin = Math.min(...papgList.filter(Number.isFinite));
+    const paMax = Math.max(...papgList.filter(Number.isFinite));
+
+    const scale01 = (v, min, max) => (max > min ? (v - min) / (max - min) : 0.5);
+
+    rows.sort((a,b) => b.raw - a.raw);
+
+    rows.forEach((p, idxRank) => {
+      const ovr = rankToOvr(idxRank, rows.length);
+
+      // OFF: relative ppm (70..99)
+      const off = Math.round(70 + scale01(p.ppm, ppmMin, ppmMax) * 29);
+
+      // DEF: invert points allowed (lower PA => higher DEF) (70..99)
+      const def = Math.round(70 + (1 - scale01(p.papg, paMin, paMax)) * 29);
+
+      // CLT: playoff win pct (60..99)
+      const clt = Math.round(60 + clamp(p.playPct, 0, 1) * 39);
+
+      // CON: inverse of std dev (60..99), clamp stddev 0..6-ish
+      const con = Math.round(60 + (1 - clamp(p.stdDev / 6, 0, 1)) * 39);
+
+      leagueRatings[p.name] = { ovr, off: clamp(off,70,99), def: clamp(def,70,99), clt: clamp(clt,60,99), con: clamp(con,60,99) };
+    });
+  }
 
   // --- Initialization ---
   document.addEventListener('DOMContentLoaded', async () => {
+    // Cache DOM once
+    [
+      'managerSelect','heroAvatar','heroName','heroTenure','trophyCase','heroOvr',
+      'ratingOFF','ratingDEF','ratingCLT','ratingCON',
+      'statRecord','statWinPct','statAvgFinish','statAvgScore','statEarnings',
+      'nemesisName','nemesisStat','pigeonName','pigeonStat',
+      'heatmapGrid'
+    ].forEach(id => els[id] = $(id));
+
     try {
       const [sRes, stRes, sdRes] = await Promise.all([
         fetch('league-scores.json'),
@@ -723,129 +859,50 @@
         fetch('playoff-seeds.json')
       ]);
 
-      if(!sRes.ok || !stRes.ok || !sdRes.ok) throw new Error("Data load failed");
+      if (!sRes.ok || !stRes.ok || !sdRes.ok) {
+        throw new Error(`Data load failed: scores=${sRes.status}, standings=${stRes.status}, seeds=${sdRes.status}`);
+      }
 
-      rawScores = await sRes.json();
-      rawStandings = await stRes.json();
-      rawSeeds = await sdRes.json();
+      rawScores = (await sRes.json()) || [];
+      rawStandings = ((await stRes.json()) || []).map(normalizeStandingsRow);
+      rawSeeds = (await sdRes.json()) || [];
 
+      buildIndexes();
       calculateAllRatings();
       initManagerDropdown();
-      
-      const firstMgr = document.getElementById('managerSelect').options[0].value;
-      loadManager(firstMgr);
+
+      const firstMgr = els.managerSelect.options?.[0]?.value;
+      if (firstMgr) loadManager(firstMgr);
+      else showErrorCard("No managers found in your data files.");
+
+      initTabs(); // no inline onclicks
 
     } catch (err) {
       console.error(err);
-      document.querySelector('.shell').innerHTML = `<div style="text-align:center; padding:60px; color:#64748b;">Unable to load league data.<br>Please ensure JSON files are present.</div>`;
+      showErrorCard("Unable to load league data. Please ensure JSON files are present and valid.");
     }
   });
 
-  // --- Madden Rating Algorithm ---
-  function calculateAllRatings() {
-    const managers = new Set();
-    rawStandings.forEach(s => { if(s.manager) managers.add(s.manager); });
-    
-    // 1. Gather Raw Stats for Everyone
-    const stats = [];
-    managers.forEach(m => {
-      const sData = rawStandings.filter(s => s.manager === m);
-      const seeds = rawSeeds.filter(s => s.manager === m);
-      
-      let wins=0, games=0, titles=0, playGames=0, playWins=0, totalPF=0;
-      let divTitles=0;
-      
-      sData.forEach(s => {
-        if(s.final_standing === 1) titles++;
-        if(s.division_finish === 1) divTitles++; // Assuming div finish 1 = title
-        totalPF += (s.points_for || 0);
-      });
-
-      rawScores.forEach(g => {
-        let isMyGame = false, myScore=0, oppScore=0;
-        if(g.manager1 === m) { isMyGame=true; myScore=Number(g.score1); oppScore=Number(g.score2); }
-        else if(g.manager2 === m) { isMyGame=true; myScore=Number(g.score2); oppScore=Number(g.score1); }
-        
-        if(isMyGame && !isNaN(myScore)) {
-          games++;
-          if(myScore > oppScore) wins++;
-          totalPF += myScore; // Add week scores to verify total
-          
-          if(g.playoffs && g.playoffs !== "N/A") {
-            playGames++;
-            if(myScore > oppScore) playWins++;
-          }
-        }
-      });
-
-      // Calculate Derived Metrics
-      const winPct = games ? wins/games : 0;
-      const playPct = playGames ? playWins/playGames : 0;
-      const ppm = games ? totalPF/games : 0;
-      
-      // Standard Dev of Finishes (Consistency)
-      const finishes = sData.map(s => s.final_standing || 12);
-      const meanFinish = finishes.reduce((a,b)=>a+b,0)/finishes.length;
-      const variance = finishes.reduce((a,b)=>a+Math.pow(b-meanFinish,2),0)/finishes.length;
-      const stdDev = Math.sqrt(variance);
-
-      // --- The Composite Score Formula ---
-      // 1. Championship Equity (25%)
-      // 10 pts per title, 2 pts per playoff app (seed), plus bonus for high playoff win %
-      const scoreTitles = (titles * 10); 
-      const scorePlayoff = (seeds.length * 2) + (playPct * 5);
-      
-      // 2. Dominance (30%)
-      // Win% scaled (e.g. .500 = 12.5), Div Titles (3pts each)
-      const scoreDom = (winPct * 25) + (divTitles * 3);
-      
-      // 3. Consistency (20%)
-      // Low Std Dev is good. Map 0-5 dev to points. 
-      const scoreCons = Math.max(0, 15 - (stdDev * 2)); 
-      
-      // 4. Peak & Longevity (15%)
-      // 1 pt per active season
-      const scoreTenure = sData.length * 1; 
-      
-      // 5. Scoring (PPM)
-      const scorePPM = Math.max(0, (ppm - 90) * 0.4); 
-
-      // Raw Sum + Base
-      // Base 55 ensures functional floor (70+)
-      let rawSum = 55 + scoreTitles + scorePlayoff + scoreDom + scoreCons + scoreTenure + scorePPM;
-      
-      stats.push({ 
-        name: m, 
-        raw: rawSum,
-        metrics: { off: ppm, def: 0, clt: playPct, con: (15-stdDev) } 
-      });
-    });
-
-    // 2. Forced Distribution (Sort & Clamp)
-    stats.sort((a,b) => b.raw - a.raw);
-    
-    // Map Ranks to Madden Buckets (12 Managers)
-    // 1 Elite (94-99), 2 Contender (89-93), 3 Strong (85-88), 3 Avg (80-84), 2 Below (75-79), 1 Low (70-74)
-    const distribution = [97, 92, 90, 88, 87, 86, 83, 82, 80, 78, 76, 73];
-    
-    stats.forEach((p, idx) => {
-      // Use distribution if possible, else fallback to raw clamp
-      let finalOvr = idx < distribution.length ? distribution[idx] : Math.min(99, Math.round(p.raw));
-      
-      // Sub-ratings normalization (simple relative scaling)
-      const off = Math.min(99, Math.round(70 + (p.metrics.off - 90)));
-      const clt = Math.min(99, Math.round(60 + (p.metrics.clt * 40)));
-      const con = Math.min(99, Math.round(70 + p.metrics.con * 2));
-      const def = Math.min(99, Math.round(finalOvr - 5 + Math.random()*10)); // Placeholder
-
-      leagueRatings[p.name] = { ovr: finalOvr, off, def, clt, con };
-    });
+  function showErrorCard(message) {
+    document.querySelector('.shell').innerHTML = `
+      <div class="card" style="text-align:center; padding:48px;">
+        <div style="font-size:0.9rem; color:#94a3b8; text-transform:uppercase; letter-spacing:0.12em; font-weight:700; margin-bottom:10px;">
+          Data Error
+        </div>
+        <div style="color:#e5e7eb; font-size:1rem; line-height:1.5;">
+          ${message}
+        </div>
+        <div style="margin-top:14px; color:#64748b; font-size:0.85rem;">
+          Check: league-scores.json, final-standings.json, playoff-seeds.json
+        </div>
+      </div>
+    `;
   }
 
   function initManagerDropdown() {
-    const managers = Object.keys(leagueRatings).sort();
-    const select = document.getElementById('managerSelect');
-    managers.forEach(m => {
+    const select = els.managerSelect;
+    select.innerHTML = '';
+    idx.managers.forEach(m => {
       const opt = document.createElement('option');
       opt.value = m;
       opt.textContent = m;
@@ -856,41 +913,25 @@
 
   // --- Core Data Processor ---
   function loadManager(name) {
-    const mySeasons = rawStandings.filter(s => s.manager === name).sort((a,b) => b.year - a.year);
-    const myGames = [];
+    const mySeasons = idx.standingsByManager.get(name) || [];
+    const myGames = (idx.gamesByManager.get(name) || []).slice();
+
+    // Build H2H in one pass
     const h2h = {};
-
-    rawScores.forEach(m => {
-      let isMyGame = false, myScore = 0, oppScore = 0, oppName = "";
-      if(m.manager1 === name) { isMyGame=true; myScore=Number(m.score1); oppScore=Number(m.score2); oppName=m.manager2; }
-      else if(m.manager2 === name) { isMyGame=true; myScore=Number(m.score2); oppScore=Number(m.score1); oppName=m.manager1; }
-
-      if (isMyGame && !isNaN(myScore)) {
-        const result = myScore > oppScore ? 'W' : (myScore < oppScore ? 'L' : 'T');
-        myGames.push({
-          year: Number(m.year),
-          week: Number(m.week),
-          score: myScore,
-          oppScore: oppScore,
-          opponent: oppName,
-          result: result,
-          isPlayoff: (m.playoffs && m.playoffs !== "N/A")
-        });
-
-        if(oppName) {
-          if(!h2h[oppName]) h2h[oppName] = { w:0, l:0, t:0, games:0 };
-          h2h[oppName].games++;
-          if(result === 'W') h2h[oppName].w++;
-          else if(result === 'L') h2h[oppName].l++;
-          else h2h[oppName].t++;
-        }
-      }
+    myGames.forEach(g => {
+      const oppName = g.opponent;
+      if (!oppName) return;
+      if (!h2h[oppName]) h2h[oppName] = { w:0, l:0, t:0, games:0 };
+      h2h[oppName].games++;
+      if (g.result === 'W') h2h[oppName].w++;
+      else if (g.result === 'L') h2h[oppName].l++;
+      else h2h[oppName].t++;
     });
 
-    renderHero(name, mySeasons, myGames);
+    renderHero(name, mySeasons);
     renderStats(mySeasons, myGames);
     renderRivalries(h2h);
-    renderTables(mySeasons, myGames);
+    renderTables(mySeasons, myGames, name);
     renderLuckChart(mySeasons);
     renderSpreadChart(myGames);
     renderClutchChart(myGames);
@@ -898,72 +939,75 @@
     renderHeatmap(myGames);
   }
 
-  function renderHero(name, seasons, games) {
-    const initials = name.split(' ').map(n => n[0]).join('').substring(0,2);
-    document.getElementById('heroAvatar').textContent = initials;
-    document.getElementById('heroName').textContent = name;
-    
-    if(seasons.length > 0) {
-      const minYear = Math.min(...seasons.map(s => s.year));
-      document.getElementById('heroTenure').textContent = `EST. ${minYear}`;
+  function renderHero(name, seasons) {
+    const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0,2).toUpperCase();
+    els.heroAvatar.textContent = initials;
+    els.heroName.textContent = name;
+
+    if (seasons.length > 0) {
+      const minYear = Math.min(...seasons.map(s => s.year).filter(Number.isFinite));
+      if (Number.isFinite(minYear)) els.heroTenure.textContent = `EST. ${minYear}`;
+    } else {
+      els.heroTenure.textContent = `EST. —`;
     }
 
     // Trophies
-    const caseEl = document.getElementById('trophyCase');
+    const caseEl = els.trophyCase;
     caseEl.innerHTML = '';
     const trophies = [];
     seasons.forEach(s => {
-      const rank = s.final_standing ?? s.finalStanding;
+      const rank = s.final_standing;
       if (rank === 1) trophies.push(`<span class="trophy-badge gold">🏆 ${s.year} Champion</span>`);
       else if (rank === 2) trophies.push(`<span class="trophy-badge silver">🥈 ${s.year} Runner-up</span>`);
       else if (rank === 3) trophies.push(`<span class="trophy-badge bronze">🥉 ${s.year} 3rd</span>`);
     });
     caseEl.innerHTML = trophies.length ? trophies.join('') : `<span class="empty-case">No hardware... yet.</span>`;
 
-    // Ratings
+    // Ratings (deterministic)
     const r = leagueRatings[name] || { ovr: 75, off: 75, def: 75, clt: 75, con: 75 };
-    
-    // Animate OVR
-    const ovrEl = document.getElementById('heroOvr');
-    let start = 0;
-    const animate = () => {
-      start += 2;
-      if(start > r.ovr) start = r.ovr;
-      ovrEl.textContent = start;
-      if(start < r.ovr) requestAnimationFrame(animate);
-    };
-    animate();
 
-    // Sub Ratings
-    document.getElementById('ratingOFF').textContent = r.off;
-    document.getElementById('ratingDEF').textContent = r.def;
-    document.getElementById('ratingCLT').textContent = r.clt;
-    document.getElementById('ratingCON').textContent = r.con;
+    // Animate OVR (cancel-safe)
+    const ovrEl = els.heroOvr;
+    const target = r.ovr;
+    const startVal = safeNum(ovrEl.textContent, 0);
+    let current = clamp(startVal, 0, target);
+
+    const step = () => {
+      current = Math.min(target, current + Math.max(1, Math.ceil(target / 40)));
+      ovrEl.textContent = current;
+      if (current < target) requestAnimationFrame(step);
+    };
+    step();
+
+    els.ratingOFF.textContent = r.off;
+    els.ratingDEF.textContent = r.def;
+    els.ratingCLT.textContent = r.clt;
+    els.ratingCON.textContent = r.con;
   }
 
   function renderStats(seasons, games) {
     const w = games.filter(g => g.result === 'W').length;
     const l = games.filter(g => g.result === 'L').length;
     const t = games.filter(g => g.result === 'T').length;
-    document.getElementById('statRecord').textContent = `${w}-${l}-${t}`;
-    
+    els.statRecord.textContent = `${w}-${l}-${t}`;
+
     const pct = games.length ? (w + t*0.5) / games.length : 0;
-    document.getElementById('statWinPct').textContent = pct.toFixed(3);
+    els.statWinPct.textContent = pct.toFixed(3);
 
-    const validFinishes = seasons.map(s => s.final_standing ?? s.finalStanding).filter(f => f);
+    const validFinishes = seasons.map(s => s.final_standing).filter(Number.isFinite);
     const avgFin = validFinishes.length ? validFinishes.reduce((a,b)=>a+b,0) / validFinishes.length : 0;
-    document.getElementById('statAvgFinish').textContent = avgFin > 0 ? avgFin.toFixed(1) : '-';
+    els.statAvgFinish.textContent = avgFin > 0 ? avgFin.toFixed(1) : '-';
 
-    const totalScore = games.reduce((a,b) => a + b.score, 0);
+    const totalScore = games.reduce((a,g) => a + g.score, 0);
     const avgScore = games.length ? totalScore / games.length : 0;
-    document.getElementById('statAvgScore').textContent = avgScore.toFixed(1);
+    els.statAvgScore.textContent = avgScore.toFixed(1);
 
     let money = 0;
     seasons.forEach(s => {
-      const rank = s.final_standing ?? s.finalStanding;
+      const rank = s.final_standing;
       if (PAYOUTS[rank]) money += PAYOUTS[rank];
     });
-    document.getElementById('statEarnings').textContent = `$${money.toLocaleString()}`;
+    els.statEarnings.textContent = moneyFmt(money);
   }
 
   function renderRivalries(h2h) {
@@ -974,59 +1018,71 @@
       const d = h2h[opp];
       if (d.games < 5) return;
       const pct = (d.w + d.t*0.5) / d.games;
-      if (pct <= nemesis.pct) nemesis = { name: opp, pct: pct, rec: `${d.w}-${d.l}` };
-      if (pct >= pigeon.pct) pigeon = { name: opp, pct: pct, rec: `${d.w}-${d.l}` };
+      if (pct <= nemesis.pct) nemesis = { name: opp, pct, rec: `${d.w}-${d.l}` };
+      if (pct >= pigeon.pct) pigeon = { name: opp, pct, rec: `${d.w}-${d.l}` };
     });
 
-    document.getElementById('nemesisName').textContent = nemesis.name;
-    document.getElementById('nemesisStat').textContent = nemesis.rec || '-';
-    document.getElementById('pigeonName').textContent = pigeon.name;
-    document.getElementById('pigeonStat').textContent = pigeon.rec || '-';
+    els.nemesisName.textContent = nemesis.name;
+    els.nemesisStat.textContent = nemesis.rec || '-';
+    els.pigeonName.textContent = pigeon.name;
+    els.pigeonStat.textContent = pigeon.rec || '-';
   }
 
-  function renderTables(seasons, games) {
+  function renderTables(seasons, games, managerName) {
     const tbodyS = document.querySelector('#seasonTable tbody');
     tbodyS.innerHTML = '';
+    const fragS = document.createDocumentFragment();
+
     seasons.forEach(s => {
-      const wins = s.wins || 0; const losses = s.losses || 0; const ties = s.ties || 0;
-      const seedData = rawSeeds.find(sd => sd.manager === s.manager && sd.year === s.year);
-      const seed = seedData ? seedData.seed : '-';
-      let money = 0;
-      const rank = s.final_standing ?? s.finalStanding;
-      if (PAYOUTS[rank]) money = PAYOUTS[rank];
+      const seed = idx.seedsByManagerYear.get(keyMY(managerName, s.year)) ?? '-';
+      const rank = s.final_standing;
+      const money = PAYOUTS[rank] ? PAYOUTS[rank] : 0;
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${s.year}</td>
-        <td>${wins}-${losses}-${ties}</td>
-        <td>${rank || '-'}</td>
+        <td>${s.year ?? '-'}</td>
+        <td>${s.wins}-${s.losses}-${s.ties}</td>
+        <td>${Number.isFinite(rank) ? rank : '-'}</td>
         <td style="color:var(--positive)">${Math.round(s.points_for || 0).toLocaleString()}</td>
         <td style="color:var(--negative)">${Math.round(s.points_against || 0).toLocaleString()}</td>
         <td>${seed}</td>
-        <td style="color:${money>0?'var(--gold)':'inherit'}">${money > 0 ? '$'+money : '-'}</td>
+        <td style="color:${money>0?'var(--gold)':'inherit'}">${money > 0 ? moneyFmt(money) : '-'}</td>
       `;
-      tbodyS.appendChild(tr);
+      fragS.appendChild(tr);
     });
+
+    tbodyS.appendChild(fragS);
 
     const tbodyG = document.querySelector('#gameTable tbody');
     tbodyG.innerHTML = '';
-    const recentGames = [...games].sort((a,b) => (a.year !== b.year ? b.year - a.year : b.week - a.week)).slice(0, 50);
+    const fragG = document.createDocumentFragment();
+
+    const recentGames = [...games]
+      .filter(g => Number.isFinite(g.year) && Number.isFinite(g.week))
+      .sort((a,b) => (a.year !== b.year ? b.year - a.year : b.week - a.week))
+      .slice(0, 50);
 
     recentGames.forEach(g => {
       const tr = document.createElement('tr');
-      const resClass = g.result === 'W' ? 'color:var(--positive); font-weight:700;' : (g.result === 'L' ? 'color:var(--negative); font-weight:700;' : '');
+      const resStyle =
+        g.result === 'W' ? 'color:var(--positive); font-weight:700;' :
+        g.result === 'L' ? 'color:var(--negative); font-weight:700;' :
+        'color:var(--warning); font-weight:700;';
+
       tr.innerHTML = `
         <td>${g.year}</td>
         <td>Week ${g.week}</td>
         <td>${g.opponent}</td>
         <td>${g.score.toFixed(2)}</td>
-        <td style="${resClass}">${g.result}</td>
+        <td style="${resStyle}">${g.result}</td>
       `;
-      tbodyG.appendChild(tr);
+      fragG.appendChild(tr);
     });
+
+    tbodyG.appendChild(fragG);
   }
 
-  // --- Charts ---
+  // --- Charts (with Luck tooltip fix) ---
   Chart.defaults.color = '#64748b';
   Chart.defaults.font.family = 'system-ui';
   const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
@@ -1034,11 +1090,15 @@
   function renderLuckChart(seasons) {
     let totalPF = 0, totalPA = 0;
     seasons.forEach(s => { totalPF += (s.points_for || 0); totalPA += (s.points_against || 0); });
-    const avgPF = seasons.length ? totalPF/seasons.length : 0;
-    const avgPA = seasons.length ? totalPA/seasons.length : 0;
+    const avgPF = seasons.length ? totalPF / seasons.length : 0;
+    const avgPA = seasons.length ? totalPA / seasons.length : 0;
 
-    const ctx = document.getElementById('luckChart').getContext('2d');
+    const canvas = $('luckChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
     if (charts.luck) charts.luck.destroy();
+
+    const points = seasons.map(s => ({ x: s.points_for, y: s.points_against, year: s.year }));
 
     const quadrantPlugin = {
       id: 'quadrants',
@@ -1050,8 +1110,13 @@
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
         ctx.lineWidth = 1;
         ctx.setLineDash([4, 4]);
-        ctx.beginPath(); ctx.moveTo(midX, top); ctx.lineTo(midX, bottom); ctx.moveTo(left, midY); ctx.lineTo(right, midY); ctx.stroke();
-        ctx.font = '600 9px system-ui'; ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; ctx.textAlign = 'center';
+        ctx.beginPath();
+        ctx.moveTo(midX, top); ctx.lineTo(midX, bottom);
+        ctx.moveTo(left, midY); ctx.lineTo(right, midY);
+        ctx.stroke();
+        ctx.font = '600 9px system-ui';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.textAlign = 'center';
         ctx.fillText("SHOOTOUTS", (midX + right)/2, top + 15);
         ctx.fillText("UNLUCKY", (left + midX)/2, top + 15);
         ctx.fillText("DOMINANT", (midX + right)/2, bottom - 10);
@@ -1064,71 +1129,225 @@
       type: 'scatter',
       data: {
         datasets: [{
-          data: seasons.map(s => ({ x: s.points_for, y: s.points_against, year: s.year })),
+          data: points,
           backgroundColor: '#38bdf8',
-          pointRadius: 6, pointHoverRadius: 8
+          pointRadius: 6,
+          pointHoverRadius: 8
         }]
       },
       plugins: [quadrantPlugin],
-      options: { ...commonOptions, scales: { x: { title: {display:true, text:'PF'}, grid: {display:false} }, y: { title: {display:true, text:'PA'}, grid: {display:false} } }, plugins: { tooltip: { callbacks: { label: c => `${c.raw.year}: PF ${Math.round(c.raw.x)}` } } } }
-    });
-  }
-
-  function renderSpreadChart(games) {
-    const years = [...new Set(games.map(g => g.year))].sort((a,b)=>a-b);
-    const data = years.map(y => {
-      const scores = games.filter(g => g.year === y).map(g => g.score);
-      return [Math.min(...scores), Math.max(...scores)];
-    });
-    const ctx = document.getElementById('spreadChart').getContext('2d');
-    if (charts.spread) charts.spread.destroy();
-    charts.spread = new Chart(ctx, { type: 'bar', data: { labels: years, datasets: [{ data: data, backgroundColor: 'rgba(56, 189, 248, 0.4)', borderWidth: 0, borderSkipped: false, barPercentage: 0.6 }] }, options: { ...commonOptions, scales: { y: { min: 40, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } } });
-  }
-
-  function renderClutchChart(games) {
-    const reg = games.filter(g => !g.isPlayoff).map(g => g.score);
-    const play = games.filter(g => g.isPlayoff).map(g => g.score);
-    const regAvg = reg.length ? reg.reduce((a,b)=>a+b,0)/reg.length : 0;
-    const playAvg = play.length ? play.reduce((a,b)=>a+b,0)/play.length : 0;
-    const ctx = document.getElementById('clutchChart').getContext('2d');
-    if (charts.clutch) charts.clutch.destroy();
-    charts.clutch = new Chart(ctx, { type: 'bar', data: { labels: ['Regular', 'Playoffs'], datasets: [{ data: [regAvg, playAvg], backgroundColor: ['#38bdf8', '#fbbf24'], borderRadius: 4 }] }, options: { ...commonOptions, indexAxis: 'y', scales: { x: { grid: { display: false }, ticks: { color: '#94a3b8' } }, y: { grid: { display: false }, ticks: { color: '#fff', font: {weight:'bold'} } } } } });
-  }
-
-  function renderCareerChart(seasons) {
-    const sorted = [...seasons].sort((a,b) => a.year - b.year);
-    const ctx = document.getElementById('careerChart').getContext('2d');
-    if (charts.career) charts.career.destroy();
-    charts.career = new Chart(ctx, { type: 'line', data: { labels: sorted.map(s => s.year), datasets: [{ data: sorted.map(s => s.final_standing ?? null), borderColor: '#38bdf8', backgroundColor: 'rgba(56, 189, 248, 0.1)', borderWidth: 2, tension: 0.3, fill: true, pointBackgroundColor: '#0f172a', pointBorderColor: '#38bdf8', pointBorderWidth: 2 }] }, options: { ...commonOptions, scales: { y: { reverse: true, min: 1, max: 12, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } } });
-  }
-
-  function renderHeatmap(games) {
-    const grid = document.getElementById('heatmapGrid');
-    grid.innerHTML = '';
-    const header = document.createElement('div'); header.className = 'hm-header'; grid.appendChild(header);
-    for(let w=1; w<=17; w++) { const h = document.createElement('div'); h.className = 'hm-header'; h.textContent = w; grid.appendChild(h); }
-    const years = [...new Set(games.map(g => g.year))].sort((a,b)=>b-a);
-    years.forEach(y => {
-      const yLabel = document.createElement('div'); yLabel.className = 'hm-year'; yLabel.textContent = y; grid.appendChild(yLabel);
-      for(let w=1; w<=17; w++) {
-        const game = games.find(g => g.year === y && g.week === w);
-        const cell = document.createElement('div'); cell.className = 'hm-cell';
-        if (game) { cell.dataset.res = game.result; cell.dataset.tooltip = `Wk ${w}: ${game.result} vs ${game.opponent || '?'} (${Math.round(game.score)})`; }
-        grid.appendChild(cell);
+      options: {
+        ...commonOptions,
+        scales: {
+          x: { title: {display:true, text:'PF'}, grid: {display:false} },
+          y: { title: {display:true, text:'PA'}, grid: {display:false} }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              // FIX: use dataIndex to pull year from our stored point object
+              label: (ctx) => {
+                const p = ctx.dataset.data?.[ctx.dataIndex];
+                const year = p?.year ?? '';
+                const pf = Number.isFinite(ctx.parsed.x) ? Math.round(ctx.parsed.x) : '';
+                const pa = Number.isFinite(ctx.parsed.y) ? Math.round(ctx.parsed.y) : '';
+                return `${year}: PF ${pf} | PA ${pa}`;
+              }
+            }
+          }
+        }
       }
     });
   }
 
-  window.switchTab = function(tab) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.table-section').forEach(s => s.classList.remove('active'));
-    if(tab === 'seasons') {
-      document.querySelector('button[onclick="switchTab(\'seasons\')"]').classList.add('active');
-      document.getElementById('tabSeasons').classList.add('active');
-    } else {
-      document.querySelector('button[onclick="switchTab(\'games\')"]').classList.add('active');
-      document.getElementById('tabGames').classList.add('active');
+  function renderSpreadChart(games) {
+    const canvas = $('spreadChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (charts.spread) charts.spread.destroy();
+
+    const years = [...new Set(games.map(g => g.year).filter(Number.isFinite))].sort((a,b)=>a-b);
+
+    const data = years.map(y => {
+      const scores = games.filter(g => g.year === y).map(g => g.score).filter(Number.isFinite);
+      if (!scores.length) return [0, 0];
+      return [Math.min(...scores), Math.max(...scores)];
+    });
+
+    charts.spread = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: years,
+        datasets: [{
+          data,
+          backgroundColor: 'rgba(56, 189, 248, 0.4)',
+          borderWidth: 0,
+          borderSkipped: false,
+          barPercentage: 0.6
+        }]
+      },
+      options: {
+        ...commonOptions,
+        scales: {
+          y: { grid: { color: 'rgba(255,255,255,0.05)' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  function renderClutchChart(games) {
+    const canvas = $('clutchChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (charts.clutch) charts.clutch.destroy();
+
+    const reg = games.filter(g => !g.isPlayoff).map(g => g.score).filter(Number.isFinite);
+    const play = games.filter(g => g.isPlayoff).map(g => g.score).filter(Number.isFinite);
+    const regAvg = reg.length ? reg.reduce((a,b)=>a+b,0)/reg.length : 0;
+    const playAvg = play.length ? play.reduce((a,b)=>a+b,0)/play.length : 0;
+
+    charts.clutch = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Regular', 'Playoffs'],
+        datasets: [{
+          data: [regAvg, playAvg],
+          backgroundColor: ['#38bdf8', '#fbbf24'],
+          borderRadius: 4
+        }]
+      },
+      options: {
+        ...commonOptions,
+        indexAxis: 'y',
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+          y: { grid: { display: false }, ticks: { color: '#fff', font: {weight:'bold'} } }
+        }
+      }
+    });
+  }
+
+  function renderCareerChart(seasons) {
+    const canvas = $('careerChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (charts.career) charts.career.destroy();
+
+    const sorted = [...seasons].filter(s => Number.isFinite(s.year)).sort((a,b) => a.year - b.year);
+
+    charts.career = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: sorted.map(s => s.year),
+        datasets: [{
+          data: sorted.map(s => Number.isFinite(s.final_standing) ? s.final_standing : null),
+          borderColor: '#38bdf8',
+          backgroundColor: 'rgba(56, 189, 248, 0.1)',
+          borderWidth: 2,
+          tension: 0.3,
+          fill: true,
+          pointBackgroundColor: '#0f172a',
+          pointBorderColor: '#38bdf8',
+          pointBorderWidth: 2
+        }]
+      },
+      options: {
+        ...commonOptions,
+        scales: {
+          y: { reverse: true, min: 1, max: 12, grid: { color: 'rgba(255,255,255,0.05)' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  function renderHeatmap(games) {
+    const grid = els.heatmapGrid;
+    grid.innerHTML = '';
+
+    const frag = document.createDocumentFragment();
+
+    const headerBlank = document.createElement('div');
+    headerBlank.className = 'hm-header';
+    frag.appendChild(headerBlank);
+
+    for (let w=1; w<=17; w++) {
+      const h = document.createElement('div');
+      h.className = 'hm-header';
+      h.textContent = w;
+      frag.appendChild(h);
     }
+
+    const years = [...new Set(games.map(g => g.year).filter(Number.isFinite))].sort((a,b)=>b-a);
+
+    // Map for O(1) lookup
+    const byYearWeek = new Map();
+    games.forEach(g => {
+      if (!Number.isFinite(g.year) || !Number.isFinite(g.week)) return;
+      byYearWeek.set(`${g.year}::${g.week}`, g);
+    });
+
+    years.forEach(y => {
+      const yLabel = document.createElement('div');
+      yLabel.className = 'hm-year';
+      yLabel.textContent = y;
+      frag.appendChild(yLabel);
+
+      for (let w=1; w<=17; w++) {
+        const game = byYearWeek.get(`${y}::${w}`);
+        const cell = document.createElement('div');
+        cell.className = 'hm-cell';
+        cell.tabIndex = 0; // keyboard accessible
+
+        if (game) {
+          cell.dataset.res = game.result;
+          cell.dataset.tooltip = `Wk ${w}: ${game.result} vs ${game.opponent || '?'} (${Math.round(game.score)})`;
+        } else {
+          cell.dataset.tooltip = `Wk ${w}: —`;
+        }
+        frag.appendChild(cell);
+      }
+    });
+
+    grid.appendChild(frag);
+  }
+
+  // --- Tabs (no inline onclick) + basic keyboard support ---
+  function initTabs() {
+    const btnSeasons = $('tabBtnSeasons');
+    const btnGames = $('tabBtnGames');
+
+    const setActive = (tab) => {
+      const isSeasons = tab === 'seasons';
+      btnSeasons.classList.toggle('active', isSeasons);
+      btnGames.classList.toggle('active', !isSeasons);
+
+      btnSeasons.setAttribute('aria-selected', String(isSeasons));
+      btnGames.setAttribute('aria-selected', String(!isSeasons));
+
+      $('tabSeasons').classList.toggle('active', isSeasons);
+      $('tabGames').classList.toggle('active', !isSeasons);
+    };
+
+    const onClick = (e) => {
+      const tab = e.currentTarget.dataset.tab;
+      setActive(tab);
+    };
+
+    [btnSeasons, btnGames].forEach(btn => {
+      btn.addEventListener('click', onClick);
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+          e.preventDefault();
+          (btn === btnSeasons ? btnGames : btnSeasons).focus();
+        }
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          btn.click();
+        }
+      });
+    });
   }
 </script>
 </body>
