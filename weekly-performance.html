@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="robots" content="noindex, nofollow" />
+  <meta name="robots" content="noindex, nofollow">
   <title>Weekly Averages – LWFFL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -19,6 +19,7 @@
       --positive: #22c55e;
       --negative: #ef4444;
       --warning: #f59e0b;
+      --sorted-header-bg: rgba(15, 23, 42, 0.95);
     }
 
     body {
@@ -59,7 +60,40 @@
       text-transform: uppercase;
     }
 
-    /* Inputs - Matches Probability Machine Style */
+    /* Tabs */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .tab-btn {
+      padding: 10px 24px;
+      border-radius: 999px;
+      border: 1px solid rgba(55,65,81,0.9);
+      background: rgba(15,23,42,0.6);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { border-color: var(--accent); color: #fff; }
+    .tab-btn.active {
+      background: rgba(56,189,248,0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 15px rgba(56,189,248,0.2);
+    }
+
+    /* Sections */
+    .scope-section { display: none; animation: fadeIn 0.3s ease; }
+    .scope-section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Controls */
     .input-row {
       display: flex;
       gap: 15px;
@@ -96,45 +130,54 @@
     }
     select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px rgba(56,189,248,0.5); }
 
-    /* Instructions */
-    .instruction-text {
+    /* Stats Banner */
+    .stat-banner {
+      background: radial-gradient(circle at center, rgba(56,189,248,0.15), transparent 70%);
+      border: 1px solid rgba(56,189,248,0.3);
+      border-radius: 12px;
+      padding: 20px;
       text-align: center;
-      color: var(--text-soft);
-      font-size: 0.95rem;
-      margin-bottom: 20px;
-      line-height: 1.5;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
+      margin-bottom: 24px;
     }
-    .highlight { color: var(--text-main); font-weight: 600; }
+    .stat-banner-label {
+      color: var(--accent);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 5px;
+    }
+    .stat-banner-val {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #fff;
+      font-family: monospace;
+    }
 
-    /* Results Card */
+    /* Table */
     .result-card {
       background: radial-gradient(circle at top, rgba(15,23,42,0.9), rgba(2,6,23,0.95));
       border: 1px solid rgba(55,65,81,0.6);
       border-radius: 14px;
-      padding: 30px;
-      margin-bottom: 24px;
-      display: none; /* Hidden until loaded */
-    }
-    .result-card.show { display: block; }
-
-    .main-stat-label { 
-      color: var(--text-soft); 
-      font-size: 0.9rem; 
-      text-transform: uppercase; 
-      letter-spacing: 0.12em; 
-      margin-bottom: 10px; 
-      text-align: center;
+      padding: 24px;
     }
 
-    /* Table Styling */
+    .table-header {
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .table-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
     .table-wrap {
       width: 100%;
       overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      margin-top: 10px;
       border-radius: 8px;
       border: 1px solid rgba(55, 65, 81, 0.5);
     }
@@ -142,13 +185,11 @@
     .data-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       min-width: 600px;
     }
 
-    .data-table thead {
-      background: rgba(30, 41, 59, 0.6);
-    }
+    .data-table thead { background: rgba(30, 41, 59, 0.6); }
 
     .data-table th {
       text-align: left;
@@ -161,7 +202,6 @@
       cursor: pointer;
       user-select: none;
     }
-    
     .data-table th:hover { color: var(--accent); }
 
     .data-table td {
@@ -171,33 +211,20 @@
       font-variant-numeric: tabular-nums;
     }
 
-    .data-table tbody tr:hover {
-      background: rgba(56, 189, 248, 0.05);
-    }
+    .data-table tbody tr:hover { background: rgba(56, 189, 248, 0.05); }
 
     .rank-col { width: 50px; color: var(--text-soft); font-weight: 600; }
-    .manager-col { font-weight: 500; color: #f9fafb; }
-    .stat-col { font-family: monospace; font-size: 1rem; }
-    .featured-col { color: var(--accent); font-weight: 700; background: rgba(56, 189, 248, 0.03); }
+    .val-col { font-family: monospace; font-size: 1rem; color: #f9fafb; }
+    .highlight-val { color: var(--accent); font-weight: 700; }
     
-    /* Footer Row */
-    .league-footer {
-      background: rgba(56, 189, 248, 0.08);
-      font-weight: 700;
-      color: var(--accent);
-    }
-    .league-footer td { border-bottom: none; }
-
-    /* Comparison Colors */
     .diff-pos { color: var(--positive); }
     .diff-neg { color: var(--negative); }
-    .diff-neu { color: var(--text-soft); }
 
     .loading { color: var(--text-soft); text-align: center; padding: 40px; }
 
     @media (max-width: 600px) {
       .input-row { flex-direction: column; align-items: stretch; }
-      .container { padding: 24px 16px; }
+      .stat-banner-val { font-size: 2rem; }
     }
   </style>
 </head>
@@ -210,39 +237,75 @@
       <p>Legion of Whom Fantasy Football League</p>
     </div>
 
-    <p class="instruction-text">
-      Select a specific week to see historical performance averages. 
-      <br>Use the <strong>"Compare With"</strong> dropdown to see how scoring differs between two weeks.
-    </p>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchScope('manager')">Manager Breakdown</button>
+      <button class="tab-btn" onclick="switchScope('league')">League Overview</button>
+    </div>
 
-    <div class="input-row">
-      <div class="input-group">
-        <label for="primaryWeek">Primary Week</label>
-        <select id="primaryWeek">
-          </select>
+    <div id="managerSection" class="scope-section active">
+      <div class="input-row">
+        <div class="input-group">
+          <label for="managerSelect">Manager</label>
+          <select id="managerSelect">
+            </select>
+        </div>
+        <div class="input-group">
+          <label for="weekSelectMgr">Week</label>
+          <select id="weekSelectMgr">
+            </select>
+        </div>
       </div>
-      <div class="input-group">
-        <label for="compareWeek" style="color:var(--accent);">Compare With (Optional)</label>
-        <select id="compareWeek">
-          <option value="">-- None --</option>
-          </select>
+
+      <div id="managerStatsArea" style="display:none;">
+        <div class="stat-banner">
+          <div class="stat-banner-label">Average Score</div>
+          <div class="stat-banner-val" id="managerAvgDisplay">0.00</div>
+          <div style="font-size:0.8rem; color:var(--text-soft); margin-top:5px;">
+            Based on <span id="managerGameCount">0</span> games
+          </div>
+        </div>
+
+        <div class="result-card">
+          <div class="table-header">
+            <div class="table-title">Historical Performance</div>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="managerTable">
+              <thead>
+                <tr>
+                  <th onclick="sortManagerTable('year')">Year</th>
+                  <th onclick="sortManagerTable('score')">Score</th>
+                  <th onclick="sortManagerTable('result')">Result</th>
+                  <th onclick="sortManagerTable('opponent')">Opponent</th>
+                  <th onclick="sortManagerTable('diff')">Margin</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div id="resultsArea" class="result-card">
-      <div class="main-stat-label" id="tableTitle">Week 1 Historical Stats</div>
-      
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr id="tableHeader">
+    <div id="leagueSection" class="scope-section">
+      <div class="result-card">
+        <div class="table-header">
+          <div class="table-title">League Average By Week (2014–Present)</div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="leagueTable">
+            <thead>
+              <tr>
+                <th onclick="sortLeagueTable('week')">Week</th>
+                <th onclick="sortLeagueTable('avg')">League Average</th>
+                <th onclick="sortLeagueTable('max')">Highest Score</th>
+                <th onclick="sortLeagueTable('min')">Lowest Score</th>
+                <th onclick="sortLeagueTable('games')">Games Played</th>
               </tr>
-          </thead>
-          <tbody id="tableBody">
-            </tbody>
-          <tfoot id="tableFooter">
-            </tfoot>
-        </table>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -253,7 +316,12 @@
 
 <script>
   let rawMatchups = [];
-  let currentSort = { key: 'avg1', dir: 'desc' }; // Default sort by Primary Average
+  
+  // State
+  let managerData = [];
+  let leagueData = [];
+  let mgrSort = { key: 'year', dir: 'desc' };
+  let leagueSort = { key: 'week', dir: 'asc' };
 
   document.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -262,257 +330,238 @@
       rawMatchups = await res.json();
 
       initDropdowns();
-      updateTable(); // Initial Render
       
+      // Pre-calc League Data
+      calculateLeagueTrends();
+      renderLeagueTable();
+
+      // Initial Manager Render
+      updateManagerView();
+
       document.getElementById('loading').style.display = 'none';
-      document.getElementById('resultsArea').classList.add('show');
+      document.getElementById('managerStatsArea').style.display = 'block';
 
     } catch (err) {
       console.error(err);
-      document.getElementById('loading').textContent = "Error loading data. Ensure league-scores.json is present.";
+      document.getElementById('loading').textContent = "Error loading data.";
     }
   });
 
-  function initDropdowns() {
-    const primary = document.getElementById('primaryWeek');
-    const compare = document.getElementById('compareWeek');
-    
-    // Standard 17 week fantasy season
-    for(let i=1; i<=17; i++) {
-      const opt1 = document.createElement('option');
-      opt1.value = i;
-      opt1.textContent = `Week ${i}`;
-      primary.appendChild(opt1);
+  // --- UI Logic ---
 
-      const opt2 = document.createElement('option');
-      opt2.value = i;
-      opt2.textContent = `Week ${i}`;
-      compare.appendChild(opt2);
+  window.switchScope = function(scope) {
+    document.querySelectorAll('.scope-section').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    
+    if (scope === 'manager') {
+      document.getElementById('managerSection').classList.add('active');
+      document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    } else {
+      document.getElementById('leagueSection').classList.add('active');
+      document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    }
+  };
+
+  function initDropdowns() {
+    // Weeks 1-17
+    const weekSel = document.getElementById('weekSelectMgr');
+    for(let i=1; i<=17; i++) {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = `Week ${i}`;
+      weekSel.appendChild(opt);
     }
 
-    primary.addEventListener('change', updateTable);
-    compare.addEventListener('change', updateTable);
+    // Managers (Unique list)
+    const mgrSel = document.getElementById('managerSelect');
+    const managers = new Set();
+    rawMatchups.forEach(m => {
+      if(m.manager1) managers.add(m.manager1);
+      if(m.manager2) managers.add(m.manager2);
+    });
+    
+    Array.from(managers).sort().forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m;
+      mgrSel.appendChild(opt);
+    });
+
+    // Listeners
+    mgrSel.addEventListener('change', updateManagerView);
+    weekSel.addEventListener('change', updateManagerView);
   }
 
-  function getStatsForWeek(weekNum) {
-    const stats = {};
+  // --- Manager Scope Logic ---
+
+  function updateManagerView() {
+    const mgr = document.getElementById('managerSelect').value;
+    const wk = parseInt(document.getElementById('weekSelectMgr').value);
+    
+    if (!mgr) return;
+
+    managerData = [];
     let totalScore = 0;
-    let totalGames = 0;
 
     rawMatchups.forEach(m => {
-      if (Number(m.week) !== weekNum) return;
+      if (Number(m.week) !== wk) return;
+      
+      let score = 0, oppScore = 0, oppName = "";
+      let found = false;
 
-      const processSide = (manager, score, opponentScore) => {
-        if (!manager) return;
-        const s = Number(score);
-        const o = Number(opponentScore);
-        if (isNaN(s)) return;
+      if (m.manager1 === mgr) {
+        score = Number(m.score1);
+        oppScore = Number(m.score2);
+        oppName = m.manager2;
+        found = true;
+      } else if (m.manager2 === mgr) {
+        score = Number(m.score2);
+        oppScore = Number(m.score1);
+        oppName = m.manager1;
+        found = true;
+      }
 
-        if (!stats[manager]) stats[manager] = { 
-          name: manager, score: 0, games: 0, w:0, l:0, t:0 
-        };
-
-        stats[manager].score += s;
-        stats[manager].games += 1;
+      if (found && !isNaN(score)) {
+        totalScore += score;
+        const diff = score - oppScore;
+        const res = diff > 0 ? "W" : (diff < 0 ? "L" : "T");
         
-        // W-L-T Calculation
-        if (s > o) stats[manager].w++;
-        else if (s < o) stats[manager].l++;
-        else stats[manager].t++;
-
-        totalScore += s;
-        totalGames++;
-      };
-
-      processSide(m.manager1, m.score1, m.score2);
-      processSide(m.manager2, m.score2, m.score1);
+        managerData.push({
+          year: Number(m.year),
+          score: score,
+          oppScore: oppScore,
+          opponent: oppName,
+          result: res,
+          diff: diff
+        });
+      }
     });
 
-    // Calculate Averages
-    const processed = Object.values(stats).map(p => ({
-      ...p,
-      average: p.games > 0 ? p.score / p.games : 0
-    }));
-
-    return {
-      data: processed,
-      leagueAvg: totalGames > 0 ? totalScore / totalGames : 0
-    };
-  }
-
-  function updateTable() {
-    const w1 = parseInt(document.getElementById('primaryWeek').value);
-    const w2Val = document.getElementById('compareWeek').value;
-    const isCompare = w2Val !== "";
-    const w2 = isCompare ? parseInt(w2Val) : null;
-
-    const set1 = getStatsForWeek(w1);
+    const avg = managerData.length > 0 ? totalScore / managerData.length : 0;
     
-    let combinedData = [];
+    document.getElementById('managerAvgDisplay').textContent = avg.toFixed(2);
+    document.getElementById('managerGameCount').textContent = managerData.length;
 
-    if (isCompare) {
-      const set2 = getStatsForWeek(w2);
-      // Merge data
-      // Create a map of all managers found in either set
-      const managers = new Set([...set1.data.map(d=>d.name), ...set2.data.map(d=>d.name)]);
-      
-      combinedData = Array.from(managers).map(m => {
-        const s1 = set1.data.find(x => x.name === m);
-        const s2 = set2.data.find(x => x.name === m);
-        
-        const avg1 = s1 ? s1.average : 0;
-        const avg2 = s2 ? s2.average : 0;
-        
-        return {
-          name: m,
-          avg1: avg1,
-          avg2: avg2,
-          diff: avg1 - avg2,
-          // For sorting convenience
-          sortVal: avg1 
-        };
-      });
+    renderManagerTable();
+  }
 
-      document.getElementById('tableTitle').textContent = `Comparison: Week ${w1} vs Week ${w2}`;
+  window.sortManagerTable = function(key) {
+    if (mgrSort.key === key) {
+      mgrSort.dir = mgrSort.dir === 'desc' ? 'asc' : 'desc';
     } else {
-      // Single Week Mode
-      combinedData = set1.data.map(d => ({
-        name: d.name,
-        avg1: d.average,
-        total: d.score,
-        games: d.games,
-        record: `${d.w}-${d.l}-${d.t}`
-      }));
-      document.getElementById('tableTitle').textContent = `Week ${w1} Historical Performance`;
+      mgrSort.key = key;
+      mgrSort.dir = 'desc'; // Default desc
+      if(key === 'year' || key === 'opponent') mgrSort.dir = 'asc';
     }
-
-    renderHeader(isCompare, w1, w2);
-    renderBody(combinedData, isCompare);
-    renderFooter(set1.leagueAvg, isCompare ? getStatsForWeek(w2).leagueAvg : null, isCompare);
+    renderManagerTable();
   }
 
-  function renderHeader(isCompare, w1, w2) {
-    const thead = document.getElementById('tableHeader');
-    thead.innerHTML = '';
-
-    const cols = isCompare 
-      ? [
-          { k: 'rank', label: 'Rank' },
-          { k: 'name', label: 'Manager' },
-          { k: 'avg1', label: `Wk ${w1} Avg` },
-          { k: 'avg2', label: `Wk ${w2} Avg` },
-          { k: 'diff', label: '+/-' }
-        ]
-      : [
-          { k: 'rank', label: 'Rank' },
-          { k: 'name', label: 'Manager' },
-          { k: 'record', label: 'Record' },
-          { k: 'total', label: 'Total Pts' },
-          { k: 'games', label: 'Games' },
-          { k: 'avg1', label: 'Average' }
-        ];
-
-    cols.forEach(c => {
-      const th = document.createElement('th');
-      th.textContent = c.label;
-      if (c.k === currentSort.key) th.style.color = 'var(--accent)';
-      
-      th.onclick = () => {
-        if (currentSort.key === c.k) {
-          currentSort.dir = currentSort.dir === 'desc' ? 'asc' : 'desc';
-        } else {
-          currentSort.key = c.k;
-          currentSort.dir = 'desc'; // Default desc for stats
-          if (c.k === 'name') currentSort.dir = 'asc';
-        }
-        updateTable(); // Re-render with new sort
-      };
-      thead.appendChild(th);
-    });
-  }
-
-  function renderBody(data, isCompare) {
-    const tbody = document.getElementById('tableBody');
+  function renderManagerTable() {
+    const tbody = document.querySelector('#managerTable tbody');
     tbody.innerHTML = '';
 
-    // Sort Data
-    data.sort((a, b) => {
-      const valA = a[currentSort.key];
-      const valB = b[currentSort.key];
+    managerData.sort((a, b) => {
+      let valA = a[mgrSort.key];
+      let valB = b[mgrSort.key];
       
-      // Tie breaking
+      // Tie handler
       if (valA === valB) return 0;
-      
+
       if (typeof valA === 'string') {
-        return currentSort.dir === 'asc' 
-          ? valA.localeCompare(valB) 
-          : valB.localeCompare(valA);
+        return mgrSort.dir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
       }
-      return currentSort.dir === 'desc' ? (valB - valA) : (valA - valB);
+      return mgrSort.dir === 'desc' ? (valB - valA) : (valA - valB);
     });
 
-    let rank = 1;
-    data.forEach((row, idx) => {
-      // Handle Rank Ties
-      if (idx > 0 && row[currentSort.key] !== data[idx-1][currentSort.key]) {
-        rank = idx + 1;
-      }
-
+    managerData.forEach(row => {
       const tr = document.createElement('tr');
+      const diffClass = row.diff > 0 ? 'diff-pos' : (row.diff < 0 ? 'diff-neg' : '');
+      const diffSign = row.diff > 0 ? '+' : '';
       
-      if (isCompare) {
-        const diffClass = row.diff > 0 ? 'diff-pos' : (row.diff < 0 ? 'diff-neg' : 'diff-neu');
-        const diffSign = row.diff > 0 ? '+' : '';
-        
-        tr.innerHTML = `
-          <td class="rank-col">${rank}</td>
-          <td class="manager-col">${row.name}</td>
-          <td class="stat-col featured-col">${row.avg1.toFixed(2)}</td>
-          <td class="stat-col">${row.avg2.toFixed(2)}</td>
-          <td class="stat-col ${diffClass}">${diffSign}${row.diff.toFixed(2)}</td>
-        `;
-      } else {
-        tr.innerHTML = `
-          <td class="rank-col">${rank}</td>
-          <td class="manager-col">${row.name}</td>
-          <td class="stat-col">${row.record}</td>
-          <td class="stat-col">${row.total.toLocaleString()}</td>
-          <td class="stat-col">${row.games}</td>
-          <td class="stat-col featured-col">${row.avg1.toFixed(2)}</td>
-        `;
-      }
+      tr.innerHTML = `
+        <td class="val-col">${row.year}</td>
+        <td class="val-col highlight-val">${row.score.toFixed(2)}</td>
+        <td class="val-col ${diffClass}">${row.result}</td>
+        <td class="val-col" style="font-family:sans-serif;">${row.opponent}</td>
+        <td class="val-col ${diffClass}">${diffSign}${row.diff.toFixed(2)}</td>
+      `;
       tbody.appendChild(tr);
     });
   }
 
-  function renderFooter(avg1, avg2, isCompare) {
-    const foot = document.getElementById('tableFooter');
-    foot.innerHTML = '';
-    
-    const tr = document.createElement('tr');
-    tr.className = 'league-footer';
+  // --- League Scope Logic ---
 
-    if (isCompare) {
-      const diff = avg1 - avg2;
-      const diffSign = diff > 0 ? '+' : '';
-      tr.innerHTML = `
-        <td></td>
-        <td>LEAGUE AVG</td>
-        <td class="stat-col">${avg1.toFixed(2)}</td>
-        <td class="stat-col">${avg2.toFixed(2)}</td>
-        <td class="stat-col">${diffSign}${diff.toFixed(2)}</td>
-      `;
-    } else {
-      tr.innerHTML = `
-        <td></td>
-        <td>LEAGUE AVG</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td class="stat-col">${avg1.toFixed(2)}</td>
-      `;
+  function calculateLeagueTrends() {
+    leagueData = [];
+    
+    for(let w=1; w<=17; w++) {
+      let sum = 0;
+      let count = 0;
+      let max = -1;
+      let min = 1000;
+
+      rawMatchups.forEach(m => {
+        if (Number(m.week) !== w) return;
+        const s1 = Number(m.score1);
+        const s2 = Number(m.score2);
+
+        if (!isNaN(s1)) {
+          sum += s1; count++;
+          if (s1 > max) max = s1;
+          if (s1 < min) min = s1;
+        }
+        if (!isNaN(s2)) {
+          sum += s2; count++;
+          if (s2 > max) max = s2;
+          if (s2 < min) min = s2;
+        }
+      });
+
+      if (count > 0) {
+        leagueData.push({
+          week: w,
+          avg: sum / count,
+          max: max,
+          min: min,
+          games: count
+        });
+      }
     }
-    foot.appendChild(tr);
+  }
+
+  window.sortLeagueTable = function(key) {
+    if (leagueSort.key === key) {
+      leagueSort.dir = leagueSort.dir === 'desc' ? 'asc' : 'desc';
+    } else {
+      leagueSort.key = key;
+      leagueSort.dir = 'desc';
+      if(key === 'week') leagueSort.dir = 'asc';
+    }
+    renderLeagueTable();
+  }
+
+  function renderLeagueTable() {
+    const tbody = document.querySelector('#leagueTable tbody');
+    tbody.innerHTML = '';
+
+    leagueData.sort((a, b) => {
+      let valA = a[leagueSort.key];
+      let valB = b[leagueSort.key];
+      if (valA === valB) return 0;
+      return leagueSort.dir === 'desc' ? (valB - valA) : (valA - valB);
+    });
+
+    leagueData.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="val-col">Week ${row.week}</td>
+        <td class="val-col highlight-val">${row.avg.toFixed(2)}</td>
+        <td class="val-col diff-pos">${row.max.toFixed(2)}</td>
+        <td class="val-col diff-neg">${row.min.toFixed(2)}</td>
+        <td class="val-col" style="color:var(--text-soft)">${row.games}</td>
+      `;
+      tbody.appendChild(tr);
+    });
   }
 
 </script>
