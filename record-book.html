@@ -455,7 +455,7 @@
                 {key:"games",label:"M",format:"integer"},
                 {key:"ppmFor",label:"PPM",format:"ppm",polarity:"negative"} ]},
     { label:"Highest Points Per Matchup (PPM)", group:"Scoring (Points For)", sortKey:"ppmFor", sortDir:"desc", type:"aggregate",
-      columns:[ {key:"ppmFor",label:"PPM",format:"ppm",polarity:"positivePrimary"}, // format fixed
+      columns:[ {key:"ppmFor",label:"PPM",format:"ppm",polarity:"positivePrimary"},
                 {key:"pointsFor",label:"PF",format:"points"},
                 {key:"games",label:"M",format:"integer"} ]},
     { label:"Lowest Points Per Matchup (PPM)", group:"Scoring (Points For)", sortKey:"ppmFor", sortDir:"asc", type:"aggregate",
@@ -473,11 +473,11 @@
                 {key:"games",label:"M",format:"integer"},
                 {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"positive"} ]},
     { label:"Highest Points Against Per Matchup (PAPM)", group:"Scoring (Points Against)", sortKey:"ppmAgainst", sortDir:"desc", type:"aggregate",
-      columns:[ {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"negativePrimary"}, // format fixed
+      columns:[ {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"negativePrimary"},
                 {key:"pointsAgainst",label:"PA",format:"points"},
                 {key:"games",label:"M",format:"integer"} ]},
     { label:"Lowest Points Against Per Matchup (PAPM)", group:"Scoring (Points Against)", sortKey:"ppmAgainst", sortDir:"asc", type:"aggregate",
-      columns:[ {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"positivePrimary"}, // format fixed
+      columns:[ {key:"ppmAgainst",label:"PAPM",format:"ppm",polarity:"positivePrimary"},
                 {key:"pointsAgainst",label:"PA",format:"points"},
                 {key:"games",label:"M",format:"integer"} ]},
 
@@ -555,7 +555,7 @@
                 {key:"ppmFor",label:"PPM",format:"ppm",polarity:"negative"},
                 {key:"year",label:"Year",format:"year"} ]},
     { label:"Highest Points Per Matchup (PPM)", group:"Scoring (Points For)", sortKey:"ppmFor", sortDir:"desc", type:"season",
-      columns:[ {key:"ppmFor",label:"PPM",format:"ppm",polarity:"positivePrimary"}, // format fixed
+      columns:[ {key:"ppmFor",label:"PPM",format:"ppm",polarity:"positivePrimary"}, 
                 {key:"pointsFor",label:"PF",format:"points"},
                 {key:"games",label:"M",format:"integer"},
                 {key:"year",label:"Year",format:"year"} ]},
@@ -619,18 +619,19 @@
                 {key:"scoreAgainst",label:"Opp Score",format:"points"},
                 {key:"yearWeek",label:"Year / Week",format:"text"} ]},
     { label:"Biggest Margin of Victory", group:"Results (Single Matchup)", sortKey:"margin", sortDir:"desc", type:"weekly",
+      // Reordered per request: MARG | Score | Opponent | Opp Score | Year/Week
       columns:[ {key:"margin",label:"MARG",format:"marg",polarity:"positivePrimary"},
                 {key:"scoreFor",label:"Score",format:"points"},
-                {key:"scoreAgainst",label:"Opp Score",format:"points"},
                 {key:"opponent",label:"Opponent",format:"text"},
+                {key:"scoreAgainst",label:"Opp Score",format:"points"},
                 {key:"yearWeek",label:"Year / Week",format:"text"} ]},
     { label:"Closest Win", group:"Results (Single Matchup)", sortKey:"margin", sortDir:"asc", type:"weekly",
       filterKey:"isWin", filterValue:true,
-      // margin format changed to marg2 for 2 decimals
+      // Reordered per request: MARG | Score | Opponent | Opp Score | Year/Week
       columns:[ {key:"margin",label:"MARG",format:"marg2",polarity:"warningPrimary"},
                 {key:"scoreFor",label:"Score",format:"points"},
-                {key:"scoreAgainst",label:"Opp Score",format:"points"},
                 {key:"opponent",label:"Opponent",format:"text"},
+                {key:"scoreAgainst",label:"Opp Score",format:"points"},
                 {key:"yearWeek",label:"Year / Week",format:"text"} ]}
   ];
 
@@ -644,6 +645,15 @@
   // ---------------------------
   // Helpers
   // ---------------------------
+
+  function areValuesEqual(a, b) {
+    if (a === b) return true;
+    if (a === null || b === null || a === undefined || b === undefined) return a === b;
+    if (typeof a === 'number' && typeof b === 'number') {
+      return Math.abs(a - b) < 0.000001;
+    }
+    return false;
+  }
 
   function isPlayoffGame(m){ return m.playoffs && m.playoffs !== "N/A"; }
 
@@ -1374,8 +1384,14 @@
     rankingOrder.forEach((s, idx) => {
       const stats = enrichAggregate({ ...s });
       const v = stats[def.sortKey];
-      if (idx === 0) currentRank = 1;
-      else if (v !== lastValue) currentRank = idx + 1;
+      
+      // Robust ranking logic using areValuesEqual
+      if (idx === 0) {
+        currentRank = 1;
+      } else if (!areValuesEqual(v, lastValue)) {
+        currentRank = idx + 1;
+      }
+      
       lastValue = v;
       rows.push({ rank: currentRank, ...stats });
     });
@@ -1511,8 +1527,11 @@
     let lastLen = null;
     let rank = 0;
     ordered.forEach((s, idx) => {
-      if (idx === 0) rank = 1;
-      else if (s.length !== lastLen) rank = idx + 1;
+      if (idx === 0) {
+        rank = 1;
+      } else if (!areValuesEqual(s.length, lastLen)) { // Updated to check ties
+        rank = idx + 1;
+      }
       lastLen = s.length;
       rows.push({ rank, ...s });
     });
@@ -1614,8 +1633,14 @@
     let rank = 0;
     ordered.forEach((s, idx) => {
       const v = s[def.sortKey];
-      if (idx === 0) rank = 1;
-      else if (v !== lastVal) rank = idx + 1;
+      
+      // Robust ranking logic
+      if (idx === 0) {
+        rank = 1;
+      } else if (!areValuesEqual(v, lastVal)) {
+        rank = idx + 1;
+      }
+      
       lastVal = v;
       rows.push({ rank, ...s });
     });
@@ -1720,8 +1745,11 @@
     let lastLen = null;
     let rank = 0;
     ordered.forEach((s, idx) => {
-      if (idx === 0) rank = 1;
-      else if (s.length !== lastLen) rank = idx + 1;
+      if (idx === 0) {
+        rank = 1;
+      } else if (!areValuesEqual(s.length, lastLen)) { // Updated to check ties
+        rank = idx + 1;
+      }
       lastLen = s.length;
       rows.push({ rank, ...s, span: `${s.startYear} / ${s.startWeek} → ${s.endYear} / ${s.endWeek}` });
     });
@@ -1794,8 +1822,14 @@
     let rank = 0;
     ordered.forEach((s, idx) => {
       const v = s[def.sortKey];
-      if (idx === 0) rank = 1;
-      else if (v !== lastVal) rank = idx + 1;
+      
+      // Robust ranking logic
+      if (idx === 0) {
+        rank = 1;
+      } else if (!areValuesEqual(v, lastVal)) {
+        rank = idx + 1;
+      }
+      
       lastVal = v;
       rows.push({ rank, ...s });
     });
