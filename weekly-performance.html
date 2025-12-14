@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Weekly Averages – LWFFL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-main: #020617;
+      --card-bg: #020617;
+      --accent: #38bdf8;
+      --border-subtle: #1f2937;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --text-soft: #6b7280;
+      --positive: #22c55e;
+      --negative: #ef4444;
+      --warning: #f59e0b;
+      --sorted-header-bg: rgba(15, 23, 42, 0.95);
+      --sorted-cell-bg: rgba(15, 23, 42, 0.88);
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #020617 0%, #020617 35%, #020617 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    .shell { max-width: 1000px; margin: 0 auto; }
+
+    .container {
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.18), transparent 55%),
+        var(--card-bg);
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      box-shadow: 0 40px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(15,23,42,0.9);
+      padding: 28px 24px 28px;
+      backdrop-filter: blur(14px);
+    }
+
+    .header { text-align: center; margin-bottom: 24px; }
+    .header h1 {
+      font-size: 2rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #f9fafb;
+    }
+    .header p {
+      color: var(--text-soft);
+      font-size: 0.9rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 300px;
+    }
+    
+    label {
+      margin-bottom: 6px;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    select {
+      appearance: none;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background-color: #0b1120;
+      color: #f9fafb;
+      font-size: 0.95rem;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.7);
+      width: 100%;
+    }
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.7);
+    }
+
+    /* Card & Table */
+    .leaderboard-card {
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.97), rgba(15, 23, 42, 0.99));
+      border-radius: 14px;
+      border: 1px solid rgba(31, 41, 55, 0.95);
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.95);
+      padding: 18px 16px 16px;
+      position: relative;
+    }
+
+    .leaderboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 16px;
+    }
+
+    .leaderboard-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #e5e7eb;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 10px;
+    }
+
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      min-width: 600px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .leaderboard-table thead { background: linear-gradient(90deg, #020617, #020617); }
+    
+    .leaderboard-table th {
+      padding: 12px 14px;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #9ca3af;
+      border-bottom: 1px solid rgba(55, 65, 81, 0.9);
+      cursor: pointer;
+      user-select: none;
+      text-align: left;
+    }
+    
+    .leaderboard-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.96);
+      color: var(--text-main);
+      text-align: left;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .leaderboard-table tbody tr:hover { background: rgba(15, 23, 42, 0.98); }
+    .leaderboard-table tbody tr:nth-child(odd) { background: #020617; }
+    .leaderboard-table tbody tr:nth-child(even) { background: #020617; }
+
+    /* Footer / League Total Row */
+    .league-total-row {
+      background: rgba(56, 189, 248, 0.08) !important;
+      font-weight: 600;
+      border-top: 2px solid rgba(56, 189, 248, 0.3);
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+    }
+    .league-total-row td {
+      color: var(--accent);
+      border-bottom: none;
+    }
+
+    .rank-cell { width: 50px; color: var(--text-muted); font-weight: 600; }
+    .manager-cell { color: #f9fafb; font-weight: 500; }
+    
+    .stat-cell { 
+      font-family: monospace; 
+      font-size: 1rem;
+    }
+    
+    .value-positive { color: var(--positive); }
+    .value-highlight { color: var(--accent); font-weight: 700; }
+
+    .featured-col { background: rgba(56, 189, 248, 0.08); }
+    .sorted-col-header { background: var(--sorted-header-bg); color: #e5e7eb; }
+
+    .no-data {
+      padding: 20px;
+      text-align: center;
+      color: var(--text-soft);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 22px 14px; }
+      .header h1 { font-size: 1.6rem; }
+      .leaderboard-table th, .leaderboard-table td { padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="container">
+    <header class="header">
+      <h1>Weekly Averages</h1>
+      <p>Historical Performance By Week · 2014–Present</p>
+    </header>
+
+    <section class="controls">
+      <div class="control-group">
+        <label for="weekSelect">Select Week</label>
+        <select id="weekSelect">
+          </select>
+      </div>
+    </section>
+
+    <section class="leaderboard-card">
+      <div class="leaderboard-header">
+        <div class="leaderboard-title" id="tableTitle">Week 1 Averages</div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="leaderboard-table" aria-live="polite">
+          <thead>
+            <tr id="headerRow">
+              <th data-key="rank">Rank</th>
+              <th data-key="manager">Manager</th>
+              <th data-key="average" class="featured-col">Average Score</th>
+              <th data-key="total">Total Points</th>
+              <th data-key="games">Games Played</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody">
+            </tbody>
+          <tfoot id="leagueFooter">
+            </tfoot>
+        </table>
+      </div>
+
+      <div id="noDataMessage" class="no-data" style="display:none;">
+        Loading data...
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+  let rawMatchups = [];
+  let currentWeek = 1;
+  let currentSort = { key: 'average', dir: 'desc' };
+
+  // Fetch Data
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const res = await fetch('league-scores.json');
+      if (!res.ok) throw new Error("Failed to load league-scores.json");
+      rawMatchups = await res.json();
+      
+      initWeekDropdown();
+      renderTable();
+    } catch (err) {
+      console.error(err);
+      document.getElementById('noDataMessage').textContent = "Error loading data.";
+      document.getElementById('noDataMessage').style.display = 'block';
+    }
+  });
+
+  // Setup Dropdown (Weeks 1-17)
+  function initWeekDropdown() {
+    const select = document.getElementById('weekSelect');
+    // Find max week in data just in case, default to 17 standard
+    const maxWeek = rawMatchups.reduce((max, m) => Math.max(max, Number(m.week)), 0) || 17;
+    
+    for (let i = 1; i <= 17; i++) { // Cap at 17 for standard fantasy schedule
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = `Week ${i}`;
+      select.appendChild(opt);
+    }
+
+    select.addEventListener('change', (e) => {
+      currentWeek = parseInt(e.target.value);
+      document.getElementById('tableTitle').textContent = `Week ${currentWeek} Averages`;
+      renderTable();
+    });
+  }
+
+  function processData(week) {
+    const managerStats = {};
+    let leagueTotalScore = 0;
+    let leagueTotalGames = 0;
+
+    rawMatchups.forEach(m => {
+      if (Number(m.week) !== week) return;
+
+      const p1 = m.manager1;
+      const s1 = Number(m.score1);
+      const p2 = m.manager2;
+      const s2 = Number(m.score2);
+
+      // Process Player 1
+      if (p1 && !isNaN(s1)) {
+        if (!managerStats[p1]) managerStats[p1] = { name: p1, total: 0, games: 0 };
+        managerStats[p1].total += s1;
+        managerStats[p1].games += 1;
+        leagueTotalScore += s1;
+        leagueTotalGames += 1;
+      }
+
+      // Process Player 2
+      if (p2 && !isNaN(s2)) {
+        if (!managerStats[p2]) managerStats[p2] = { name: p2, total: 0, games: 0 };
+        managerStats[p2].total += s2;
+        managerStats[p2].games += 1;
+        leagueTotalScore += s2;
+        leagueTotalGames += 1;
+      }
+    });
+
+    const rows = Object.values(managerStats).map(m => ({
+      ...m,
+      average: m.games > 0 ? (m.total / m.games) : 0
+    }));
+
+    return {
+      rows,
+      leagueAvg: leagueTotalGames > 0 ? (leagueTotalScore / leagueTotalGames) : 0,
+      leagueTotal: leagueTotalScore,
+      leagueGames: leagueTotalGames
+    };
+  }
+
+  function renderTable() {
+    const { rows, leagueAvg, leagueTotal, leagueGames } = processData(currentWeek);
+    const tbody = document.getElementById('leaderboardBody');
+    const footer = document.getElementById('leagueFooter');
+    
+    tbody.innerHTML = '';
+    footer.innerHTML = '';
+
+    if (rows.length === 0) {
+      document.getElementById('noDataMessage').style.display = 'block';
+      document.getElementById('noDataMessage').textContent = "No matchups found for this week.";
+      return;
+    }
+    document.getElementById('noDataMessage').style.display = 'none';
+
+    // Sort Rows
+    rows.sort((a, b) => {
+      const valA = a[currentSort.key];
+      const valB = b[currentSort.key];
+      // Tie comparison helper
+      if (Math.abs(valA - valB) < 0.0001) return 0;
+      return currentSort.dir === 'desc' ? (valB - valA) : (valA - valB);
+    });
+
+    // Render Body
+    let rank = 1;
+    rows.forEach((row, index) => {
+      // Handle ties in rank
+      if (index > 0 && Math.abs(row[currentSort.key] - rows[index-1][currentSort.key]) < 0.0001) {
+        // keep same rank
+      } else {
+        rank = index + 1;
+      }
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="rank-cell">${rank}</td>
+        <td class="manager-cell">${row.name}</td>
+        <td class="stat-cell value-highlight featured-col">${row.average.toFixed(2)}</td>
+        <td class="stat-cell">${row.total.toLocaleString()}</td>
+        <td class="stat-cell">${row.games}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // Render Footer (League Totals)
+    const footRow = document.createElement('tr');
+    footRow.className = 'league-total-row';
+    footRow.innerHTML = `
+      <td>—</td>
+      <td>LEAGUE AVERAGE</td>
+      <td class="stat-cell">${leagueAvg.toFixed(2)}</td>
+      <td class="stat-cell">${leagueTotal.toLocaleString()}</td>
+      <td class="stat-cell">${leagueGames}</td>
+    `;
+    footer.appendChild(footRow);
+
+    updateSortIcons();
+  }
+
+  // Sorting Logic
+  document.querySelectorAll('th').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.key;
+      if (currentSort.key === key) {
+        currentSort.dir = currentSort.dir === 'desc' ? 'asc' : 'desc';
+      } else {
+        currentSort.key = key;
+        currentSort.dir = 'desc'; // Default to high-to-low
+        if (key === 'manager') currentSort.dir = 'asc';
+      }
+      renderTable();
+    });
+  });
+
+  function updateSortIcons() {
+    document.querySelectorAll('th').forEach(th => {
+      th.classList.remove('sorted-col-header');
+      if (th.dataset.key === currentSort.key) {
+        th.classList.add('sorted-col-header');
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
