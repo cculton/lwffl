@@ -12,7 +12,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      /* Reverted to original "Record Book" palette */
+      /* Dark Navy Theme */
       --bg-main: #020617;
       --card-bg: #020617;
       --accent: #38bdf8;
@@ -43,7 +43,7 @@
 
     .shell { max-width: 1200px; margin: 0 auto; }
 
-    /* Custom Scrollbar to match theme */
+    /* Scrollbar */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #020617; }
     ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
@@ -92,7 +92,7 @@
     }
     select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 1px var(--accent); }
 
-    /* --- Common Card Style (Matches Record Book) --- */
+    /* --- Common Card Style --- */
     .card {
       background:
         radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%),
@@ -265,7 +265,7 @@
       font-weight: 700; 
       color: #f9fafb; 
       line-height: 1;
-      margin-bottom: 4px;
+      margin-bottom: 4px; 
     }
     
     .stat-sub { font-size: 0.75rem; color: var(--text-soft); }
@@ -433,6 +433,7 @@
       bottom: -6px; left: 0; right: 0;
       height: 2px;
       background: var(--accent);
+      border-radius: 3px 3px 0 0;
     }
 
     .table-section { display: none; }
@@ -466,6 +467,23 @@
     }
     tr:last-child td { border-bottom: none; }
     tbody tr:hover { background: rgba(56, 189, 248, 0.03); }
+
+    /* Skeleton Loading */
+    .skeleton {
+      background: rgba(255,255,255,0.05);
+      border-radius: 4px;
+      color: transparent !important;
+      position: relative;
+      overflow: hidden;
+    }
+    .skeleton::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 
     /* Responsive */
     @media (max-width: 1024px) {
@@ -501,8 +519,8 @@
     <div class="hero-identity">
       <div class="avatar" id="heroAvatar"></div>
       <div class="hero-text">
-        <div class="hero-name" id="heroName">Loading...</div>
-        <div class="hero-tenure" id="heroTenure">EST. 20XX</div>
+        <div class="hero-name" id="heroName"><span class="skeleton">Loading Name</span></div>
+        <div class="hero-tenure" id="heroTenure"><span class="skeleton">Est 20XX</span></div>
       </div>
     </div>
 
@@ -513,7 +531,7 @@
       <div class="ovr-ring">
         <span class="ovr-val" id="heroOvr">--</span>
       </div>
-      <span class="ovr-label">OVR</span>
+      <span class="ovr-label">RATING</span>
     </div>
   </div>
 
@@ -792,12 +810,14 @@
       caseEl.innerHTML = `<span class="empty-case">No hardware... yet.</span>`;
     }
 
-    // OVR Formula (Slightly smarter: Weight longevity + titles more)
+    // OVR Formula (Smarter Weights)
     const wins = games.filter(g => g.result === 'W').length;
     const winPct = games.length ? wins / games.length : 0;
     const seeds = rawSeeds.filter(s => s.manager === name);
-    // Base 50 + (Win% * 20) + (Titles * 12) + (Seasons * 2.5) + (PlayoffApps * 1.5)
-    let ovr = 50 + (winPct * 20) + (champCount * 12) + (seasons.length * 2.5) + (seeds.length * 1.5);
+    
+    // Base 55 + Win% * 25 + Titles * 8 + Playoffs * 2 + Tenure * 0.5
+    let ovr = 55 + (winPct * 25) + (champCount * 8) + (seeds.length * 2) + (seasons.length * 0.5);
+    
     if(ovr > 99) ovr = 99;
     
     // Animate OVR
