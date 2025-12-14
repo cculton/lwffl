@@ -66,9 +66,10 @@
       justify-content: center;
       gap: 10px;
       margin-bottom: 24px;
+      flex-wrap: wrap;
     }
     .tab-btn {
-      padding: 10px 24px;
+      padding: 10px 20px;
       border-radius: 999px;
       border: 1px solid rgba(55,65,81,0.9);
       background: rgba(15,23,42,0.6);
@@ -125,23 +126,14 @@
       color: #f9fafb;
       font-size: 1.1em;
       transition: border-color 0.2s;
-      appearance: none; /* Removes default OS styling */
-      -webkit-appearance: none;
-      -moz-appearance: none;
+      appearance: none;
       cursor: pointer;
-      /* Add explicit arrow for cross-browser support */
       background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
       background-repeat: no-repeat;
       background-position: right 1rem center;
       background-size: 1em;
     }
-    
-    /* Ensure options have readable contrast */
-    select option {
-      background-color: #0b1120;
-      color: #f9fafb;
-    }
-    
+    select option { background-color: #0b1120; color: #f9fafb; }
     select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px rgba(56,189,248,0.5); }
 
     /* Stats Banner Grid */
@@ -170,7 +162,6 @@
       font-size: 2.2rem;
       font-weight: 800;
       color: #fff;
-      /* Removed monospace to match text font request */
     }
 
     /* Table */
@@ -205,7 +196,7 @@
     .data-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.95rem; /* Slightly bumped */
+      font-size: 0.95rem;
       min-width: 600px;
     }
 
@@ -247,11 +238,8 @@
       border-bottom: none;
     }
 
-    /* Column Styles - Matching text font (no monospace) */
-    .val-col { 
-      font-size: 1rem; 
-      color: #f9fafb; 
-    }
+    /* Column Styles */
+    .val-col { font-size: 1rem; color: #f9fafb; }
     .highlight-val { color: var(--accent); font-weight: 700; }
     
     .diff-pos { color: var(--positive); }
@@ -277,6 +265,7 @@
 
     <div class="tabs">
       <button class="tab-btn active" onclick="switchScope('manager')">Manager Breakdown</button>
+      <button class="tab-btn" onclick="switchScope('comparison')">Manager Comparison</button>
       <button class="tab-btn" onclick="switchScope('league')">League Overview</button>
     </div>
 
@@ -295,7 +284,6 @@
       </div>
 
       <div id="managerStatsArea" style="display:none;">
-        
         <div class="stats-banner-grid">
           <div class="stat-banner">
             <div class="stat-banner-label">Average Score</div>
@@ -329,10 +317,41 @@
                 </tr>
               </thead>
               <tbody></tbody>
-              <tfoot id="managerTableFooter">
-                </tfoot>
+              <tfoot id="managerTableFooter"></tfoot>
             </table>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="comparisonSection" class="scope-section">
+      <div class="input-row">
+        <div class="input-group">
+          <label for="compWeekSelect">Select Week To Compare</label>
+          <select id="compWeekSelect">
+            </select>
+        </div>
+      </div>
+
+      <div class="result-card">
+        <div class="table-header">
+          <div class="table-title" id="compTableTitle">All Managers</div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="compTable">
+            <thead>
+              <tr>
+                <th onclick="sortCompTable('rank')">Rank</th>
+                <th onclick="sortCompTable('name')">Manager</th>
+                <th onclick="sortCompTable('record')">Record</th>
+                <th onclick="sortCompTable('avgPPM')">Avg PPM</th>
+                <th onclick="sortCompTable('avgPPA')">Avg PPA</th>
+                <th onclick="sortCompTable('total')">Total Pts</th>
+                <th onclick="sortCompTable('matchups')">Matchups</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -370,8 +389,11 @@
   // State
   let managerData = [];
   let leagueData = [];
+  let compData = [];
+  
   let mgrSort = { key: 'year', dir: 'desc' };
   let leagueSort = { key: 'week', dir: 'asc' };
+  let compSort = { key: 'avgPPM', dir: 'desc' };
 
   document.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -381,12 +403,13 @@
 
       initDropdowns();
       
-      // Pre-calc League Data
+      // Pre-calc
       calculateLeagueTrends();
       renderLeagueTable();
 
-      // Initial Manager Render
+      // Initial Views
       updateManagerView();
+      updateCompView();
 
       document.getElementById('loading').style.display = 'none';
       document.getElementById('managerStatsArea').style.display = 'block';
@@ -403,23 +426,34 @@
     document.querySelectorAll('.scope-section').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
     
+    const btns = document.querySelectorAll('.tab-btn');
     if (scope === 'manager') {
       document.getElementById('managerSection').classList.add('active');
-      document.querySelectorAll('.tab-btn')[0].classList.add('active');
+      btns[0].classList.add('active');
+    } else if (scope === 'comparison') {
+      document.getElementById('comparisonSection').classList.add('active');
+      btns[1].classList.add('active');
     } else {
       document.getElementById('leagueSection').classList.add('active');
-      document.querySelectorAll('.tab-btn')[1].classList.add('active');
+      btns[2].classList.add('active');
     }
   };
 
   function initDropdowns() {
-    // Weeks 1-17
+    // Week selects
     const weekSel = document.getElementById('weekSelectMgr');
+    const compSel = document.getElementById('compWeekSelect');
+    
     for(let i=1; i<=17; i++) {
       const opt = document.createElement('option');
       opt.value = i;
       opt.textContent = `Week ${i}`;
       weekSel.appendChild(opt);
+      
+      const opt2 = document.createElement('option');
+      opt2.value = i;
+      opt2.textContent = `Week ${i}`;
+      compSel.appendChild(opt2);
     }
 
     // Managers (Unique list)
@@ -440,14 +474,14 @@
     // Listeners
     mgrSel.addEventListener('change', updateManagerView);
     weekSel.addEventListener('change', updateManagerView);
+    compSel.addEventListener('change', updateCompView);
   }
 
-  // --- Manager Scope Logic ---
+  // --- 1. Manager Breakdown Logic ---
 
   function updateManagerView() {
     const mgr = document.getElementById('managerSelect').value;
     const wk = parseInt(document.getElementById('weekSelectMgr').value);
-    
     if (!mgr) return;
 
     managerData = [];
@@ -455,7 +489,6 @@
 
     rawMatchups.forEach(m => {
       if (Number(m.week) !== wk) return;
-      
       let score = 0, oppScore = 0, oppName = "";
       let found = false;
 
@@ -475,7 +508,6 @@
         totalScore += score;
         const diff = score - oppScore;
         const res = diff > 0 ? "W" : (diff < 0 ? "L" : "T");
-        
         managerData.push({
           year: Number(m.year),
           score: score,
@@ -487,39 +519,29 @@
       }
     });
 
-    // 1. Calculate Average
     const avg = managerData.length > 0 ? totalScore / managerData.length : 0;
     
     document.getElementById('managerAvgDisplay').textContent = avg.toFixed(2);
     document.getElementById('managerGameCount').textContent = managerData.length;
 
-    // 2. Calculate Streak
-    // Sort data chronologically to find latest streak
+    // Streak Calculation
     const sortedForStreak = [...managerData].sort((a,b) => b.year - a.year);
     let streakCount = 0;
     let streakType = "";
-    
     if (sortedForStreak.length > 0) {
-      streakType = sortedForStreak[0].result; // "W", "L", or "T"
+      streakType = sortedForStreak[0].result;
       for (const game of sortedForStreak) {
-        if (game.result === streakType) {
-          streakCount++;
-        } else {
-          break;
-        }
+        if (game.result === streakType) streakCount++;
+        else break;
       }
     }
-    
     const streakDisplay = streakCount > 0 ? `${streakType}${streakCount}` : "-";
     const streakEl = document.getElementById('managerStreakDisplay');
     streakEl.textContent = streakDisplay;
-    
-    // Streak Color Styling
-    streakEl.className = 'stat-banner-val'; // reset
+    streakEl.className = 'stat-banner-val'; 
     if (streakType === 'W') streakEl.classList.add('diff-pos');
     if (streakType === 'L') streakEl.classList.add('diff-neg');
 
-    // 3. Render Table
     renderManagerTable(totalScore, avg);
   }
 
@@ -531,8 +553,6 @@
       mgrSort.dir = 'desc'; 
       if(key === 'year' || key === 'opponent') mgrSort.dir = 'asc';
     }
-    // Retrieve stored total/avg to re-render footer correctly
-    // Re-calculating briefly for simplicity
     const total = managerData.reduce((acc, cur) => acc + cur.score, 0);
     const avg = managerData.length ? total / managerData.length : 0;
     renderManagerTable(total, avg);
@@ -541,11 +561,9 @@
   function renderManagerTable(totalScore, avgScore) {
     const tbody = document.querySelector('#managerTable tbody');
     const tfoot = document.querySelector('#managerTableFooter');
-    
     tbody.innerHTML = '';
     tfoot.innerHTML = '';
 
-    // Sort
     managerData.sort((a, b) => {
       let valA = a[mgrSort.key];
       let valB = b[mgrSort.key];
@@ -556,12 +574,10 @@
       return mgrSort.dir === 'desc' ? (valB - valA) : (valA - valB);
     });
 
-    // Body
     managerData.forEach(row => {
       const tr = document.createElement('tr');
       const diffClass = row.diff > 0 ? 'diff-pos' : (row.diff < 0 ? 'diff-neg' : '');
       const diffSign = row.diff > 0 ? '+' : '';
-      
       tr.innerHTML = `
         <td class="val-col">${row.year}</td>
         <td class="val-col highlight-val">${row.score.toFixed(2)}</td>
@@ -572,7 +588,6 @@
       tbody.appendChild(tr);
     });
 
-    // Locked Footer Row
     const trFoot = document.createElement('tr');
     trFoot.className = 'table-footer-row';
     trFoot.innerHTML = `
@@ -586,36 +601,114 @@
     tfoot.appendChild(trFoot);
   }
 
-  // --- League Scope Logic ---
+  // --- 2. Comparison Scope Logic ---
+
+  function updateCompView() {
+    const wk = parseInt(document.getElementById('compWeekSelect').value);
+    document.getElementById('compTableTitle').textContent = `Week ${wk} Performance (All Managers)`;
+
+    const stats = {}; 
+    // { ManagerName: { totalPts, totalOpp, wins, losses, ties, games } }
+
+    rawMatchups.forEach(m => {
+      if (Number(m.week) !== wk) return;
+
+      const process = (mgr, sc, oppSc) => {
+        if (!mgr) return;
+        const s = Number(sc);
+        const o = Number(oppSc);
+        if (isNaN(s)) return;
+
+        if (!stats[mgr]) stats[mgr] = { totalPts:0, totalOpp:0, w:0, l:0, t:0, games:0 };
+        
+        stats[mgr].totalPts += s;
+        stats[mgr].totalOpp += o;
+        stats[mgr].games += 1;
+
+        if (s > o) stats[mgr].w++;
+        else if (s < o) stats[mgr].l++;
+        else stats[mgr].t++;
+      };
+
+      process(m.manager1, m.score1, m.score2);
+      process(m.manager2, m.score2, m.score1);
+    });
+
+    compData = Object.keys(stats).map(mgr => {
+      const d = stats[mgr];
+      return {
+        name: mgr,
+        record: `${d.w}-${d.l}-${d.t}`,
+        avgPPM: d.games ? d.totalPts / d.games : 0,
+        avgPPA: d.games ? d.totalOpp / d.games : 0,
+        total: d.totalPts,
+        matchups: d.games
+      };
+    });
+
+    renderCompTable();
+  }
+
+  window.sortCompTable = function(key) {
+    if (compSort.key === key) {
+      compSort.dir = compSort.dir === 'desc' ? 'asc' : 'desc';
+    } else {
+      compSort.key = key;
+      compSort.dir = 'desc';
+      if(key === 'name') compSort.dir = 'asc';
+    }
+    renderCompTable();
+  }
+
+  function renderCompTable() {
+    const tbody = document.querySelector('#compTable tbody');
+    tbody.innerHTML = '';
+
+    compData.sort((a, b) => {
+      let valA = a[compSort.key];
+      let valB = b[compSort.key];
+      if (valA === valB) return 0;
+      if (typeof valA === 'string') {
+        return compSort.dir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+      }
+      return compSort.dir === 'desc' ? (valB - valA) : (valA - valB);
+    });
+
+    let rank = 1;
+    compData.forEach((row, idx) => {
+      // Ties in rank
+      if (idx > 0 && row[compSort.key] !== compData[idx-1][compSort.key]) {
+        rank = idx + 1;
+      }
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="rank-col">${rank}</td>
+        <td class="val-col">${row.name}</td>
+        <td class="val-col">${row.record}</td>
+        <td class="val-col highlight-val">${row.avgPPM.toFixed(2)}</td>
+        <td class="val-col">${row.avgPPA.toFixed(2)}</td>
+        <td class="val-col">${row.total.toLocaleString()}</td>
+        <td class="val-col">${row.matchups}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // --- 3. League Scope Logic ---
 
   function calculateLeagueTrends() {
     leagueData = [];
-    
     for(let w=1; w<=17; w++) {
-      let sum = 0;
-      let count = 0;
-      let max = -1;
-      let min = 1000;
-
+      let sum = 0, count = 0, max = -1, min = 1000;
       rawMatchups.forEach(m => {
         if (Number(m.week) !== w) return;
         const s1 = Number(m.score1);
         const s2 = Number(m.score2);
-
-        if (!isNaN(s1)) {
-          sum += s1; count++; // count games (teams)
-          if (s1 > max) max = s1;
-          if (s1 < min) min = s1;
-        }
-        if (!isNaN(s2)) {
-          sum += s2; count++;
-          if (s2 > max) max = s2;
-          if (s2 < min) min = s2;
-        }
+        if (!isNaN(s1)) { sum += s1; count++; if (s1>max) max=s1; if (s1<min) min=s1; }
+        if (!isNaN(s2)) { sum += s2; count++; if (s2>max) max=s2; if (s2<min) min=s2; }
       });
-
       if (count > 0) {
-        // "Matchups" typically implies Head-to-Head pairings, so games / 2
         leagueData.push({
           week: w,
           avg: sum / count,
@@ -641,14 +734,12 @@
   function renderLeagueTable() {
     const tbody = document.querySelector('#leagueTable tbody');
     tbody.innerHTML = '';
-
     leagueData.sort((a, b) => {
       let valA = a[leagueSort.key];
       let valB = b[leagueSort.key];
       if (valA === valB) return 0;
       return leagueSort.dir === 'desc' ? (valB - valA) : (valA - valB);
     });
-
     leagueData.forEach(row => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
