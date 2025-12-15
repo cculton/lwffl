@@ -200,7 +200,7 @@
     .trophy-badge.gold { background: var(--gold-bg); color: var(--gold); border-color: rgba(251, 191, 36, 0.3); }
     .trophy-badge.silver { background: var(--silver-bg); color: var(--silver); border-color: rgba(203, 213, 225, 0.3); }
     .trophy-badge.bronze { background: var(--bronze-bg); color: var(--bronze); border-color: rgba(217, 119, 6, 0.3); }
-    .trophy-badge.scoring { background: rgba(248, 113, 113, 0.14); color: #f87171; border-color: rgba(248, 113, 113, 0.35); }
+    .trophy-badge.scoring { background: rgba(59, 130, 246, 0.16); color: #93c5fd; border-color: rgba(59, 130, 246, 0.35); }
 
     .empty-case { font-size: 0.85rem; color: var(--text-soft); font-style: italic; }
 
@@ -642,18 +642,7 @@
           <div id="fateFlow" class="fate-flow"></div>
         </div>
       </div>
-
-      <div class="card chart-card">
-        <div class="chart-header">
-          <div class="chart-icon">🏅</div>
-          <h3>The Hardware Stack</h3>
-        </div>
-        <div class="chart-container">
-          <canvas id="hardwareChart"></canvas>
-        </div>
-      </div>
-
-      <div class="card chart-card">
+<div class="card chart-card">
         <div class="chart-header">
           <div class="chart-icon">💓</div>
           <h3>Heart Attack Ratio (Games < 5 pts)</h3>
@@ -662,31 +651,7 @@
           <canvas id="heartChart"></canvas>
         </div>
       </div>
-
-      <div class="card chart-card">
-        <div class="chart-header">
-          <div class="chart-icon">🔥</div>
-          <h3>CLUTCH FACTOR (REGULAR SEASON VS PLAYOFF PERFORMANCE)</h3>
-        </div>
-        <div class="chart-container" style="height:150px;">
-          <canvas id="clutchChart"></canvas>
-        </div>
-      </div>
-
-      <div class="card form-card">
-        <div class="chart-header" style="margin-bottom:14px;">
-          <div class="chart-icon">⚡</div>
-          <h3>Form (Last 10 Games)</h3>
-        </div>
-        <div class="form-row">
-          <div class="form-strip" id="formStrip" aria-label="Last 10 games form strip"></div>
-          <div class="form-meta">
-            <span class="label">Last 10</span>
-            <span class="rec" id="formRecord">–</span>
-          </div>
-        </div>
-      </div>
-    </div>
+</div>
 
     <div class="card">
       <div class="table-wrap">
@@ -724,6 +689,26 @@
     const safeNum = (v, fallback = 0) => Number.isFinite(Number(v)) ? Number(v) : fallback;
     const moneyFmt = (n) => `$${Number(n || 0).toLocaleString()}`;
     const keyMY = (m, y) => `${m}::${y}`;
+
+    // Shrink very long names so they fit in two lines in the hero header.
+    function fitHeroName() {
+      const el = els.heroName;
+      if (!el) return;
+      // Reset to CSS-defined size first
+      el.style.fontSize = '';
+      el.style.lineHeight = '';
+      const cs = window.getComputedStyle(el);
+      const lineHeight = parseFloat(cs.lineHeight) || (parseFloat(cs.fontSize) * 1.1);
+      const maxHeight = lineHeight * 2 + 1; // 2 lines (small buffer)
+      // If it overflows, step font size down slightly until it fits (or hits a floor)
+      let fs = parseFloat(cs.fontSize) || 32;
+      const minFs = 20;
+      while (el.scrollHeight > maxHeight && fs > minFs) {
+        fs -= 1;
+        el.style.fontSize = fs + 'px';
+        el.style.lineHeight = '1.1';
+      }
+    }
 
     // --- Dynamic Earnings Calculation ---
     // Pot multipliers based on Buy-In History:
@@ -1059,6 +1044,7 @@
       const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase();
       els.heroAvatar.textContent = initials;
       els.heroName.textContent = name;
+      fitHeroName();
 
       if (seasons.length > 0) {
         const minYear = Math.min(...seasons.map(s => s.year).filter(Number.isFinite));
@@ -1073,13 +1059,13 @@
 
       seasons.forEach(s => {
         const rank = s.final_standing;
-        if (rank === 1) trophies.push({ y: s.year, html: `<span class="trophy-badge gold">🏆 ${s.year} – Champion</span>` });
-        else if (rank === 2) trophies.push({ y: s.year, html: `<span class="trophy-badge silver">🥈 ${s.year} – Runner-up</span>` });
-        else if (rank === 3) trophies.push({ y: s.year, html: `<span class="trophy-badge bronze">🥉 ${s.year} – 3rd</span>` });
+        if (rank === 1) trophies.push({ y: s.year, html: `<span class="trophy-badge gold">🏆 ${s.year} Champion</span>` });
+        else if (rank === 2) trophies.push({ y: s.year, html: `<span class="trophy-badge silver">🥈 ${s.year} Runner-up</span>` });
+        else if (rank === 3) trophies.push({ y: s.year, html: `<span class="trophy-badge bronze">🥉 ${s.year} 3rd</span>` });
       });
 
       const scoringYears = idx.scoringTitlesByManager.get(name) ? Array.from(idx.scoringTitlesByManager.get(name)) : [];
-      scoringYears.forEach(y => trophies.push({ y, html: `<span class="trophy-badge scoring">💰 ${y} – Scoring Title</span>` }));
+      scoringYears.forEach(y => trophies.push({ y, html: `<span class="trophy-badge scoring">💰 ${y} Scoring Title</span>` }));
 
       trophies.sort((a, b) => (b.y ?? 0) - (a.y ?? 0));
       caseEl.innerHTML = trophies.length ? trophies.map(t => t.html).join('') : `<span class="empty-case">No hardware... yet.</span>`;
@@ -1182,6 +1168,7 @@
     function renderFormStrip(games) {
       const strip = els.formStrip;
       const recEl = els.formRecord;
+      if (!strip || !recEl) return;
       strip.innerHTML = '';
 
       const last10 = [...games]
@@ -1327,10 +1314,12 @@
           ctx.font = '600 9px system-ui';
           ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
           ctx.textAlign = 'center';
-          ctx.fillText("UNLUCKY / SHOOTOUTS", (left + midX) / 2, top + 15);
-          ctx.fillText("SUBPAR & UNLUCKY", (midX + right) / 2, top + 15);
-          ctx.fillText("DOMINANT & LUCKY", (left + midX) / 2, bottom - 10);
-          ctx.fillText("SUBPAR & LUCKY", (midX + right) / 2, bottom - 10);
+          
+          ctx.fillText("DOMINANT & LUCKY", (left + midX) / 2, top + 15);
+          ctx.fillText("SUBPAR & LUCKY", (midX + right) / 2, top + 15);
+          ctx.fillText("UNLUCKY / SHOOTOUTS", (left + midX) / 2, bottom - 10);
+          ctx.fillText("SUBPAR & UNLUCKY", (midX + right) / 2, bottom - 10);
+
           ctx.restore();
         }
       };
@@ -1365,7 +1354,7 @@
               max: 12,
               ticks: { stepSize: 1, callback: (v) => Number(v).toFixed(0) },
               grid: { display: false },
-              reverse: true
+              reverse: false
             }
           },
           plugins: {
@@ -1470,7 +1459,7 @@
         options: {
           ...commonOptions,
           scales: {
-            y: { reverse: true, min: 1, max: 12, ticks: { stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { reverse: false, min: 1, max: 12, grace: 0.4, ticks: { stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } },
             x: { grid: { display: false } }
           }
         }
@@ -1556,6 +1545,7 @@
 
     // --- Initialization ---
     document.addEventListener('DOMContentLoaded', async () => {
+      window.addEventListener('resize', () => { try { fitHeroName(); } catch(e){} });
       [
         'managerSelect', 'heroAvatar', 'heroName', 'heroTenure', 'trophyCase', 'heroOvr',
         'ratingSCOR', 'ratingGM', 'ratingCLT', 'ratingSTB',
