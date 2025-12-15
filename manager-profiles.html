@@ -200,7 +200,7 @@
     .trophy-badge.gold { background: var(--gold-bg); color: var(--gold); border-color: rgba(251, 191, 36, 0.3); }
     .trophy-badge.silver { background: var(--silver-bg); color: var(--silver); border-color: rgba(203, 213, 225, 0.3); }
     .trophy-badge.bronze { background: var(--bronze-bg); color: var(--bronze); border-color: rgba(217, 119, 6, 0.3); }
-    .trophy-badge.scoring { background: rgba(239, 68, 68, 0.10); color: var(--negative); border-color: rgba(239, 68, 68, 0.25); }
+    .trophy-badge.scoring { background: rgba(248, 113, 113, 0.14); color: #f87171; border-color: rgba(248, 113, 113, 0.35); }
 
     .empty-case { font-size: 0.85rem; color: var(--text-soft); font-style: italic; }
 
@@ -1338,14 +1338,35 @@
       charts.luck = new Chart(ctx, {
         type: 'scatter',
         data: {
-          datasets: [{ data: points, backgroundColor: '#38bdf8', pointRadius: 6, pointHoverRadius: 8 }]
+          datasets: [{
+            data: points,
+            backgroundColor: 'rgba(56, 189, 248, 0.55)',
+            borderColor: 'rgba(56, 189, 248, 0.9)',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 8
+          }]
         },
         plugins: [quadrantPlugin],
         options: {
           ...commonOptions,
           scales: {
-            x: { title: { display: true, text: 'PF Rank (1=Best)' }, min: 0.5, max: 12.5, grid: { display: false }, reverse: false },
-            y: { title: { display: true, text: 'PA Rank (1=Unlucky)' }, min: 0.5, max: 12.5, grid: { display: false }, reverse: true }
+            x: {
+              title: { display: true, text: 'PF Rank (1=Best)' },
+              min: 0,
+              max: 12,
+              ticks: { stepSize: 1, callback: (v) => Number(v).toFixed(0) },
+              grid: { display: false },
+              reverse: false
+            },
+            y: {
+              title: { display: true, text: 'PA Rank (1=Unlucky)' },
+              min: 0,
+              max: 12,
+              ticks: { stepSize: 1, callback: (v) => Number(v).toFixed(0) },
+              grid: { display: false },
+              reverse: true
+            }
           },
           plugins: {
             legend: { display: false },
@@ -1484,17 +1505,11 @@
             hoverOffset: 4
           }]
         },
-        plugins: [ChartDataLabels],
         options: {
           ...commonOptions,
           cutout: '65%',
           plugins: {
-            legend: { display: true, position: 'bottom', labels: { color: '#94a3b8' } },
-            datalabels: {
-              color: '#fff',
-              font: { weight: 'bold', size: 14 },
-              formatter: (v) => v
-            }
+            legend: { display: true, position: 'bottom', labels: { color: '#94a3b8' } }
           }
         }
       });
