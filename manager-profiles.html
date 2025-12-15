@@ -1,3 +1,18 @@
+Here is the complete updated `manager-profiles.html` file with all the requested changes integrated.
+
+**Changes Summary:**
+
+1.  **Typography & Layout:** Modified `.hero-name` CSS to allow text wrapping, preventing long names from being cut off. Removed `.stat-sub` text display in the Stats Strip.
+2.  **Trophy Case:** Changed Scoring Title badge color to Red. Added a dash between year and accolade (e.g., "2014 – Champion").
+3.  **Charts:**
+      * **Scoring Spread:** Refactored to use Chart.js floating bars (`[min, max]`) for a single floating bar per year.
+      * **Luck Index:** Updated quadrant labels to "Dominant & Lucky", "Dominant & Unlucky", etc. Explicitly disabled legend.
+      * **Clutch Factor:** Updated title and axis labels.
+      * **Career Trajectory:** Forced Y-axis to show every step (1-12) evenly.
+
+<!-- end list -->
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -126,13 +141,13 @@
       align-items: center;
       gap: 24px;
       flex: 1.2;
-      min-width: 260px; /* helps avoid crushing */
+      min-width: 260px;
     }
 
     .avatar {
       width: 90px;
       height: 90px;
-      flex: 0 0 90px;       /* FIX: never shrink */
+      flex: 0 0 90px;
       border-radius: 50%;
       background: linear-gradient(135deg, rgba(56,189,248,0.2), rgba(2,6,23,0.8));
       border: 2px solid var(--accent);
@@ -147,6 +162,8 @@
     }
 
     .hero-text { display: flex; flex-direction: column; min-width: 0; }
+    
+    /* Updated Name Style for wrapping */
     .hero-name {
       font-size: 2rem;
       font-weight: 800;
@@ -154,10 +171,9 @@
       text-transform: uppercase;
       margin-bottom: 4px;
       color: #f9fafb;
-      line-height: 1;
-      white-space: nowrap;           /* FIX: prevent wrap-crush */
-      overflow: hidden;
-      text-overflow: ellipsis;
+      line-height: 1.1;
+      white-space: normal; /* Allow wrapping */
+      word-wrap: break-word;
       max-width: 520px;
     }
 
@@ -201,11 +217,11 @@
     .trophy-badge.silver { background: var(--silver-bg); color: var(--silver); border-color: rgba(203, 213, 225, 0.3); }
     .trophy-badge.bronze { background: var(--bronze-bg); color: var(--bronze); border-color: rgba(217, 119, 6, 0.3); }
 
-    /* Scoring Title badge */
+    /* Updated Scoring Title badge (Red) */
     .trophy-badge.scoring {
-      background: rgba(34, 197, 94, 0.10);
-      color: var(--money);
-      border-color: rgba(34, 197, 94, 0.25);
+      background: rgba(239, 68, 68, 0.10);
+      color: var(--negative);
+      border-color: rgba(239, 68, 68, 0.25);
     }
 
     .empty-case { font-size: 0.85rem; color: var(--text-soft); font-style: italic; }
@@ -254,7 +270,7 @@
     }
     .stat-label { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.1em; margin-bottom: 6px; }
     .stat-val { font-size: 1.4rem; font-weight: 700; color: #f9fafb; line-height: 1; margin-bottom: 4px; }
-    .stat-sub { font-size: 0.75rem; color: var(--text-soft); }
+    .stat-sub { font-size: 0.75rem; color: var(--text-soft); display: none; /* HIDDEN PER REQUEST */ }
 
     /* 3. Analytics Grid */
     .analytics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 24px; }
@@ -301,7 +317,7 @@
     .nemesis .rival-stat { color: var(--negative); }
     .pigeon .rival-stat { color: var(--positive); }
 
-    /* Last 10 sparkline (replaces heatmap) */
+    /* Last 10 sparkline */
     .form-card { grid-column: 1 / -1; }
     .form-row {
       display: flex;
@@ -391,7 +407,7 @@
     td {
       padding: 12px 16px;
       border-bottom: 1px solid rgba(31, 41, 55, 0.5);
-      color: #ffffff; /* Season log text white */
+      color: #ffffff; 
       font-variant-numeric: tabular-nums;
     }
     tr:last-child td { border-bottom: none; }
@@ -530,7 +546,6 @@
       </div>
 
       <div class="rivalry-col">
-        <!-- Swap order: Pigeon above Nemesis -->
         <div class="rival-card pigeon">
           <div class="rival-meta">
             <span class="rival-type">Pigeon (Highest Win %)</span>
@@ -550,7 +565,7 @@
         <div class="card chart-card" style="flex:1;">
           <div class="chart-header">
             <div class="chart-icon">🔥</div>
-            <h3>Clutch Factor (Reg vs Playoff)</h3>
+            <h3>CLUTCH FACTOR (REGULAR SEASON VS PLAYOFF PERFORMANCE)</h3>
           </div>
           <div class="chart-container" style="height:150px;">
             <canvas id="clutchChart"></canvas>
@@ -568,7 +583,6 @@
         </div>
       </div>
 
-      <!-- Replace Heatmap with Last 10 Form Sparkline -->
       <div class="card form-card">
         <div class="chart-header" style="margin-bottom:14px;">
           <div class="chart-icon">⚡</div>
@@ -584,7 +598,6 @@
       </div>
     </div>
 
-    <!-- Remove Game Log entirely: Season Log only -->
     <div class="card">
       <div class="table-wrap">
         <table id="seasonTable">
@@ -679,8 +692,8 @@
       standingsByManager: new Map(),
       seedsByManagerYear: new Map(),
       gamesByManager: new Map(),
-      weekBuckets: new Map(), // `${year}::${week}` -> [{manager, score, isPlayoff}]
-      scoringTitlesByManager: new Map(), // manager -> Set(years)
+      weekBuckets: new Map(), 
+      scoringTitlesByManager: new Map(), 
     };
 
     function buildIndexes() {
@@ -693,7 +706,6 @@
 
       const managerSet = new Set();
 
-      // Standings by manager
       rawStandings.forEach(s => {
         if (!s.manager) return;
         managerSet.add(s.manager);
@@ -702,7 +714,6 @@
       });
       idx.standingsByManager.forEach(arr => arr.sort((a, b) => b.year - a.year));
 
-      // Seeds map
       rawSeeds.forEach(sd => {
         const m = (sd.manager ?? '').trim();
         const y = safeNum(sd.year, null);
@@ -711,7 +722,6 @@
         managerSet.add(m);
       });
 
-      // Week buckets + gamesByManager (one pass)
       rawScores.forEach(row => {
         const g = normalizeScoreRow(row);
         if (!g.manager1 || !g.manager2) return;
@@ -752,7 +762,6 @@
       idx.gamesByManager.forEach(arr => arr.sort((a, b) => (b.year !== a.year ? b.year - a.year : b.week - a.week)));
       idx.managers = Array.from(managerSet).sort((a, b) => a.localeCompare(b));
 
-      // Scoring Titles: per year, highest points_for in standings
       const byYear = new Map();
       rawStandings.forEach(s => {
         if (!Number.isFinite(s.year) || !s.manager) return;
@@ -774,12 +783,9 @@
       }
     }
 
-    // --- Ratings: SCOR / GM / CLT / STB + OVR ---
     function calculateAllRatings() {
-      // expected wins (all-play expectation) per manager, using each week’s score distribution
       const expectedWins = {};
-      const weeksPlayed = {};
-      idx.managers.forEach(m => { expectedWins[m] = 0; weeksPlayed[m] = 0; });
+      idx.managers.forEach(m => { expectedWins[m] = 0; });
 
       for (const [, entries] of idx.weekBuckets.entries()) {
         const byManager = new Map();
@@ -804,9 +810,7 @@
             if (si > sj) beat++;
             else if (si === sj) tie++;
           }
-
           expectedWins[mi] += (beat + 0.5 * tie) / (N - 1);
-          weeksPlayed[mi] += 1;
         }
       }
 
@@ -846,7 +850,7 @@
         const seedApps = seasons.reduce((acc, s) => acc + (idx.seedsByManagerYear.has(keyMY(m, s.year)) ? 1 : 0), 0);
 
         const hardwarePoints = (titles * 10) + (runnerUps * 6) + (thirds * 4) + (divTitles * 2) + (seedApps * 1);
-        const legacyRaw = 12 * Math.log(1 + hardwarePoints); // diminishing returns
+        const legacyRaw = 12 * Math.log(1 + hardwarePoints); 
 
         return { name: m, ppm, gmRaw, cltRaw, stdDev, legacyRaw };
       });
@@ -868,11 +872,11 @@
       const legMin = min(legVals), legMax = max(legVals);
 
       rows.forEach(r => {
-        const scor = Math.round(70 + scale01(r.ppm, ppmMin, ppmMax) * 29);                        // 70–99
-        const gm   = Math.round(70 + scale01(r.gmRaw, gmMin, gmMax) * 29);                        // 70–99
-        const clt  = Math.round(60 + scale01(r.cltRaw, cltMin, cltMax) * 39);                     // 60–99
-        const stb  = Math.round(60 + (1 - scale01(r.stdDev, stbMin, stbMax)) * 39);               // 60–99 (lower std dev => higher)
-        const leg  = Math.round(60 + scale01(r.legacyRaw, legMin, legMax) * 39);                  // 60–99
+        const scor = Math.round(70 + scale01(r.ppm, ppmMin, ppmMax) * 29);                        
+        const gm   = Math.round(70 + scale01(r.gmRaw, gmMin, gmMax) * 29);                        
+        const clt  = Math.round(60 + scale01(r.cltRaw, cltMin, cltMax) * 39);                     
+        const stb  = Math.round(60 + (1 - scale01(r.stdDev, stbMin, stbMax)) * 39);               
+        const leg  = Math.round(60 + scale01(r.legacyRaw, legMin, legMax) * 39);                  
 
         const skill = (scor * 0.30) + (gm * 0.35) + (clt * 0.20) + (stb * 0.15);
         const ovr = Math.round(skill * 0.80 + leg * 0.20);
@@ -899,12 +903,10 @@
       select.addEventListener('change', (e) => loadManager(e.target.value));
     }
 
-    // --- Core Data Processor ---
     function loadManager(name) {
       const mySeasons = idx.standingsByManager.get(name) || [];
       const myGames = idx.gamesByManager.get(name) || [];
 
-      // H2H from my games
       const h2h = {};
       myGames.forEach(g => {
         if (!g.opponent) return;
@@ -938,29 +940,27 @@
         els.heroTenure.textContent = `EST. —`;
       }
 
-      // Trophies + scoring titles
       const caseEl = els.trophyCase;
       caseEl.innerHTML = '';
       const trophies = [];
 
       seasons.forEach(s => {
         const rank = s.final_standing;
-        if (rank === 1) trophies.push({ y: s.year, html: `<span class="trophy-badge gold">🏆 ${s.year} Champion</span>` });
-        else if (rank === 2) trophies.push({ y: s.year, html: `<span class="trophy-badge silver">🥈 ${s.year} Runner-up</span>` });
-        else if (rank === 3) trophies.push({ y: s.year, html: `<span class="trophy-badge bronze">🥉 ${s.year} 3rd</span>` });
+        // Added dash to format as requested: Year - Accolade
+        if (rank === 1) trophies.push({ y: s.year, html: `<span class="trophy-badge gold">🏆 ${s.year} – Champion</span>` });
+        else if (rank === 2) trophies.push({ y: s.year, html: `<span class="trophy-badge silver">🥈 ${s.year} – Runner-up</span>` });
+        else if (rank === 3) trophies.push({ y: s.year, html: `<span class="trophy-badge bronze">🥉 ${s.year} – 3rd</span>` });
       });
 
       const scoringYears = idx.scoringTitlesByManager.get(name) ? Array.from(idx.scoringTitlesByManager.get(name)) : [];
-      scoringYears.forEach(y => trophies.push({ y, html: `<span class="trophy-badge scoring">💰 ${y} Scoring Title</span>` }));
+      // Added dash to scoring title format as well
+      scoringYears.forEach(y => trophies.push({ y, html: `<span class="trophy-badge scoring">💰 ${y} – Scoring Title</span>` }));
 
-      // sort newest first
       trophies.sort((a, b) => (b.y ?? 0) - (a.y ?? 0));
       caseEl.innerHTML = trophies.length ? trophies.map(t => t.html).join('') : `<span class="empty-case">No hardware... yet.</span>`;
 
-      // Ratings
       const r = leagueRatings[name] || { ovr: 75, scor: 75, gm: 75, clt: 75, stb: 75 };
 
-      // Animate OVR
       const ovrEl = els.heroOvr;
       const target = r.ovr;
       let current = clamp(safeNum(ovrEl.textContent, 0), 0, target);
@@ -972,7 +972,6 @@
       };
       step();
 
-      // Sub-ratings
       els.ratingSCOR.textContent = r.scor;
       els.ratingGM.textContent = r.gm;
       els.ratingCLT.textContent = r.clt;
@@ -1002,7 +1001,6 @@
         const rank = s.final_standing;
         if (PAYOUTS[rank]) money += PAYOUTS[rank];
       });
-      // $$$ green everywhere
       els.statEarnings.textContent = moneyFmt(money);
       els.statEarnings.style.color = 'var(--money)';
     }
@@ -1119,10 +1117,11 @@
           ctx.font = '600 9px system-ui';
           ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
           ctx.textAlign = 'center';
-          ctx.fillText("SHOOTOUTS", (midX + right) / 2, top + 15);
-          ctx.fillText("UNLUCKY", (left + midX) / 2, top + 15);
-          ctx.fillText("DOMINANT", (midX + right) / 2, bottom - 10);
-          ctx.fillText("DEFENSIVE", (left + midX) / 2, bottom - 10);
+          // UPDATED LABELS
+          ctx.fillText("DOMINANT & UNLUCKY", (midX + right) / 2, top + 15);
+          ctx.fillText("SUBPAR & UNLUCKY", (left + midX) / 2, top + 15);
+          ctx.fillText("DOMINANT & LUCKY", (midX + right) / 2, bottom - 10);
+          ctx.fillText("SUBPAR & LUCKY", (left + midX) / 2, bottom - 10);
           ctx.restore();
         }
       };
@@ -1145,6 +1144,8 @@
             y: { title: { display: true, text: 'PA' }, grid: { display: false } }
           },
           plugins: {
+            // Disabled legend
+            legend: { display: false },
             tooltip: {
               callbacks: {
                 label: (c) => {
@@ -1161,7 +1162,6 @@
       });
     }
 
-    // NOTE: Chart.js doesn't support true "range bars" without a plugin. This renders two bars (Low and High).
     function renderSpreadChart(games) {
       const canvas = $('spreadChart');
       if (!canvas) return;
@@ -1169,29 +1169,44 @@
       if (charts.spread) charts.spread.destroy();
 
       const years = [...new Set(games.map(g => g.year).filter(Number.isFinite))].sort((a, b) => a - b);
-      const lows = [];
-      const highs = [];
-
-      years.forEach(y => {
+      
+      // Floating bars data format: [[min, max], [min, max]]
+      const data = years.map(y => {
         const scores = games.filter(g => g.year === y).map(g => g.score).filter(Number.isFinite);
-        if (!scores.length) { lows.push(0); highs.push(0); return; }
-        lows.push(Math.min(...scores));
-        highs.push(Math.max(...scores));
+        if (!scores.length) return [0, 0];
+        return [Math.min(...scores), Math.max(...scores)];
       });
 
       charts.spread = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: years,
-          datasets: [
-            { label: 'Low', data: lows, backgroundColor: 'rgba(239, 68, 68, 0.25)', borderWidth: 0 },
-            { label: 'High', data: highs, backgroundColor: 'rgba(56, 189, 248, 0.35)', borderWidth: 0 }
-          ]
+          datasets: [{
+            // No label needed if legend hidden, but helps tooltip
+            label: 'Score Range',
+            data: data,
+            backgroundColor: 'rgba(56, 189, 248, 0.4)',
+            borderWidth: 0,
+            borderSkipped: false,
+            barPercentage: 0.6
+          }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
+          plugins: { 
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (c) => {
+                  // c.raw is [min, max]
+                  const low = c.raw[0];
+                  const high = c.raw[1];
+                  return `Low: ${low} - High: ${high}`;
+                }
+              }
+            }
+          },
           scales: {
             y: { grid: { color: 'rgba(255,255,255,0.05)' } },
             x: { grid: { display: false } }
@@ -1215,7 +1230,8 @@
       charts.clutch = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: ['Regular', 'Playoffs'],
+          // Updated Label
+          labels: ['Regular Season', 'Playoffs'],
           datasets: [{
             data: [regAvg, playAvg],
             backgroundColor: ['#38bdf8', '#fbbf24'],
@@ -1260,7 +1276,14 @@
         options: {
           ...commonOptions,
           scales: {
-            y: { reverse: true, min: 1, max: 12, grid: { color: 'rgba(255,255,255,0.05)' } },
+            // Forced 1-12 step size
+            y: { 
+              reverse: true, 
+              min: 1, 
+              max: 12, 
+              ticks: { stepSize: 1 },
+              grid: { color: 'rgba(255,255,255,0.05)' } 
+            },
             x: { grid: { display: false } }
           }
         }
@@ -1308,3 +1331,4 @@
   </script>
 </body>
 </html>
+```
