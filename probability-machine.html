@@ -127,7 +127,7 @@
       text-transform: uppercase;
     }
     
-    input[type="number"] {
+    input[type="number"], select {
       width: 100%;
       padding: 12px 15px;
       background: #0b1120;
@@ -137,7 +137,14 @@
       font-size: 1.1em;
       transition: border-color 0.2s;
     }
-    input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px rgba(56,189,248,0.5); }
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 15px center;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px rgba(56,189,248,0.5); }
     
     /* Placeholder styling */
     ::placeholder {
@@ -290,10 +297,17 @@
     <div id="weeklySection" class="section active">
       <p class="instruction-text">
         Enter a fantasy score to calculate its win probability based on <span id="weeklyCount" class="highlight">0</span> historical matchups. 
-        The model fits a normal distribution to every score recorded in league history excluding consolation matchups.
+        The model fits a normal distribution to every score recorded in league history based on the selected matchup type.
       </p>
 
       <div class="input-row">
+        <div class="input-group">
+          <label for="matchupType">Matchup Type</label>
+          <select id="matchupType" onchange="processWeeklyData(); if(document.getElementById('scoreInput').value) calcWeekly();">
+            <option value="Reg">Regular Season</option>
+            <option value="Playoffs">Playoffs</option>
+          </select>
+        </div>
         <div class="input-group">
           <label for="scoreInput">Your Score</label>
           <input type="number" id="scoreInput" placeholder="e.g., 105.5" step="0.1">
@@ -397,18 +411,14 @@
       rawMatchups = await scoresRes.json();
       seasonStats = await statsRes.json();
 
-      processWeeklyData();
+      processWeeklyData(); // Will default to Regular Season
       processHistoricalModel();
       
       // Update dynamic counts with commas
-      document.getElementById('weeklyCount').textContent = rawMatchups.length.toLocaleString();
       document.getElementById('seasonCount').textContent = seasonStats.length.toLocaleString();
 
       document.getElementById('loading').style.display = 'none';
       
-      // Init Chart
-      initChart();
-
     } catch (err) {
       console.error(err);
       document.getElementById('loading').textContent = "Error loading data files. Ensure JSONs are present.";
@@ -431,11 +441,31 @@
 
   // --- Data Processing: Weekly ---
   function processWeeklyData() {
+    const filterType = document.getElementById('matchupType').value;
     const scores = [];
+    
     rawMatchups.forEach(m => {
-      if (m.score1) scores.push(Number(m.score1));
-      if (m.score2) scores.push(Number(m.score2));
+      // Determine if matchup is Playoff
+      const isPlayoff = (m.playoffs && m.playoffs !== "N/A");
+      
+      let include = false;
+      if (filterType === 'Reg' && !isPlayoff) include = true;
+      if (filterType === 'Playoffs' && isPlayoff) include = true;
+
+      if (include) {
+        if (m.score1) scores.push(Number(m.score1));
+        if (m.score2) scores.push(Number(m.score2));
+      }
     });
+
+    // Update count display
+    document.getElementById('weeklyCount').textContent = scores.length.toLocaleString();
+
+    if (scores.length === 0) {
+        leagueMeta = { mean: 0, std: 0, scores: [] };
+        renderChart();
+        return;
+    }
 
     const sum = scores.reduce((a, b) => a + b, 0);
     const mean = sum / scores.length;
@@ -446,6 +476,9 @@
 
     document.getElementById('leagueMean').textContent = mean.toFixed(2);
     document.getElementById('leagueStd').textContent = std.toFixed(2);
+    
+    // Refresh chart with new data
+    renderChart();
   }
 
   // --- Data Processing: Historical Model ---
@@ -520,7 +553,7 @@
     }
     el.innerHTML = html;
 
-    updateChart(val);
+    updateChartHighlight(val);
   };
 
   // --- Calculation: Season ---
@@ -582,13 +615,21 @@
   }
 
   // --- Charting ---
-  function initChart() {
+  function renderChart() {
     const ctx = document.getElementById('scoreChart').getContext('2d');
     
+    // If chart exists, destroy it before re-creating
+    if (chartInstance) {
+        chartInstance.destroy();
+    }
+
     // Generate buckets - Start from 0 per request
     const bucketSize = 10;
     const bins = {};
-    for(let i=0; i<=190; i+=bucketSize) bins[i] = 0;
+    const maxScore = leagueMeta.scores.length ? Math.max(...leagueMeta.scores) : 200;
+    const limit = Math.ceil(maxScore / 10) * 10 + 10;
+
+    for(let i=0; i<=limit; i+=bucketSize) bins[i] = 0;
     
     leagueMeta.scores.forEach(s => {
       const b = Math.floor(s / bucketSize) * bucketSize;
@@ -631,9 +672,13 @@
         }
       }
     });
+    
+    // Re-apply highlight if a score is entered
+    const currentInput = document.getElementById('scoreInput').value;
+    if(currentInput) updateChartHighlight(currentInput);
   }
 
-  function updateChart(userScore) {
+  function updateChartHighlight(userScore) {
     if (!chartInstance) return;
     
     const bucket = Math.floor(userScore / 10) * 10;
