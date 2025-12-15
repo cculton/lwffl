@@ -26,7 +26,6 @@
       --negative: #ef4444;
       --warning: #f59e0b;
 
-      /* Money: make $$$ green */
       --money: #22c55e;
 
       /* Badges */
@@ -148,7 +147,6 @@
 
     .hero-text { display: flex; flex-direction: column; min-width: 0; }
     
-    /* Updated Name Style for wrapping */
     .hero-name {
       font-size: 2rem;
       font-weight: 800;
@@ -157,7 +155,7 @@
       margin-bottom: 4px;
       color: #f9fafb;
       line-height: 1.1;
-      white-space: normal; /* Allow wrapping */
+      white-space: normal;
       word-wrap: break-word;
       max-width: 520px;
     }
@@ -201,13 +199,7 @@
     .trophy-badge.gold { background: var(--gold-bg); color: var(--gold); border-color: rgba(251, 191, 36, 0.3); }
     .trophy-badge.silver { background: var(--silver-bg); color: var(--silver); border-color: rgba(203, 213, 225, 0.3); }
     .trophy-badge.bronze { background: var(--bronze-bg); color: var(--bronze); border-color: rgba(217, 119, 6, 0.3); }
-
-    /* Updated Scoring Title badge (Red) */
-    .trophy-badge.scoring {
-      background: rgba(239, 68, 68, 0.10);
-      color: var(--negative);
-      border-color: rgba(239, 68, 68, 0.25);
-    }
+    .trophy-badge.scoring { background: rgba(239, 68, 68, 0.10); color: var(--negative); border-color: rgba(239, 68, 68, 0.25); }
 
     .empty-case { font-size: 0.85rem; color: var(--text-soft); font-style: italic; }
 
@@ -224,7 +216,7 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    .sub-stat span:last-child { color: var(--accent); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 0.9rem; }
+    .sub-stat span:last-child { color: var(--accent); font-family: monospace; font-size: 0.9rem; }
 
     .ovr-badge { display: flex; flex-direction: column; align-items: center; flex: 0 0 auto; }
     .ovr-ring {
@@ -255,7 +247,7 @@
     }
     .stat-label { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.1em; margin-bottom: 6px; }
     .stat-val { font-size: 1.4rem; font-weight: 700; color: #f9fafb; line-height: 1; margin-bottom: 4px; }
-    .stat-sub { font-size: 0.75rem; color: var(--text-soft); display: none; /* HIDDEN PER REQUEST */ }
+    .stat-sub { font-size: 0.75rem; color: var(--text-soft); display: none; }
 
     /* 3. Analytics Grid */
     .analytics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 24px; }
@@ -298,7 +290,7 @@
     .rival-meta { display: flex; flex-direction: column; }
     .rival-type { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; color: var(--text-soft); margin-bottom: 4px; }
     .rival-name { font-size: 1.1rem; font-weight: 600; color: #f9fafb; }
-    .rival-stat { text-align: right; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-weight: 700; font-size: 1.1rem; }
+    .rival-stat { text-align: right; font-family: monospace; font-weight: 700; font-size: 1.1rem; }
     .nemesis .rival-stat { color: var(--negative); }
     .pigeon .rival-stat { color: var(--positive); }
 
@@ -370,7 +362,7 @@
       color: var(--text-muted);
     }
     .form-meta .rec {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-family: monospace;
       font-weight: 800;
       color: #f9fafb;
       font-size: 0.95rem;
@@ -513,7 +505,7 @@
       <div class="card chart-card">
         <div class="chart-header">
           <div class="chart-icon">✦</div>
-          <h3>Luck Index (Quadrants)</h3>
+          <h3>Luck Index (Regular Season Rank)</h3>
         </div>
         <div class="chart-container">
           <canvas id="luckChart"></canvas>
@@ -622,22 +614,6 @@
     const moneyFmt = (n) => `$${Number(n || 0).toLocaleString()}`;
     const keyMY = (m, y) => `${m}::${y}`;
 
-    function showErrorCard(message) {
-      document.querySelector('.shell').innerHTML = `
-        <div class="card" style="text-align:center; padding:48px;">
-          <div style="font-size:0.9rem; color:#94a3b8; text-transform:uppercase; letter-spacing:0.12em; font-weight:700; margin-bottom:10px;">
-            Data Error
-          </div>
-          <div style="color:#e5e7eb; font-size:1rem; line-height:1.5;">
-            ${message}
-          </div>
-          <div style="margin-top:14px; color:#64748b; font-size:0.85rem;">
-            Check: league-scores.json, final-standings.json, playoff-seeds.json
-          </div>
-        </div>
-      `;
-    }
-
     function normalizeStandingsRow(s) {
       return {
         year: safeNum(s.year, null),
@@ -671,14 +647,15 @@
       return Math.sqrt(variance);
     }
 
-    // --- Indexes ---
+    // --- Indexes & Ranking Logic ---
     const idx = {
       managers: [],
       standingsByManager: new Map(),
       seedsByManagerYear: new Map(),
       gamesByManager: new Map(),
       weekBuckets: new Map(), 
-      scoringTitlesByManager: new Map(), 
+      scoringTitlesByManager: new Map(),
+      seasonRanks: {} // { "Manager::Year": { pfRank, paRank } }
     };
 
     function buildIndexes() {
@@ -688,6 +665,7 @@
       idx.gamesByManager.clear();
       idx.weekBuckets.clear();
       idx.scoringTitlesByManager.clear();
+      idx.seasonRanks = {};
 
       const managerSet = new Set();
 
@@ -747,6 +725,7 @@
       idx.gamesByManager.forEach(arr => arr.sort((a, b) => (b.year !== a.year ? b.year - a.year : b.week - a.week)));
       idx.managers = Array.from(managerSet).sort((a, b) => a.localeCompare(b));
 
+      // Calculate Ranks per Season (1-12) for PF and PA
       const byYear = new Map();
       rawStandings.forEach(s => {
         if (!Number.isFinite(s.year) || !s.manager) return;
@@ -755,16 +734,33 @@
       });
 
       for (const [year, rows] of byYear.entries()) {
+        // PF Rank (1 = High)
+        rows.sort((a,b) => b.points_for - a.points_for);
+        rows.forEach((r, i) => {
+          const k = keyMY(r.manager, year);
+          if(!idx.seasonRanks[k]) idx.seasonRanks[k] = {};
+          idx.seasonRanks[k].pfRank = i + 1;
+        });
+
+        // PA Rank (1 = High Points Against = Unlucky)
+        rows.sort((a,b) => b.points_against - a.points_against);
+        rows.forEach((r, i) => {
+          const k = keyMY(r.manager, year);
+          if(!idx.seasonRanks[k]) idx.seasonRanks[k] = {};
+          idx.seasonRanks[k].paRank = i + 1;
+        });
+
+        // Scoring Title Logic (Highest PF)
         let maxPF = -Infinity;
         rows.forEach(r => { if (Number.isFinite(r.points_for)) maxPF = Math.max(maxPF, r.points_for); });
-        if (!Number.isFinite(maxPF) || maxPF <= 0) continue;
-
-        rows.forEach(r => {
-          if (r.points_for === maxPF) {
-            if (!idx.scoringTitlesByManager.has(r.manager)) idx.scoringTitlesByManager.set(r.manager, new Set());
-            idx.scoringTitlesByManager.get(r.manager).add(year);
-          }
-        });
+        if (Number.isFinite(maxPF) && maxPF > 0) {
+          rows.forEach(r => {
+            if (r.points_for === maxPF) {
+              if (!idx.scoringTitlesByManager.has(r.manager)) idx.scoringTitlesByManager.set(r.manager, new Set());
+              idx.scoringTitlesByManager.get(r.manager).add(year);
+            }
+          });
+        }
       }
     }
 
@@ -906,7 +902,7 @@
       renderStats(mySeasons, myGames);
       renderRivalries(h2h);
       renderSeasonTable(mySeasons, name);
-      renderLuckChart(mySeasons);
+      renderLuckChart(mySeasons, name);
       renderSpreadChart(myGames);
       renderClutchChart(myGames);
       renderCareerChart(mySeasons);
@@ -931,14 +927,14 @@
 
       seasons.forEach(s => {
         const rank = s.final_standing;
-        // Added dash to format as requested: Year - Accolade
+        // Added dash
         if (rank === 1) trophies.push({ y: s.year, html: `<span class="trophy-badge gold">🏆 ${s.year} – Champion</span>` });
         else if (rank === 2) trophies.push({ y: s.year, html: `<span class="trophy-badge silver">🥈 ${s.year} – Runner-up</span>` });
         else if (rank === 3) trophies.push({ y: s.year, html: `<span class="trophy-badge bronze">🥉 ${s.year} – 3rd</span>` });
       });
 
       const scoringYears = idx.scoringTitlesByManager.get(name) ? Array.from(idx.scoringTitlesByManager.get(name)) : [];
-      // Added dash to scoring title format as well
+      // Added dash + scoring title class
       scoringYears.forEach(y => trophies.push({ y, html: `<span class="trophy-badge scoring">💰 ${y} – Scoring Title</span>` }));
 
       trophies.sort((a, b) => (b.y ?? 0) - (a.y ?? 0));
@@ -1071,29 +1067,35 @@
     Chart.defaults.font.family = 'system-ui';
     const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
 
-    function renderLuckChart(seasons) {
+    function renderLuckChart(seasons, managerName) {
       const canvas = $('luckChart');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (charts.luck) charts.luck.destroy();
 
-      let totalPF = 0, totalPA = 0;
-      seasons.forEach(s => { totalPF += (s.points_for || 0); totalPA += (s.points_against || 0); });
-      const avgPF = seasons.length ? totalPF / seasons.length : 0;
-      const avgPA = seasons.length ? totalPA / seasons.length : 0;
-
-      const points = seasons.map(s => ({ x: s.points_for, y: s.points_against, year: s.year }));
+      // Get ranks for each season
+      const points = seasons.map(s => {
+        const k = keyMY(managerName, s.year);
+        const ranks = idx.seasonRanks[k] || { pfRank: 6, paRank: 6 };
+        return { 
+          x: ranks.pfRank, 
+          y: ranks.paRank, 
+          year: s.year 
+        };
+      });
 
       const quadrantPlugin = {
         id: 'quadrants',
         beforeDraw(chart) {
-          const { ctx, chartArea: { top, bottom, left, right }, scales: { x, y } } = chart;
-          const midX = x.getPixelForValue(avgPF);
-          const midY = y.getPixelForValue(avgPA);
+          const { ctx, chartArea: { top, bottom, left, right } } = chart;
+          const midX = (left + right) / 2;
+          const midY = (top + bottom) / 2;
+          
           ctx.save();
           ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
           ctx.lineWidth = 1;
           ctx.setLineDash([4, 4]);
+          
           ctx.beginPath();
           ctx.moveTo(midX, top); ctx.lineTo(midX, bottom);
           ctx.moveTo(left, midY); ctx.lineTo(right, midY);
@@ -1102,11 +1104,26 @@
           ctx.font = '600 9px system-ui';
           ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
           ctx.textAlign = 'center';
-          // UPDATED LABELS
-          ctx.fillText("DOMINANT & UNLUCKY", (midX + right) / 2, top + 15);
-          ctx.fillText("SUBPAR & UNLUCKY", (left + midX) / 2, top + 15);
-          ctx.fillText("DOMINANT & LUCKY", (midX + right) / 2, bottom - 10);
-          ctx.fillText("SUBPAR & LUCKY", (left + midX) / 2, bottom - 10);
+          
+          // Updated Quadrants based on Rank (1 = Top/Left)
+          // X: 1 is Left (Good), 12 is Right (Bad)
+          // Y: 1 is Top (Unlucky), 12 is Bottom (Lucky)
+          
+          // Top Left: Rank 1 PF, Rank 1 PA -> Dominant & Unlucky (or Unlucky/Shootouts)
+          // Actually, Rank 1 PA means "Allowed Most Points". 
+          // So High PF (Rank 1), High PA (Rank 1) = Shootouts.
+          // Bottom Left: Rank 1 PF, Rank 12 PA = Dominant & Lucky.
+          
+          // Using requested labels:
+          // Top-Left (Good PF, Bad PA): "UNLUCKY / SHOOTOUTS"
+          // Bottom-Left (Good PF, Good PA): "DOMINANT & LUCKY"
+          // Top-Right (Bad PF, Bad PA): "SUBPAR & UNLUCKY"
+          // Bottom-Right (Bad PF, Good PA): "SUBPAR & LUCKY"
+
+          ctx.fillText("UNLUCKY / SHOOTOUTS", (left + midX) / 2, top + 15);
+          ctx.fillText("SUBPAR & UNLUCKY", (midX + right) / 2, top + 15);
+          ctx.fillText("DOMINANT & LUCKY", (left + midX) / 2, bottom - 10);
+          ctx.fillText("SUBPAR & LUCKY", (midX + right) / 2, bottom - 10);
           ctx.restore();
         }
       };
@@ -1125,20 +1142,26 @@
         options: {
           ...commonOptions,
           scales: {
-            x: { title: { display: true, text: 'PF' }, grid: { display: false } },
-            y: { title: { display: true, text: 'PA' }, grid: { display: false } }
+            x: { 
+              title: { display: true, text: 'PF Rank (1=Best)' }, 
+              min: 0.5, max: 12.5, 
+              grid: { display: false },
+              reverse: false // 1 on left
+            },
+            y: { 
+              title: { display: true, text: 'PA Rank (1=Unlucky)' }, 
+              min: 0.5, max: 12.5, 
+              grid: { display: false },
+              reverse: true // 1 on top (High Points Allowed)
+            }
           },
           plugins: {
-            // Disabled legend
             legend: { display: false },
             tooltip: {
               callbacks: {
                 label: (c) => {
-                  const p = c.dataset.data?.[c.dataIndex];
-                  const year = p?.year ?? '';
-                  const pf = Number.isFinite(c.parsed.x) ? Math.round(c.parsed.x) : '';
-                  const pa = Number.isFinite(c.parsed.y) ? Math.round(c.parsed.y) : '';
-                  return `${year}: PF ${pf} | PA ${pa}`;
+                  const p = c.raw;
+                  return `${p.year}: PF #${p.x} | PA #${p.y}`;
                 }
               }
             }
@@ -1155,7 +1178,7 @@
 
       const years = [...new Set(games.map(g => g.year).filter(Number.isFinite))].sort((a, b) => a - b);
       
-      // Floating bars data format: [[min, max], [min, max]]
+      // Floating bars: each data point is [min, max]
       const data = years.map(y => {
         const scores = games.filter(g => g.year === y).map(g => g.score).filter(Number.isFinite);
         if (!scores.length) return [0, 0];
@@ -1167,12 +1190,11 @@
         data: {
           labels: years,
           datasets: [{
-            // No label needed if legend hidden, but helps tooltip
-            label: 'Score Range',
             data: data,
             backgroundColor: 'rgba(56, 189, 248, 0.4)',
             borderWidth: 0,
             borderSkipped: false,
+            borderRadius: 4,
             barPercentage: 0.6
           }]
         },
@@ -1184,10 +1206,8 @@
             tooltip: {
               callbacks: {
                 label: (c) => {
-                  // c.raw is [min, max]
-                  const low = c.raw[0];
-                  const high = c.raw[1];
-                  return `Low: ${low} - High: ${high}`;
+                  const range = c.raw; // [min, max]
+                  return `Range: ${range[0]} - ${range[1]}`;
                 }
               }
             }
@@ -1215,7 +1235,6 @@
       charts.clutch = new Chart(ctx, {
         type: 'bar',
         data: {
-          // Updated Label
           labels: ['Regular Season', 'Playoffs'],
           datasets: [{
             data: [regAvg, playAvg],
@@ -1261,12 +1280,11 @@
         options: {
           ...commonOptions,
           scales: {
-            // Forced 1-12 step size
             y: { 
               reverse: true, 
               min: 1, 
               max: 12, 
-              ticks: { stepSize: 1 },
+              ticks: { stepSize: 1 }, 
               grid: { color: 'rgba(255,255,255,0.05)' } 
             },
             x: { grid: { display: false } }
