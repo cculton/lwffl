@@ -9,6 +9,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
+      /* Theme matches Record Book & Probability Machine */
       --bg-main: #020617;
       --card-bg: #020617;
       --accent: #38bdf8;
@@ -20,13 +21,15 @@
       --positive: #22c55e;
       --negative: #ef4444;
       --warning: #f59e0b;
+      
+      /* Scorigami Specific Colors */
       --scorigami-gradient: linear-gradient(135deg, #f472b6 0%, #a855f7 50%, #3b82f6 100%);
       --scorigami-glow: 0 0 40px rgba(168, 85, 247, 0.4);
     }
 
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #020617;
+      background: radial-gradient(circle at top, #020617 0%, #020617 35%, #020617 100%);
       color: var(--text-main);
       min-height: 100vh;
       padding: 32px 16px;
@@ -35,6 +38,7 @@
 
     .shell { max-width: 800px; margin: 0 auto; }
 
+    /* --- Header --- */
     .header { text-align: center; margin-bottom: 40px; }
     .header h1 {
       font-size: 2.5rem;
@@ -53,11 +57,15 @@
       text-transform: uppercase;
     }
 
+    /* --- Search Card --- */
     .search-card {
-      background: var(--card-bg);
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.08), transparent 60%),
+        var(--card-bg);
       border: 1px solid rgba(148, 163, 184, 0.2);
       border-radius: 24px;
       padding: 40px;
+      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
       margin-bottom: 32px;
       text-align: center;
     }
@@ -80,11 +88,16 @@
       color: #fff;
       font-weight: 700;
       text-align: center;
+      transition: all 0.2s;
+      appearance: textfield; /* Remove spinner */
     }
-
-    /* lighter placeholder text */
-    input::placeholder {
-      color: rgba(148, 163, 184, 0.4);
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-dim);
     }
 
     button.search-btn {
@@ -96,13 +109,20 @@
       font-size: 1rem;
       font-weight: 800;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
       cursor: pointer;
+      transition: all 0.2s;
+    }
+    button.search-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px -5px rgba(56, 189, 248, 0.4);
     }
 
+    /* --- Common Scores Section --- */
     .common-section {
       margin-bottom: 32px;
+      animation: fadeIn 0.5s ease-out;
     }
-
     .section-title {
       text-align: center;
       font-size: 0.75rem;
@@ -111,13 +131,11 @@
       color: var(--text-soft);
       margin-bottom: 12px;
     }
-
     .common-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
       gap: 12px;
     }
-
     .common-item {
       background: rgba(30, 41, 59, 0.4);
       border: 1px solid var(--border-subtle);
@@ -125,24 +143,173 @@
       padding: 16px;
       text-align: center;
       cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
     }
-
+    .common-item:hover {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
     .rank {
       font-size: 0.7rem;
+      color: var(--text-soft);
+      text-transform: uppercase;
       margin-bottom: 4px;
-      min-height: 0.9em;
     }
-
     .common-score {
       font-size: 1.4rem;
       font-weight: 800;
       color: #fff;
+      line-height: 1.1;
     }
-
     .common-count {
       font-size: 0.75rem;
       color: var(--text-muted);
       margin-top: 4px;
+    }
+
+    /* --- Results Section --- */
+    .result-container {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+    .result-container.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    /* Scorigami State */
+    .scorigami-box {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      border-radius: 20px;
+      padding: 60px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      display: none;
+    }
+    .scorigami-box.show { display: block; }
+    
+    .scorigami-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+      background: var(--scorigami-gradient);
+    }
+
+    .scorigami-title {
+      font-size: 4rem;
+      font-weight: 900;
+      margin-bottom: 16px;
+      background: var(--scorigami-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+      text-shadow: var(--scorigami-glow);
+      animation: pulse 2s infinite;
+    }
+
+    .scorigami-desc {
+      font-size: 1.2rem;
+      color: #e5e7eb;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* History State */
+    .history-box {
+      display: none;
+    }
+    .history-box.show { display: block; }
+
+    .count-banner {
+      text-align: center;
+      margin-bottom: 24px;
+      padding: 20px;
+      background: rgba(56, 189, 248, 0.05);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+    }
+    .count-val {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--accent);
+      display: block;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .count-label {
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Table */
+    .table-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .table-wrap { overflow-x: auto; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+      font-size: 0.95rem;
+    }
+    
+    th {
+      background: rgba(30, 41, 59, 0.5);
+      text-align: left;
+      padding: 14px 20px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    td {
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      color: #e5e7eb;
+    }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: rgba(56, 189, 248, 0.03); }
+
+    .score-cell { font-weight: 700; color: var(--accent); font-family: monospace; font-size: 1.1rem; }
+    .opp-score-cell { font-family: monospace; color: var(--text-muted); }
+    .manager-name { font-weight: 600; color: #fff; }
+
+    /* Keyframes */
+    @keyframes pulse {
+      0% { text-shadow: 0 0 30px rgba(168, 85, 247, 0.2); }
+      50% { text-shadow: 0 0 60px rgba(168, 85, 247, 0.6); }
+      100% { text-shadow: 0 0 30px rgba(168, 85, 247, 0.2); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobile */
+    @media (max-width: 600px) {
+      .input-wrapper { flex-direction: column; }
+      .search-btn { width: 100%; }
+      .scorigami-title { font-size: 2.8rem; }
+      .header h1 { font-size: 2rem; }
+      .common-grid { grid-template-columns: repeat(3, 1fr); } 
     }
   </style>
 </head>
@@ -154,9 +321,11 @@
     <p>Has this score ever happened in LWFFL History?</p>
   </header>
 
+  <!-- Moved above search bar -->
   <section class="common-section">
     <div class="section-title">Most Common League Scores</div>
-    <div class="common-grid" id="commonGrid"></div>
+    <div class="common-grid" id="commonGrid">
+      </div>
   </section>
 
   <section class="search-card">
@@ -165,37 +334,103 @@
       <button class="search-btn" onclick="checkScorigami()">Check Score</button>
     </div>
   </section>
+
+  <div id="resultContainer" class="result-container">
+    
+    <div id="scorigamiBox" class="scorigami-box">
+      <div class="scorigami-title">SCORIGAMI!</div>
+      <p class="scorigami-desc">
+        This score has <strong>never</strong> happened in league history.
+        <br><br>
+        If you just scored <span id="targetScoreDisplay" style="color:var(--accent); font-weight:bold;">--</span>, you have made history.
+      </p>
+    </div>
+
+    <div id="historyBox" class="history-box">
+      <div class="count-banner">
+        <span class="count-val" id="countDisplay">0</span>
+        <span class="count-label">Occurrences in League History</span>
+      </div>
+
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Manager</th>
+                <th>Score</th>
+                <th>Result</th>
+                <th>Opponent</th>
+                <th>Opp Score</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody">
+              </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <script>
   let rawMatchups = [];
 
   document.addEventListener('DOMContentLoaded', async () => {
-    const res = await fetch('league-scores.json');
-    rawMatchups = await res.json();
-    renderCommonScores();
+    try {
+      // Fetch league data
+      const res = await fetch('league-scores.json');
+      if (!res.ok) throw new Error("Failed to load league-scores.json");
+      rawMatchups = await res.json();
+      
+      // Calculate Common Scores
+      renderCommonScores();
+
+      // Allow "Enter" key to trigger search
+      document.getElementById('scoreInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') checkScorigami();
+      });
+
+    } catch (err) {
+      console.error(err);
+      alert("Error loading league data. Please ensure league-scores.json is present.");
+    }
   });
 
   function renderCommonScores() {
     const meta = {};
-
+    
     rawMatchups.forEach(m => {
-      const lastKey = (m.year * 100) + m.week;
+      const y = parseInt(m.year, 10);
+      const w = parseInt(m.week, 10);
+      const lastKey = (isNaN(y) || isNaN(w)) ? -Infinity : (y * 100 + w);
+
       [m.score1, m.score2].forEach(s => {
-        const v = parseFloat(s).toFixed(2);
-        if (!meta[v]) meta[v] = { count: 0, last: -Infinity };
-        meta[v].count++;
-        meta[v].last = Math.max(meta[v].last, lastKey);
+        const val = parseFloat(s);
+        if(!isNaN(val)) {
+          // Store string key to prevent rounding errors in object keys, normalized to 2 decimals
+          const k = val.toFixed(2);
+          if (!meta[k]) meta[k] = { count: 0, last: -Infinity };
+          meta[k].count += 1;
+          if (lastKey > meta[k].last) meta[k].last = lastKey;
+        }
       });
     });
 
+    // Convert to array and sort: count desc, then most-recent occurrence desc
     const sorted = Object.entries(meta)
       .sort((a,b) => (b[1].count - a[1].count) || (b[1].last - a[1].last))
-      .slice(0,5);
+      .slice(0, 5); // Take top 5
 
-    document.getElementById('commonGrid').innerHTML = sorted.map(([score, info]) => `
+    const container = document.getElementById('commonGrid');
+    
+    // Using formatted HTML for the cards
+    // NOTE: ranking removed to imply ties for first; order handles most-recent first (leftmost)
+    container.innerHTML = sorted.map(([score, info]) => `
       <div class="common-item" onclick="autoSearch('${score}')">
-        <div class="rank"></div>
+        <div class="rank">Most Common</div>
         <div class="common-score">${parseFloat(score)}</div>
         <div class="common-count">${info.count} Times</div>
       </div>
@@ -204,9 +439,104 @@
 
   function autoSearch(score) {
     document.getElementById('scoreInput').value = score;
+    checkScorigami();
+    
+    // Smooth scroll to results
+    setTimeout(() => {
+        document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   }
 
-  function checkScorigami() {}
+  function checkScorigami() {
+    const inputVal = document.getElementById('scoreInput').value;
+    if (inputVal === "") return;
+
+    const targetScore = parseFloat(inputVal);
+    const matches = [];
+
+    // Search logic: Check both manager1 and manager2 scores
+    rawMatchups.forEach(m => {
+      const s1 = parseFloat(m.score1);
+      const s2 = parseFloat(m.score2);
+
+      // Check Team 1
+      if (Math.abs(s1 - targetScore) < 0.001) { // Float comparison safety
+        matches.push({
+          year: m.year,
+          week: m.week,
+          manager: m.manager1,
+          score: s1,
+          oppScore: s2,
+          opponent: m.manager2,
+          result: s1 > s2 ? 'W' : (s1 < s2 ? 'L' : 'T')
+        });
+      }
+
+      // Check Team 2
+      if (Math.abs(s2 - targetScore) < 0.001) {
+        matches.push({
+          year: m.year,
+          week: m.week,
+          manager: m.manager2,
+          score: s2,
+          oppScore: s1,
+          opponent: m.manager1,
+          result: s2 > s1 ? 'W' : (s2 < s1 ? 'L' : 'T')
+        });
+      }
+    });
+
+    displayResults(targetScore, matches);
+  }
+
+  function displayResults(score, matches) {
+    const container = document.getElementById('resultContainer');
+    const scorigamiBox = document.getElementById('scorigamiBox');
+    const historyBox = document.getElementById('historyBox');
+    const tbody = document.getElementById('historyBody');
+
+    // Reset UI state (fade out)
+    container.classList.remove('active');
+    
+    // Wait for transition, then update DOM
+    setTimeout(() => {
+      scorigamiBox.classList.remove('show');
+      historyBox.classList.remove('show');
+
+      if (matches.length === 0) {
+        // SCORIGAMI STATE
+        document.getElementById('targetScoreDisplay').textContent = score;
+        scorigamiBox.classList.add('show');
+      } else {
+        // HISTORY STATE
+        document.getElementById('countDisplay').textContent = matches.length;
+        
+        // Sort matches: Newest first
+        matches.sort((a,b) => (b.year - a.year) || (b.week - a.week));
+
+        tbody.innerHTML = '';
+        matches.forEach(m => {
+          const tr = document.createElement('tr');
+          const resColor = m.result === 'W' ? 'var(--positive)' : (m.result === 'L' ? 'var(--negative)' : 'var(--warning)');
+          
+          tr.innerHTML = `
+            <td>${m.year} Wk ${m.week}</td>
+            <td class="manager-name">${m.manager}</td>
+            <td class="score-cell">${m.score.toFixed(2)}</td>
+            <td style="color:${resColor}; font-weight:700;">${m.result}</td>
+            <td>${m.opponent}</td>
+            <td class="opp-score-cell">${m.oppScore.toFixed(2)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        historyBox.classList.add('show');
+      }
+
+      // Trigger Fade In
+      container.classList.add('active');
+    }, 300); 
+  }
 </script>
 
 </body>
