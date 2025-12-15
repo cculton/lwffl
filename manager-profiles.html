@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -438,7 +437,6 @@
       font-weight: 700;
       z-index: 2;
     }
-    /* Specific Colors for Fate Steps */
     .step-playoffs .fate-bar { background: rgba(56,189,248,0.2); border-color: var(--accent); }
     .step-finals .fate-bar { background: rgba(251,191,36,0.15); border-color: var(--gold); }
     .step-titles .fate-bar { background: rgba(34,197,94,0.2); border-color: var(--positive); }
@@ -621,8 +619,7 @@
             <div class="chart-icon">↕</div>
             <h3>All-Time Highs & Lows</h3>
           </div>
-          <div class="hl-ticker" id="hlTicker">
-            </div>
+          <div class="hl-ticker" id="hlTicker"></div>
         </div>
       </div>
 
@@ -714,8 +711,6 @@
 
   <script>
     // --- Constants & Global State ---
-    const PAYOUTS = { 1: 450, 2: 175, 3: 100, 4: 75 };
-
     let rawScores = [], rawStandings = [], rawSeeds = [];
     const charts = {};
     const leagueRatings = {};
@@ -729,6 +724,40 @@
     const safeNum = (v, fallback = 0) => Number.isFinite(Number(v)) ? Number(v) : fallback;
     const moneyFmt = (n) => `$${Number(n || 0).toLocaleString()}`;
     const keyMY = (m, y) => `${m}::${y}`;
+
+    // --- Dynamic Earnings Calculation ---
+    // Pot multipliers based on Buy-In History:
+    // 2014-2017: $20 (Factor 1.0)
+    // 2018-2019: $40 (Factor 2.0)
+    // 2020:      $50 (Factor 2.5)
+    // 2021+:     $75 (Factor 3.75)
+    
+    function getEarnings(year, rank, hasScoringTitle, isFinalsApp) {
+      let multiplier = 3.75; // Default (2021+)
+      if (year <= 2017) multiplier = 1.0;
+      else if (year <= 2019) multiplier = 2.0;
+      else if (year === 2020) multiplier = 2.5;
+      
+      const baseSemis = 15 * multiplier;
+      const baseFinalsApp = 20 * multiplier;
+      const baseChamp = 120 * multiplier;
+      const baseScoring = 20 * multiplier;
+      
+      let total = 0;
+      
+      // Structure:
+      // 3rd/4th (Semis losers): Base Semis
+      // 2nd: Base Semis + Base Finals App
+      // 1st: Base Semis + Base Finals App + Base Champ
+      
+      if (rank <= 4) total += baseSemis;
+      if (rank <= 2) total += baseFinalsApp;
+      if (rank === 1) total += baseChamp;
+      
+      if (hasScoringTitle) total += baseScoring;
+      
+      return total;
+    }
 
     function normalizeStandingsRow(s) {
       return {
@@ -1011,7 +1040,7 @@
       });
 
       renderHero(name, mySeasons);
-      renderStats(mySeasons, myGames);
+      renderStats(mySeasons, myGames, name);
       renderRivalries(h2h);
       renderSeasonTable(mySeasons, name);
       renderLuckChart(mySeasons, name);
@@ -1020,14 +1049,11 @@
       renderCareerChart(mySeasons);
       renderFormStrip(myGames);
       
-      // NEW FUNCTIONS
       renderHardwareChart(mySeasons);
       renderHeartAttackChart(myGames);
       renderHighLow(myGames);
       renderFateFlow(mySeasons, name);
     }
-
-    // --- Renderers ---
 
     function renderHero(name, seasons) {
       const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase();
@@ -1077,7 +1103,7 @@
       els.ratingSTB.textContent = r.stb;
     }
 
-    function renderStats(seasons, games) {
+    function renderStats(seasons, games, managerName) {
       const w = games.filter(g => g.result === 'W').length;
       const l = games.filter(g => g.result === 'L').length;
       const t = games.filter(g => g.result === 'T').length;
@@ -1097,8 +1123,11 @@
 
       let money = 0;
       seasons.forEach(s => {
-        const rank = s.final_standing;
-        if (PAYOUTS[rank]) money += PAYOUTS[rank];
+        const hasScoring = (idx.scoringTitlesByManager.get(managerName) || new Set()).has(s.year);
+        // We pass 'false' for isFinalsApp because we just infer rank based on payouts logic
+        // Actually, if rank <= 2, they made finals.
+        // We handle this inside getEarnings via rank
+        money += getEarnings(s.year, s.final_standing, hasScoring);
       });
       els.statEarnings.textContent = moneyFmt(money);
       els.statEarnings.style.color = 'var(--money)';
@@ -1130,7 +1159,9 @@
       seasons.forEach(s => {
         const seed = idx.seedsByManagerYear.get(keyMY(managerName, s.year)) ?? '-';
         const rank = s.final_standing;
-        const money = PAYOUTS[rank] ? PAYOUTS[rank] : 0;
+        
+        const hasScoring = (idx.scoringTitlesByManager.get(managerName) || new Set()).has(s.year);
+        const money = getEarnings(s.year, rank, hasScoring);
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -1188,7 +1219,6 @@
       const validGames = games.filter(g => Number.isFinite(g.score));
       if(!validGames.length) { el.innerHTML = ''; return; }
       
-      // Sort by score
       validGames.sort((a,b) => b.score - a.score);
       const high = validGames[0];
       const low = validGames[validGames.length - 1];
@@ -1221,7 +1251,6 @@
       seasons.forEach(s => {
         if(!Number.isFinite(s.year)) return;
         total++;
-        // Check playoff status
         const seed = idx.seedsByManagerYear.get(keyMY(managerName, s.year));
         const rank = s.final_standing;
         
@@ -1236,7 +1265,6 @@
         }
       });
       
-      // Percentage relative to total seasons
       const pctP = total ? (playoffs / total * 100) : 0;
       const pctF = total ? (finals / total * 100) : 0;
       const pctT = total ? (titles / total * 100) : 0;
@@ -1373,6 +1401,7 @@
 
       const reg = games.filter(g => !g.isPlayoff).map(g => g.score).filter(Number.isFinite);
       const play = games.filter(g => g.isPlayoff).map(g => g.score).filter(Number.isFinite);
+
       const regAvg = reg.length ? reg.reduce((a, b) => a + b, 0) / reg.length : 0;
       const playAvg = play.length ? play.reduce((a, b) => a + b, 0) / play.length : 0;
 
@@ -1427,7 +1456,6 @@
       });
     }
 
-    // --- NEW CHART: Heart Attack ---
     function renderHeartAttackChart(games) {
       const canvas = $('heartChart');
       if (!canvas) return;
@@ -1472,7 +1500,6 @@
       });
     }
 
-    // --- NEW CHART: Hardware Stack ---
     function renderHardwareChart(seasons) {
       const canvas = $('hardwareChart');
       if (!canvas) return;
