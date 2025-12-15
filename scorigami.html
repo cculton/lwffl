@@ -118,6 +118,58 @@
       box-shadow: 0 10px 20px -5px rgba(56, 189, 248, 0.4);
     }
 
+    /* --- Common Scores Section --- */
+    .common-section {
+      margin-bottom: 32px;
+      animation: fadeIn 0.5s ease-out;
+    }
+    .section-title {
+      text-align: center;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-soft);
+      margin-bottom: 12px;
+    }
+    .common-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+    }
+    .common-item {
+      background: rgba(30, 41, 59, 0.4);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .common-item:hover {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .rank {
+      font-size: 0.7rem;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .common-score {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+    }
+    .common-count {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
     /* --- Results Section --- */
     .result-container {
       opacity: 0;
@@ -245,6 +297,11 @@
       50% { text-shadow: 0 0 60px rgba(168, 85, 247, 0.6); }
       100% { text-shadow: 0 0 30px rgba(168, 85, 247, 0.2); }
     }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
     /* Mobile */
     @media (max-width: 600px) {
@@ -252,6 +309,7 @@
       .search-btn { width: 100%; }
       .scorigami-title { font-size: 2.8rem; }
       .header h1 { font-size: 2rem; }
+      .common-grid { grid-template-columns: repeat(3, 1fr); } 
     }
   </style>
 </head>
@@ -268,6 +326,12 @@
       <input type="number" id="scoreInput" placeholder="Enter Score (e.g. 105.5)" step="0.01" />
       <button class="search-btn" onclick="checkScorigami()">Check Score</button>
     </div>
+  </section>
+
+  <section class="common-section">
+    <div class="section-title">Most Common League Scores</div>
+    <div class="common-grid" id="commonGrid">
+      </div>
   </section>
 
   <div id="resultContainer" class="result-container">
@@ -320,6 +384,9 @@
       if (!res.ok) throw new Error("Failed to load league-scores.json");
       rawMatchups = await res.json();
       
+      // Calculate Common Scores
+      renderCommonScores();
+
       // Allow "Enter" key to trigger search
       document.getElementById('scoreInput').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') checkScorigami();
@@ -330,6 +397,47 @@
       alert("Error loading league data. Please ensure league-scores.json is present.");
     }
   });
+
+  function renderCommonScores() {
+    const counts = {};
+    
+    rawMatchups.forEach(m => {
+      [m.score1, m.score2].forEach(s => {
+        const val = parseFloat(s);
+        if(!isNaN(val)) {
+          // Store string key to prevent rounding errors in object keys, normalized to 2 decimals
+          const k = val.toFixed(2);
+          counts[k] = (counts[k] || 0) + 1;
+        }
+      });
+    });
+
+    // Convert to array and sort
+    const sorted = Object.entries(counts)
+      .sort((a,b) => b[1] - a[1]) // Sort by count descending
+      .slice(0, 5); // Take top 5
+
+    const container = document.getElementById('commonGrid');
+    
+    // Using formatted HTML for the cards
+    container.innerHTML = sorted.map(([score, count], i) => `
+      <div class="common-item" onclick="autoSearch('${score}')">
+        <div class="rank">#${i+1} Most Common</div>
+        <div class="common-score">${parseFloat(score)}</div>
+        <div class="common-count">${count} Times</div>
+      </div>
+    `).join('');
+  }
+
+  function autoSearch(score) {
+    document.getElementById('scoreInput').value = score;
+    checkScorigami();
+    
+    // Smooth scroll to results
+    setTimeout(() => {
+        document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
 
   function checkScorigami() {
     const inputVal = document.getElementById('scoreInput').value;
@@ -379,8 +487,10 @@
     const historyBox = document.getElementById('historyBox');
     const tbody = document.getElementById('historyBody');
 
-    // Reset UI
+    // Reset UI state (fade out)
     container.classList.remove('active');
+    
+    // Wait for transition, then update DOM
     setTimeout(() => {
       scorigamiBox.classList.remove('show');
       historyBox.classList.remove('show');
@@ -415,9 +525,9 @@
         historyBox.classList.add('show');
       }
 
-      // Trigger Animation
+      // Trigger Fade In
       container.classList.add('active');
-    }, 300); // Wait for fade out
+    }, 300); 
   }
 </script>
 
