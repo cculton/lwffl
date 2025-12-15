@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,6 +27,7 @@
       --negative: #ef4444;
       --warning: #f59e0b;
 
+      /* Money: make $$$ green */
       --money: #22c55e;
 
       /* Badges */
@@ -216,7 +218,7 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    .sub-stat span:last-child { color: var(--accent); font-family: monospace; font-size: 0.9rem; }
+    .sub-stat span:last-child { color: var(--accent); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 0.9rem; }
 
     .ovr-badge { display: flex; flex-direction: column; align-items: center; flex: 0 0 auto; }
     .ovr-ring {
@@ -290,7 +292,7 @@
     .rival-meta { display: flex; flex-direction: column; }
     .rival-type { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; color: var(--text-soft); margin-bottom: 4px; }
     .rival-name { font-size: 1.1rem; font-weight: 600; color: #f9fafb; }
-    .rival-stat { text-align: right; font-family: monospace; font-weight: 700; font-size: 1.1rem; }
+    .rival-stat { text-align: right; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-weight: 700; font-size: 1.1rem; }
     .nemesis .rival-stat { color: var(--negative); }
     .pigeon .rival-stat { color: var(--positive); }
 
@@ -367,6 +369,81 @@
       color: #f9fafb;
       font-size: 0.95rem;
     }
+
+    /* --- High/Low Ticker Styles --- */
+    .hl-ticker {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 10px 0;
+    }
+    .hl-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-subtle);
+      padding: 10px 14px;
+      border-radius: 8px;
+    }
+    .hl-icon {
+      font-size: 1.2rem;
+      flex: 0 0 30px;
+      text-align: center;
+    }
+    .hl-data { display: flex; flex-direction: column; }
+    .hl-score { font-size: 1.2rem; font-weight: 800; line-height: 1; color: #fff; }
+    .hl-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+    .hl-high .hl-icon, .hl-high .hl-score { color: var(--positive); }
+    .hl-low .hl-icon, .hl-low .hl-score { color: var(--negative); }
+
+    /* --- Fate Flow Styles --- */
+    .fate-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px 0;
+    }
+    .fate-step {
+      display: flex;
+      align-items: center;
+      background: rgba(255,255,255,0.03);
+      border-radius: 6px;
+      height: 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .fate-bar {
+      height: 100%;
+      background: rgba(56, 189, 248, 0.2);
+      border-right: 2px solid var(--accent);
+      transition: width 0.5s ease-out;
+    }
+    .fate-label {
+      position: absolute;
+      left: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      z-index: 2;
+    }
+    .fate-val {
+      position: absolute;
+      right: 12px;
+      font-size: 0.85rem;
+      font-family: monospace;
+      color: var(--accent);
+      font-weight: 700;
+      z-index: 2;
+    }
+    /* Specific Colors for Fate Steps */
+    .step-playoffs .fate-bar { background: rgba(56,189,248,0.2); border-color: var(--accent); }
+    .step-finals .fate-bar { background: rgba(251,191,36,0.15); border-color: var(--gold); }
+    .step-titles .fate-bar { background: rgba(34,197,94,0.2); border-color: var(--positive); }
+    .step-finals .fate-val { color: var(--gold); }
+    .step-titles .fate-val { color: var(--positive); }
 
     /* --- Tables --- */
     .table-wrap { border: 1px solid var(--border-subtle); border-radius: 12px; overflow-x: auto; }
@@ -505,7 +582,7 @@
       <div class="card chart-card">
         <div class="chart-header">
           <div class="chart-icon">✦</div>
-          <h3>Luck Index (Regular Season Rank)</h3>
+          <h3>Luck Index (Quadrants)</h3>
         </div>
         <div class="chart-container">
           <canvas id="luckChart"></canvas>
@@ -539,14 +616,13 @@
           <span class="rival-stat" id="nemesisStat">-</span>
         </div>
 
-        <div class="card chart-card" style="flex:1;">
-          <div class="chart-header">
-            <div class="chart-icon">🔥</div>
-            <h3>CLUTCH FACTOR (REGULAR SEASON VS PLAYOFF PERFORMANCE)</h3>
+        <div class="card" style="margin-bottom:0; padding:16px;">
+          <div class="chart-header" style="margin-bottom:10px;">
+            <div class="chart-icon">↕</div>
+            <h3>All-Time Highs & Lows</h3>
           </div>
-          <div class="chart-container" style="height:150px;">
-            <canvas id="clutchChart"></canvas>
-          </div>
+          <div class="hl-ticker" id="hlTicker">
+            </div>
         </div>
       </div>
 
@@ -557,6 +633,46 @@
         </div>
         <div class="chart-container">
           <canvas id="careerChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-header">
+          <div class="chart-icon">🏁</div>
+          <h3>Post-Season Fate</h3>
+        </div>
+        <div class="chart-container" style="display:flex; flex-direction:column; justify-content:center;">
+          <div id="fateFlow" class="fate-flow"></div>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-header">
+          <div class="chart-icon">🏅</div>
+          <h3>The Hardware Stack</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="hardwareChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-header">
+          <div class="chart-icon">💓</div>
+          <h3>Heart Attack Ratio (Games < 5 pts)</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="heartChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-header">
+          <div class="chart-icon">🔥</div>
+          <h3>CLUTCH FACTOR (REGULAR SEASON VS PLAYOFF PERFORMANCE)</h3>
+        </div>
+        <div class="chart-container" style="height:150px;">
+          <canvas id="clutchChart"></canvas>
         </div>
       </div>
 
@@ -655,7 +771,7 @@
       gamesByManager: new Map(),
       weekBuckets: new Map(), 
       scoringTitlesByManager: new Map(),
-      seasonRanks: {} // { "Manager::Year": { pfRank, paRank } }
+      seasonRanks: {} 
     };
 
     function buildIndexes() {
@@ -725,7 +841,6 @@
       idx.gamesByManager.forEach(arr => arr.sort((a, b) => (b.year !== a.year ? b.year - a.year : b.week - a.week)));
       idx.managers = Array.from(managerSet).sort((a, b) => a.localeCompare(b));
 
-      // Calculate Ranks per Season (1-12) for PF and PA
       const byYear = new Map();
       rawStandings.forEach(s => {
         if (!Number.isFinite(s.year) || !s.manager) return;
@@ -734,7 +849,6 @@
       });
 
       for (const [year, rows] of byYear.entries()) {
-        // PF Rank (1 = High)
         rows.sort((a,b) => b.points_for - a.points_for);
         rows.forEach((r, i) => {
           const k = keyMY(r.manager, year);
@@ -742,7 +856,6 @@
           idx.seasonRanks[k].pfRank = i + 1;
         });
 
-        // PA Rank (1 = High Points Against = Unlucky)
         rows.sort((a,b) => b.points_against - a.points_against);
         rows.forEach((r, i) => {
           const k = keyMY(r.manager, year);
@@ -750,7 +863,6 @@
           idx.seasonRanks[k].paRank = i + 1;
         });
 
-        // Scoring Title Logic (Highest PF)
         let maxPF = -Infinity;
         rows.forEach(r => { if (Number.isFinite(r.points_for)) maxPF = Math.max(maxPF, r.points_for); });
         if (Number.isFinite(maxPF) && maxPF > 0) {
@@ -907,7 +1019,15 @@
       renderClutchChart(myGames);
       renderCareerChart(mySeasons);
       renderFormStrip(myGames);
+      
+      // NEW FUNCTIONS
+      renderHardwareChart(mySeasons);
+      renderHeartAttackChart(myGames);
+      renderHighLow(myGames);
+      renderFateFlow(mySeasons, name);
     }
+
+    // --- Renderers ---
 
     function renderHero(name, seasons) {
       const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase();
@@ -927,14 +1047,12 @@
 
       seasons.forEach(s => {
         const rank = s.final_standing;
-        // Added dash
         if (rank === 1) trophies.push({ y: s.year, html: `<span class="trophy-badge gold">🏆 ${s.year} – Champion</span>` });
         else if (rank === 2) trophies.push({ y: s.year, html: `<span class="trophy-badge silver">🥈 ${s.year} – Runner-up</span>` });
         else if (rank === 3) trophies.push({ y: s.year, html: `<span class="trophy-badge bronze">🥉 ${s.year} – 3rd</span>` });
       });
 
       const scoringYears = idx.scoringTitlesByManager.get(name) ? Array.from(idx.scoringTitlesByManager.get(name)) : [];
-      // Added dash + scoring title class
       scoringYears.forEach(y => trophies.push({ y, html: `<span class="trophy-badge scoring">💰 ${y} – Scoring Title</span>` }));
 
       trophies.sort((a, b) => (b.y ?? 0) - (a.y ?? 0));
@@ -1062,6 +1180,91 @@
       recEl.textContent = last10.length ? `${w}-${l}-${t}` : '—';
     }
 
+    // --- NEW: High/Low Render ---
+    function renderHighLow(games) {
+      const el = $('hlTicker');
+      if(!el) return;
+      
+      const validGames = games.filter(g => Number.isFinite(g.score));
+      if(!validGames.length) { el.innerHTML = ''; return; }
+      
+      // Sort by score
+      validGames.sort((a,b) => b.score - a.score);
+      const high = validGames[0];
+      const low = validGames[validGames.length - 1];
+      
+      el.innerHTML = `
+        <div class="hl-row hl-high">
+          <div class="hl-icon">▲</div>
+          <div class="hl-data">
+            <div class="hl-score">${high.score.toFixed(2)}</div>
+            <div class="hl-meta">${high.year} Wk ${high.week} vs ${high.opponent}</div>
+          </div>
+        </div>
+        <div class="hl-row hl-low">
+          <div class="hl-icon">▼</div>
+          <div class="hl-data">
+            <div class="hl-score">${low.score.toFixed(2)}</div>
+            <div class="hl-meta">${low.year} Wk ${low.week} vs ${low.opponent}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // --- NEW: Fate Flow Render ---
+    function renderFateFlow(seasons, managerName) {
+      const container = $('fateFlow');
+      if(!container) return;
+      
+      let total = 0, playoffs = 0, finals = 0, titles = 0;
+      
+      seasons.forEach(s => {
+        if(!Number.isFinite(s.year)) return;
+        total++;
+        // Check playoff status
+        const seed = idx.seedsByManagerYear.get(keyMY(managerName, s.year));
+        const rank = s.final_standing;
+        
+        let madePlayoffs = false;
+        if(seed) madePlayoffs = true;
+        if(Number.isFinite(rank) && rank <= 6) madePlayoffs = true;
+        
+        if(madePlayoffs) playoffs++;
+        if(Number.isFinite(rank)) {
+          if(rank <= 2) finals++;
+          if(rank === 1) titles++;
+        }
+      });
+      
+      // Percentage relative to total seasons
+      const pctP = total ? (playoffs / total * 100) : 0;
+      const pctF = total ? (finals / total * 100) : 0;
+      const pctT = total ? (titles / total * 100) : 0;
+      
+      container.innerHTML = `
+        <div class="fate-step">
+          <div class="fate-bar" style="width:100%"></div>
+          <div class="fate-label">Seasons Played</div>
+          <div class="fate-val">${total}</div>
+        </div>
+        <div class="fate-step step-playoffs">
+          <div class="fate-bar" style="width:${pctP}%"></div>
+          <div class="fate-label">Made Playoffs</div>
+          <div class="fate-val">${playoffs}</div>
+        </div>
+        <div class="fate-step step-finals">
+          <div class="fate-bar" style="width:${pctF}%"></div>
+          <div class="fate-label">Made Finals</div>
+          <div class="fate-val">${finals}</div>
+        </div>
+        <div class="fate-step step-titles">
+          <div class="fate-bar" style="width:${pctT}%"></div>
+          <div class="fate-label">Champions</div>
+          <div class="fate-val">${titles}</div>
+        </div>
+      `;
+    }
+
     // --- Charts ---
     Chart.defaults.color = '#64748b';
     Chart.defaults.font.family = 'system-ui';
@@ -1073,15 +1276,10 @@
       const ctx = canvas.getContext('2d');
       if (charts.luck) charts.luck.destroy();
 
-      // Get ranks for each season
       const points = seasons.map(s => {
         const k = keyMY(managerName, s.year);
         const ranks = idx.seasonRanks[k] || { pfRank: 6, paRank: 6 };
-        return { 
-          x: ranks.pfRank, 
-          y: ranks.paRank, 
-          year: s.year 
-        };
+        return { x: ranks.pfRank, y: ranks.paRank, year: s.year };
       });
 
       const quadrantPlugin = {
@@ -1090,36 +1288,17 @@
           const { ctx, chartArea: { top, bottom, left, right } } = chart;
           const midX = (left + right) / 2;
           const midY = (top + bottom) / 2;
-          
           ctx.save();
           ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
           ctx.lineWidth = 1;
           ctx.setLineDash([4, 4]);
-          
           ctx.beginPath();
           ctx.moveTo(midX, top); ctx.lineTo(midX, bottom);
           ctx.moveTo(left, midY); ctx.lineTo(right, midY);
           ctx.stroke();
-
           ctx.font = '600 9px system-ui';
           ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
           ctx.textAlign = 'center';
-          
-          // Updated Quadrants based on Rank (1 = Top/Left)
-          // X: 1 is Left (Good), 12 is Right (Bad)
-          // Y: 1 is Top (Unlucky), 12 is Bottom (Lucky)
-          
-          // Top Left: Rank 1 PF, Rank 1 PA -> Dominant & Unlucky (or Unlucky/Shootouts)
-          // Actually, Rank 1 PA means "Allowed Most Points". 
-          // So High PF (Rank 1), High PA (Rank 1) = Shootouts.
-          // Bottom Left: Rank 1 PF, Rank 12 PA = Dominant & Lucky.
-          
-          // Using requested labels:
-          // Top-Left (Good PF, Bad PA): "UNLUCKY / SHOOTOUTS"
-          // Bottom-Left (Good PF, Good PA): "DOMINANT & LUCKY"
-          // Top-Right (Bad PF, Bad PA): "SUBPAR & UNLUCKY"
-          // Bottom-Right (Bad PF, Good PA): "SUBPAR & LUCKY"
-
           ctx.fillText("UNLUCKY / SHOOTOUTS", (left + midX) / 2, top + 15);
           ctx.fillText("SUBPAR & UNLUCKY", (midX + right) / 2, top + 15);
           ctx.fillText("DOMINANT & LUCKY", (left + midX) / 2, bottom - 10);
@@ -1131,40 +1310,18 @@
       charts.luck = new Chart(ctx, {
         type: 'scatter',
         data: {
-          datasets: [{
-            data: points,
-            backgroundColor: '#38bdf8',
-            pointRadius: 6,
-            pointHoverRadius: 8
-          }]
+          datasets: [{ data: points, backgroundColor: '#38bdf8', pointRadius: 6, pointHoverRadius: 8 }]
         },
         plugins: [quadrantPlugin],
         options: {
           ...commonOptions,
           scales: {
-            x: { 
-              title: { display: true, text: 'PF Rank (1=Best)' }, 
-              min: 0.5, max: 12.5, 
-              grid: { display: false },
-              reverse: false // 1 on left
-            },
-            y: { 
-              title: { display: true, text: 'PA Rank (1=Unlucky)' }, 
-              min: 0.5, max: 12.5, 
-              grid: { display: false },
-              reverse: true // 1 on top (High Points Allowed)
-            }
+            x: { title: { display: true, text: 'PF Rank (1=Best)' }, min: 0.5, max: 12.5, grid: { display: false }, reverse: false },
+            y: { title: { display: true, text: 'PA Rank (1=Unlucky)' }, min: 0.5, max: 12.5, grid: { display: false }, reverse: true }
           },
           plugins: {
             legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: (c) => {
-                  const p = c.raw;
-                  return `${p.year}: PF #${p.x} | PA #${p.y}`;
-                }
-              }
-            }
+            tooltip: { callbacks: { label: (c) => `${c.raw.year}: PF #${c.raw.x} | PA #${c.raw.y}` } }
           }
         }
       });
@@ -1177,8 +1334,6 @@
       if (charts.spread) charts.spread.destroy();
 
       const years = [...new Set(games.map(g => g.year).filter(Number.isFinite))].sort((a, b) => a - b);
-      
-      // Floating bars: each data point is [min, max]
       const data = years.map(y => {
         const scores = games.filter(g => g.year === y).map(g => g.score).filter(Number.isFinite);
         if (!scores.length) return [0, 0];
@@ -1203,19 +1358,9 @@
           maintainAspectRatio: false,
           plugins: { 
             legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: (c) => {
-                  const range = c.raw; // [min, max]
-                  return `Range: ${range[0]} - ${range[1]}`;
-                }
-              }
-            }
+            tooltip: { callbacks: { label: (c) => `Range: ${c.raw[0]} - ${c.raw[1]}` } }
           },
-          scales: {
-            y: { grid: { color: 'rgba(255,255,255,0.05)' } },
-            x: { grid: { display: false } }
-          }
+          scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } }
         }
       });
     }
@@ -1228,7 +1373,6 @@
 
       const reg = games.filter(g => !g.isPlayoff).map(g => g.score).filter(Number.isFinite);
       const play = games.filter(g => g.isPlayoff).map(g => g.score).filter(Number.isFinite);
-
       const regAvg = reg.length ? reg.reduce((a, b) => a + b, 0) / reg.length : 0;
       const playAvg = play.length ? play.reduce((a, b) => a + b, 0) / play.length : 0;
 
@@ -1236,11 +1380,7 @@
         type: 'bar',
         data: {
           labels: ['Regular Season', 'Playoffs'],
-          datasets: [{
-            data: [regAvg, playAvg],
-            backgroundColor: ['#38bdf8', '#fbbf24'],
-            borderRadius: 4
-          }]
+          datasets: [{ data: [regAvg, playAvg], backgroundColor: ['#38bdf8', '#fbbf24'], borderRadius: 4 }]
         },
         options: {
           ...commonOptions,
@@ -1280,14 +1420,93 @@
         options: {
           ...commonOptions,
           scales: {
-            y: { 
-              reverse: true, 
-              min: 1, 
-              max: 12, 
-              ticks: { stepSize: 1 }, 
-              grid: { color: 'rgba(255,255,255,0.05)' } 
-            },
+            y: { reverse: true, min: 1, max: 12, ticks: { stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } },
             x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    // --- NEW CHART: Heart Attack ---
+    function renderHeartAttackChart(games) {
+      const canvas = $('heartChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (charts.heart) charts.heart.destroy();
+
+      let wins=0, losses=0;
+      games.forEach(g => {
+        if(Number.isFinite(g.score) && Number.isFinite(g.oppScore)) {
+          const diff = Math.abs(g.score - g.oppScore);
+          if(diff < 5) {
+            if(g.result === 'W') wins++;
+            else if(g.result === 'L') losses++;
+          }
+        }
+      });
+
+      charts.heart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Wins', 'Losses'],
+          datasets: [{
+            data: [wins, losses],
+            backgroundColor: ['#22c55e', '#ef4444'],
+            borderWidth: 0,
+            hoverOffset: 4
+          }]
+        },
+        plugins: [ChartDataLabels],
+        options: {
+          ...commonOptions,
+          cutout: '65%',
+          plugins: {
+            legend: { display: true, position: 'bottom', labels: { color: '#94a3b8' } },
+            datalabels: {
+              color: '#fff',
+              font: { weight: 'bold', size: 14 },
+              formatter: (v) => v
+            }
+          }
+        }
+      });
+    }
+
+    // --- NEW CHART: Hardware Stack ---
+    function renderHardwareChart(seasons) {
+      const canvas = $('hardwareChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (charts.hw) charts.hw.destroy();
+
+      let g=0, s=0, b=0, none=0;
+      seasons.forEach(row => {
+        const r = row.final_standing;
+        if(r === 1) g++;
+        else if(r === 2) s++;
+        else if(r === 3) b++;
+        else none++;
+      });
+
+      charts.hw = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Career Finishes'],
+          datasets: [
+            { label: 'Gold', data: [g], backgroundColor: '#fbbf24', barThickness: 40 },
+            { label: 'Silver', data: [s], backgroundColor: '#cbd5e1', barThickness: 40 },
+            { label: 'Bronze', data: [b], backgroundColor: '#d97706', barThickness: 40 },
+            { label: 'Other', data: [none], backgroundColor: '#334155', barThickness: 40 }
+          ]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: true, position: 'bottom', labels: { color:'#94a3b8' } } },
+          scales: {
+            x: { stacked: true, grid: { display:false }, ticks:{ color:'#94a3b8', stepSize:1 } },
+            y: { stacked: true, display: false }
           }
         }
       });
