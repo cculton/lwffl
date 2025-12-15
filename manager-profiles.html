@@ -539,12 +539,12 @@
 
       <div class="rating-container">
         <div class="sub-ratings">
-          <div class="sub-stat"><span>SCOR</span> <span id="ratingSCOR">-</span></div>
-          <div class="sub-stat"><span>GM</span> <span id="ratingGM">-</span></div>
-          <div class="sub-stat"><span>CLT</span> <span id="ratingCLT">-</span></div>
-          <div class="sub-stat"><span>STB</span> <span id="ratingSTB">-</span></div>
+          <div class="sub-stat" title="SCOR: Average scoring strength vs league (points per game)."><span>SCOR</span> <span id="ratingSCOR">-</span></div>
+          <div class="sub-stat" title="GM: Expected-wins overperformance (actual wins vs what your scores predict)."><span>GM</span> <span id="ratingGM">-</span></div>
+          <div class="sub-stat" title="CLT: Playoff win rate."><span>CLT</span> <span id="ratingCLT">-</span></div>
+          <div class="sub-stat" title="STB: Season-to-season consistency (lower finish volatility = higher rating)."><span>STB</span> <span id="ratingSTB">-</span></div>
         </div>
-        <div class="ovr-badge">
+        <div class="ovr-badge" title="OVR: Weighted blend of SCOR, GM, CLT, STB plus legacy. Championships add +0.5 each.">
           <div class="ovr-ring">
             <span class="ovr-val" id="heroOvr">--</span>
           </div>
@@ -577,26 +577,6 @@
     </div>
 
     <div class="analytics-grid">
-      <div class="card chart-card">
-        <div class="chart-header">
-          <div class="chart-icon">✦</div>
-          <h3>Luck Index (Quadrants)</h3>
-        </div>
-        <div class="chart-container">
-          <canvas id="luckChart"></canvas>
-        </div>
-      </div>
-
-      <div class="card chart-card">
-        <div class="chart-header">
-          <div class="chart-icon">📊</div>
-          <h3>Scoring Spread (Low/High)</h3>
-        </div>
-        <div class="chart-container">
-          <canvas id="spreadChart"></canvas>
-        </div>
-      </div>
-
       <div class="rivalry-col">
         <div class="rival-card pigeon">
           <div class="rival-meta">
@@ -625,6 +605,36 @@
 
       <div class="card chart-card">
         <div class="chart-header">
+          <div class="chart-icon">💓</div>
+          <h3>Heart Attack Ratio (Games < 5 pts)</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="heartChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-header">
+          <div class="chart-icon">✦</div>
+          <h3>Luck Index (Quadrants)</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="luckChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-header">
+          <div class="chart-icon">📊</div>
+          <h3>Scoring Spread (Low/High)</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="spreadChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-header">
           <div class="chart-icon">📈</div>
           <h3>Career Trajectory</h3>
         </div>
@@ -642,16 +652,7 @@
           <div id="fateFlow" class="fate-flow"></div>
         </div>
       </div>
-<div class="card chart-card">
-        <div class="chart-header">
-          <div class="chart-icon">💓</div>
-          <h3>Heart Attack Ratio (Games < 5 pts)</h3>
-        </div>
-        <div class="chart-container">
-          <canvas id="heartChart"></canvas>
-        </div>
-      </div>
-</div>
+    </div>
 
     <div class="card">
       <div class="table-wrap">
@@ -959,7 +960,7 @@
         const hardwarePoints = (titles * 10) + (runnerUps * 6) + (thirds * 4) + (divTitles * 2) + (seedApps * 1);
         const legacyRaw = 12 * Math.log(1 + hardwarePoints); 
 
-        return { name: m, ppm, gmRaw, cltRaw, stdDev, legacyRaw };
+        return { name: m, ppm, gmRaw, cltRaw, stdDev, legacyRaw, titles };
       });
 
       const ppmVals = rows.map(r => r.ppm).filter(Number.isFinite);
@@ -986,7 +987,7 @@
         const leg  = Math.round(60 + scale01(r.legacyRaw, legMin, legMax) * 39);                  
 
         const skill = (scor * 0.30) + (gm * 0.35) + (clt * 0.20) + (stb * 0.15);
-        const ovr = Math.round(skill * 0.80 + leg * 0.20);
+        const ovr = Math.round(skill * 0.80 + leg * 0.20 + (safeNum(r.titles, 0) * 0.5));
 
         leagueRatings[r.name] = {
           ovr: clamp(ovr, 60, 99),
@@ -1061,7 +1062,7 @@
         const rank = s.final_standing;
         if (rank === 1) trophies.push({ y: s.year, html: `<span class="trophy-badge gold">🏆 ${s.year} Champion</span>` });
         else if (rank === 2) trophies.push({ y: s.year, html: `<span class="trophy-badge silver">🥈 ${s.year} Runner-up</span>` });
-        else if (rank === 3) trophies.push({ y: s.year, html: `<span class="trophy-badge bronze">🥉 ${s.year} 3rd</span>` });
+        else if (rank === 3) trophies.push({ y: s.year, html: `<span class="trophy-badge bronze">🥉 ${s.year} 3rd Place</span>` });
       });
 
       const scoringYears = idx.scoringTitlesByManager.get(name) ? Array.from(idx.scoringTitlesByManager.get(name)) : [];
@@ -1317,7 +1318,7 @@
           
           ctx.fillText("DOMINANT & LUCKY", (left + midX) / 2, top + 15);
           ctx.fillText("SUBPAR & LUCKY", (midX + right) / 2, top + 15);
-          ctx.fillText("UNLUCKY / SHOOTOUTS", (left + midX) / 2, bottom - 10);
+          ctx.fillText("DOMINANT & UNLUCKY", (left + midX) / 2, bottom - 10);
           ctx.fillText("SUBPAR & UNLUCKY", (midX + right) / 2, bottom - 10);
 
           ctx.restore();
@@ -1339,6 +1340,8 @@
         plugins: [quadrantPlugin],
         options: {
           ...commonOptions,
+          
+          layout: { padding: { top: 10 } },
           scales: {
             x: {
               title: { display: true, text: 'PF Rank (1=Best)' },
@@ -1354,7 +1357,7 @@
               max: 12,
               ticks: { stepSize: 1, callback: (v) => Number(v).toFixed(0) },
               grid: { display: false },
-              reverse: false
+              reverse: true
             }
           },
           plugins: {
@@ -1458,8 +1461,10 @@
         },
         options: {
           ...commonOptions,
+          
+          layout: { padding: { top: 8, bottom: 8 } },
           scales: {
-            y: { reverse: false, min: 1, max: 12, grace: 0.4, ticks: { stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { reverse: true, min: 1, max: 12, grace: 0.4, ticks: { stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } },
             x: { grid: { display: false } }
           }
         }
