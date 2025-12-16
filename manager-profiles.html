@@ -147,7 +147,7 @@
     }
 
     .hero-text { display: flex; flex-direction: column; min-width: 0; }
-    
+
     .hero-name {
       font-size: 2rem;
       font-weight: 800;
@@ -207,11 +207,13 @@
     /* Right: OVR Rating & Attributes */
     .rating-container { display: flex; align-items: center; gap: 20px; flex: 1; justify-content: flex-end; min-width: 260px; }
     .sub-ratings { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; min-width: 180px; }
+
+    /* Smaller label text to accommodate longer subcategory names (feature request) */
     .sub-stat {
       display: flex;
       justify-content: space-between;
       gap: 12px;
-      font-size: 0.8rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
       font-weight: 600;
       text-transform: uppercase;
@@ -463,7 +465,7 @@
     td {
       padding: 12px 16px;
       border-bottom: 1px solid rgba(31, 41, 55, 0.5);
-      color: #ffffff; 
+      color: #ffffff;
       font-variant-numeric: tabular-nums;
     }
     tr:last-child td { border-bottom: none; }
@@ -610,7 +612,7 @@
       <div class="card chart-card">
         <div class="chart-header">
           <div class="chart-icon">💓</div>
-          <h3>Heart Attack Ratio (Games < 5 pts)</h3>
+          <h3>Heart Attack Ratio (Games &lt; 5 pts)</h3>
         </div>
         <div class="chart-container">
           <canvas id="heartChart"></canvas>
@@ -718,37 +720,62 @@
       }
     }
 
+    // NEW: Build tenure ranges (handles gaps like "2014-2019, 2022-Present")
+    function formatTenureRanges(seasons) {
+      const years = Array.from(new Set((seasons || []).map(s => safeNum(s.year, null)).filter(Number.isFinite))).sort((a,b)=>a-b);
+      if (!years.length) return '—';
+
+      const ranges = [];
+      let start = years[0];
+      let prev = years[0];
+
+      for (let i = 1; i < years.length; i++) {
+        const y = years[i];
+        if (y === prev + 1) {
+          prev = y;
+          continue;
+        }
+        ranges.push([start, prev]);
+        start = y;
+        prev = y;
+      }
+      ranges.push([start, prev]);
+
+      const parts = ranges.map(([a, b], idxRange) => {
+        const isLast = idxRange === ranges.length - 1;
+        if (a === b) {
+          // single season segment
+          return `${a}`;
+        }
+        if (isLast && Number.isFinite(latestLeagueYear) && b >= latestLeagueYear) {
+          return `${a}-Present`;
+        }
+        return `${a}-${b}`;
+      });
+
+      return parts.join(', ');
+    }
+
     // --- Dynamic Earnings Calculation ---
-    // Pot multipliers based on Buy-In History:
-    // 2014-2017: $20 (Factor 1.0)
-    // 2018-2019: $40 (Factor 2.0)
-    // 2020:      $50 (Factor 2.5)
-    // 2021+:     $75 (Factor 3.75)
-    
     function getEarnings(year, rank, hasScoringTitle, isFinalsApp) {
       let multiplier = 3.75; // Default (2021+)
       if (year <= 2017) multiplier = 1.0;
       else if (year <= 2019) multiplier = 2.0;
       else if (year === 2020) multiplier = 2.5;
-      
+
       const baseSemis = 15 * multiplier;
       const baseFinalsApp = 20 * multiplier;
       const baseChamp = 120 * multiplier;
       const baseScoring = 20 * multiplier;
-      
+
       let total = 0;
-      
-      // Structure:
-      // 3rd/4th (Semis losers): Base Semis
-      // 2nd: Base Semis + Base Finals App
-      // 1st: Base Semis + Base Finals App + Base Champ
-      
+
       if (rank <= 4) total += baseSemis;
       if (rank <= 2) total += baseFinalsApp;
       if (rank === 1) total += baseChamp;
-      
+
       if (hasScoringTitle) total += baseScoring;
-      
+
       return total;
     }
 
@@ -791,9 +818,9 @@
       standingsByManager: new Map(),
       seedsByManagerYear: new Map(),
       gamesByManager: new Map(),
-      weekBuckets: new Map(), 
+      weekBuckets: new Map(),
       scoringTitlesByManager: new Map(),
-      seasonRanks: {} 
+      seasonRanks: {}
     };
 
     function buildIndexes() {
@@ -988,11 +1015,11 @@
       const legMin = min(legVals), legMax = max(legVals);
 
       rows.forEach(r => {
-        const scor = Math.round(70 + scale01(r.ppm, ppmMin, ppmMax) * 29);                        
-        const gm   = Math.round(70 + scale01(r.gmRaw, gmMin, gmMax) * 29);                        
-        const clt  = Math.round(60 + scale01(r.cltRaw, cltMin, cltMax) * 39);                     
-        const stb  = Math.round(60 + (1 - scale01(r.stdDev, stbMin, stbMax)) * 39);               
-        const leg  = Math.round(60 + scale01(r.legacyRaw, legMin, legMax) * 39);                  
+        const scor = Math.round(70 + scale01(r.ppm, ppmMin, ppmMax) * 29);
+        const gm   = Math.round(70 + scale01(r.gmRaw, gmMin, gmMax) * 29);
+        const clt  = Math.round(60 + scale01(r.cltRaw, cltMin, cltMax) * 39);
+        const stb  = Math.round(60 + (1 - scale01(r.stdDev, stbMin, stbMax)) * 39);
+        const leg  = Math.round(60 + scale01(r.legacyRaw, legMin, legMax) * 39);
 
         const skill = (scor * 0.30) + (gm * 0.35) + (clt * 0.20) + (stb * 0.15);
         const ovr = Math.round(skill * 0.80 + leg * 0.20 + (safeNum(r.titles, 0) * 0.5));
@@ -1042,7 +1069,7 @@
       renderClutchChart(myGames);
       renderCareerChart(mySeasons);
       renderFormStrip(myGames);
-      
+
       renderHardwareChart(mySeasons);
       renderHeartAttackChart(myGames);
       renderHighLow(myGames);
@@ -1055,22 +1082,8 @@
       els.heroName.textContent = name;
       fitHeroName();
 
-      if (seasons.length > 0) {
-        const years = seasons.map(s => s.year).filter(Number.isFinite);
-        const minYear = years.length ? Math.min(...years) : null;
-        const maxYear = years.length ? Math.max(...years) : null;
-
-        if (Number.isFinite(minYear) && Number.isFinite(maxYear) && Number.isFinite(latestLeagueYear)) {
-          const endLabel = (maxYear < latestLeagueYear) ? String(maxYear) : 'Present';
-          els.heroTenure.textContent = `${minYear}-${endLabel}`;
-        } else if (Number.isFinite(minYear)) {
-          els.heroTenure.textContent = `${minYear}-Present`;
-        } else {
-          els.heroTenure.textContent = `—`;
-        }
-      } else {
-        els.heroTenure.textContent = `—`;
-      }
+      // UPDATED: tenure supports gaps (e.g., "2014-2019, 2022-Present")
+      els.heroTenure.textContent = formatTenureRanges(seasons);
 
       const caseEl = els.trophyCase;
       caseEl.innerHTML = '';
@@ -1161,7 +1174,7 @@
       seasons.forEach(s => {
         const seed = idx.seedsByManagerYear.get(keyMY(managerName, s.year)) ?? '-';
         const rank = s.final_standing;
-        
+
         const hasScoring = (idx.scoringTitlesByManager.get(managerName) || new Set()).has(s.year);
         const money = getEarnings(s.year, rank, hasScoring);
 
@@ -1214,18 +1227,17 @@
       recEl.textContent = last10.length ? `${w}-${l}-${t}` : '—';
     }
 
-    // --- NEW: High/Low Render ---
     function renderHighLow(games) {
       const el = $('hlTicker');
       if(!el) return;
-      
+
       const validGames = games.filter(g => Number.isFinite(g.score));
       if(!validGames.length) { el.innerHTML = ''; return; }
-      
+
       validGames.sort((a,b) => b.score - a.score);
       const high = validGames[0];
       const low = validGames[validGames.length - 1];
-      
+
       el.innerHTML = `
         <div class="hl-row hl-high">
           <div class="hl-icon">▲</div>
@@ -1244,34 +1256,33 @@
       `;
     }
 
-    // --- NEW: Fate Flow Render ---
     function renderFateFlow(seasons, managerName) {
       const container = $('fateFlow');
       if(!container) return;
-      
+
       let total = 0, playoffs = 0, finals = 0, titles = 0;
-      
+
       seasons.forEach(s => {
         if(!Number.isFinite(s.year)) return;
         total++;
         const seed = idx.seedsByManagerYear.get(keyMY(managerName, s.year));
         const rank = s.final_standing;
-        
+
         let madePlayoffs = false;
         if(seed) madePlayoffs = true;
         if(Number.isFinite(rank) && rank <= 6) madePlayoffs = true;
-        
+
         if(madePlayoffs) playoffs++;
         if(Number.isFinite(rank)) {
           if(rank <= 2) finals++;
           if(rank === 1) titles++;
         }
       });
-      
+
       const pctP = total ? (playoffs / total * 100) : 0;
       const pctF = total ? (finals / total * 100) : 0;
       const pctT = total ? (titles / total * 100) : 0;
-      
+
       container.innerHTML = `
         <div class="fate-step">
           <div class="fate-bar" style="width:100%"></div>
@@ -1330,7 +1341,7 @@
           ctx.font = '600 9px system-ui';
           ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
           ctx.textAlign = 'center';
-          
+
           ctx.fillText("DOMINANT & LUCKY", (left + midX) / 2, top + 15);
           ctx.fillText("SUBPAR & LUCKY", (midX + right) / 2, top + 15);
           ctx.fillText("DOMINANT & UNLUCKY", (left + midX) / 2, bottom - 10);
@@ -1355,7 +1366,6 @@
         plugins: [quadrantPlugin],
         options: {
           ...commonOptions,
-          
           layout: { padding: { top: 10 } },
           scales: {
             x: {
@@ -1372,7 +1382,7 @@
               max: 12,
               ticks: { stepSize: 1, callback: (v) => Number(v).toFixed(0) },
               grid: { display: false },
-              reverse: true
+              reverse: false
             }
           },
           plugins: {
@@ -1412,7 +1422,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { 
+          plugins: {
             legend: { display: false },
             tooltip: { callbacks: { label: (c) => `Range: ${c.raw[0]} - ${c.raw[1]}` } }
           },
@@ -1569,7 +1579,6 @@
     }
 
     function showErrorCard(msg) {
-      // Minimal fallback (kept local) to avoid breaking existing flow if data fails
       const shell = document.querySelector('.shell');
       if (!shell) return;
       const div = document.createElement('div');
@@ -1581,6 +1590,7 @@
     // --- Initialization ---
     document.addEventListener('DOMContentLoaded', async () => {
       window.addEventListener('resize', () => { try { fitHeroName(); } catch(e){} });
+
       [
         'managerSelect', 'heroAvatar', 'heroName', 'heroTenure', 'trophyCase', 'heroOvr',
         'ratingSCOR', 'ratingGM', 'ratingCLT', 'ratingSTB',
@@ -1604,7 +1614,6 @@
         rawStandings = ((await stRes.json()) || []).map(normalizeStandingsRow);
         rawSeeds = (await sdRes.json()) || [];
 
-        // Determine latest league season (for tenure end detection)
         const allYears = rawStandings.map(r => r.year).filter(Number.isFinite);
         latestLeagueYear = allYears.length ? Math.max(...allYears) : null;
 
