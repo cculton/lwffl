@@ -515,4 +515,1112 @@
       .stats-strip { grid-template-columns: 1fr 1fr; }
       .analytics-grid { grid-template-columns: 1fr; }
       .chart-card { min-height: 320px; }
-      .form-row
+      .form-row { justify-content: center; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+
+    <div class="top-bar">
+      <div class="page-title">Manager Profile</div>
+      <div class="manager-select-wrapper">
+        <select id="managerSelect" aria-label="Select Manager"></select>
+      </div>
+    </div>
+
+    <div class="card hero-card">
+      <div class="hero-identity">
+        <div class="avatar" id="heroAvatar"></div>
+        <div class="hero-text">
+          <div class="hero-name" id="heroName"><span class="skeleton">Loading Name</span></div>
+          <div class="hero-tenure" id="heroTenure"><span class="skeleton">EST. 20XX</span></div>
+        </div>
+      </div>
+
+      <div class="trophy-case" id="trophyCase"></div>
+
+      <div class="rating-container">
+        <div class="sub-ratings">
+          <div class="sub-stat" title="SCOR: Average scoring strength vs league (points per game)."><span>Scoring</span> <span id="ratingSCOR">-</span></div>
+          <div class="sub-stat" title="GM: Expected-wins overperformance (actual wins vs what your scores predict)."><span>GM Skill</span> <span id="ratingGM">-</span></div>
+          <div class="sub-stat" title="CLT: Playoff win rate."><span>Clutch</span> <span id="ratingCLT">-</span></div>
+          <div class="sub-stat" title="STB: Season-to-season consistency (lower finish volatility = higher rating)."><span>Stability</span> <span id="ratingSTB">-</span></div>
+        </div>
+        <div class="ovr-badge" title="OVR: Weighted blend of SCOR, GM, CLT, STB plus legacy. Championships add +0.5 each.">
+          <div class="ovr-ring">
+            <span class="ovr-val" id="heroOvr">--</span>
+          </div>
+          <span class="ovr-label">OVR</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-strip">
+      <div class="stat-box">
+        <span class="stat-label">Career Record</span>
+        <span class="stat-val" id="statRecord">-</span>
+        <span class="stat-sub" id="statWinPct">Win %</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Avg Finish</span>
+        <span class="stat-val" id="statAvgFinish">-</span>
+        <span class="stat-sub">Rank</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Avg Score</span>
+        <span class="stat-val" id="statAvgScore">-</span>
+        <span class="stat-sub">PTS/Game</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Career Earnings</span>
+        <span class="stat-val" id="statEarnings" style="color:var(--money)">-</span>
+        <span class="stat-sub">Total Won</span>
+      </div>
+    </div>
+
+    <div class="analytics-grid">
+      <div class="rivalry-col">
+        <div class="rival-card pigeon">
+          <div class="rival-meta">
+            <span class="rival-type">Pigeon (Highest Win %)</span>
+            <span class="rival-name" id="pigeonName">-</span>
+          </div>
+          <span class="rival-stat" id="pigeonStat">-</span>
+        </div>
+
+        <div class="rival-card nemesis">
+          <div class="rival-meta">
+            <span class="rival-type">Nemesis (Lowest Win %)</span>
+            <span class="rival-name" id="nemesisName">-</span>
+          </div>
+          <span class="rival-stat" id="nemesisStat">-</span>
+        </div>
+
+        <div class="card" style="margin-bottom:0; padding:16px;">
+          <div class="chart-header" style="margin-bottom:10px;">
+            <div class="chart-icon">↕</div>
+            <h3>All-Time Highs & Lows</h3>
+          </div>
+          <div class="hl-ticker" id="hlTicker"></div>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-header">
+          <div class="chart-icon">💓</div>
+          <h3>Heart Attack Ratio (Games < 5 pts)</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="heartChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-header">
+          <div class="chart-icon">✦</div>
+          <h3>Luck Index (Quadrants)</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="luckChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-header">
+          <div class="chart-icon">📊</div>
+          <h3>Scoring Spread (Low/High)</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="spreadChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-header">
+          <div class="chart-icon">📈</div>
+          <h3>Career Trajectory</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="careerChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-header">
+          <div class="chart-icon">🏁</div>
+          <h3>Post-Season Fate</h3>
+        </div>
+        <div class="chart-container" style="display:flex; flex-direction:column; justify-content:center;">
+          <div id="fateFlow" class="fate-flow"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table id="seasonTable">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Record</th>
+              <th>Finish</th>
+              <th>Points For</th>
+              <th>Points Against</th>
+              <th>Seed</th>
+              <th>Career Earnings</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- Constants & Global State ---
+    let rawScores = [], rawStandings = [], rawSeeds = [];
+    const charts = {};
+    const leagueRatings = {};
+
+    // Cached DOM
+    const $ = (id) => document.getElementById(id);
+    const els = {};
+
+    // --- Helpers ---
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    const safeNum = (v, fallback = 0) => Number.isFinite(Number(v)) ? Number(v) : fallback;
+    const moneyFmt = (n) => `$${Number(n || 0).toLocaleString()}`;
+    const keyMY = (m, y) => `${m}::${y}`;
+
+    // League-wide latest year (used for tenure end detection)
+    let latestLeagueYear = null;
+
+    // Shrink very long names so they fit in two lines in the hero header.
+    function fitHeroName() {
+      const el = els.heroName;
+      if (!el) return;
+      // Reset to CSS-defined size first
+      el.style.fontSize = '';
+      el.style.lineHeight = '';
+      const cs = window.getComputedStyle(el);
+      const lineHeight = parseFloat(cs.lineHeight) || (parseFloat(cs.fontSize) * 1.1);
+      const maxHeight = lineHeight * 2 + 1; // 2 lines (small buffer)
+      // If it overflows, step font size down slightly until it fits (or hits a floor)
+      let fs = parseFloat(cs.fontSize) || 32;
+      const minFs = 20;
+      while (el.scrollHeight > maxHeight && fs > minFs) {
+        fs -= 1;
+        el.style.fontSize = fs + 'px';
+        el.style.lineHeight = '1.1';
+      }
+    }
+
+    // --- Dynamic Earnings Calculation ---
+    // Pot multipliers based on Buy-In History:
+    // 2014-2017: $20 (Factor 1.0)
+    // 2018-2019: $40 (Factor 2.0)
+    // 2020:      $50 (Factor 2.5)
+    // 2021+:     $75 (Factor 3.75)
+    
+    function getEarnings(year, rank, hasScoringTitle, isFinalsApp) {
+      let multiplier = 3.75; // Default (2021+)
+      if (year <= 2017) multiplier = 1.0;
+      else if (year <= 2019) multiplier = 2.0;
+      else if (year === 2020) multiplier = 2.5;
+      
+      const baseSemis = 15 * multiplier;
+      const baseFinalsApp = 20 * multiplier;
+      const baseChamp = 120 * multiplier;
+      const baseScoring = 20 * multiplier;
+      
+      let total = 0;
+      
+      // Structure:
+      // 3rd/4th (Semis losers): Base Semis
+      // 2nd: Base Semis + Base Finals App
+      // 1st: Base Semis + Base Finals App + Base Champ
+      
+      if (rank <= 4) total += baseSemis;
+      if (rank <= 2) total += baseFinalsApp;
+      if (rank === 1) total += baseChamp;
+      
+      if (hasScoringTitle) total += baseScoring;
+      
+      return total;
+    }
+
+    function normalizeStandingsRow(s) {
+      return {
+        year: safeNum(s.year, null),
+        manager: (s.manager ?? '').trim(),
+        wins: safeNum(s.wins, 0),
+        losses: safeNum(s.losses, 0),
+        ties: safeNum(s.ties, 0),
+        final_standing: safeNum((s.final_standing ?? s.finalStanding), null),
+        division_finish: safeNum((s.division_finish ?? s.divisionFinish), null),
+        points_for: safeNum((s.points_for ?? s.pointsFor), 0),
+        points_against: safeNum((s.points_against ?? s.pointsAgainst), 0),
+      };
+    }
+
+    function normalizeScoreRow(g) {
+      return {
+        year: safeNum(g.year, null),
+        week: safeNum(g.week, null),
+        manager1: (g.manager1 ?? '').trim(),
+        manager2: (g.manager2 ?? '').trim(),
+        score1: safeNum(g.score1, NaN),
+        score2: safeNum(g.score2, NaN),
+        playoffs: g.playoffs ?? "N/A"
+      };
+    }
+
+    function calcStdDev(values) {
+      if (!values.length) return 0;
+      const mean = values.reduce((a, b) => a + b, 0) / values.length;
+      const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
+      return Math.sqrt(variance);
+    }
+
+    // --- Indexes & Ranking Logic ---
+    const idx = {
+      managers: [],
+      standingsByManager: new Map(),
+      seedsByManagerYear: new Map(),
+      gamesByManager: new Map(),
+      weekBuckets: new Map(), 
+      scoringTitlesByManager: new Map(),
+      seasonRanks: {} 
+    };
+
+    function buildIndexes() {
+      idx.managers = [];
+      idx.standingsByManager.clear();
+      idx.seedsByManagerYear.clear();
+      idx.gamesByManager.clear();
+      idx.weekBuckets.clear();
+      idx.scoringTitlesByManager.clear();
+      idx.seasonRanks = {};
+
+      const managerSet = new Set();
+
+      rawStandings.forEach(s => {
+        if (!s.manager) return;
+        managerSet.add(s.manager);
+        if (!idx.standingsByManager.has(s.manager)) idx.standingsByManager.set(s.manager, []);
+        idx.standingsByManager.get(s.manager).push(s);
+      });
+      idx.standingsByManager.forEach(arr => arr.sort((a, b) => b.year - a.year));
+
+      rawSeeds.forEach(sd => {
+        const m = (sd.manager ?? '').trim();
+        const y = safeNum(sd.year, null);
+        if (!m || !y) return;
+        idx.seedsByManagerYear.set(keyMY(m, y), sd.seed);
+        managerSet.add(m);
+      });
+
+      rawScores.forEach(row => {
+        const g = normalizeScoreRow(row);
+        if (!g.manager1 || !g.manager2) return;
+        if (!Number.isFinite(g.score1) || !Number.isFinite(g.score2)) return;
+        if (!Number.isFinite(g.year) || !Number.isFinite(g.week)) return;
+
+        managerSet.add(g.manager1);
+        managerSet.add(g.manager2);
+
+        const bucketKey = `${g.year}::${g.week}`;
+        if (!idx.weekBuckets.has(bucketKey)) idx.weekBuckets.set(bucketKey, []);
+        idx.weekBuckets.get(bucketKey).push({ manager: g.manager1, score: g.score1, isPlayoff: (g.playoffs && g.playoffs !== "N/A") });
+        idx.weekBuckets.get(bucketKey).push({ manager: g.manager2, score: g.score2, isPlayoff: (g.playoffs && g.playoffs !== "N/A") });
+
+        const asGameFor = (name) => {
+          const isAway = (g.manager1 === name);
+          const myScore = isAway ? g.score1 : g.score2;
+          const oppScore = isAway ? g.score2 : g.score1;
+          const opponent = isAway ? g.manager2 : g.manager1;
+          const result = myScore > oppScore ? 'W' : (myScore < oppScore ? 'L' : 'T');
+          return {
+            year: g.year,
+            week: g.week,
+            score: myScore,
+            oppScore,
+            opponent,
+            result,
+            isPlayoff: (g.playoffs && g.playoffs !== "N/A")
+          };
+        };
+
+        [g.manager1, g.manager2].forEach(m => {
+          if (!idx.gamesByManager.has(m)) idx.gamesByManager.set(m, []);
+          idx.gamesByManager.get(m).push(asGameFor(m));
+        });
+      });
+
+      idx.gamesByManager.forEach(arr => arr.sort((a, b) => (b.year !== a.year ? b.year - a.year : b.week - a.week)));
+      idx.managers = Array.from(managerSet).sort((a, b) => a.localeCompare(b));
+
+      const byYear = new Map();
+      rawStandings.forEach(s => {
+        if (!Number.isFinite(s.year) || !s.manager) return;
+        if (!byYear.has(s.year)) byYear.set(s.year, []);
+        byYear.get(s.year).push(s);
+      });
+
+      for (const [year, rows] of byYear.entries()) {
+        rows.sort((a,b) => b.points_for - a.points_for);
+        rows.forEach((r, i) => {
+          const k = keyMY(r.manager, year);
+          if(!idx.seasonRanks[k]) idx.seasonRanks[k] = {};
+          idx.seasonRanks[k].pfRank = i + 1;
+        });
+
+        rows.sort((a,b) => b.points_against - a.points_against);
+        rows.forEach((r, i) => {
+          const k = keyMY(r.manager, year);
+          if(!idx.seasonRanks[k]) idx.seasonRanks[k] = {};
+          idx.seasonRanks[k].paRank = i + 1;
+        });
+
+        let maxPF = -Infinity;
+        rows.forEach(r => { if (Number.isFinite(r.points_for)) maxPF = Math.max(maxPF, r.points_for); });
+        if (Number.isFinite(maxPF) && maxPF > 0) {
+          rows.forEach(r => {
+            if (r.points_for === maxPF) {
+              if (!idx.scoringTitlesByManager.has(r.manager)) idx.scoringTitlesByManager.set(r.manager, new Set());
+              idx.scoringTitlesByManager.get(r.manager).add(year);
+            }
+          });
+        }
+      }
+    }
+
+    function calculateAllRatings() {
+      const expectedWins = {};
+      idx.managers.forEach(m => { expectedWins[m] = 0; });
+
+      for (const [, entries] of idx.weekBuckets.entries()) {
+        const byManager = new Map();
+        entries.forEach(e => {
+          if (!e.manager) return;
+          if (!Number.isFinite(e.score)) return;
+          byManager.set(e.manager, e.score);
+        });
+
+        const list = Array.from(byManager.entries()).map(([manager, score]) => ({ manager, score }));
+        const N = list.length;
+        if (N < 2) continue;
+
+        for (let i = 0; i < N; i++) {
+          const mi = list[i].manager;
+          const si = list[i].score;
+          let beat = 0, tie = 0;
+
+          for (let j = 0; j < N; j++) {
+            if (i === j) continue;
+            const sj = list[j].score;
+            if (si > sj) beat++;
+            else if (si === sj) tie++;
+          }
+          expectedWins[mi] += (beat + 0.5 * tie) / (N - 1);
+        }
+      }
+
+      const rows = idx.managers.map(m => {
+        const seasons = idx.standingsByManager.get(m) || [];
+        const games = idx.gamesByManager.get(m) || [];
+
+        let wins = 0, ties = 0;
+        let playGames = 0, playWins = 0;
+        let totalPF = 0;
+
+        games.forEach(g => {
+          totalPF += g.score;
+          if (g.result === 'W') wins++;
+          else if (g.result === 'T') ties++;
+
+          if (g.isPlayoff) {
+            playGames++;
+            if (g.result === 'W') playWins++;
+          }
+        });
+
+        const actualW = wins + ties * 0.5;
+        const expW = expectedWins[m] || 0;
+        const gmRaw = actualW - expW;
+
+        const ppm = games.length ? totalPF / games.length : 0;
+        const cltRaw = playGames ? (playWins / playGames) : 0;
+
+        const finishes = seasons.map(s => s.final_standing).filter(Number.isFinite);
+        const stdDev = calcStdDev(finishes);
+
+        const titles = seasons.filter(s => s.final_standing === 1).length;
+        const runnerUps = seasons.filter(s => s.final_standing === 2).length;
+        const thirds = seasons.filter(s => s.final_standing === 3).length;
+        const divTitles = seasons.filter(s => s.division_finish === 1).length;
+        const seedApps = seasons.reduce((acc, s) => acc + (idx.seedsByManagerYear.has(keyMY(m, s.year)) ? 1 : 0), 0);
+
+        const hardwarePoints = (titles * 10) + (runnerUps * 6) + (thirds * 4) + (divTitles * 2) + (seedApps * 1);
+        const legacyPoints = hardwarePoints + (safeNum(titles, 0) * 0.5); // visual-only parity: championships +0.5
+        const legacyRaw = 12 * Math.log(1 + legacyPoints);
+
+        return { name: m, ppm, gmRaw, cltRaw, stdDev, legacyRaw, titles };
+      });
+
+      const ppmVals = rows.map(r => r.ppm).filter(Number.isFinite);
+      const gmVals = rows.map(r => r.gmRaw).filter(Number.isFinite);
+      const cltVals = rows.map(r => r.cltRaw).filter(Number.isFinite);
+      const stbVals = rows.map(r => r.stdDev).filter(Number.isFinite);
+      const legVals = rows.map(r => r.legacyRaw).filter(Number.isFinite);
+
+      const min = (a) => Math.min(...a);
+      const max = (a) => Math.max(...a);
+      const scale01 = (v, lo, hi) => (hi > lo ? (v - lo) / (hi - lo) : 0.5);
+
+      const ppmMin = min(ppmVals), ppmMax = max(ppmVals);
+      const gmMin = min(gmVals), gmMax = max(gmVals);
+      const cltMin = min(cltVals), cltMax = max(cltVals);
+      const stbMin = min(stbVals), stbMax = max(stbVals);
+      const legMin = min(legVals), legMax = max(legVals);
+
+      rows.forEach(r => {
+        const scor = Math.round(70 + scale01(r.ppm, ppmMin, ppmMax) * 29);                        
+        const gm   = Math.round(70 + scale01(r.gmRaw, gmMin, gmMax) * 29);                        
+        const clt  = Math.round(60 + scale01(r.cltRaw, cltMin, cltMax) * 39);                     
+        const stb  = Math.round(60 + (1 - scale01(r.stdDev, stbMin, stbMax)) * 39);               
+        const leg  = Math.round(60 + scale01(r.legacyRaw, legMin, legMax) * 39);                  
+
+        const skill = (scor * 0.30) + (gm * 0.35) + (clt * 0.20) + (stb * 0.15);
+        const ovr = Math.round(skill * 0.80 + leg * 0.20 + (safeNum(r.titles, 0) * 0.5));
+
+        leagueRatings[r.name] = {
+          ovr: clamp(ovr, 60, 99),
+          scor: clamp(scor, 60, 99),
+          gm: clamp(gm, 60, 99),
+          clt: clamp(clt, 60, 99),
+          stb: clamp(stb, 60, 99)
+        };
+      });
+    }
+
+    function initManagerDropdown() {
+      const select = els.managerSelect;
+      select.innerHTML = '';
+      idx.managers.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        select.appendChild(opt);
+      });
+      select.addEventListener('change', (e) => loadManager(e.target.value));
+    }
+
+    function loadManager(name) {
+      const mySeasons = idx.standingsByManager.get(name) || [];
+      const myGames = idx.gamesByManager.get(name) || [];
+
+      const h2h = {};
+      myGames.forEach(g => {
+        if (!g.opponent) return;
+        if (!h2h[g.opponent]) h2h[g.opponent] = { w: 0, l: 0, t: 0, games: 0 };
+        h2h[g.opponent].games++;
+        if (g.result === 'W') h2h[g.opponent].w++;
+        else if (g.result === 'L') h2h[g.opponent].l++;
+        else h2h[g.opponent].t++;
+      });
+
+      renderHero(name, mySeasons);
+      renderStats(mySeasons, myGames, name);
+      renderRivalries(h2h);
+      renderSeasonTable(mySeasons, name);
+      renderLuckChart(mySeasons, name);
+      renderSpreadChart(myGames);
+      renderClutchChart(myGames);
+      renderCareerChart(mySeasons);
+      renderFormStrip(myGames);
+      
+      renderHardwareChart(mySeasons);
+      renderHeartAttackChart(myGames);
+      renderHighLow(myGames);
+      renderFateFlow(mySeasons, name);
+    }
+
+    function renderHero(name, seasons) {
+      const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      els.heroAvatar.textContent = initials;
+      els.heroName.textContent = name;
+      fitHeroName();
+
+      if (seasons.length > 0) {
+        const years = seasons.map(s => s.year).filter(Number.isFinite);
+        const minYear = years.length ? Math.min(...years) : null;
+        const maxYear = years.length ? Math.max(...years) : null;
+
+        if (Number.isFinite(minYear) && Number.isFinite(maxYear) && Number.isFinite(latestLeagueYear)) {
+          const endLabel = (maxYear < latestLeagueYear) ? String(maxYear) : 'Present';
+          els.heroTenure.textContent = `${minYear}-${endLabel}`;
+        } else if (Number.isFinite(minYear)) {
+          els.heroTenure.textContent = `${minYear}-Present`;
+        } else {
+          els.heroTenure.textContent = `—`;
+        }
+      } else {
+        els.heroTenure.textContent = `—`;
+      }
+
+      const caseEl = els.trophyCase;
+      caseEl.innerHTML = '';
+      const trophies = [];
+
+      seasons.forEach(s => {
+        const rank = s.final_standing;
+        if (rank === 1) trophies.push({ y: s.year, html: `<span class="trophy-badge gold">🏆 ${s.year} Champion</span>` });
+        else if (rank === 2) trophies.push({ y: s.year, html: `<span class="trophy-badge silver">🥈 ${s.year} Runner-up</span>` });
+        else if (rank === 3) trophies.push({ y: s.year, html: `<span class="trophy-badge bronze">🥉 ${s.year} 3rd Place</span>` });
+      });
+
+      const scoringYears = idx.scoringTitlesByManager.get(name) ? Array.from(idx.scoringTitlesByManager.get(name)) : [];
+      scoringYears.forEach(y => trophies.push({ y, html: `<span class="trophy-badge scoring">🕹️ ${y} Scoring Title</span>` }));
+
+      trophies.sort((a, b) => (b.y ?? 0) - (a.y ?? 0));
+      caseEl.innerHTML = trophies.length ? trophies.map(t => t.html).join('') : `<span class="empty-case">No hardware... yet.</span>`;
+
+      const r = leagueRatings[name] || { ovr: 75, scor: 75, gm: 75, clt: 75, stb: 75 };
+
+      const ovrEl = els.heroOvr;
+      const target = r.ovr;
+      let current = clamp(safeNum(ovrEl.textContent, 0), 0, target);
+
+      const step = () => {
+        current = Math.min(target, current + Math.max(1, Math.ceil(target / 40)));
+        ovrEl.textContent = current;
+        if (current < target) requestAnimationFrame(step);
+      };
+      step();
+
+      els.ratingSCOR.textContent = r.scor;
+      els.ratingGM.textContent = r.gm;
+      els.ratingCLT.textContent = r.clt;
+      els.ratingSTB.textContent = r.stb;
+    }
+
+    function renderStats(seasons, games, managerName) {
+      const w = games.filter(g => g.result === 'W').length;
+      const l = games.filter(g => g.result === 'L').length;
+      const t = games.filter(g => g.result === 'T').length;
+
+      els.statRecord.textContent = `${w}-${l}-${t}`;
+
+      const pct = games.length ? (w + t * 0.5) / games.length : 0;
+      els.statWinPct.textContent = pct.toFixed(3);
+
+      const finishes = seasons.map(s => s.final_standing).filter(Number.isFinite);
+      const avgFin = finishes.length ? finishes.reduce((a, b) => a + b, 0) / finishes.length : 0;
+      els.statAvgFinish.textContent = avgFin > 0 ? avgFin.toFixed(1) : '-';
+
+      const totalScore = games.reduce((a, g) => a + g.score, 0);
+      const avgScore = games.length ? totalScore / games.length : 0;
+      els.statAvgScore.textContent = avgScore.toFixed(1);
+
+      let money = 0;
+      seasons.forEach(s => {
+        const hasScoring = (idx.scoringTitlesByManager.get(managerName) || new Set()).has(s.year);
+        money += getEarnings(s.year, s.final_standing, hasScoring);
+      });
+      els.statEarnings.textContent = moneyFmt(money);
+      els.statEarnings.style.color = 'var(--money)';
+    }
+
+    function renderRivalries(h2h) {
+      let nemesis = { name: '-', pct: 1.0, rec: '' };
+      let pigeon = { name: '-', pct: 0.0, rec: '' };
+
+      Object.keys(h2h).forEach(opp => {
+        const d = h2h[opp];
+        if (d.games < 5) return;
+        const pct = (d.w + d.t * 0.5) / d.games;
+        if (pct <= nemesis.pct) nemesis = { name: opp, pct, rec: `${d.w}-${d.l}` };
+        if (pct >= pigeon.pct) pigeon = { name: opp, pct, rec: `${d.w}-${d.l}` };
+      });
+
+      els.nemesisName.textContent = nemesis.name;
+      els.nemesisStat.textContent = nemesis.rec || '-';
+      els.pigeonName.textContent = pigeon.name;
+      els.pigeonStat.textContent = pigeon.rec || '-';
+    }
+
+    function renderSeasonTable(seasons, managerName) {
+      const tbody = document.querySelector('#seasonTable tbody');
+      tbody.innerHTML = '';
+      const frag = document.createDocumentFragment();
+
+      seasons.forEach(s => {
+        const seed = idx.seedsByManagerYear.get(keyMY(managerName, s.year)) ?? '-';
+        const rank = s.final_standing;
+        
+        const hasScoring = (idx.scoringTitlesByManager.get(managerName) || new Set()).has(s.year);
+        const money = getEarnings(s.year, rank, hasScoring);
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${s.year ?? '-'}</td>
+          <td>${s.wins}-${s.losses}-${s.ties}</td>
+          <td>${Number.isFinite(rank) ? rank : '-'}</td>
+          <td>${Math.round(s.points_for || 0).toLocaleString()}</td>
+          <td>${Math.round(s.points_against || 0).toLocaleString()}</td>
+          <td>${seed}</td>
+          <td style="color:${money > 0 ? 'var(--money)' : 'inherit'}">${money > 0 ? moneyFmt(money) : '-'}</td>
+        `;
+        frag.appendChild(tr);
+      });
+
+      tbody.appendChild(frag);
+    }
+
+    function renderFormStrip(games) {
+      const strip = els.formStrip;
+      const recEl = els.formRecord;
+      if (!strip || !recEl) return;
+      strip.innerHTML = '';
+
+      const last10 = [...games]
+        .filter(g => Number.isFinite(g.year) && Number.isFinite(g.week))
+        .sort((a, b) => (a.year !== b.year ? b.year - a.year : b.week - a.week))
+        .slice(0, 10);
+
+      let w = 0, l = 0, t = 0;
+      last10.forEach(g => {
+        if (g.result === 'W') w++;
+        else if (g.result === 'L') l++;
+        else t++;
+
+        const dot = document.createElement('div');
+        dot.className = 'form-dot';
+        dot.dataset.res = g.result;
+        dot.tabIndex = 0;
+
+        const opp = g.opponent || '?';
+        const score = Number.isFinite(g.score) ? g.score.toFixed(1) : '';
+        const oppScore = Number.isFinite(g.oppScore) ? g.oppScore.toFixed(1) : '';
+        dot.dataset.tooltip = `${g.year} Wk ${g.week}: ${g.result} vs ${opp} (${score}–${oppScore})`;
+
+        strip.appendChild(dot);
+      });
+
+      recEl.textContent = last10.length ? `${w}-${l}-${t}` : '—';
+    }
+
+    // --- NEW: High/Low Render ---
+    function renderHighLow(games) {
+      const el = $('hlTicker');
+      if(!el) return;
+      
+      const validGames = games.filter(g => Number.isFinite(g.score));
+      if(!validGames.length) { el.innerHTML = ''; return; }
+      
+      validGames.sort((a,b) => b.score - a.score);
+      const high = validGames[0];
+      const low = validGames[validGames.length - 1];
+      
+      el.innerHTML = `
+        <div class="hl-row hl-high">
+          <div class="hl-icon">▲</div>
+          <div class="hl-data">
+            <div class="hl-score">${high.score.toFixed(2)}</div>
+            <div class="hl-meta">${high.year} Wk ${high.week} vs ${high.opponent}</div>
+          </div>
+        </div>
+        <div class="hl-row hl-low">
+          <div class="hl-icon">▼</div>
+          <div class="hl-data">
+            <div class="hl-score">${low.score.toFixed(2)}</div>
+            <div class="hl-meta">${low.year} Wk ${low.week} vs ${low.opponent}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // --- NEW: Fate Flow Render ---
+    function renderFateFlow(seasons, managerName) {
+      const container = $('fateFlow');
+      if(!container) return;
+      
+      let total = 0, playoffs = 0, finals = 0, titles = 0;
+      
+      seasons.forEach(s => {
+        if(!Number.isFinite(s.year)) return;
+        total++;
+        const seed = idx.seedsByManagerYear.get(keyMY(managerName, s.year));
+        const rank = s.final_standing;
+        
+        let madePlayoffs = false;
+        if(seed) madePlayoffs = true;
+        if(Number.isFinite(rank) && rank <= 6) madePlayoffs = true;
+        
+        if(madePlayoffs) playoffs++;
+        if(Number.isFinite(rank)) {
+          if(rank <= 2) finals++;
+          if(rank === 1) titles++;
+        }
+      });
+      
+      const pctP = total ? (playoffs / total * 100) : 0;
+      const pctF = total ? (finals / total * 100) : 0;
+      const pctT = total ? (titles / total * 100) : 0;
+      
+      container.innerHTML = `
+        <div class="fate-step">
+          <div class="fate-bar" style="width:100%"></div>
+          <div class="fate-label">Seasons Played</div>
+          <div class="fate-val">${total}</div>
+        </div>
+        <div class="fate-step step-playoffs">
+          <div class="fate-bar" style="width:${pctP}%"></div>
+          <div class="fate-label">Made Playoffs</div>
+          <div class="fate-val">${playoffs}</div>
+        </div>
+        <div class="fate-step step-finals">
+          <div class="fate-bar" style="width:${pctF}%"></div>
+          <div class="fate-label">Made Finals</div>
+          <div class="fate-val">${finals}</div>
+        </div>
+        <div class="fate-step step-titles">
+          <div class="fate-bar" style="width:${pctT}%"></div>
+          <div class="fate-label">Champion</div>
+          <div class="fate-val">${titles}</div>
+        </div>
+      `;
+    }
+
+    // --- Charts ---
+    Chart.defaults.color = '#64748b';
+    Chart.defaults.font.family = 'system-ui';
+    const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+
+    function renderLuckChart(seasons, managerName) {
+      const canvas = $('luckChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (charts.luck) charts.luck.destroy();
+
+      const points = seasons.map(s => {
+        const k = keyMY(managerName, s.year);
+        const ranks = idx.seasonRanks[k] || { pfRank: 6, paRank: 6 };
+        return { x: ranks.pfRank, y: ranks.paRank, year: s.year };
+      });
+
+      const quadrantPlugin = {
+        id: 'quadrants',
+        beforeDraw(chart) {
+          const { ctx, chartArea: { top, bottom, left, right } } = chart;
+          const midX = (left + right) / 2;
+          const midY = (top + bottom) / 2;
+          ctx.save();
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(midX, top); ctx.lineTo(midX, bottom);
+          ctx.moveTo(left, midY); ctx.lineTo(right, midY);
+          ctx.stroke();
+          ctx.font = '600 9px system-ui';
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+          ctx.textAlign = 'center';
+          
+          ctx.fillText("DOMINANT & LUCKY", (left + midX) / 2, top + 15);
+          ctx.fillText("SUBPAR & LUCKY", (midX + right) / 2, top + 15);
+          ctx.fillText("DOMINANT & UNLUCKY", (left + midX) / 2, bottom - 10);
+          ctx.fillText("SUBPAR & UNLUCKY", (midX + right) / 2, bottom - 10);
+
+          ctx.restore();
+        }
+      };
+
+      charts.luck = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+          datasets: [{
+            data: points,
+            backgroundColor: 'rgba(56, 189, 248, 0.55)',
+            borderColor: 'rgba(56, 189, 248, 0.9)',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 8
+          }]
+        },
+        plugins: [quadrantPlugin],
+        options: {
+          ...commonOptions,
+          
+          layout: { padding: { top: 10 } },
+          scales: {
+            x: {
+              title: { display: true, text: 'PF Rank (1=Best)' },
+              min: 0,
+              max: 12,
+              ticks: { stepSize: 1, callback: (v) => Number(v).toFixed(0) },
+              grid: { display: false },
+              reverse: false
+            },
+            y: {
+              title: { display: true, text: 'PA Rank (1=Unlucky)' },
+              min: 0,
+              max: 12,
+              ticks: { stepSize: 1, callback: (v) => Number(v).toFixed(0) },
+              grid: { display: false },
+              reverse: true
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: (c) => `${c.raw.year}: PF #${c.raw.x} | PA #${c.raw.y}` } }
+          }
+        }
+      });
+    }
+
+    function renderSpreadChart(games) {
+      const canvas = $('spreadChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (charts.spread) charts.spread.destroy();
+
+      const years = [...new Set(games.map(g => g.year).filter(Number.isFinite))].sort((a, b) => a - b);
+      const data = years.map(y => {
+        const scores = games.filter(g => g.year === y).map(g => g.score).filter(Number.isFinite);
+        if (!scores.length) return [0, 0];
+        return [Math.min(...scores), Math.max(...scores)];
+      });
+
+      charts.spread = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: years,
+          datasets: [{
+            data: data,
+            backgroundColor: 'rgba(56, 189, 248, 0.4)',
+            borderWidth: 0,
+            borderSkipped: false,
+            borderRadius: 4,
+            barPercentage: 0.6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { 
+            legend: { display: false },
+            tooltip: { callbacks: { label: (c) => `Range: ${c.raw[0]} - ${c.raw[1]}` } }
+          },
+          scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } }
+        }
+      });
+    }
+
+    function renderClutchChart(games) {
+      const canvas = $('clutchChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (charts.clutch) charts.clutch.destroy();
+
+      const reg = games.filter(g => !g.isPlayoff).map(g => g.score).filter(Number.isFinite);
+      const play = games.filter(g => g.isPlayoff).map(g => g.score).filter(Number.isFinite);
+
+      const regAvg = reg.length ? reg.reduce((a, b) => a + b, 0) / reg.length : 0;
+      const playAvg = play.length ? play.reduce((a, b) => a + b, 0) / play.length : 0;
+
+      charts.clutch = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Regular Season', 'Playoffs'],
+          datasets: [{ data: [regAvg, playAvg], backgroundColor: ['#38bdf8', '#fbbf24'], borderRadius: 4 }]
+        },
+        options: {
+          ...commonOptions,
+          indexAxis: 'y',
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+            y: { grid: { display: false }, ticks: { color: '#fff', font: { weight: 'bold' } } }
+          }
+        }
+      });
+    }
+
+    function renderCareerChart(seasons) {
+      const canvas = $('careerChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (charts.career) charts.career.destroy();
+
+      const sorted = [...seasons].filter(s => Number.isFinite(s.year)).sort((a, b) => a.year - b.year);
+
+      charts.career = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: sorted.map(s => s.year),
+          datasets: [{
+            data: sorted.map(s => Number.isFinite(s.final_standing) ? s.final_standing : null),
+            borderColor: '#38bdf8',
+            borderWidth: 2,
+            tension: 0.3,
+            fill: false,
+            pointBackgroundColor: '#0f172a',
+            pointBorderColor: '#38bdf8',
+            pointBorderWidth: 2
+          }]
+        },
+        options: {
+          ...commonOptions,
+          layout: { padding: { top: 16, bottom: 16 } },
+          scales: {
+            y: {
+              reverse: false,
+              min: 1,
+              max: 12,
+              grace: '10%',
+              ticks: { stepSize: 1, callback: (v) => Number(v).toFixed(0) },
+              grid: { color: 'rgba(255,255,255,0.05)' }
+            },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function renderHeartAttackChart(games) {
+      const canvas = $('heartChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (charts.heart) charts.heart.destroy();
+
+      let wins=0, losses=0;
+      games.forEach(g => {
+        if(Number.isFinite(g.score) && Number.isFinite(g.oppScore)) {
+          const diff = Math.abs(g.score - g.oppScore);
+          if(diff < 5) {
+            if(g.result === 'W') wins++;
+            else if(g.result === 'L') losses++;
+          }
+        }
+      });
+
+      charts.heart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Wins', 'Losses'],
+          datasets: [{
+            data: [wins, losses],
+            backgroundColor: ['#22c55e', '#ef4444'],
+            borderWidth: 0,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          ...commonOptions,
+          cutout: '65%',
+          plugins: {
+            legend: { display: true, position: 'bottom', labels: { color: '#94a3b8' } }
+          }
+        }
+      });
+    }
+
+    function renderHardwareChart(seasons) {
+      const canvas = $('hardwareChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (charts.hw) charts.hw.destroy();
+
+      let g=0, s=0, b=0, none=0;
+      seasons.forEach(row => {
+        const r = row.final_standing;
+        if(r === 1) g++;
+        else if(r === 2) s++;
+        else if(r === 3) b++;
+        else none++;
+      });
+
+      charts.hw = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Career Finishes'],
+          datasets: [
+            { label: 'Gold', data: [g], backgroundColor: '#fbbf24', barThickness: 40 },
+            { label: 'Silver', data: [s], backgroundColor: '#cbd5e1', barThickness: 40 },
+            { label: 'Bronze', data: [b], backgroundColor: '#d97706', barThickness: 40 },
+            { label: 'Other', data: [none], backgroundColor: '#334155', barThickness: 40 }
+          ]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: true, position: 'bottom', labels: { color:'#94a3b8' } } },
+          scales: {
+            x: { stacked: true, grid: { display:false }, ticks:{ color:'#94a3b8', stepSize:1 } },
+            y: { stacked: true, display: false }
+          }
+        }
+      });
+    }
+
+    function showErrorCard(msg) {
+      // Minimal fallback (kept local) to avoid breaking existing flow if data fails
+      const shell = document.querySelector('.shell');
+      if (!shell) return;
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.innerHTML = `<div style="color:var(--text-main); font-weight:700;">${msg}</div>`;
+      shell.appendChild(div);
+    }
+
+    // --- Initialization ---
+    document.addEventListener('DOMContentLoaded', async () => {
+      window.addEventListener('resize', () => { try { fitHeroName(); } catch(e){} });
+      [
+        'managerSelect', 'heroAvatar', 'heroName', 'heroTenure', 'trophyCase', 'heroOvr',
+        'ratingSCOR', 'ratingGM', 'ratingCLT', 'ratingSTB',
+        'statRecord', 'statWinPct', 'statAvgFinish', 'statAvgScore', 'statEarnings',
+        'nemesisName', 'nemesisStat', 'pigeonName', 'pigeonStat',
+        'formStrip', 'formRecord'
+      ].forEach(id => els[id] = $(id));
+
+      try {
+        const [sRes, stRes, sdRes] = await Promise.all([
+          fetch('league-scores.json'),
+          fetch('final-standings.json'),
+          fetch('playoff-seeds.json')
+        ]);
+
+        if (!sRes.ok || !stRes.ok || !sdRes.ok) {
+          throw new Error(`Data load failed: scores=${sRes.status}, standings=${stRes.status}, seeds=${sdRes.status}`);
+        }
+
+        rawScores = (await sRes.json()) || [];
+        rawStandings = ((await stRes.json()) || []).map(normalizeStandingsRow);
+        rawSeeds = (await sdRes.json()) || [];
+
+        // Determine latest league season (for tenure end detection)
+        const allYears = rawStandings.map(r => r.year).filter(Number.isFinite);
+        latestLeagueYear = allYears.length ? Math.max(...allYears) : null;
+
+        buildIndexes();
+        calculateAllRatings();
+        initManagerDropdown();
+
+        const firstMgr = els.managerSelect.options?.[0]?.value;
+        if (firstMgr) loadManager(firstMgr);
+        else showErrorCard("No managers found in your data files.");
+
+      } catch (err) {
+        console.error(err);
+        showErrorCard("Unable to load league data. Please ensure JSON files are present and valid.");
+      }
+    });
+  </script>
+</body>
+</html>
