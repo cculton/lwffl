@@ -430,7 +430,6 @@
     // NOTE: ranking removed to imply ties for first; order handles most-recent first (leftmost)
     container.innerHTML = sorted.map(([score, info]) => `
       <div class="common-item" onclick="autoSearch('${score}')">
-        <div class="rank">Most Common</div>
         <div class="common-score">${parseFloat(score)}</div>
         <div class="common-count">${info.count} Times</div>
       </div>
