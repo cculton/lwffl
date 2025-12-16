@@ -9070,5 +9070,23 @@
         "manager2": "Ryan Carson",
         "score2": 63.16,
         "playoffs": "N/A"
+      },
+      {
+        "year": 2025,
+        "week": 15,
+        "manager1": "Adam Goho",
+        "score1": 100.64,
+        "manager2": "Tom Hos",
+        "score2": 105.86,
+        "playoffs": "First Round"
+      },
+      {
+        "year": 2025,
+        "week": 15,
+        "manager1": "Samuel Wheeler",
+        "score1": 118.92,
+        "manager2": "Cobey Culton",
+        "score2": 120.2,
+        "playoffs": "First Round"
       }
 ]
