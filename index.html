@@ -130,6 +130,15 @@
       text-transform: uppercase;
     }
 
+    .nav-section {
+      grid-column: 1 / -1;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 10px 0 2px;
+    }
+
     @media (max-width: 800px) {
       .links-grid {
         grid-template-columns: 1fr;
@@ -147,56 +156,7 @@
 
       <main>
         <div class="links-grid">
-          
-          <a href="record-book.html" class="nav-card">
-            <div>
-              <div class="nav-title">📖 Record Book</div>
-              <div class="nav-desc">
-                Peruse league records with various categories and filters. 
-              </div>
-            </div>
-            <div class="nav-footer">Open</div>
-          </a>
-
-          <a href="postseason-accomplishments.html" class="nav-card">
-            <div>
-              <div class="nav-title">🏆 Postseason Accomplishments</div>
-              <div class="nav-desc">
-                An interactive table showing championships, playoff appearances, and more. 
-              </div>
-            </div>
-            <div class="nav-footer">Open</div>
-          </a>
-
-          <a href="season-stats.html" class="nav-card">
-            <div>
-              <div class="nav-title">📊 Season By Season Stats</div>
-              <div class="nav-desc">
-                Sortable table of all single-season performances in LWFFL history.
-              </div>
-            </div>
-            <div class="nav-footer">Open</div>
-          </a>
-
-          <a href="h2h.html" class="nav-card">
-            <div>
-              <div class="nav-title">⚔️ H2H Matchup History</div>
-              <div class="nav-desc">
-                Explore every matchup between any two managers: outcomes, series streaks and more.
-              </div>
-            </div>
-            <div class="nav-footer">Open</div>
-          </a>
-          
-          <a href="probability-machine.html" class="nav-card">
-            <div>
-              <div class="nav-title">🕹️ Probability Machine</div>
-              <div class="nav-desc">
-                Calculate weekly win probabilities and season playoff odds using historical league data.
-              </div>
-            </div>
-            <div class="nav-footer">Open</div>
-          </a>
+          <div class="nav-section">Administrative</div>
 
           <a href="constitution.html" class="nav-card">
             <div>
@@ -205,7 +165,7 @@
                 Full text of the league constitution with easy navigation.
               </div>
             </div>
-            <div class="nav-footer">Open</div>
+            <div class="nav-footer">Open →</div>
           </a>
           
           <a href="amendment-history.html" class="nav-card">
@@ -215,7 +175,61 @@
                 A history of approved league amendments and LM-implemented rules from newest to oldest.
               </div>
             </div>
-            <div class="nav-footer">Open</div>
+            <div class="nav-footer">Open →</div>
+          </a>
+
+          <div class="nav-section">Stats &amp; Records</div>
+
+          <a href="record-book.html" class="nav-card">
+            <div>
+              <div class="nav-title">📖 Record Book</div>
+              <div class="nav-desc">
+                Peruse league records with various categories and filters. 
+              </div>
+            </div>
+            <div class="nav-footer">Open →</div>
+          </a>
+
+          <a href="postseason-accomplishments.html" class="nav-card">
+            <div>
+              <div class="nav-title">🏆 Postseason Accomplishments</div>
+              <div class="nav-desc">
+                An interactive table showing championships, playoff appearances, and more. 
+              </div>
+            </div>
+            <div class="nav-footer">Open →</div>
+          </a>
+
+          <a href="season-stats.html" class="nav-card">
+            <div>
+              <div class="nav-title">📊 Season By Season Stats</div>
+              <div class="nav-desc">
+                Sortable table of all single-season performances in LWFFL history.
+              </div>
+            </div>
+            <div class="nav-footer">Open →</div>
+          </a>
+
+          <a href="h2h.html" class="nav-card">
+            <div>
+              <div class="nav-title">⚔️ H2H Matchup History</div>
+              <div class="nav-desc">
+                Explore every matchup between any two managers: outcomes, series streaks and more.
+              </div>
+            </div>
+            <div class="nav-footer">Open →</div>
+          </a>
+
+          <div class="nav-section">For Fun</div>
+
+          <a href="probability-machine.html" class="nav-card">
+            <div>
+              <div class="nav-title">🕹️ Probability Machine</div>
+              <div class="nav-desc">
+                Calculate weekly win probabilities and season playoff odds using historical league data.
+              </div>
+            </div>
+            <div class="nav-footer">Open →</div>
           </a>
 
         </div>
