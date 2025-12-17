@@ -205,8 +205,8 @@
     .empty-case { font-size: 0.85rem; color: var(--text-soft); font-style: italic; }
 
     /* Right: OVR Rating & Attributes */
-    .rating-container { display: flex; align-items: center; gap: 20px; flex: 1; justify-content: flex-end; min-width: 260px; }
-    .sub-ratings { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; min-width: 180px; }
+    .rating-container { display: flex; align-items: center; gap: 32px; flex: 1; justify-content: flex-end; min-width: 320px; }
+    .sub-ratings { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; min-width: 180px; }
 
     /* Smaller label text to accommodate longer subcategory names (feature request) */
     .sub-stat {
@@ -548,7 +548,7 @@
           <div class="sub-stat" title="Peak: Highest Elo reached across all tracked games."><span>Peak</span> <span id="ratingSCOR">-</span></div>
           <div class="sub-stat" title="Floor: Lowest Elo reached across all tracked games."><span>Floor</span> <span id="ratingGM">-</span></div>
           <div class="sub-stat" title="Δ Last 10: Elo change over the last 10 games (or since start if fewer than 10)."><span>Δ Last 10</span> <span id="ratingCLT">-</span></div>
-          <div class="sub-stat" title="Rank: Current Elo rank (1 = highest)."><span>Rank</span> <span id="ratingSTB">-</span></div>
+          <div class="sub-stat" title="Rank: Current Elo rank (1 = highest). Required 3+ seasons."><span>Rank</span> <span id="ratingSTB">-</span></div>
         </div>
         <div class="ovr-badge" title="ELO: Rating that updates after every matchup based on opponent strength, margin of victory, and playoff weighting.">
           <div class="ovr-ring">
@@ -621,6 +621,16 @@
 
       <div class="card chart-card">
         <div class="chart-header">
+          <div class="chart-icon">⚡</div>
+          <h3>ELO Progression (Season-End)</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="eloProgressionChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="chart-header">
           <div class="chart-icon">✦</div>
           <h3>Luck Index (Quadrants)</h3>
         </div>
@@ -686,6 +696,7 @@
     let rawScores = [], rawStandings = [], rawSeeds = [];
     const charts = {};
     const leagueRatings = {};
+    const seasonalEloHistory = {}; // Store ELO at end of each season
 
     // Cached DOM
     const $ = (id) => document.getElementById(id);
@@ -704,13 +715,11 @@
     function fitHeroName() {
       const el = els.heroName;
       if (!el) return;
-      // Reset to CSS-defined size first
       el.style.fontSize = '';
       el.style.lineHeight = '';
       const cs = window.getComputedStyle(el);
       const lineHeight = parseFloat(cs.lineHeight) || (parseFloat(cs.fontSize) * 1.1);
-      const maxHeight = lineHeight * 2 + 1; // 2 lines (small buffer)
-      // If it overflows, step font size down slightly until it fits (or hits a floor)
+      const maxHeight = lineHeight * 2 + 1; 
       let fs = parseFloat(cs.fontSize) || 32;
       const minFs = 20;
       while (el.scrollHeight > maxHeight && fs > minFs) {
@@ -720,8 +729,7 @@
       }
     }
 
-    // NEW: Build tenure ranges (handles gaps like "2014-2019, 2022-Present")
-    function formatTenureRanges(seasons) {
+    function formatTenureRanges(seasons, managerName) {
       const years = Array.from(new Set((seasons || []).map(s => safeNum(s.year, null)).filter(Number.isFinite))).sort((a,b)=>a-b);
       if (!years.length) return '—';
 
@@ -744,7 +752,10 @@
       const parts = ranges.map(([a, b], idxRange) => {
         const isLast = idxRange === ranges.length - 1;
         if (a === b) {
-          // single season segment
+          // If it's a single year and it's the latest league year, mark as present
+          if (isLast && Number.isFinite(latestLeagueYear) && b >= latestLeagueYear) {
+            return `${a}-Present`;
+          }
           return `${a}`;
         }
         if (isLast && Number.isFinite(latestLeagueYear) && b >= latestLeagueYear) {
@@ -756,9 +767,8 @@
       return parts.join(', ');
     }
 
-    // --- Dynamic Earnings Calculation ---
     function getEarnings(year, rank, hasScoringTitle, isFinalsApp) {
-      let multiplier = 3.75; // Default (2021+)
+      let multiplier = 3.75; 
       if (year <= 2017) multiplier = 1.0;
       else if (year <= 2019) multiplier = 2.0;
       else if (year === 2020) multiplier = 2.5;
@@ -803,13 +813,6 @@
         score2: safeNum(g.score2, NaN),
         playoffs: g.playoffs ?? "N/A"
       };
-    }
-
-    function calcStdDev(values) {
-      if (!values.length) return 0;
-      const mean = values.reduce((a, b) => a + b, 0) / values.length;
-      const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
-      return Math.sqrt(variance);
     }
 
     // --- Indexes & Ranking Logic ---
@@ -925,10 +928,6 @@
       }
     }
 
-    /***********************
-     * Enhanced ELO helpers
-     * (kept local + minimal; no UI changes)
-     ***********************/
     function mean(arr) {
       if (!arr || !arr.length) return 0;
       return arr.reduce((a,b)=>a+b,0) / arr.length;
@@ -960,52 +959,30 @@
     }
 
     function calculateAllRatings() {
-      /**
-       * Enhanced ELO (still looks/behaves like ELO on the page)
-       * - Opponent strength (ELO core)
-       * - Heavier playoffs
-       * - Score quality (weekly z-score) + top-half credit via z-differential
-       * - "Floor" focus: penalizes frequent/low dud weeks (bottom-quartile z), never penalizes 190s
-       *
-       * Implementation note:
-       * - We keep updates zero-sum by applying one delta per matchup (A gains, B loses).
-       * - Scoring quality enters as a small adjustment to the "result" via zA - zB (bounded).
-       * - Floor enters via *expected win* (effective rating), so chronic dud teams are less "trusted."
-       */
-
       const BASE = 1500;
-
-      // Base K tuning (higher = more movement)
       const K_BASE = 40;
-      const G0 = 30; // stabilizes after ~2+ seasons worth of games
-
-      // Playoff weight (heavier)
+      const G0 = 30; 
       const PLAYOFF_MULT = 2.0;
-
-      // Score-quality influence (weekly relative): affects effective result slightly
-      const ETA_Z_DIFF = 0.08;      // 0.08 => small, noticeable; keep low for sanity
-      const Z_DIFF_CAP = 0.15;      // max +/- added to result (so wins still matter most)
-
-      // Floor / dud penalty (bottom-quartile z average): affects expected win only
-      const FLOOR_LOOKBACK = 50;    // rolling window in games
-      const FLOOR_Q = 0.25;         // worst 25%
-      const FLOOR_FACTOR = 70;      // rating points per 1.0 z in floorAvg (negative lowers effective rating)
-      const FLOOR_Z_CLIP = -2.5;    // avoid extreme early-season artifacts
+      const ETA_Z_DIFF = 0.08;      
+      const Z_DIFF_CAP = 0.15;      
+      const FLOOR_LOOKBACK = 50;    
+      const FLOOR_Q = 0.25;         
+      const FLOOR_FACTOR = 70;      
+      const FLOOR_Z_CLIP = -2.5;    
 
       const rating = {};
       const gamesPlayed = {};
       const history = {};
-      const zHist = {}; // manager -> array of weekly z-scores (for floor)
+      const zHist = {}; 
 
-      // Initialize for every known manager
       idx.managers.forEach(m => {
         rating[m] = BASE;
         gamesPlayed[m] = 0;
         history[m] = [BASE];
         zHist[m] = [];
+        seasonalEloHistory[m] = [];
       });
 
-      // Build chronologically ordered game list from league-scores.json
       const games = (rawScores || [])
         .map(normalizeScoreRow)
         .filter(g =>
@@ -1015,70 +992,68 @@
         )
         .sort((a, b) => (a.year !== b.year ? a.year - b.year : a.week - b.week));
 
-      // Precompute per-week mean/std + top-half cutoff using idx.weekBuckets (already built from same rawScores)
-      const weekStats = new Map(); // "year::week" -> { mu, sd, topCut }
+      const weekStats = new Map(); 
       idx.weekBuckets.forEach((arr, key) => {
         const scores = (arr || []).map(x => safeNum(x.score, NaN)).filter(Number.isFinite);
         const mu = mean(scores);
         const sd = stdev(scores) || 1;
-        const topCut = median(scores); // >= median => top half (simple, stable)
+        const topCut = median(scores); 
         weekStats.set(key, { mu, sd, topCut });
       });
 
-      games.forEach(g => {
+      let currentYear = games.length ? games[0].year : null;
+
+      games.forEach((g, idxGame) => {
+        // Track ELO at the transition of years
+        if (g.year !== currentYear) {
+          idx.managers.forEach(m => {
+            seasonalEloHistory[m].push({ year: currentYear, elo: Math.round(rating[m]) });
+          });
+          currentYear = g.year;
+        }
+
         const A = g.manager1;
         const B = g.manager2;
 
-        // Ensure managers exist (in case a name appears only in scores)
-        if (!(A in rating)) { rating[A] = BASE; gamesPlayed[A] = 0; history[A] = [BASE]; zHist[A] = []; }
-        if (!(B in rating)) { rating[B] = BASE; gamesPlayed[B] = 0; history[B] = [BASE]; zHist[B] = []; }
+        if (!(A in rating)) { rating[A] = BASE; gamesPlayed[A] = 0; history[A] = [BASE]; zHist[A] = []; seasonalEloHistory[A] = []; }
+        if (!(B in rating)) { rating[B] = BASE; gamesPlayed[B] = 0; history[B] = [BASE]; zHist[B] = []; seasonalEloHistory[B] = []; }
 
-        // Week stats for z-score
         const wkKey = `${g.year}::${g.week}`;
         const ws = weekStats.get(wkKey) || { mu: 0, sd: 1, topCut: Infinity };
 
         const zA = (g.score1 - ws.mu) / ws.sd;
         const zB = (g.score2 - ws.mu) / ws.sd;
 
-        // Update z histories (used for floor, but floor is computed pre-update for this game)
         const zAHist = zHist[A] || [];
         const zBHist = zHist[B] || [];
 
         const floorAraw = bottomQuantileAverage(zAHist.slice(-FLOOR_LOOKBACK), FLOOR_Q);
         const floorBraw = bottomQuantileAverage(zBHist.slice(-FLOOR_LOOKBACK), FLOOR_Q);
 
-        // Clip floor to avoid insane early/noisy values; note floors are typically <= 0
         const floorA = clamp(floorAraw, FLOOR_Z_CLIP, 0);
         const floorB = clamp(floorBraw, FLOOR_Z_CLIP, 0);
 
-        // Effective ratings adjust expected win based on "how low your lows go"
         const RA = rating[A];
         const RB = rating[B];
-        const effRA = RA + FLOOR_FACTOR * floorA; // floorA is negative => lowers effRA
+        const effRA = RA + FLOOR_FACTOR * floorA; 
         const effRB = RB + FLOOR_FACTOR * floorB;
 
-        // Expected result (using effective ratings)
         const EA = eloExpected(effRA, effRB);
 
-        // Actual result
         let SA = 0.5;
         if (g.score1 > g.score2) SA = 1;
         else if (g.score1 < g.score2) SA = 0;
 
-        // Score-quality adjustment to the result (bounded), based on weekly-relative performance
         const zDiff = zA - zB;
         const adj = clamp(ETA_Z_DIFF * zDiff, -Z_DIFF_CAP, Z_DIFF_CAP);
         const SA_adj = clamp(SA + adj, 0, 1);
 
-        // Margin of victory multiplier (keep your existing behavior, but prevent extreme spikes)
-        const m = Math.abs(g.score1 - g.score2);
-        const M = clamp(Math.log(m + 1), 0.2, 2.2);
+        const mVal = Math.abs(g.score1 - g.score2);
+        const M = clamp(Math.log(mVal + 1), 0.2, 2.2);
 
-        // Playoff weighting (heavier)
         const isPlayoff = (g.playoffs && g.playoffs !== "N/A") ? 1 : 0;
         const P = isPlayoff ? PLAYOFF_MULT : 1.0;
 
-        // K-factor with sample-size stabilization (average to keep updates symmetric)
         const KA = K_BASE * (G0 / (G0 + (gamesPlayed[A] || 0)));
         const KB = K_BASE * (G0 / (G0 + (gamesPlayed[B] || 0)));
         const K = (KA + KB) / 2;
@@ -1094,20 +1069,30 @@
         history[A].push(rating[A]);
         history[B].push(rating[B]);
 
-        // Now append z-scores (after using prior history for floor)
         zAHist.push(zA);
         zBHist.push(zB);
         zHist[A] = zAHist;
         zHist[B] = zBHist;
+
+        // Final game capture
+        if (idxGame === games.length - 1) {
+          idx.managers.forEach(m => {
+            seasonalEloHistory[m].push({ year: g.year, elo: Math.round(rating[m]) });
+          });
+        }
       });
 
-      // Compute ranks (1 = highest Elo)
-      const managers = Object.keys(rating);
-      const sorted = [...managers].sort((a, b) => rating[b] - rating[a]);
+      // Compute ranks (1 = highest Elo) - ONLY for managers with 3+ seasons
       const rankMap = {};
+      const eligibleManagers = idx.managers.filter(m => {
+        const seasons = idx.standingsByManager.get(m) || [];
+        return seasons.length >= 3;
+      });
+      
+      const sorted = [...eligibleManagers].sort((a, b) => rating[b] - rating[a]);
       sorted.forEach((m, i) => { rankMap[m] = i + 1; });
 
-      managers.forEach(m => {
+      idx.managers.forEach(m => {
         const h = history[m] || [BASE];
         const peak = Math.max(...h);
         const floor = Math.min(...h);
@@ -1121,7 +1106,7 @@
           peak: Math.round(peak),
           floor: Math.round(floor),
           d10: Math.round(d10),
-          rank: rankMap[m] || '-'
+          rank: rankMap[m] || '—'
         };
       });
     }
@@ -1161,81 +1146,64 @@
       renderClutchChart(myGames);
       renderCareerChart(mySeasons);
       renderFormStrip(myGames);
-
       renderHardwareChart(mySeasons);
       renderHeartAttackChart(myGames);
       renderHighLow(myGames);
       renderFateFlow(mySeasons, name);
+      renderEloProgressionChart(name);
     }
 
-function renderHero(name, seasons) {
-  const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase();
-  els.heroAvatar.textContent = initials;
-  els.heroName.textContent = name;
-  fitHeroName();
-  els.heroTenure.textContent = formatTenureRanges(seasons);
+    function renderHero(name, seasons) {
+      const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      els.heroAvatar.textContent = initials;
+      els.heroName.textContent = name;
+      fitHeroName();
+      els.heroTenure.textContent = formatTenureRanges(seasons, name);
 
-  const caseEl = els.trophyCase;
-  caseEl.innerHTML = '';
+      const caseEl = els.trophyCase;
+      caseEl.innerHTML = '';
 
-  // --- Hardware counts ---
-  let champs = 0, runners = 0, thirds = 0, divisions = 0;
-  seasons.forEach(s => {
-    if (s.final_standing === 1) champs++;
-    else if (s.final_standing === 2) runners++;
-    else if (s.final_standing === 3) thirds++;
-    if (s.division_finish === 1) divisions++;
-  });
+      let champs = 0, runners = 0, thirds = 0, divisions = 0;
+      seasons.forEach(s => {
+        if (s.final_standing === 1) champs++;
+        else if (s.final_standing === 2) runners++;
+        else if (s.final_standing === 3) thirds++;
+        if (s.division_finish === 1) divisions++;
+      });
 
-  const scoringTitles =
-    idx.scoringTitlesByManager.get(name)?.size || 0;
+      const scoringTitles = idx.scoringTitlesByManager.get(name)?.size || 0;
+      const pills = [];
 
-  const pills = [];
+      if (champs > 0) pills.push(`<span class="trophy-badge gold">🏆 Champion ×${champs}</span>`);
+      if (runners > 0) pills.push(`<span class="trophy-badge silver">🥈 Runner-Up ×${runners}</span>`);
+      if (thirds > 0) pills.push(`<span class="trophy-badge bronze">🥉 3rd Place ×${thirds}</span>`);
+      if (scoringTitles > 0) pills.push(`<span class="trophy-badge scoring">🕹️ Scoring Title ×${scoringTitles}</span>`);
+      if (divisions > 0) pills.push(`<span class="trophy-badge" style="background: rgba(34,197,94,0.15); border-color: rgba(34,197,94,0.4); color: var(--positive);">🏁 Division Title ×${divisions}</span>`);
 
-  if (champs > 0)
-    pills.push(`<span class="trophy-badge gold">🏆 Champion ×${champs}</span>`);
-  if (runners > 0)
-    pills.push(`<span class="trophy-badge silver">🥈 Runner-Up ×${runners}</span>`);
-  if (thirds > 0)
-    pills.push(`<span class="trophy-badge bronze">🥉 3rd Place ×${thirds}</span>`);
-  if (scoringTitles > 0)
-    pills.push(`<span class="trophy-badge scoring">🕹️ Scoring Title ×${scoringTitles}</span>`);
-  if (divisions > 0)
-    pills.push(
-      `<span class="trophy-badge" style="
-        background: rgba(34,197,94,0.15);
-        border-color: rgba(34,197,94,0.4);
-        color: var(--positive);
-      ">🏁 Division Title ×${divisions}</span>`
-    );
+      caseEl.innerHTML = pills.length ? pills.join('') : `<span class="empty-case">No hardware... yet.</span>`;
 
-  caseEl.innerHTML = pills.length
-    ? pills.join('')
-    : `<span class="empty-case">No hardware... yet.</span>`;
+      const r = leagueRatings[name];
+      const ovrEl = els.heroOvr;
+      const target = r.elo;
+      let current = clamp(Number(ovrEl.textContent) || 0, 0, target);
 
-  const r = leagueRatings[name];
-  const ovrEl = els.heroOvr;
-  const target = r.elo;
-  let current = clamp(Number(ovrEl.textContent) || 0, 0, target);
+      const step = () => {
+        current = Math.min(target, current + Math.max(1, Math.ceil(target / 40)));
+        ovrEl.textContent = current;
+        if (current < target) requestAnimationFrame(step);
+      };
+      step();
 
-  const step = () => {
-    current = Math.min(target, current + Math.max(1, Math.ceil(target / 40)));
-    ovrEl.textContent = current;
-    if (current < target) requestAnimationFrame(step);
-    };
-  step();
-
-  els.ratingSCOR.textContent = r.peak;
-  els.ratingGM.textContent = r.floor;
-  els.ratingCLT.textContent = (r.d10 >= 0 ? "+" : "") + r.d10;
-  els.ratingSTB.textContent = r.rank;
-  }
+      els.ratingSCOR.textContent = r.peak;
+      els.ratingGM.textContent = r.floor;
+      els.ratingCLT.textContent = (r.d10 >= 0 ? "+" : "") + r.d10;
+      els.ratingSTB.textContent = r.rank;
+    }
 
     function renderStats(seasons, games, managerName) {
       const w = games.filter(g => g.result === 'W').length;
       const l = games.filter(g => g.result === 'L').length;
       const t = games.filter(g => g.result === 'T').length;
-
       els.statRecord.textContent = `${w}-${l}-${t}`;
 
       const pct = games.length ? (w + t * 0.5) / games.length : 0;
@@ -1255,7 +1223,6 @@ function renderHero(name, seasons) {
         money += getEarnings(s.year, s.final_standing, hasScoring);
       });
       els.statEarnings.textContent = moneyFmt(money);
-      els.statEarnings.style.color = 'var(--money)';
     }
 
     function renderRivalries(h2h) {
@@ -1284,7 +1251,6 @@ function renderHero(name, seasons) {
       seasons.forEach(s => {
         const seed = idx.seedsByManagerYear.get(keyMY(managerName, s.year)) ?? '-';
         const rank = s.final_standing;
-
         const hasScoring = (idx.scoringTitlesByManager.get(managerName) || new Set()).has(s.year);
         const money = getEarnings(s.year, rank, hasScoring);
 
@@ -1300,7 +1266,6 @@ function renderHero(name, seasons) {
         `;
         frag.appendChild(tr);
       });
-
       tbody.appendChild(frag);
     }
 
@@ -1333,21 +1298,17 @@ function renderHero(name, seasons) {
 
         strip.appendChild(dot);
       });
-
       recEl.textContent = last10.length ? `${w}-${l}-${t}` : '—';
     }
 
     function renderHighLow(games) {
       const el = $('hlTicker');
       if(!el) return;
-
       const validGames = games.filter(g => Number.isFinite(g.score));
       if(!validGames.length) { el.innerHTML = ''; return; }
-
       validGames.sort((a,b) => b.score - a.score);
       const high = validGames[0];
       const low = validGames[validGames.length - 1];
-
       el.innerHTML = `
         <div class="hl-row hl-high">
           <div class="hl-icon">▲</div>
@@ -1369,51 +1330,27 @@ function renderHero(name, seasons) {
     function renderFateFlow(seasons, managerName) {
       const container = $('fateFlow');
       if(!container) return;
-
       let total = 0, playoffs = 0, finals = 0, titles = 0;
-
       seasons.forEach(s => {
         if(!Number.isFinite(s.year)) return;
         total++;
         const seed = idx.seedsByManagerYear.get(keyMY(managerName, s.year));
         const rank = s.final_standing;
-
-        let madePlayoffs = false;
-        if(seed) madePlayoffs = true;
-        if(Number.isFinite(rank) && rank <= 6) madePlayoffs = true;
-
+        let madePlayoffs = !!seed || (Number.isFinite(rank) && rank <= 6);
         if(madePlayoffs) playoffs++;
         if(Number.isFinite(rank)) {
           if(rank <= 2) finals++;
           if(rank === 1) titles++;
         }
       });
-
       const pctP = total ? (playoffs / total * 100) : 0;
       const pctF = total ? (finals / total * 100) : 0;
       const pctT = total ? (titles / total * 100) : 0;
-
       container.innerHTML = `
-        <div class="fate-step">
-          <div class="fate-bar" style="width:100%"></div>
-          <div class="fate-label">Seasons Played</div>
-          <div class="fate-val">${total}</div>
-        </div>
-        <div class="fate-step step-playoffs">
-          <div class="fate-bar" style="width:${pctP}%"></div>
-          <div class="fate-label">Made Playoffs</div>
-          <div class="fate-val">${playoffs}</div>
-        </div>
-        <div class="fate-step step-finals">
-          <div class="fate-bar" style="width:${pctF}%"></div>
-          <div class="fate-label">Made Finals</div>
-          <div class="fate-val">${finals}</div>
-        </div>
-        <div class="fate-step step-titles">
-          <div class="fate-bar" style="width:${pctT}%"></div>
-          <div class="fate-label">Champion</div>
-          <div class="fate-val">${titles}</div>
-        </div>
+        <div class="fate-step"><div class="fate-bar" style="width:100%"></div><div class="fate-label">Seasons Played</div><div class="fate-val">${total}</div></div>
+        <div class="fate-step step-playoffs"><div class="fate-bar" style="width:${pctP}%"></div><div class="fate-label">Made Playoffs</div><div class="fate-val">${playoffs}</div></div>
+        <div class="fate-step step-finals"><div class="fate-bar" style="width:${pctF}%"></div><div class="fate-label">Made Finals</div><div class="fate-val">${finals}</div></div>
+        <div class="fate-step step-titles"><div class="fate-bar" style="width:${pctT}%"></div><div class="fate-label">Champion</div><div class="fate-val">${titles}</div></div>
       `;
     }
 
@@ -1422,18 +1359,50 @@ function renderHero(name, seasons) {
     Chart.defaults.font.family = 'system-ui';
     const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
 
+    function renderEloProgressionChart(name) {
+      const canvas = $('eloProgressionChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (charts.eloProg) charts.eloProg.destroy();
+
+      const dataPoints = seasonalEloHistory[name] || [];
+
+      charts.eloProg = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: dataPoints.map(d => d.year),
+          datasets: [{
+            data: dataPoints.map(d => d.elo),
+            borderColor: '#38bdf8',
+            backgroundColor: 'rgba(56, 189, 248, 0.1)',
+            borderWidth: 3,
+            pointRadius: 5,
+            pointHoverRadius: 8,
+            pointBackgroundColor: '#fff',
+            tension: 0.1,
+            fill: true
+          }]
+        },
+        options: {
+          ...commonOptions,
+          scales: {
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { stepSize: 50 } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
     function renderLuckChart(seasons, managerName) {
       const canvas = $('luckChart');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (charts.luck) charts.luck.destroy();
-
       const points = seasons.map(s => {
         const k = keyMY(managerName, s.year);
         const ranks = idx.seasonRanks[k] || { pfRank: 6, paRank: 6 };
         return { x: ranks.pfRank, y: ranks.paRank, year: s.year };
       });
-
       const quadrantPlugin = {
         id: 'quadrants',
         beforeDraw(chart) {
@@ -1442,64 +1411,21 @@ function renderHero(name, seasons) {
           const midY = (top + bottom) / 2;
           ctx.save();
           ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-          ctx.lineWidth = 1;
-          ctx.setLineDash([4, 4]);
-          ctx.beginPath();
-          ctx.moveTo(midX, top); ctx.lineTo(midX, bottom);
-          ctx.moveTo(left, midY); ctx.lineTo(right, midY);
-          ctx.stroke();
-          ctx.font = '600 9px system-ui';
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-          ctx.textAlign = 'center';
-
+          ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+          ctx.beginPath(); ctx.moveTo(midX, top); ctx.lineTo(midX, bottom); ctx.moveTo(left, midY); ctx.lineTo(right, midY); ctx.stroke();
+          ctx.font = '600 9px system-ui'; ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; ctx.textAlign = 'center';
           ctx.fillText("DOMINANT & LUCKY", (left + midX) / 2, top + 15);
           ctx.fillText("SUBPAR & LUCKY", (midX + right) / 2, top + 15);
           ctx.fillText("DOMINANT & UNLUCKY", (left + midX) / 2, bottom - 10);
           ctx.fillText("SUBPAR & UNLUCKY", (midX + right) / 2, bottom - 10);
-
           ctx.restore();
         }
       };
-
       charts.luck = new Chart(ctx, {
         type: 'scatter',
-        data: {
-          datasets: [{
-            data: points,
-            backgroundColor: 'rgba(56, 189, 248, 0.55)',
-            borderColor: 'rgba(56, 189, 248, 0.9)',
-            pointBorderWidth: 2,
-            pointRadius: 6,
-            pointHoverRadius: 8
-          }]
-        },
+        data: { datasets: [{ data: points, backgroundColor: 'rgba(56, 189, 248, 0.55)', borderColor: 'rgba(56, 189, 248, 0.9)', pointBorderWidth: 2, pointRadius: 6 }] },
         plugins: [quadrantPlugin],
-        options: {
-          ...commonOptions,
-          layout: { padding: { top: 10 } },
-          scales: {
-            x: {
-              title: { display: true, text: 'PF Rank (1=Best)' },
-              min: 0,
-              max: 12,
-              ticks: { stepSize: 1, callback: (v) => Number(v).toFixed(0) },
-              grid: { display: false },
-              reverse: false
-            },
-            y: {
-              title: { display: true, text: 'PA Rank (1=Unlucky)' },
-              min: 0,
-              max: 12,
-              ticks: { stepSize: 1, callback: (v) => Number(v).toFixed(0) },
-              grid: { display: false },
-              reverse: false
-            }
-          },
-          plugins: {
-            legend: { display: false },
-            tooltip: { callbacks: { label: (c) => `${c.raw.year}: PF #${c.raw.x} | PA #${c.raw.y}` } }
-          }
-        }
+        options: { ...commonOptions, scales: { x: { min:0, max:12, ticks:{ stepSize:1 } }, y: { min:0, max:12, ticks:{ stepSize:1 } } } }
       });
     }
 
@@ -1508,37 +1434,12 @@ function renderHero(name, seasons) {
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (charts.spread) charts.spread.destroy();
-
       const years = [...new Set(games.map(g => g.year).filter(Number.isFinite))].sort((a, b) => a - b);
       const data = years.map(y => {
         const scores = games.filter(g => g.year === y).map(g => g.score).filter(Number.isFinite);
-        if (!scores.length) return [0, 0];
-        return [Math.min(...scores), Math.max(...scores)];
+        return scores.length ? [Math.min(...scores), Math.max(...scores)] : [0,0];
       });
-
-      charts.spread = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: years,
-          datasets: [{
-            data: data,
-            backgroundColor: 'rgba(56, 189, 248, 0.4)',
-            borderWidth: 0,
-            borderSkipped: false,
-            borderRadius: 4,
-            barPercentage: 0.6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: { callbacks: { label: (c) => `Range: ${c.raw[0]} - ${c.raw[1]}` } }
-          },
-          scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } }
-        }
-      });
+      charts.spread = new Chart(ctx, { type: 'bar', data: { labels: years, datasets: [{ data, backgroundColor: 'rgba(56, 189, 248, 0.4)', borderRadius: 4 }] }, options: commonOptions });
     }
 
     function renderClutchChart(games) {
@@ -1546,27 +1447,12 @@ function renderHero(name, seasons) {
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (charts.clutch) charts.clutch.destroy();
-
       const reg = games.filter(g => !g.isPlayoff).map(g => g.score).filter(Number.isFinite);
       const play = games.filter(g => g.isPlayoff).map(g => g.score).filter(Number.isFinite);
-
-      const regAvg = reg.length ? reg.reduce((a, b) => a + b, 0) / reg.length : 0;
-      const playAvg = play.length ? play.reduce((a, b) => a + b, 0) / play.length : 0;
-
       charts.clutch = new Chart(ctx, {
         type: 'bar',
-        data: {
-          labels: ['Regular Season', 'Playoffs'],
-          datasets: [{ data: [regAvg, playAvg], backgroundColor: ['#38bdf8', '#fbbf24'], borderRadius: 4 }]
-        },
-        options: {
-          ...commonOptions,
-          indexAxis: 'y',
-          scales: {
-            x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
-            y: { grid: { display: false }, ticks: { color: '#fff', font: { weight: 'bold' } } }
-          }
-        }
+        data: { labels: ['Regular Season', 'Playoffs'], datasets: [{ data: [mean(reg), mean(play)], backgroundColor: ['#38bdf8', '#fbbf24'], borderRadius: 4 }] },
+        options: { ...commonOptions, indexAxis: 'y' }
       });
     }
 
@@ -1575,39 +1461,11 @@ function renderHero(name, seasons) {
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (charts.career) charts.career.destroy();
-
       const sorted = [...seasons].filter(s => Number.isFinite(s.year)).sort((a, b) => a.year - b.year);
-
       charts.career = new Chart(ctx, {
         type: 'line',
-        data: {
-          labels: sorted.map(s => s.year),
-          datasets: [{
-            data: sorted.map(s => Number.isFinite(s.final_standing) ? s.final_standing : null),
-            borderColor: '#38bdf8',
-            borderWidth: 2,
-            tension: 0.3,
-            fill: false,
-            pointBackgroundColor: '#0f172a',
-            pointBorderColor: '#38bdf8',
-            pointBorderWidth: 2
-          }]
-        },
-        options: {
-          ...commonOptions,
-          layout: { padding: { top: 16, bottom: 16 } },
-          scales: {
-            y: {
-              reverse: false,
-              min: 1,
-              max: 12,
-              grace: '10%',
-              ticks: { stepSize: 1, callback: (v) => Number(v).toFixed(0) },
-              grid: { color: 'rgba(255,255,255,0.05)' }
-            },
-            x: { grid: { display: false } }
-          }
-        }
+        data: { labels: sorted.map(s => s.year), datasets: [{ data: sorted.map(s => s.final_standing), borderColor: '#38bdf8', tension: 0.3 }] },
+        options: { ...commonOptions, scales: { y: { reverse: true, min: 1, max: 12, ticks: { stepSize: 1 } } } }
       });
     }
 
@@ -1616,37 +1474,14 @@ function renderHero(name, seasons) {
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (charts.heart) charts.heart.destroy();
-
       let wins=0, losses=0;
       games.forEach(g => {
         if(Number.isFinite(g.score) && Number.isFinite(g.oppScore)) {
           const diff = Math.abs(g.score - g.oppScore);
-          if(diff < 5) {
-            if(g.result === 'W') wins++;
-            else if(g.result === 'L') losses++;
-          }
+          if(diff < 5) { if(g.result === 'W') wins++; else if(g.result === 'L') losses++; }
         }
       });
-
-      charts.heart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Wins', 'Losses'],
-          datasets: [{
-            data: [wins, losses],
-            backgroundColor: ['#22c55e', '#ef4444'],
-            borderWidth: 0,
-            hoverOffset: 4
-          }]
-        },
-        options: {
-          ...commonOptions,
-          cutout: '65%',
-          plugins: {
-            legend: { display: true, position: 'bottom', labels: { color: '#94a3b8' } }
-          }
-        }
-      });
+      charts.heart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Wins', 'Losses'], datasets: [{ data: [wins, losses], backgroundColor: ['#22c55e', '#ef4444'], borderWidth: 0 }] }, options: { ...commonOptions, cutout: '65%', plugins: { legend: { display: true, position: 'bottom' } } } });
     }
 
     function renderHardwareChart(seasons) {
@@ -1654,37 +1489,15 @@ function renderHero(name, seasons) {
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (charts.hw) charts.hw.destroy();
-
       let g=0, s=0, b=0, none=0;
       seasons.forEach(row => {
         const r = row.final_standing;
-        if(r === 1) g++;
-        else if(r === 2) s++;
-        else if(r === 3) b++;
-        else none++;
+        if(r === 1) g++; else if(r === 2) s++; else if(r === 3) b++; else none++;
       });
-
       charts.hw = new Chart(ctx, {
         type: 'bar',
-        data: {
-          labels: ['Career Finishes'],
-          datasets: [
-            { label: 'Gold', data: [g], backgroundColor: '#fbbf24', barThickness: 40 },
-            { label: 'Silver', data: [s], backgroundColor: '#cbd5e1', barThickness: 40 },
-            { label: 'Bronze', data: [b], backgroundColor: '#d97706', barThickness: 40 },
-            { label: 'Other', data: [none], backgroundColor: '#334155', barThickness: 40 }
-          ]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: true, position: 'bottom', labels: { color:'#94a3b8' } } },
-          scales: {
-            x: { stacked: true, grid: { display:false }, ticks:{ color:'#94a3b8', stepSize:1 } },
-            y: { stacked: true, display: false }
-          }
-        }
+        data: { labels: ['Finishes'], datasets: [{ label: 'Gold', data: [g], backgroundColor: '#fbbf24' }, { label: 'Silver', data: [s], backgroundColor: '#cbd5e1' }, { label: 'Bronze', data: [b], backgroundColor: '#d97706' }, { label: 'Other', data: [none], backgroundColor: '#334155' }] },
+        options: { indexAxis: 'y', scales: { x: { stacked: true }, y: { stacked: true, display: false } } }
       });
     }
 
@@ -1697,10 +1510,8 @@ function renderHero(name, seasons) {
       shell.appendChild(div);
     }
 
-    // --- Initialization ---
     document.addEventListener('DOMContentLoaded', async () => {
       window.addEventListener('resize', () => { try { fitHeroName(); } catch(e){} });
-
       [
         'managerSelect', 'heroAvatar', 'heroName', 'heroTenure', 'trophyCase', 'heroOvr',
         'ratingSCOR', 'ratingGM', 'ratingCLT', 'ratingSTB',
@@ -1715,10 +1526,7 @@ function renderHero(name, seasons) {
           fetch('final-standings.json'),
           fetch('playoff-seeds.json')
         ]);
-
-        if (!sRes.ok || !stRes.ok || !sdRes.ok) {
-          throw new Error(`Data load failed: scores=${sRes.status}, standings=${stRes.status}, seeds=${sdRes.status}`);
-        }
+        if (!sRes.ok || !stRes.ok || !sdRes.ok) throw new Error("Data load failed");
 
         rawScores = (await sRes.json()) || [];
         rawStandings = ((await stRes.json()) || []).map(normalizeStandingsRow);
@@ -1733,11 +1541,9 @@ function renderHero(name, seasons) {
 
         const firstMgr = els.managerSelect.options?.[0]?.value;
         if (firstMgr) loadManager(firstMgr);
-        else showErrorCard("No managers found in your data files.");
-
       } catch (err) {
         console.error(err);
-        showErrorCard("Unable to load league data. Please ensure JSON files are present and valid.");
+        showErrorCard("Unable to load league data.");
       }
     });
   </script>
