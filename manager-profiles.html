@@ -199,7 +199,7 @@
 
     .trophy-badge.gold { background: var(--gold-bg); color: var(--gold); border-color: rgba(251, 191, 36, 0.3); }
     .trophy-badge.silver { background: var(--silver-bg); color: var(--silver); border-color: rgba(203, 213, 225, 0.3); }
-    .trophy-badge.bronze { background: var(--bronze-bg); color: var(--bronze); border-color: rgba(217, 119, 6, 0.3); }
+    .trophy-badge.bronze { background: var(--bronze-bg); color: var(--bronze); border-color: rgba(217, 119, 6, 0.1); }
     .trophy-badge.scoring { background: rgba(59, 130, 246, 0.16); color: #93c5fd; border-color: rgba(59, 130, 246, 0.35); }
 
     .empty-case { font-size: 0.85rem; color: var(--text-soft); font-style: italic; }
@@ -208,7 +208,6 @@
     .rating-container { display: flex; align-items: center; gap: 32px; flex: 1; justify-content: flex-end; min-width: 320px; }
     .sub-ratings { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; min-width: 180px; }
 
-    /* Smaller label text to accommodate longer subcategory names (feature request) */
     .sub-stat {
       display: flex;
       justify-content: space-between;
@@ -440,7 +439,6 @@
       z-index: 2;
     }
 
-    /* Updated color semantics per request */
     .step-playoffs .fate-bar { background: rgba(217, 119, 6, 0.15); border-color: var(--bronze); }
     .step-finals .fate-bar { background: rgba(203, 213, 225, 0.12); border-color: var(--silver); }
     .step-titles .fate-bar { background: rgba(251, 191, 36, 0.15); border-color: var(--gold); }
@@ -471,7 +469,6 @@
     tr:last-child td { border-bottom: none; }
     tbody tr:hover { background: rgba(56, 189, 248, 0.03); }
 
-    /* Skeleton Loading */
     .skeleton {
       background: rgba(255,255,255,0.05);
       border-radius: 4px;
@@ -488,7 +485,6 @@
     }
     @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 
-    /* Responsive */
     @media (max-width: 1024px) {
       .hero-card { flex-wrap: wrap; padding: 24px; gap: 24px; }
       .trophy-case {
@@ -611,11 +607,11 @@
 
       <div class="card chart-card">
         <div class="chart-header">
-          <div class="chart-icon">💓</div>
-          <h3>Heart Attack Ratio (Games &lt; 5 pts)</h3>
+          <div class="chart-icon">✦</div>
+          <h3>Luck Index (Quadrants)</h3>
         </div>
         <div class="chart-container">
-          <canvas id="heartChart"></canvas>
+          <canvas id="luckChart"></canvas>
         </div>
       </div>
 
@@ -631,11 +627,11 @@
 
       <div class="card chart-card">
         <div class="chart-header">
-          <div class="chart-icon">✦</div>
-          <h3>Luck Index (Quadrants)</h3>
+          <div class="chart-icon">💓</div>
+          <h3>Heart Attack Ratio (Games &lt; 5 pts)</h3>
         </div>
         <div class="chart-container">
-          <canvas id="luckChart"></canvas>
+          <canvas id="heartChart"></canvas>
         </div>
       </div>
 
@@ -692,26 +688,22 @@
   </div>
 
   <script>
-    // --- Constants & Global State ---
     let rawScores = [], rawStandings = [], rawSeeds = [];
     const charts = {};
     const leagueRatings = {};
-    const seasonalEloHistory = {}; // Store ELO at end of each season
+    const seasonalEloHistory = {};
+    const leagueSeasonalAverage = {};
 
-    // Cached DOM
     const $ = (id) => document.getElementById(id);
     const els = {};
 
-    // --- Helpers ---
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
     const safeNum = (v, fallback = 0) => Number.isFinite(Number(v)) ? Number(v) : fallback;
     const moneyFmt = (n) => `$${Number(n || 0).toLocaleString()}`;
     const keyMY = (m, y) => `${m}::${y}`;
 
-    // League-wide latest year (used for tenure end detection)
     let latestLeagueYear = null;
 
-    // Shrink very long names so they fit in two lines in the hero header.
     function fitHeroName() {
       const el = els.heroName;
       if (!el) return;
@@ -752,7 +744,6 @@
       const parts = ranges.map(([a, b], idxRange) => {
         const isLast = idxRange === ranges.length - 1;
         if (a === b) {
-          // If it's a single year and it's the latest league year, mark as present
           if (isLast && Number.isFinite(latestLeagueYear) && b >= latestLeagueYear) {
             return `${a}-Present`;
           }
@@ -767,7 +758,7 @@
       return parts.join(', ');
     }
 
-    function getEarnings(year, rank, hasScoringTitle, isFinalsApp) {
+    function getEarnings(year, rank, hasScoringTitle) {
       let multiplier = 3.75; 
       if (year <= 2017) multiplier = 1.0;
       else if (year <= 2019) multiplier = 2.0;
@@ -779,11 +770,9 @@
       const baseScoring = 20 * multiplier;
 
       let total = 0;
-
       if (rank <= 4) total += baseSemis;
       if (rank <= 2) total += baseFinalsApp;
       if (rank === 1) total += baseChamp;
-
       if (hasScoringTitle) total += baseScoring;
 
       return total;
@@ -815,7 +804,6 @@
       };
     }
 
-    // --- Indexes & Ranking Logic ---
     const idx = {
       managers: [],
       standingsByManager: new Map(),
@@ -1004,11 +992,14 @@
       let currentYear = games.length ? games[0].year : null;
 
       games.forEach((g, idxGame) => {
-        // Track ELO at the transition of years
         if (g.year !== currentYear) {
+          const yearlyRatings = [];
           idx.managers.forEach(m => {
-            seasonalEloHistory[m].push({ year: currentYear, elo: Math.round(rating[m]) });
+            const currentR = rating[m];
+            seasonalEloHistory[m].push({ year: currentYear, elo: Math.round(currentR) });
+            yearlyRatings.push(currentR);
           });
+          leagueSeasonalAverage[currentYear] = mean(yearlyRatings);
           currentYear = g.year;
         }
 
@@ -1074,15 +1065,17 @@
         zHist[A] = zAHist;
         zHist[B] = zBHist;
 
-        // Final game capture
         if (idxGame === games.length - 1) {
+          const yearlyRatings = [];
           idx.managers.forEach(m => {
-            seasonalEloHistory[m].push({ year: g.year, elo: Math.round(rating[m]) });
+            const currentR = rating[m];
+            seasonalEloHistory[m].push({ year: g.year, elo: Math.round(currentR) });
+            yearlyRatings.push(currentR);
           });
+          leagueSeasonalAverage[g.year] = mean(yearlyRatings);
         }
       });
 
-      // Compute ranks (1 = highest Elo) - ONLY for managers with 3+ seasons
       const rankMap = {};
       const eligibleManagers = idx.managers.filter(m => {
         const seasons = idx.standingsByManager.get(m) || [];
@@ -1354,7 +1347,6 @@
       `;
     }
 
-    // --- Charts ---
     Chart.defaults.color = '#64748b';
     Chart.defaults.font.family = 'system-ui';
     const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
@@ -1366,27 +1358,57 @@
       if (charts.eloProg) charts.eloProg.destroy();
 
       const dataPoints = seasonalEloHistory[name] || [];
+      const years = dataPoints.map(d => d.year);
+      const leagueAvgData = years.map(y => leagueSeasonalAverage[y]);
 
       charts.eloProg = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: dataPoints.map(d => d.year),
-          datasets: [{
-            data: dataPoints.map(d => d.elo),
-            borderColor: '#38bdf8',
-            backgroundColor: 'rgba(56, 189, 248, 0.1)',
-            borderWidth: 3,
-            pointRadius: 5,
-            pointHoverRadius: 8,
-            pointBackgroundColor: '#fff',
-            tension: 0.1,
-            fill: true
-          }]
+          labels: years,
+          datasets: [
+            {
+              label: 'Manager ELO',
+              data: dataPoints.map(d => d.elo),
+              borderColor: '#38bdf8',
+              backgroundColor: 'rgba(56, 189, 248, 0.1)',
+              borderWidth: 3,
+              pointRadius: 5,
+              pointHoverRadius: 8,
+              pointBackgroundColor: '#fff',
+              tension: 0.1,
+              fill: true,
+              zIndex: 2
+            },
+            {
+              label: 'League Average',
+              data: leagueAvgData,
+              borderColor: 'rgba(255, 255, 255, 0.25)',
+              borderWidth: 1.5,
+              borderDash: [5, 5],
+              pointRadius: 0,
+              fill: false,
+              tension: 0.1,
+              zIndex: 1
+            }
+          ]
         },
         options: {
           ...commonOptions,
+          plugins: {
+            legend: { 
+              display: true, 
+              position: 'top', 
+              align: 'end',
+              labels: { boxWidth: 12, font: { size: 10 }, color: '#94a3b8' } 
+            }
+          },
           scales: {
-            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { stepSize: 50 } },
+            y: { 
+              min: 1300, 
+              max: 1750, 
+              grid: { color: 'rgba(255,255,255,0.05)' }, 
+              ticks: { stepSize: 50 } 
+            },
             x: { grid: { display: false } }
           }
         }
