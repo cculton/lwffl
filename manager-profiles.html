@@ -256,13 +256,14 @@
 
     .chart-card { min-height: 350px; display: flex; flex-direction: column; }
     .chart-header {
-      margin-bottom: 20px;
+      margin-bottom: 12px;
       display: flex;
-      align-items: center;
-      gap: 10px;
+      flex-direction: column;
+      gap: 4px;
       border-bottom: 1px solid var(--border-subtle);
       padding-bottom: 12px;
     }
+    .chart-title-row { display: flex; align-items: center; gap: 10px; }
     .chart-header h3 {
       font-size: 0.9rem;
       font-weight: 700;
@@ -270,6 +271,12 @@
       margin: 0;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+    }
+    .chart-subtitle {
+      font-size: 0.7rem;
+      color: var(--text-soft);
+      font-weight: 500;
+      line-height: 1.2;
     }
     .chart-icon { color: var(--accent); font-size: 1.1rem; }
     .chart-container { position: relative; flex: 1; width: 100%; min-height: 220px; }
@@ -295,80 +302,6 @@
     .rival-stat { text-align: right; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-weight: 700; font-size: 1.1rem; }
     .nemesis .rival-stat { color: var(--negative); }
     .pigeon .rival-stat { color: var(--positive); }
-
-    /* Last 10 sparkline */
-    .form-card { grid-column: 1 / -1; }
-    .form-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .form-strip {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      padding-bottom: 6px;
-    }
-    .form-dot {
-      width: 18px;
-      height: 18px;
-      border-radius: 6px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      position: relative;
-      flex: 0 0 auto;
-      transition: transform 0.12s;
-      outline: none;
-    }
-    .form-dot[data-res="W"] { background: rgba(34, 197, 94, 0.95); border-color: rgba(34, 197, 94, 0.35); }
-    .form-dot[data-res="L"] { background: rgba(239, 68, 68, 0.95); border-color: rgba(239, 68, 68, 0.35); }
-    .form-dot[data-res="T"] { background: rgba(245, 158, 11, 0.95); border-color: rgba(245, 158, 11, 0.35); }
-    .form-dot:hover, .form-dot:focus { transform: scale(1.12); border-color: rgba(255,255,255,0.35); }
-
-    .form-dot::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: 140%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #000;
-      border: 1px solid var(--border-subtle);
-      color: #fff;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.15s;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.55);
-      z-index: 10;
-    }
-    .form-dot:hover::after, .form-dot:focus::after { opacity: 1; }
-
-    .form-meta {
-      display: flex;
-      align-items: baseline;
-      gap: 12px;
-      white-space: nowrap;
-    }
-    .form-meta .label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-weight: 800;
-      color: var(--text-muted);
-    }
-    .form-meta .rec {
-      font-family: monospace;
-      font-weight: 800;
-      color: #f9fafb;
-      font-size: 0.95rem;
-    }
 
     /* --- High/Low Ticker Styles --- */
     .hl-ticker {
@@ -513,7 +446,6 @@
       .stats-strip { grid-template-columns: 1fr 1fr; }
       .analytics-grid { grid-template-columns: 1fr; }
       .chart-card { min-height: 320px; }
-      .form-row { justify-content: center; }
     }
   </style>
 </head>
@@ -580,6 +512,17 @@
 
     <div class="analytics-grid">
       <div class="rivalry-col">
+        <div class="card" style="margin-bottom:0; padding:16px;">
+          <div class="chart-header" style="margin-bottom:10px;">
+            <div class="chart-title-row">
+              <div class="chart-icon">↕</div>
+              <h3>All-Time Highs & Lows</h3>
+            </div>
+            <span class="chart-subtitle">Absolute single-game peaks and valleys throughout history.</span>
+          </div>
+          <div class="hl-ticker" id="hlTicker"></div>
+        </div>
+
         <div class="rival-card pigeon">
           <div class="rival-meta">
             <span class="rival-type">Pigeon (Highest Win %)</span>
@@ -595,20 +538,15 @@
           </div>
           <span class="rival-stat" id="nemesisStat">-</span>
         </div>
-
-        <div class="card" style="margin-bottom:0; padding:16px;">
-          <div class="chart-header" style="margin-bottom:10px;">
-            <div class="chart-icon">↕</div>
-            <h3>All-Time Highs & Lows</h3>
-          </div>
-          <div class="hl-ticker" id="hlTicker"></div>
-        </div>
       </div>
 
       <div class="card chart-card">
         <div class="chart-header">
-          <div class="chart-icon">✦</div>
-          <h3>Luck Index (Quadrants)</h3>
+          <div class="chart-title-row">
+            <div class="chart-icon">✦</div>
+            <h3>Luck Index (Quadrants)</h3>
+          </div>
+          <span class="chart-subtitle">PF vs PA ranks. Top-left is efficient dominance; bottom-right is cursed.</span>
         </div>
         <div class="chart-container">
           <canvas id="luckChart"></canvas>
@@ -617,8 +555,11 @@
 
       <div class="card chart-card">
         <div class="chart-header">
-          <div class="chart-icon">⚡</div>
-          <h3>ELO Progression (Season-End)</h3>
+          <div class="chart-title-row">
+            <div class="chart-icon">⚡</div>
+            <h3>ELO Progression (Season-End)</h3>
+          </div>
+          <span class="chart-subtitle">End-of-season power rating relative to the league average (dashed).</span>
         </div>
         <div class="chart-container">
           <canvas id="eloProgressionChart"></canvas>
@@ -627,8 +568,11 @@
 
       <div class="card chart-card">
         <div class="chart-header">
-          <div class="chart-icon">💓</div>
-          <h3>Heart Attack Ratio (Games &lt; 5 pts)</h3>
+          <div class="chart-title-row">
+            <div class="chart-icon">💓</div>
+            <h3>Heart Attack Ratio (Games &lt; 5 pts)</h3>
+          </div>
+          <span class="chart-subtitle">Success rate in high-pressure matchups decided by one big play.</span>
         </div>
         <div class="chart-container">
           <canvas id="heartChart"></canvas>
@@ -637,8 +581,11 @@
 
       <div class="card chart-card">
         <div class="chart-header">
-          <div class="chart-icon">📊</div>
-          <h3>Scoring Spread (Low/High)</h3>
+          <div class="chart-title-row">
+            <div class="chart-icon">📊</div>
+            <h3>Scoring Spread (Low/High)</h3>
+          </div>
+          <span class="chart-subtitle">Annual volatility showing the gap between floor and ceiling each year.</span>
         </div>
         <div class="chart-container">
           <canvas id="spreadChart"></canvas>
@@ -647,18 +594,11 @@
 
       <div class="card chart-card">
         <div class="chart-header">
-          <div class="chart-icon">📈</div>
-          <h3>Career Trajectory</h3>
-        </div>
-        <div class="chart-container">
-          <canvas id="careerChart"></canvas>
-        </div>
-      </div>
-
-      <div class="card chart-card">
-        <div class="chart-header">
-          <div class="chart-icon">🏁</div>
-          <h3>Post-Season Fate</h3>
+          <div class="chart-title-row">
+            <div class="chart-icon">🏁</div>
+            <h3>Post-Season Fate</h3>
+          </div>
+          <span class="chart-subtitle">Conversion funnel from regular season entry to championship glory.</span>
         </div>
         <div class="chart-container" style="display:flex; flex-direction:column; justify-content:center;">
           <div id="fateFlow" class="fate-flow"></div>
@@ -1137,7 +1077,6 @@
       renderLuckChart(mySeasons, name);
       renderSpreadChart(myGames);
       renderClutchChart(myGames);
-      renderCareerChart(mySeasons);
       renderFormStrip(myGames);
       renderHardwareChart(mySeasons);
       renderHeartAttackChart(myGames);
@@ -1464,33 +1403,6 @@
       charts.spread = new Chart(ctx, { type: 'bar', data: { labels: years, datasets: [{ data, backgroundColor: 'rgba(56, 189, 248, 0.4)', borderRadius: 4 }] }, options: commonOptions });
     }
 
-    function renderClutchChart(games) {
-      const canvas = $('clutchChart');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (charts.clutch) charts.clutch.destroy();
-      const reg = games.filter(g => !g.isPlayoff).map(g => g.score).filter(Number.isFinite);
-      const play = games.filter(g => g.isPlayoff).map(g => g.score).filter(Number.isFinite);
-      charts.clutch = new Chart(ctx, {
-        type: 'bar',
-        data: { labels: ['Regular Season', 'Playoffs'], datasets: [{ data: [mean(reg), mean(play)], backgroundColor: ['#38bdf8', '#fbbf24'], borderRadius: 4 }] },
-        options: { ...commonOptions, indexAxis: 'y' }
-      });
-    }
-
-    function renderCareerChart(seasons) {
-      const canvas = $('careerChart');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (charts.career) charts.career.destroy();
-      const sorted = [...seasons].filter(s => Number.isFinite(s.year)).sort((a, b) => a.year - b.year);
-      charts.career = new Chart(ctx, {
-        type: 'line',
-        data: { labels: sorted.map(s => s.year), datasets: [{ data: sorted.map(s => s.final_standing), borderColor: '#38bdf8', tension: 0.3 }] },
-        options: { ...commonOptions, scales: { y: { reverse: true, min: 1, max: 12, ticks: { stepSize: 1 } } } }
-      });
-    }
-
     function renderHeartAttackChart(games) {
       const canvas = $('heartChart');
       if (!canvas) return;
@@ -1539,7 +1451,7 @@
         'ratingSCOR', 'ratingGM', 'ratingCLT', 'ratingSTB',
         'statRecord', 'statWinPct', 'statAvgFinish', 'statAvgScore', 'statEarnings',
         'nemesisName', 'nemesisStat', 'pigeonName', 'pigeonStat',
-        'formStrip', 'formRecord'
+        'formStrip'
       ].forEach(id => els[id] = $(id));
 
       try {
