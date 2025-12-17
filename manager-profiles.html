@@ -111,10 +111,10 @@
 
     /* 1. Horizontal Hero Card */
     .hero-card {
-      display: flex;
+      display: grid;
+      grid-template-columns: auto 1fr minmax(320px, auto);
       align-items: center;
-      justify-content: space-between;
-      gap: 32px;
+      column-gap: 32px;
       padding: 32px 40px;
       background:
         radial-gradient(circle at top right, rgba(56, 189, 248, 0.15), transparent 60%),
@@ -175,12 +175,14 @@
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      flex: 1.5;
       justify-content: center;
       border-left: 1px solid var(--border-subtle);
       border-right: 1px solid var(--border-subtle);
-      padding: 0 32px;
-      min-width: 260px;
+      padding: 0 28px;
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto;
+      min-width: 0;
     }
 
     .trophy-badge {
@@ -201,12 +203,13 @@
     .trophy-badge.silver { background: var(--silver-bg); color: var(--silver); border-color: rgba(203, 213, 225, 0.3); }
     .trophy-badge.bronze { background: var(--bronze-bg); color: var(--bronze); border-color: rgba(217, 119, 6, 0.3); }
     .trophy-badge.scoring { background: rgba(59, 130, 246, 0.16); color: #93c5fd; border-color: rgba(59, 130, 246, 0.35); }
+    .trophy-badge.division { background: rgba(34, 197, 94, 0.14); color: var(--positive); border-color: rgba(34, 197, 94, 0.35); font-size: 0.72rem; padding: 5px 10px; }
 
     .empty-case { font-size: 0.85rem; color: var(--text-soft); font-style: italic; }
 
     /* Right: OVR Rating & Attributes */
-    .rating-container { display: flex; align-items: center; gap: 20px; flex: 1; justify-content: flex-end; min-width: 260px; }
-    .sub-ratings { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; min-width: 180px; }
+    .rating-container { display: flex; align-items: center; gap: 22px; flex: 0 0 auto; justify-content: flex-end; min-width: 320px; white-space: nowrap; }
+    .sub-ratings { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; min-width: 180px; white-space: nowrap; }
 
     /* Smaller label text to accommodate longer subcategory names (feature request) */
     .sub-stat {
@@ -276,17 +279,12 @@
     .chart-container { position: relative; flex: 1; width: 100%; min-height: 220px; }
 
     /* Rivalry Cards */
-    .rivalry-col { display: flex; flex-direction: column; gap: 20px; height: 100%; min-height: 350px; }
-
-    .rival-card {
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid var(--border-subtle);
-      border-left: 4px solid var(--border-subtle);
-      padding: 16px 20px;
-      border-radius: 4px 12px 12px 4px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .rivalry-col {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 20px;
+      height: 100%;
+      min-height: 350px;
     }
     .rival-card.nemesis { border-left-color: var(--negative); }
     .rival-card.pigeon { border-left-color: var(--positive); }
@@ -490,28 +488,29 @@
 
     /* Responsive */
     @media (max-width: 1024px) {
-      .hero-card { flex-wrap: wrap; padding: 24px; gap: 24px; }
+      .hero-card { grid-template-columns: 1fr; row-gap: 24px; padding: 24px; column-gap: 24px; }
       .trophy-case {
         border-left: none; padding-left: 0;
         border-right: none; padding-right: 0;
         border-top: 1px solid var(--border-subtle);
         padding-top: 20px;
         width: 100%;
-        flex: 100%;
       }
       .rating-container {
         width: 100%;
         justify-content: space-between;
         border-top: 1px solid var(--border-subtle);
         padding-top: 20px;
+        min-width: unset;
+        white-space: normal;
       }
       .hero-name { max-width: 100%; }
     }
 
     @media (max-width: 768px) {
-      .hero-card { flex-direction: column; text-align: center; gap: 20px; align-items: center; }
+      .hero-card { grid-template-columns: 1fr; text-align: center; row-gap: 20px; justify-items: center; }
       .hero-identity { flex-direction: column; text-align: center; gap: 12px; min-width: unset; }
-      .rating-container { flex-direction: column; gap: 20px; min-width: unset; }
+      .rating-container { flex-direction: column; gap: 20px; min-width: unset; white-space: normal; }
       .trophy-case { justify-content: center; min-width: unset; }
 
       .stats-strip { grid-template-columns: 1fr 1fr; }
@@ -925,84 +924,24 @@
       }
     }
 
-    /***********************
-     * Enhanced ELO helpers
-     * (kept local + minimal; no UI changes)
-     ***********************/
-    function mean(arr) {
-      if (!arr || !arr.length) return 0;
-      return arr.reduce((a,b)=>a+b,0) / arr.length;
-    }
-
-    function stdev(arr) {
-      if (!arr || arr.length < 2) return 0;
-      const m = mean(arr);
-      const v = mean(arr.map(x => (x - m) ** 2));
-      return Math.sqrt(v);
-    }
-
-    function median(arr) {
-      if (!arr || !arr.length) return 0;
-      const s = [...arr].sort((a,b)=>a-b);
-      const mid = Math.floor(s.length / 2);
-      return (s.length % 2) ? s[mid] : (s[mid - 1] + s[mid]) / 2;
-    }
-
-    function bottomQuantileAverage(arr, q = 0.25) {
-      if (!arr || !arr.length) return 0;
-      const s = [...arr].sort((a,b)=>a-b);
-      const k = Math.max(1, Math.floor(s.length * q));
-      return mean(s.slice(0, k));
-    }
-
-    function eloExpected(rA, rB) {
-      return 1 / (1 + Math.pow(10, (rB - rA) / 400));
-    }
-
     function calculateAllRatings() {
-      /**
-       * Enhanced ELO (still looks/behaves like ELO on the page)
-       * - Opponent strength (ELO core)
-       * - Heavier playoffs
-       * - Score quality (weekly z-score) + top-half credit via z-differential
-       * - "Floor" focus: penalizes frequent/low dud weeks (bottom-quartile z), never penalizes 190s
-       *
-       * Implementation note:
-       * - We keep updates zero-sum by applying one delta per matchup (A gains, B loses).
-       * - Scoring quality enters as a small adjustment to the "result" via zA - zB (bounded).
-       * - Floor enters via *expected win* (effective rating), so chronic dud teams are less "trusted."
-       */
-
+      // --- Elo Ratings (replaces Madden-style OVR) ---
+      // Starting rating
       const BASE = 1500;
 
-      // Base K tuning (higher = more movement)
+      // K-factor tuning (higher = more movement)
       const K_BASE = 40;
       const G0 = 30; // stabilizes after ~2+ seasons worth of games
-
-      // Playoff weight (heavier)
-      const PLAYOFF_MULT = 2.0;
-
-      // Score-quality influence (weekly relative): affects effective result slightly
-      const ETA_Z_DIFF = 0.08;      // 0.08 => small, noticeable; keep low for sanity
-      const Z_DIFF_CAP = 0.15;      // max +/- added to result (so wins still matter most)
-
-      // Floor / dud penalty (bottom-quartile z average): affects expected win only
-      const FLOOR_LOOKBACK = 50;    // rolling window in games
-      const FLOOR_Q = 0.25;         // worst 25%
-      const FLOOR_FACTOR = 70;      // rating points per 1.0 z in floorAvg (negative lowers effective rating)
-      const FLOOR_Z_CLIP = -2.5;    // avoid extreme early-season artifacts
 
       const rating = {};
       const gamesPlayed = {};
       const history = {};
-      const zHist = {}; // manager -> array of weekly z-scores (for floor)
 
       // Initialize for every known manager
       idx.managers.forEach(m => {
         rating[m] = BASE;
         gamesPlayed[m] = 0;
         history[m] = [BASE];
-        zHist[m] = [];
       });
 
       // Build chronologically ordered game list from league-scores.json
@@ -1015,75 +954,39 @@
         )
         .sort((a, b) => (a.year !== b.year ? a.year - b.year : a.week - b.week));
 
-      // Precompute per-week mean/std + top-half cutoff using idx.weekBuckets (already built from same rawScores)
-      const weekStats = new Map(); // "year::week" -> { mu, sd, topCut }
-      idx.weekBuckets.forEach((arr, key) => {
-        const scores = (arr || []).map(x => safeNum(x.score, NaN)).filter(Number.isFinite);
-        const mu = mean(scores);
-        const sd = stdev(scores) || 1;
-        const topCut = median(scores); // >= median => top half (simple, stable)
-        weekStats.set(key, { mu, sd, topCut });
-      });
-
       games.forEach(g => {
         const A = g.manager1;
         const B = g.manager2;
 
         // Ensure managers exist (in case a name appears only in scores)
-        if (!(A in rating)) { rating[A] = BASE; gamesPlayed[A] = 0; history[A] = [BASE]; zHist[A] = []; }
-        if (!(B in rating)) { rating[B] = BASE; gamesPlayed[B] = 0; history[B] = [BASE]; zHist[B] = []; }
+        if (!(A in rating)) { rating[A] = BASE; gamesPlayed[A] = 0; history[A] = [BASE];  }
+        if (!(B in rating)) { rating[B] = BASE; gamesPlayed[B] = 0; history[B] = [BASE];  }
 
-        // Week stats for z-score
-        const wkKey = `${g.year}::${g.week}`;
-        const ws = weekStats.get(wkKey) || { mu: 0, sd: 1, topCut: Infinity };
-
-        const zA = (g.score1 - ws.mu) / ws.sd;
-        const zB = (g.score2 - ws.mu) / ws.sd;
-
-        // Update z histories (used for floor, but floor is computed pre-update for this game)
-        const zAHist = zHist[A] || [];
-        const zBHist = zHist[B] || [];
-
-        const floorAraw = bottomQuantileAverage(zAHist.slice(-FLOOR_LOOKBACK), FLOOR_Q);
-        const floorBraw = bottomQuantileAverage(zBHist.slice(-FLOOR_LOOKBACK), FLOOR_Q);
-
-        // Clip floor to avoid insane early/noisy values; note floors are typically <= 0
-        const floorA = clamp(floorAraw, FLOOR_Z_CLIP, 0);
-        const floorB = clamp(floorBraw, FLOOR_Z_CLIP, 0);
-
-        // Effective ratings adjust expected win based on "how low your lows go"
         const RA = rating[A];
         const RB = rating[B];
-        const effRA = RA + FLOOR_FACTOR * floorA; // floorA is negative => lowers effRA
-        const effRB = RB + FLOOR_FACTOR * floorB;
 
-        // Expected result (using effective ratings)
-        const EA = eloExpected(effRA, effRB);
+        // Expected result
+        const EA = 1 / (1 + Math.pow(10, (RB - RA) / 400));
 
         // Actual result
         let SA = 0.5;
         if (g.score1 > g.score2) SA = 1;
         else if (g.score1 < g.score2) SA = 0;
 
-        // Score-quality adjustment to the result (bounded), based on weekly-relative performance
-        const zDiff = zA - zB;
-        const adj = clamp(ETA_Z_DIFF * zDiff, -Z_DIFF_CAP, Z_DIFF_CAP);
-        const SA_adj = clamp(SA + adj, 0, 1);
-
-        // Margin of victory multiplier (keep your existing behavior, but prevent extreme spikes)
+        // Margin of victory multiplier
         const m = Math.abs(g.score1 - g.score2);
-        const M = clamp(Math.log(m + 1), 0.2, 2.2);
+        const M = Math.log(m + 1);
 
-        // Playoff weighting (heavier)
+        // Playoff weighting
         const isPlayoff = (g.playoffs && g.playoffs !== "N/A") ? 1 : 0;
-        const P = isPlayoff ? PLAYOFF_MULT : 1.0;
+        const P = 1 + 0.25 * isPlayoff;
 
-        // K-factor with sample-size stabilization (average to keep updates symmetric)
+        // K-factor with sample-size stabilization (use the average of both players' Ks to keep updates zero-sum)
         const KA = K_BASE * (G0 / (G0 + (gamesPlayed[A] || 0)));
         const KB = K_BASE * (G0 / (G0 + (gamesPlayed[B] || 0)));
         const K = (KA + KB) / 2;
 
-        const delta = (K * P * M) * (SA_adj - EA);
+        const delta = (K * P * M) * (SA - EA);
 
         rating[A] = RA + delta;
         rating[B] = RB - delta;
@@ -1093,12 +996,6 @@
 
         history[A].push(rating[A]);
         history[B].push(rating[B]);
-
-        // Now append z-scores (after using prior history for floor)
-        zAHist.push(zA);
-        zBHist.push(zB);
-        zHist[A] = zAHist;
-        zHist[B] = zBHist;
       });
 
       // Compute ranks (1 = highest Elo)
@@ -1190,6 +1087,13 @@
 
       const scoringYears = idx.scoringTitlesByManager.get(name) ? Array.from(idx.scoringTitlesByManager.get(name)) : [];
       scoringYears.forEach(y => trophies.push({ y, html: `<span class="trophy-badge scoring">🕹️ ${y} Scoring Title</span>` }));
+
+      // Division titles: 1st place in division (regular season)
+      seasons.forEach(s => {
+        if (s.division_finish === 1) {
+          trophies.push({ y: s.year, html: `<span class="trophy-badge division">🏆 ${s.year} Division Title</span>` });
+        }
+      });
 
       trophies.sort((a, b) => (b.y ?? 0) - (a.y ?? 0));
       caseEl.innerHTML = trophies.length ? trophies.map(t => t.html).join('') : `<span class="empty-case">No hardware... yet.</span>`;
