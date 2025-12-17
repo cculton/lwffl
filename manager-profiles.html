@@ -545,16 +545,16 @@
 
       <div class="rating-container">
         <div class="sub-ratings">
-          <div class="sub-stat" title="SCOR: Average scoring strength vs league (points per game)."><span>Scoring</span> <span id="ratingSCOR">-</span></div>
-          <div class="sub-stat" title="GM: Expected-wins overperformance (actual wins vs what your scores predict)."><span>GM Skill</span> <span id="ratingGM">-</span></div>
-          <div class="sub-stat" title="CLT: Playoff win rate."><span>Clutch</span> <span id="ratingCLT">-</span></div>
-          <div class="sub-stat" title="STB: Season-to-season consistency (lower finish volatility = higher rating)."><span>Stability</span> <span id="ratingSTB">-</span></div>
+          <div class="sub-stat" title="Peak: Highest Elo reached across all tracked games."><span>Peak</span> <span id="ratingSCOR">-</span></div>
+          <div class="sub-stat" title="Floor: Lowest Elo reached across all tracked games."><span>Floor</span> <span id="ratingGM">-</span></div>
+          <div class="sub-stat" title="Δ Last 10: Elo change over the last 10 games (or since start if fewer than 10)."><span>Δ Last 10</span> <span id="ratingCLT">-</span></div>
+          <div class="sub-stat" title="Rank: Current Elo rank (1 = highest)."><span>Rank</span> <span id="ratingSTB">-</span></div>
         </div>
-        <div class="ovr-badge" title="OVR: Weighted blend of SCOR, GM, CLT, STB plus legacy. Championships add +0.5 each.">
+        <div class="ovr-badge" title="ELO: Rating that updates after every matchup based on opponent strength, margin of victory, and playoff weighting.">
           <div class="ovr-ring">
             <span class="ovr-val" id="heroOvr">--</span>
           </div>
-          <span class="ovr-label">OVR</span>
+          <span class="ovr-label">ELO</span>
         </div>
       </div>
     </div>
@@ -926,110 +926,100 @@
     }
 
     function calculateAllRatings() {
-      const expectedWins = {};
-      idx.managers.forEach(m => { expectedWins[m] = 0; });
+      // --- Elo Ratings (replaces Madden-style OVR) ---
+      // Starting rating
+      const BASE = 1500;
 
-      for (const [, entries] of idx.weekBuckets.entries()) {
-        const byManager = new Map();
-        entries.forEach(e => {
-          if (!e.manager) return;
-          if (!Number.isFinite(e.score)) return;
-          byManager.set(e.manager, e.score);
-        });
+      // K-factor tuning (higher = more movement)
+      const K_BASE = 40;
+      const G0 = 30; // stabilizes after ~2+ seasons worth of games
 
-        const list = Array.from(byManager.entries()).map(([manager, score]) => ({ manager, score }));
-        const N = list.length;
-        if (N < 2) continue;
+      const rating = {};
+      const gamesPlayed = {};
+      const history = {};
 
-        for (let i = 0; i < N; i++) {
-          const mi = list[i].manager;
-          const si = list[i].score;
-          let beat = 0, tie = 0;
-
-          for (let j = 0; j < N; j++) {
-            if (i === j) continue;
-            const sj = list[j].score;
-            if (si > sj) beat++;
-            else if (si === sj) tie++;
-          }
-          expectedWins[mi] += (beat + 0.5 * tie) / (N - 1);
-        }
-      }
-
-      const rows = idx.managers.map(m => {
-        const seasons = idx.standingsByManager.get(m) || [];
-        const games = idx.gamesByManager.get(m) || [];
-
-        let wins = 0, ties = 0;
-        let playGames = 0, playWins = 0;
-        let totalPF = 0;
-
-        games.forEach(g => {
-          totalPF += g.score;
-          if (g.result === 'W') wins++;
-          else if (g.result === 'T') ties++;
-
-          if (g.isPlayoff) {
-            playGames++;
-            if (g.result === 'W') playWins++;
-          }
-        });
-
-        const actualW = wins + ties * 0.5;
-        const expW = expectedWins[m] || 0;
-        const gmRaw = actualW - expW;
-
-        const ppm = games.length ? totalPF / games.length : 0;
-        const cltRaw = playGames ? (playWins / playGames) : 0;
-
-        const finishes = seasons.map(s => s.final_standing).filter(Number.isFinite);
-        const stdDev = calcStdDev(finishes);
-
-        const titles = seasons.filter(s => s.final_standing === 1).length;
-        const runnerUps = seasons.filter(s => s.final_standing === 2).length;
-        const thirds = seasons.filter(s => s.final_standing === 3).length;
-        const divTitles = seasons.filter(s => s.division_finish === 1).length;
-        const seedApps = seasons.reduce((acc, s) => acc + (idx.seedsByManagerYear.has(keyMY(m, s.year)) ? 1 : 0), 0);
-
-        const hardwarePoints = (titles * 10) + (runnerUps * 6) + (thirds * 4) + (divTitles * 2) + (seedApps * 1);
-        const legacyPoints = hardwarePoints + (safeNum(titles, 0) * 0.5); // visual-only parity: championships +0.5
-        const legacyRaw = 12 * Math.log(1 + legacyPoints);
-
-        return { name: m, ppm, gmRaw, cltRaw, stdDev, legacyRaw, titles };
+      // Initialize for every known manager
+      idx.managers.forEach(m => {
+        rating[m] = BASE;
+        gamesPlayed[m] = 0;
+        history[m] = [BASE];
       });
 
-      const ppmVals = rows.map(r => r.ppm).filter(Number.isFinite);
-      const gmVals = rows.map(r => r.gmRaw).filter(Number.isFinite);
-      const cltVals = rows.map(r => r.cltRaw).filter(Number.isFinite);
-      const stbVals = rows.map(r => r.stdDev).filter(Number.isFinite);
-      const legVals = rows.map(r => r.legacyRaw).filter(Number.isFinite);
+      // Build chronologically ordered game list from league-scores.json
+      const games = (rawScores || [])
+        .map(normalizeScoreRow)
+        .filter(g =>
+          g.manager1 && g.manager2 &&
+          Number.isFinite(g.score1) && Number.isFinite(g.score2) &&
+          Number.isFinite(g.year) && Number.isFinite(g.week)
+        )
+        .sort((a, b) => (a.year !== b.year ? a.year - b.year : a.week - b.week));
 
-      const min = (a) => Math.min(...a);
-      const max = (a) => Math.max(...a);
-      const scale01 = (v, lo, hi) => (hi > lo ? (v - lo) / (hi - lo) : 0.5);
+      games.forEach(g => {
+        const A = g.manager1;
+        const B = g.manager2;
 
-      const ppmMin = min(ppmVals), ppmMax = max(ppmVals);
-      const gmMin = min(gmVals), gmMax = max(gmVals);
-      const cltMin = min(cltVals), cltMax = max(cltVals);
-      const stbMin = min(stbVals), stbMax = max(stbVals);
-      const legMin = min(legVals), legMax = max(legVals);
+        // Ensure managers exist (in case a name appears only in scores)
+        if (!(A in rating)) { rating[A] = BASE; gamesPlayed[A] = 0; history[A] = [BASE];  }
+        if (!(B in rating)) { rating[B] = BASE; gamesPlayed[B] = 0; history[B] = [BASE];  }
 
-      rows.forEach(r => {
-        const scor = Math.round(70 + scale01(r.ppm, ppmMin, ppmMax) * 29);
-        const gm   = Math.round(70 + scale01(r.gmRaw, gmMin, gmMax) * 29);
-        const clt  = Math.round(60 + scale01(r.cltRaw, cltMin, cltMax) * 39);
-        const stb  = Math.round(60 + (1 - scale01(r.stdDev, stbMin, stbMax)) * 39);
-        const leg  = Math.round(60 + scale01(r.legacyRaw, legMin, legMax) * 39);
+        const RA = rating[A];
+        const RB = rating[B];
 
-        const skill = (scor * 0.30) + (gm * 0.35) + (clt * 0.20) + (stb * 0.15);
-        const ovr = Math.round(skill * 0.80 + leg * 0.20 + (safeNum(r.titles, 0) * 0.5));
+        // Expected result
+        const EA = 1 / (1 + Math.pow(10, (RB - RA) / 400));
 
-        leagueRatings[r.name] = {
-          ovr: clamp(ovr, 60, 99),
-          scor: clamp(scor, 60, 99),
-          gm: clamp(gm, 60, 99),
-          clt: clamp(clt, 60, 99),
-          stb: clamp(stb, 60, 99)
+        // Actual result
+        let SA = 0.5;
+        if (g.score1 > g.score2) SA = 1;
+        else if (g.score1 < g.score2) SA = 0;
+
+        // Margin of victory multiplier
+        const m = Math.abs(g.score1 - g.score2);
+        const M = Math.log(m + 1);
+
+        // Playoff weighting
+        const isPlayoff = (g.playoffs && g.playoffs !== "N/A") ? 1 : 0;
+        const P = 1 + 0.25 * isPlayoff;
+
+        // K-factor with sample-size stabilization (use the average of both players' Ks to keep updates zero-sum)
+        const KA = K_BASE * (G0 / (G0 + (gamesPlayed[A] || 0)));
+        const KB = K_BASE * (G0 / (G0 + (gamesPlayed[B] || 0)));
+        const K = (KA + KB) / 2;
+
+        const delta = (K * P * M) * (SA - EA);
+
+        rating[A] = RA + delta;
+        rating[B] = RB - delta;
+
+        gamesPlayed[A] = (gamesPlayed[A] || 0) + 1;
+        gamesPlayed[B] = (gamesPlayed[B] || 0) + 1;
+
+        history[A].push(rating[A]);
+        history[B].push(rating[B]);
+      });
+
+      // Compute ranks (1 = highest Elo)
+      const managers = Object.keys(rating);
+      const sorted = [...managers].sort((a, b) => rating[b] - rating[a]);
+      const rankMap = {};
+      sorted.forEach((m, i) => { rankMap[m] = i + 1; });
+
+      managers.forEach(m => {
+        const h = history[m] || [BASE];
+        const peak = Math.max(...h);
+        const floor = Math.min(...h);
+
+        const last = h[h.length - 1];
+        const prev10 = h.length > 10 ? h[h.length - 11] : h[0];
+        const d10 = last - prev10;
+
+        leagueRatings[m] = {
+          elo: Math.round(last),
+          peak: Math.round(peak),
+          floor: Math.round(floor),
+          d10: Math.round(d10),
+          rank: rankMap[m] || '-'
         };
       });
     }
@@ -1105,7 +1095,7 @@
       const r = leagueRatings[name] || { ovr: 75, scor: 75, gm: 75, clt: 75, stb: 75 };
 
       const ovrEl = els.heroOvr;
-      const target = r.ovr;
+      const target = r.elo;
       let current = clamp(safeNum(ovrEl.textContent, 0), 0, target);
 
       const step = () => {
@@ -1115,10 +1105,10 @@
       };
       step();
 
-      els.ratingSCOR.textContent = r.scor;
-      els.ratingGM.textContent = r.gm;
-      els.ratingCLT.textContent = r.clt;
-      els.ratingSTB.textContent = r.stb;
+      els.ratingSCOR.textContent = r.peak;
+      els.ratingGM.textContent = r.floor;
+      els.ratingCLT.textContent = (r.d10 >= 0 ? "+" : "") + r.d10;
+      els.ratingSTB.textContent = r.rank;
     }
 
     function renderStats(seasons, games, managerName) {
