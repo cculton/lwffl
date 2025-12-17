@@ -500,12 +500,10 @@
         flex: 100%;
       }
       .rating-container {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      flex: 1.25;
-      justify-content: flex-end;
-      min-width: 300px;
+        width: 100%;
+        justify-content: space-between;
+        border-top: 1px solid var(--border-subtle);
+        padding-top: 20px;
       }
       .hero-name { max-width: 100%; }
     }
@@ -1104,35 +1102,10 @@
       });
 
       // Compute ranks (1 = highest Elo)
-      // --- Rank only managers with 3+ seasons ---
-      const MIN_SEASONS_FOR_RANK = 3;
-      
-      // Count distinct seasons per manager
-      const seasonCounts = {};
-      rawStandings.forEach(s => {
-        if (!s.manager || !Number.isFinite(s.year)) return;
-        if (!seasonCounts[s.manager]) seasonCounts[s.manager] = new Set();
-        seasonCounts[s.manager].add(s.year);
-      });
-      
-      // Eligible managers = 3+ seasons
-      const eligibleManagers = Object.keys(rating).filter(m => {
-        return (seasonCounts[m]?.size || 0) >= MIN_SEASONS_FOR_RANK;
-      });
-      
-      // Sort ONLY eligible managers by Elo
-      eligibleManagers.sort((a, b) => rating[b] - rating[a]);
-      
-      // Assign ranks within eligible pool
+      const managers = Object.keys(rating);
+      const sorted = [...managers].sort((a, b) => rating[b] - rating[a]);
       const rankMap = {};
-      eligibleManagers.forEach((m, i) => {
-        rankMap[m] = i + 1;
-      });
-      
-      // Everyone else gets no rank
-      Object.keys(rating).forEach(m => {
-        if (!(m in rankMap)) rankMap[m] = null;
-      });
+      sorted.forEach((m, i) => { rankMap[m] = i + 1; });
 
       managers.forEach(m => {
         const h = history[m] || [BASE];
@@ -1255,7 +1228,7 @@ function renderHero(name, seasons) {
   els.ratingSCOR.textContent = r.peak;
   els.ratingGM.textContent = r.floor;
   els.ratingCLT.textContent = (r.d10 >= 0 ? "+" : "") + r.d10;
-  els.ratingSTB.textContent = r.rank ?? '—';
+  els.ratingSTB.textContent = r.rank;
   }
 
     function renderStats(seasons, games, managerName) {
