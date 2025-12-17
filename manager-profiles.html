@@ -1168,44 +1168,50 @@
       renderFateFlow(mySeasons, name);
     }
 
-    function renderHero(name, seasons) {
-      const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase();
-      els.heroAvatar.textContent = initials;
-      els.heroName.textContent = name;
-      fitHeroName();
+function renderHero(name, seasons) {
+  const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  els.heroAvatar.textContent = initials;
+  els.heroName.textContent = name;
+  fitHeroName();
+  els.heroTenure.textContent = formatTenureRanges(seasons);
 
-      // UPDATED: tenure supports gaps (e.g., "2014-2019, 2022-Present")
-      els.heroTenure.textContent = formatTenureRanges(seasons);
+  const caseEl = els.trophyCase;
+  caseEl.innerHTML = '';
 
-      const caseEl = els.trophyCase;
-      caseEl.innerHTML = '';
-      const trophies = [];
+  // --- Hardware counts ---
+  let champs = 0, runners = 0, thirds = 0, divisions = 0;
+  seasons.forEach(s => {
+    if (s.final_standing === 1) champs++;
+    else if (s.final_standing === 2) runners++;
+    else if (s.final_standing === 3) thirds++;
+    if (s.division_finish === 1) divisions++;
+  });
 
-      seasons.forEach(s => {
-        const rank = s.final_standing;
-        if (rank === 1) trophies.push({ y: s.year, html: `<span class="trophy-badge gold">🏆 ${s.year} Champion</span>` });
-        else if (rank === 2) trophies.push({ y: s.year, html: `<span class="trophy-badge silver">🥈 ${s.year} Runner-up</span>` });
-        else if (rank === 3) trophies.push({ y: s.year, html: `<span class="trophy-badge bronze">🥉 ${s.year} 3rd Place</span>` });
-      });
+  const scoringTitles =
+    idx.scoringTitlesByManager.get(name)?.size || 0;
 
-      const scoringYears = idx.scoringTitlesByManager.get(name) ? Array.from(idx.scoringTitlesByManager.get(name)) : [];
-      scoringYears.forEach(y => trophies.push({ y, html: `<span class="trophy-badge scoring">🕹️ ${y} Scoring Title</span>` }));
+  const pills = [];
 
-      trophies.sort((a, b) => (b.y ?? 0) - (a.y ?? 0));
-      caseEl.innerHTML = trophies.length ? trophies.map(t => t.html).join('') : `<span class="empty-case">No hardware... yet.</span>`;
+  if (champs > 0)
+    pills.push(`<span class="trophy-badge gold">🏆 Champion ×${champs}</span>`);
+  if (runners > 0)
+    pills.push(`<span class="trophy-badge silver">🥈 Runner-Up ×${runners}</span>`);
+  if (thirds > 0)
+    pills.push(`<span class="trophy-badge bronze">🥉 3rd Place ×${thirds}</span>`);
+  if (scoringTitles > 0)
+    pills.push(`<span class="trophy-badge scoring">🕹️ Scoring Title ×${scoringTitles}</span>`);
+  if (divisions > 0)
+    pills.push(
+      `<span class="trophy-badge" style="
+        background: rgba(34,197,94,0.15);
+        border-color: rgba(34,197,94,0.4);
+        color: var(--positive);
+      ">🏁 Division Title ×${divisions}</span>`
+    );
 
-      const r = leagueRatings[name] || { ovr: 75, scor: 75, gm: 75, clt: 75, stb: 75 };
-
-      const ovrEl = els.heroOvr;
-      const target = r.elo;
-      let current = clamp(safeNum(ovrEl.textContent, 0), 0, target);
-
-      const step = () => {
-        current = Math.min(target, current + Math.max(1, Math.ceil(target / 40)));
-        ovrEl.textContent = current;
-        if (current < target) requestAnimationFrame(step);
-      };
-      step();
+  caseEl.innerHTML = pills.length
+    ? pills.join('')
+    : `<span class="empty-case">No hardware... yet.</span>`;
 
       els.ratingSCOR.textContent = r.peak;
       els.ratingGM.textContent = r.floor;
