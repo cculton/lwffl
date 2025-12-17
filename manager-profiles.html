@@ -12,7 +12,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      /* Dark Navy Theme */
       --bg-main: #020617;
       --card-bg: #020617;
       --accent: #38bdf8;
@@ -21,15 +20,10 @@
       --text-main: #e5e7eb;
       --text-muted: #9ca3af;
       --text-soft: #6b7280;
-
       --positive: #22c55e;
       --negative: #ef4444;
       --warning: #f59e0b;
-
-      /* Money: make $$$ green */
       --money: #22c55e;
-
-      /* Badges */
       --gold: #fbbf24;
       --gold-bg: rgba(251, 191, 36, 0.1);
       --silver: #cbd5e1;
@@ -48,13 +42,6 @@
 
     .shell { max-width: 1200px; margin: 0 auto; }
 
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #020617; }
-    ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #374151; }
-
-    /* --- Controls --- */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -85,20 +72,14 @@
       font-weight: 500;
       appearance: none;
       cursor: pointer;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.7);
-      transition: border-color 0.15s;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 14px center;
       background-size: 16px;
     }
-    select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 1px var(--accent); }
 
-    /* --- Common Card Style --- */
     .card {
-      background:
-        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%),
-        var(--card-bg);
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%), var(--card-bg);
       border: 1px solid rgba(148, 163, 184, 0.3);
       border-radius: 18px;
       padding: 24px;
@@ -109,1377 +90,339 @@
       backdrop-filter: blur(14px);
     }
 
-    /* 1. Horizontal Hero Card */
-    .hero-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 32px;
-      padding: 32px 40px;
-      background:
-        radial-gradient(circle at top right, rgba(56, 189, 248, 0.15), transparent 60%),
-        var(--card-bg);
-    }
+    .hero-card { display: flex; align-items: center; justify-content: space-between; gap: 32px; padding: 32px 40px; }
+    .hero-identity { display: flex; align-items: center; gap: 24px; flex: 1.2; min-width: 260px; }
+    .avatar { width: 90px; height: 90px; border-radius: 50%; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 800; color: #fff; background: linear-gradient(135deg, rgba(56,189,248,0.2), rgba(2,6,23,0.8)); }
+    .hero-name { font-size: 2rem; font-weight: 800; text-transform: uppercase; color: #f9fafb; line-height: 1.1; }
+    .hero-tenure { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; }
 
-    .hero-identity {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      flex: 1.2;
-      min-width: 260px;
-    }
-
-    .avatar {
-      width: 90px;
-      height: 90px;
-      flex: 0 0 90px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, rgba(56,189,248,0.2), rgba(2,6,23,0.8));
-      border: 2px solid var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.2rem;
-      font-weight: 800;
-      color: #fff;
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
-      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    }
-
-    .hero-text { display: flex; flex-direction: column; min-width: 0; }
-
-    .hero-name {
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-      color: #f9fafb;
-      line-height: 1.1;
-      white-space: normal;
-      word-wrap: break-word;
-      max-width: 520px;
-    }
-
-    .hero-tenure {
-      display: inline-block;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-    }
-
-    /* Middle: Trophy Case */
-    .trophy-case {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      flex: 1.5;
-      justify-content: center;
-      border-left: 1px solid var(--border-subtle);
-      border-right: 1px solid var(--border-subtle);
-      padding: 0 32px;
-      min-width: 260px;
-    }
-
-    .trophy-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 12px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border: 1px solid transparent;
-      white-space: nowrap;
-    }
-
+    .trophy-case { display: flex; flex-wrap: wrap; gap: 8px; flex: 1.5; justify-content: center; border-left: 1px solid var(--border-subtle); border-right: 1px solid var(--border-subtle); padding: 0 32px; }
+    .trophy-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; border: 1px solid transparent; }
     .trophy-badge.gold { background: var(--gold-bg); color: var(--gold); border-color: rgba(251, 191, 36, 0.3); }
-    .trophy-badge.silver { background: var(--silver-bg); color: var(--silver); border-color: rgba(203, 213, 225, 0.3); }
-    .trophy-badge.bronze { background: var(--bronze-bg); color: var(--bronze); border-color: rgba(217, 119, 6, 0.1); }
     .trophy-badge.scoring { background: rgba(59, 130, 246, 0.16); color: #93c5fd; border-color: rgba(59, 130, 246, 0.35); }
 
-    .empty-case { font-size: 0.85rem; color: var(--text-soft); font-style: italic; }
-
-    /* Right: OVR Rating & Attributes */
     .rating-container { display: flex; align-items: center; gap: 32px; flex: 1; justify-content: flex-end; min-width: 320px; }
-    .sub-ratings { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; min-width: 180px; }
+    .sub-ratings { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
+    .sub-stat { display: flex; justify-content: space-between; gap: 12px; font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+    .sub-stat span:last-child { color: var(--accent); font-family: monospace; font-size: 0.9rem; }
+    .ovr-ring { width: 75px; height: 75px; border-radius: 50%; border: 3px solid var(--accent); display: flex; align-items: center; justify-content: center; background: rgba(2, 6, 23, 0.8); }
+    .ovr-val { font-size: 2.2rem; font-weight: 900; }
+    .ovr-label { font-size: 0.75rem; font-weight: 700; color: var(--accent); margin-top: 8px; text-align: center; display: block; }
 
-    .sub-stat {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .sub-stat span:last-child { color: var(--accent); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 0.9rem; }
-
-    .ovr-badge { display: flex; flex-direction: column; align-items: center; flex: 0 0 auto; }
-    .ovr-ring {
-      width: 75px; height: 75px;
-      border-radius: 50%;
-      border: 3px solid var(--accent);
-      display: flex;
-      align-items: center; justify-content: center;
-      box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
-      background: rgba(2, 6, 23, 0.8);
-      flex: 0 0 auto;
-    }
-    .ovr-val { font-size: 2.2rem; font-weight: 900; color: #fff; }
-    .ovr-label { font-size: 0.75rem; font-weight: 700; color: var(--accent); margin-top: 8px; letter-spacing: 0.2em; }
-
-    /* 2. Stats Strip */
     .stats-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-    .stat-box {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      text-align: center;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-    }
-    .stat-label { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.1em; margin-bottom: 6px; }
-    .stat-val { font-size: 1.4rem; font-weight: 700; color: #f9fafb; line-height: 1; margin-bottom: 4px; }
-    .stat-sub { font-size: 0.75rem; color: var(--text-soft); display: none; }
+    .stat-box { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 16px; text-align: center; }
+    .stat-label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; display: block; }
+    .stat-val { font-size: 1.4rem; font-weight: 700; color: #f9fafb; }
 
-    /* 3. Analytics Grid */
-    .analytics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 24px; }
-
+    .analytics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
     .chart-card { min-height: 350px; display: flex; flex-direction: column; }
-    .chart-header {
-      margin-bottom: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      border-bottom: 1px solid var(--border-subtle);
-      padding-bottom: 12px;
-    }
-    .chart-title-row { display: flex; align-items: center; gap: 10px; }
-    .chart-header h3 {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: var(--text-main);
-      margin: 0;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .chart-subtitle {
-      font-size: 0.7rem;
-      color: var(--text-soft);
-      font-weight: 500;
-      line-height: 1.2;
-    }
-    .chart-icon { color: var(--accent); font-size: 1.1rem; }
+    .chart-header { margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px; }
+    .chart-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+    .chart-header h3 { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin: 0; }
+    .chart-subtitle { font-size: 0.7rem; color: var(--text-soft); font-weight: 500; }
     .chart-container { position: relative; flex: 1; width: 100%; min-height: 220px; }
 
-    /* Rivalry Cards */
-    .rivalry-col { display: flex; flex-direction: column; gap: 20px; height: 100%; min-height: 350px; }
-
-    .rival-card {
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid var(--border-subtle);
-      border-left: 4px solid var(--border-subtle);
-      padding: 16px 20px;
-      border-radius: 4px 12px 12px 4px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .rival-card.nemesis { border-left-color: var(--negative); }
+    .rivalry-col { display: flex; flex-direction: column; gap: 20px; }
+    .rival-card { background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-subtle); border-left: 4px solid var(--border-subtle); padding: 16px 20px; border-radius: 4px 12px 12px 4px; display: flex; justify-content: space-between; align-items: center; }
     .rival-card.pigeon { border-left-color: var(--positive); }
-    .rival-meta { display: flex; flex-direction: column; }
-    .rival-type { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; color: var(--text-soft); margin-bottom: 4px; }
-    .rival-name { font-size: 1.1rem; font-weight: 600; color: #f9fafb; }
-    .rival-stat { text-align: right; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-weight: 700; font-size: 1.1rem; }
-    .nemesis .rival-stat { color: var(--negative); }
+    .rival-card.nemesis { border-left-color: var(--negative); }
+    .rival-stat { font-family: monospace; font-weight: 700; font-size: 1.1rem; }
     .pigeon .rival-stat { color: var(--positive); }
+    .nemesis .rival-stat { color: var(--negative); }
 
-    /* --- High/Low Ticker Styles --- */
-    .hl-ticker {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding: 10px 0;
-    }
-    .hl-row {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid var(--border-subtle);
-      padding: 10px 14px;
-      border-radius: 8px;
-    }
-    .hl-icon {
-      font-size: 1.2rem;
-      flex: 0 0 30px;
-      text-align: center;
-    }
-    .hl-data { display: flex; flex-direction: column; }
-    .hl-score { font-size: 1.2rem; font-weight: 800; line-height: 1; color: #fff; }
+    .hl-ticker { display: flex; flex-direction: column; gap: 12px; padding: 10px 0; }
+    .hl-row { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); padding: 10px 14px; border-radius: 8px; }
+    .hl-score { font-size: 1.2rem; font-weight: 800; color: #fff; }
     .hl-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
-    .hl-high .hl-icon, .hl-high .hl-score { color: var(--positive); }
-    .hl-low .hl-icon, .hl-low .hl-score { color: var(--negative); }
+    .hl-high .hl-score { color: var(--positive); }
+    .hl-low .hl-score { color: var(--negative); }
 
-    /* --- Fate Flow Styles --- */
-    .fate-flow {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 10px 0;
-    }
-    .fate-step {
-      display: flex;
-      align-items: center;
-      background: rgba(255,255,255,0.03);
-      border-radius: 6px;
-      height: 36px;
-      position: relative;
-      overflow: hidden;
-    }
-    .fate-bar {
-      height: 100%;
-      background: rgba(56, 189, 248, 0.2);
-      border-right: 2px solid var(--accent);
-      transition: width 0.5s ease-out;
-    }
-    .fate-label {
-      position: absolute;
-      left: 12px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #fff;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      z-index: 2;
-    }
-    .fate-val {
-      position: absolute;
-      right: 12px;
-      font-size: 0.85rem;
-      font-family: monospace;
-      color: var(--accent);
-      font-weight: 700;
-      z-index: 2;
-    }
+    .fate-flow { display: flex; flex-direction: column; gap: 8px; padding: 10px 0; }
+    .fate-step { display: flex; align-items: center; background: rgba(255,255,255,0.03); border-radius: 6px; height: 36px; position: relative; overflow: hidden; }
+    .fate-bar { height: 100%; background: rgba(56, 189, 248, 0.2); border-right: 2px solid var(--accent); transition: width 0.5s ease-out; }
+    .fate-label { position: absolute; left: 12px; font-size: 0.75rem; font-weight: 700; z-index: 2; text-transform: uppercase; }
+    .fate-val { position: absolute; right: 12px; font-size: 0.85rem; font-family: monospace; font-weight: 700; z-index: 2; }
 
-    .step-playoffs .fate-bar { background: rgba(217, 119, 6, 0.15); border-color: var(--bronze); }
-    .step-finals .fate-bar { background: rgba(203, 213, 225, 0.12); border-color: var(--silver); }
-    .step-titles .fate-bar { background: rgba(251, 191, 36, 0.15); border-color: var(--gold); }
-
-    .step-playoffs .fate-val { color: var(--bronze); }
-    .step-finals .fate-val { color: var(--silver); }
-    .step-titles .fate-val { color: var(--gold); }
-
-    /* --- Tables --- */
-    .table-wrap { border: 1px solid var(--border-subtle); border-radius: 12px; overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; min-width: 700px; font-size: 0.9rem; }
-    th {
-      background: rgba(15, 23, 42, 0.95);
-      text-align: left;
-      padding: 12px 16px;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--border-subtle);
-    }
-    td {
-      padding: 12px 16px;
-      border-bottom: 1px solid rgba(31, 41, 55, 0.5);
-      color: #ffffff;
-      font-variant-numeric: tabular-nums;
-    }
-    tr:last-child td { border-bottom: none; }
-    tbody tr:hover { background: rgba(56, 189, 248, 0.03); }
-
-    .skeleton {
-      background: rgba(255,255,255,0.05);
-      border-radius: 4px;
-      color: transparent !important;
-      position: relative;
-      overflow: hidden;
-    }
-    .skeleton::after {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-      animation: shimmer 1.5s infinite;
-    }
-    @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-
-    @media (max-width: 1024px) {
-      .hero-card { flex-wrap: wrap; padding: 24px; gap: 24px; }
-      .trophy-case {
-        border-left: none; padding-left: 0;
-        border-right: none; padding-right: 0;
-        border-top: 1px solid var(--border-subtle);
-        padding-top: 20px;
-        width: 100%;
-        flex: 100%;
-      }
-      .rating-container {
-        width: 100%;
-        justify-content: space-between;
-        border-top: 1px solid var(--border-subtle);
-        padding-top: 20px;
-      }
-      .hero-name { max-width: 100%; }
-    }
-
-    @media (max-width: 768px) {
-      .hero-card { flex-direction: column; text-align: center; gap: 20px; align-items: center; }
-      .hero-identity { flex-direction: column; text-align: center; gap: 12px; min-width: unset; }
-      .rating-container { flex-direction: column; gap: 20px; min-width: unset; }
-      .trophy-case { justify-content: center; min-width: unset; }
-
-      .stats-strip { grid-template-columns: 1fr 1fr; }
-      .analytics-grid { grid-template-columns: 1fr; }
-      .chart-card { min-height: 320px; }
-    }
+    .table-wrap { border: 1px solid var(--border-subtle); border-radius: 12px; overflow-x: auto; margin-top: 24px; }
+    table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    th { background: rgba(15, 23, 42, 0.95); text-align: left; padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle); }
+    td { padding: 12px 16px; border-bottom: 1px solid rgba(31, 41, 55, 0.5); color: #fff; }
   </style>
 </head>
 
 <body>
   <div class="shell">
-
     <div class="top-bar">
       <div class="page-title">Manager Profile</div>
-      <div class="manager-select-wrapper">
-        <select id="managerSelect" aria-label="Select Manager"></select>
-      </div>
+      <div class="manager-select-wrapper"><select id="managerSelect"></select></div>
     </div>
 
     <div class="card hero-card">
       <div class="hero-identity">
         <div class="avatar" id="heroAvatar"></div>
         <div class="hero-text">
-          <div class="hero-name" id="heroName"><span class="skeleton">Loading Name</span></div>
-          <div class="hero-tenure" id="heroTenure"><span class="skeleton">EST. 20XX</span></div>
+          <div class="hero-name" id="heroName">Manager Name</div>
+          <div class="hero-tenure" id="heroTenure">EST. 20XX</div>
         </div>
       </div>
-
       <div class="trophy-case" id="trophyCase"></div>
-
       <div class="rating-container">
         <div class="sub-ratings">
-          <div class="sub-stat" title="Peak: Highest Elo reached across all tracked games."><span>Peak</span> <span id="ratingSCOR">-</span></div>
-          <div class="sub-stat" title="Floor: Lowest Elo reached across all tracked games."><span>Floor</span> <span id="ratingGM">-</span></div>
-          <div class="sub-stat" title="Δ Last 10: Elo change over the last 10 games (or since start if fewer than 10)."><span>Δ Last 10</span> <span id="ratingCLT">-</span></div>
-          <div class="sub-stat" title="Rank: Current Elo rank (1 = highest). Required 3+ seasons."><span>Rank</span> <span id="ratingSTB">-</span></div>
+          <div class="sub-stat"><span>Peak</span> <span id="ratingPeak">-</span></div>
+          <div class="sub-stat"><span>Floor</span> <span id="ratingFloor">-</span></div>
+          <div class="sub-stat"><span>Δ 10</span> <span id="ratingDelta">-</span></div>
+          <div class="sub-stat"><span>Rank</span> <span id="ratingRank">-</span></div>
         </div>
-        <div class="ovr-badge" title="ELO: Rating that updates after every matchup based on opponent strength, margin of victory, and playoff weighting.">
-          <div class="ovr-ring">
-            <span class="ovr-val" id="heroOvr">--</span>
-          </div>
+        <div class="ovr-badge">
+          <div class="ovr-ring"><span class="ovr-val" id="heroElo">--</span></div>
           <span class="ovr-label">ELO</span>
         </div>
       </div>
     </div>
 
     <div class="stats-strip">
-      <div class="stat-box">
-        <span class="stat-label">Career Record</span>
-        <span class="stat-val" id="statRecord">-</span>
-        <span class="stat-sub" id="statWinPct">Win %</span>
-      </div>
-      <div class="stat-box">
-        <span class="stat-label">Avg Finish</span>
-        <span class="stat-val" id="statAvgFinish">-</span>
-        <span class="stat-sub">Rank</span>
-      </div>
-      <div class="stat-box">
-        <span class="stat-label">Avg Score</span>
-        <span class="stat-val" id="statAvgScore">-</span>
-        <span class="stat-sub">PTS/Game</span>
-      </div>
-      <div class="stat-box">
-        <span class="stat-label">Career Earnings</span>
-        <span class="stat-val" id="statEarnings" style="color:var(--money)">-</span>
-        <span class="stat-sub">Total Won</span>
-      </div>
+      <div class="stat-box"><span class="stat-label">Career Record</span><span class="stat-val" id="statRecord">-</span></div>
+      <div class="stat-box"><span class="stat-label">Avg Finish</span><span class="stat-val" id="statFinish">-</span></div>
+      <div class="stat-box"><span class="stat-label">Avg Score</span><span class="stat-val" id="statScore">-</span></div>
+      <div class="stat-box"><span class="stat-label">Earnings</span><span class="stat-val" id="statCash" style="color:var(--money)">-</span></div>
     </div>
 
     <div class="analytics-grid">
       <div class="rivalry-col">
-        <div class="card" style="margin-bottom:0; padding:16px;">
-          <div class="chart-header" style="margin-bottom:10px;">
-            <div class="chart-title-row">
-              <div class="chart-icon">↕</div>
-              <h3>All-Time Highs & Lows</h3>
-            </div>
-            <span class="chart-subtitle">Absolute single-game peaks and valleys throughout history.</span>
+        <div class="card" style="padding:16px;">
+          <div class="chart-header">
+            <div class="chart-title-row"><div class="chart-icon">↕</div><h3>Highs & Lows</h3></div>
+            <span class="chart-subtitle">Personal best and worst single-game outputs.</span>
           </div>
           <div class="hl-ticker" id="hlTicker"></div>
         </div>
-
-        <div class="rival-card pigeon">
-          <div class="rival-meta">
-            <span class="rival-type">Pigeon (Highest Win %)</span>
-            <span class="rival-name" id="pigeonName">-</span>
-          </div>
-          <span class="rival-stat" id="pigeonStat">-</span>
-        </div>
-
-        <div class="rival-card nemesis">
-          <div class="rival-meta">
-            <span class="rival-type">Nemesis (Lowest Win %)</span>
-            <span class="rival-name" id="nemesisName">-</span>
-          </div>
-          <span class="rival-stat" id="nemesisStat">-</span>
-        </div>
+        <div class="rival-card pigeon"><div class="rival-meta"><span class="rival-type">Pigeon</span><span class="rival-name" id="pigeonName">-</span></div><span class="rival-stat" id="pigeonStat">-</span></div>
+        <div class="rival-card nemesis"><div class="rival-meta"><span class="rival-type">Nemesis</span><span class="rival-name" id="nemesisName">-</span></div><span class="rival-stat" id="nemesisStat">-</span></div>
       </div>
 
       <div class="card chart-card">
         <div class="chart-header">
-          <div class="chart-title-row">
-            <div class="chart-icon">✦</div>
-            <h3>Luck Index (Quadrants)</h3>
-          </div>
-          <span class="chart-subtitle">PF vs PA ranks. Top-left is efficient dominance; bottom-right is cursed.</span>
+          <div class="chart-title-row"><div class="chart-icon">⚡</div><h3>ELO Progression</h3></div>
+          <span class="chart-subtitle">End-of-season power rating vs. the league average (dashed).</span>
         </div>
-        <div class="chart-container">
-          <canvas id="luckChart"></canvas>
-        </div>
+        <div class="chart-container"><canvas id="eloProgChart"></canvas></div>
       </div>
 
       <div class="card chart-card">
         <div class="chart-header">
-          <div class="chart-title-row">
-            <div class="chart-icon">⚡</div>
-            <h3>ELO Progression (Season-End)</h3>
-          </div>
-          <span class="chart-subtitle">End-of-season power rating relative to the league average (dashed).</span>
+          <div class="chart-title-row"><div class="chart-icon">✦</div><h3>Luck Index</h3></div>
+          <span class="chart-subtitle">Points For vs Points Against rank quadrants.</span>
         </div>
-        <div class="chart-container">
-          <canvas id="eloProgressionChart"></canvas>
-        </div>
+        <div class="chart-container"><canvas id="luckChart"></canvas></div>
       </div>
 
       <div class="card chart-card">
         <div class="chart-header">
-          <div class="chart-title-row">
-            <div class="chart-icon">💓</div>
-            <h3>Heart Attack Ratio (Games &lt; 5 pts)</h3>
-          </div>
-          <span class="chart-subtitle">Success rate in high-pressure matchups decided by one big play.</span>
+          <div class="chart-icon">💓</div><h3>Heart Attack Ratio</h3></div>
+          <span class="chart-subtitle">Win/Loss results for games decided by fewer than 5 points.</span>
         </div>
-        <div class="chart-container">
-          <canvas id="heartChart"></canvas>
-        </div>
+        <div class="chart-container"><canvas id="heartChart"></canvas></div>
       </div>
 
       <div class="card chart-card">
         <div class="chart-header">
-          <div class="chart-title-row">
-            <div class="chart-icon">📊</div>
-            <h3>Scoring Spread (Low/High)</h3>
-          </div>
-          <span class="chart-subtitle">Annual volatility showing the gap between floor and ceiling each year.</span>
+          <div class="chart-icon">📊</div><h3>Scoring Spread</h3></div>
+          <span class="chart-subtitle">Annual volatility showing the gap between floor and ceiling.</span>
         </div>
-        <div class="chart-container">
-          <canvas id="spreadChart"></canvas>
-        </div>
+        <div class="chart-container"><canvas id="spreadChart"></canvas></div>
       </div>
 
       <div class="card chart-card">
         <div class="chart-header">
-          <div class="chart-title-row">
-            <div class="chart-icon">🏁</div>
-            <h3>Post-Season Fate</h3>
-          </div>
-          <span class="chart-subtitle">Conversion funnel from regular season entry to championship glory.</span>
+          <div class="chart-title-row"><div class="chart-icon">🏁</div><h3>Post-Season Fate</h3></div>
+          <span class="chart-subtitle">Manager's path from entry to championship conversion.</span>
         </div>
-        <div class="chart-container" style="display:flex; flex-direction:column; justify-content:center;">
-          <div id="fateFlow" class="fate-flow"></div>
-        </div>
+        <div id="fateFlow" class="fate-flow"></div>
       </div>
     </div>
 
-    <div class="card">
-      <div class="table-wrap">
-        <table id="seasonTable">
-          <thead>
-            <tr>
-              <th>Year</th>
-              <th>Record</th>
-              <th>Finish</th>
-              <th>Points For</th>
-              <th>Points Against</th>
-              <th>Seed</th>
-              <th>Career Earnings</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-
+    <div class="card"><div class="table-wrap"><table id="seasonTable"><thead><tr><th>Year</th><th>Record</th><th>Finish</th><th>PF</th><th>PA</th><th>Seed</th><th>Earnings</th></tr></thead><tbody></tbody></table></div></div>
   </div>
 
   <script>
     let rawScores = [], rawStandings = [], rawSeeds = [];
-    const charts = {};
-    const leagueRatings = {};
-    const seasonalEloHistory = {};
-    const leagueSeasonalAverage = {};
+    const leagueRatings = {}, seasonalEloHistory = {}, leagueSeasonalAverage = {}, charts = {};
 
-    const $ = (id) => document.getElementById(id);
-    const els = {};
-
-    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-    const safeNum = (v, fallback = 0) => Number.isFinite(Number(v)) ? Number(v) : fallback;
-    const moneyFmt = (n) => `$${Number(n || 0).toLocaleString()}`;
-    const keyMY = (m, y) => `${m}::${y}`;
-
-    let latestLeagueYear = null;
-
-    function fitHeroName() {
-      const el = els.heroName;
-      if (!el) return;
-      el.style.fontSize = '';
-      el.style.lineHeight = '';
-      const cs = window.getComputedStyle(el);
-      const lineHeight = parseFloat(cs.lineHeight) || (parseFloat(cs.fontSize) * 1.1);
-      const maxHeight = lineHeight * 2 + 1; 
-      let fs = parseFloat(cs.fontSize) || 32;
-      const minFs = 20;
-      while (el.scrollHeight > maxHeight && fs > minFs) {
-        fs -= 1;
-        el.style.fontSize = fs + 'px';
-        el.style.lineHeight = '1.1';
-      }
-    }
-
-    function formatTenureRanges(seasons, managerName) {
-      const years = Array.from(new Set((seasons || []).map(s => safeNum(s.year, null)).filter(Number.isFinite))).sort((a,b)=>a-b);
-      if (!years.length) return '—';
-
-      const ranges = [];
-      let start = years[0];
-      let prev = years[0];
-
-      for (let i = 1; i < years.length; i++) {
-        const y = years[i];
-        if (y === prev + 1) {
-          prev = y;
-          continue;
-        }
-        ranges.push([start, prev]);
-        start = y;
-        prev = y;
-      }
-      ranges.push([start, prev]);
-
-      const parts = ranges.map(([a, b], idxRange) => {
-        const isLast = idxRange === ranges.length - 1;
-        if (a === b) {
-          if (isLast && Number.isFinite(latestLeagueYear) && b >= latestLeagueYear) {
-            return `${a}-Present`;
-          }
-          return `${a}`;
-        }
-        if (isLast && Number.isFinite(latestLeagueYear) && b >= latestLeagueYear) {
-          return `${a}-Present`;
-        }
-        return `${a}-${b}`;
-      });
-
-      return parts.join(', ');
-    }
-
-    function getEarnings(year, rank, hasScoringTitle) {
-      let multiplier = 3.75; 
-      if (year <= 2017) multiplier = 1.0;
-      else if (year <= 2019) multiplier = 2.0;
-      else if (year === 2020) multiplier = 2.5;
-
-      const baseSemis = 15 * multiplier;
-      const baseFinalsApp = 20 * multiplier;
-      const baseChamp = 120 * multiplier;
-      const baseScoring = 20 * multiplier;
-
-      let total = 0;
-      if (rank <= 4) total += baseSemis;
-      if (rank <= 2) total += baseFinalsApp;
-      if (rank === 1) total += baseChamp;
-      if (hasScoringTitle) total += baseScoring;
-
-      return total;
-    }
-
-    function normalizeStandingsRow(s) {
-      return {
-        year: safeNum(s.year, null),
-        manager: (s.manager ?? '').trim(),
-        wins: safeNum(s.wins, 0),
-        losses: safeNum(s.losses, 0),
-        ties: safeNum(s.ties, 0),
-        final_standing: safeNum((s.final_standing ?? s.finalStanding), null),
-        division_finish: safeNum((s.division_finish ?? s.divisionFinish), null),
-        points_for: safeNum((s.points_for ?? s.pointsFor), 0),
-        points_against: safeNum((s.points_against ?? s.pointsAgainst), 0),
+    const buildIndexes = () => {
+      window.idx = {
+        managers: [...new Set(rawStandings.map(s => s.manager))].sort(),
+        standingsByManager: new Map(),
+        gamesByManager: new Map(),
+        seedsByManagerYear: new Map(),
+        scoringTitles: new Map()
       };
-    }
-
-    function normalizeScoreRow(g) {
-      return {
-        year: safeNum(g.year, null),
-        week: safeNum(g.week, null),
-        manager1: (g.manager1 ?? '').trim(),
-        manager2: (g.manager2 ?? '').trim(),
-        score1: safeNum(g.score1, NaN),
-        score2: safeNum(g.score2, NaN),
-        playoffs: g.playoffs ?? "N/A"
-      };
-    }
-
-    const idx = {
-      managers: [],
-      standingsByManager: new Map(),
-      seedsByManagerYear: new Map(),
-      gamesByManager: new Map(),
-      weekBuckets: new Map(),
-      scoringTitlesByManager: new Map(),
-      seasonRanks: {}
-    };
-
-    function buildIndexes() {
-      idx.managers = [];
-      idx.standingsByManager.clear();
-      idx.seedsByManagerYear.clear();
-      idx.gamesByManager.clear();
-      idx.weekBuckets.clear();
-      idx.scoringTitlesByManager.clear();
-      idx.seasonRanks = {};
-
-      const managerSet = new Set();
-
       rawStandings.forEach(s => {
-        if (!s.manager) return;
-        managerSet.add(s.manager);
-        if (!idx.standingsByManager.has(s.manager)) idx.standingsByManager.set(s.manager, []);
+        if(!idx.standingsByManager.has(s.manager)) idx.standingsByManager.set(s.manager, []);
         idx.standingsByManager.get(s.manager).push(s);
       });
-      idx.standingsByManager.forEach(arr => arr.sort((a, b) => b.year - a.year));
-
-      rawSeeds.forEach(sd => {
-        const m = (sd.manager ?? '').trim();
-        const y = safeNum(sd.year, null);
-        if (!m || !y) return;
-        idx.seedsByManagerYear.set(keyMY(m, y), sd.seed);
-        managerSet.add(m);
-      });
-
-      rawScores.forEach(row => {
-        const g = normalizeScoreRow(row);
-        if (!g.manager1 || !g.manager2) return;
-        if (!Number.isFinite(g.score1) || !Number.isFinite(g.score2)) return;
-        if (!Number.isFinite(g.year) || !Number.isFinite(g.week)) return;
-
-        managerSet.add(g.manager1);
-        managerSet.add(g.manager2);
-
-        const bucketKey = `${g.year}::${g.week}`;
-        if (!idx.weekBuckets.has(bucketKey)) idx.weekBuckets.set(bucketKey, []);
-        idx.weekBuckets.get(bucketKey).push({ manager: g.manager1, score: g.score1, isPlayoff: (g.playoffs && g.playoffs !== "N/A") });
-        idx.weekBuckets.get(bucketKey).push({ manager: g.manager2, score: g.score2, isPlayoff: (g.playoffs && g.playoffs !== "N/A") });
-
-        const asGameFor = (name) => {
-          const isAway = (g.manager1 === name);
-          const myScore = isAway ? g.score1 : g.score2;
-          const oppScore = isAway ? g.score2 : g.score1;
-          const opponent = isAway ? g.manager2 : g.manager1;
-          const result = myScore > oppScore ? 'W' : (myScore < oppScore ? 'L' : 'T');
-          return {
-            year: g.year,
-            week: g.week,
-            score: myScore,
-            oppScore,
-            opponent,
-            result,
-            isPlayoff: (g.playoffs && g.playoffs !== "N/A")
-          };
-        };
-
-        [g.manager1, g.manager2].forEach(m => {
-          if (!idx.gamesByManager.has(m)) idx.gamesByManager.set(m, []);
-          idx.gamesByManager.get(m).push(asGameFor(m));
-        });
-      });
-
-      idx.gamesByManager.forEach(arr => arr.sort((a, b) => (b.year !== a.year ? b.year - a.year : b.week - a.week)));
-      idx.managers = Array.from(managerSet).sort((a, b) => a.localeCompare(b));
-
-      const byYear = new Map();
-      rawStandings.forEach(s => {
-        if (!Number.isFinite(s.year) || !s.manager) return;
-        if (!byYear.has(s.year)) byYear.set(s.year, []);
-        byYear.get(s.year).push(s);
-      });
-
-      for (const [year, rows] of byYear.entries()) {
-        rows.sort((a,b) => b.points_for - a.points_for);
-        rows.forEach((r, i) => {
-          const k = keyMY(r.manager, year);
-          if(!idx.seasonRanks[k]) idx.seasonRanks[k] = {};
-          idx.seasonRanks[k].pfRank = i + 1;
-        });
-
-        rows.sort((a,b) => b.points_against - a.points_against);
-        rows.forEach((r, i) => {
-          const k = keyMY(r.manager, year);
-          if(!idx.seasonRanks[k]) idx.seasonRanks[k] = {};
-          idx.seasonRanks[k].paRank = i + 1;
-        });
-
-        let maxPF = -Infinity;
-        rows.forEach(r => { if (Number.isFinite(r.points_for)) maxPF = Math.max(maxPF, r.points_for); });
-        if (Number.isFinite(maxPF) && maxPF > 0) {
-          rows.forEach(r => {
-            if (r.points_for === maxPF) {
-              if (!idx.scoringTitlesByManager.has(r.manager)) idx.scoringTitlesByManager.set(r.manager, new Set());
-              idx.scoringTitlesByManager.get(r.manager).add(year);
-            }
-          });
+      rawSeeds.forEach(s => idx.seedsByManagerYear.set(`${s.manager}::${s.year}`, s.seed));
+      
+      const years = [...new Set(rawStandings.map(s => s.year))];
+      years.forEach(y => {
+        const yearStandings = rawStandings.filter(s => s.year === y).sort((a,b) => b.points_for - a.points_for);
+        if(yearStandings.length) {
+          if(!idx.scoringTitles.has(yearStandings[0].manager)) idx.scoringTitles.set(yearStandings[0].manager, new Set());
+          idx.scoringTitles.get(yearStandings[0].manager).add(y);
         }
-      }
-    }
+      });
+    };
 
-    function mean(arr) {
-      if (!arr || !arr.length) return 0;
-      return arr.reduce((a,b)=>a+b,0) / arr.length;
-    }
-
-    function stdev(arr) {
-      if (!arr || arr.length < 2) return 0;
-      const m = mean(arr);
-      const v = mean(arr.map(x => (x - m) ** 2));
-      return Math.sqrt(v);
-    }
-
-    function median(arr) {
-      if (!arr || !arr.length) return 0;
-      const s = [...arr].sort((a,b)=>a-b);
-      const mid = Math.floor(s.length / 2);
-      return (s.length % 2) ? s[mid] : (s[mid - 1] + s[mid]) / 2;
-    }
-
-    function bottomQuantileAverage(arr, q = 0.25) {
-      if (!arr || !arr.length) return 0;
-      const s = [...arr].sort((a,b)=>a-b);
-      const k = Math.max(1, Math.floor(s.length * q));
-      return mean(s.slice(0, k));
-    }
-
-    function eloExpected(rA, rB) {
-      return 1 / (1 + Math.pow(10, (rB - rA) / 400));
-    }
-
-    function calculateAllRatings() {
+    const calculateRatings = () => {
       const BASE = 1500;
-      const K_BASE = 40;
-      const G0 = 30; 
-      const PLAYOFF_MULT = 2.0;
-      const ETA_Z_DIFF = 0.08;      
-      const Z_DIFF_CAP = 0.15;      
-      const FLOOR_LOOKBACK = 50;    
-      const FLOOR_Q = 0.25;         
-      const FLOOR_FACTOR = 70;      
-      const FLOOR_Z_CLIP = -2.5;    
-
-      const rating = {};
-      const gamesPlayed = {};
-      const history = {};
-      const zHist = {}; 
-
-      idx.managers.forEach(m => {
-        rating[m] = BASE;
-        gamesPlayed[m] = 0;
-        history[m] = [BASE];
-        zHist[m] = [];
+      const ratings = {};
+      idx.managers.forEach(m => { 
+        ratings[m] = BASE; 
         seasonalEloHistory[m] = [];
       });
 
-      const games = (rawScores || [])
-        .map(normalizeScoreRow)
-        .filter(g =>
-          g.manager1 && g.manager2 &&
-          Number.isFinite(g.score1) && Number.isFinite(g.score2) &&
-          Number.isFinite(g.year) && Number.isFinite(g.week)
-        )
-        .sort((a, b) => (a.year !== b.year ? a.year - b.year : a.week - b.week));
+      const processedGames = rawScores.sort((a,b) => a.year !== b.year ? a.year - b.year : a.week - b.week);
+      let currentYear = processedGames[0]?.year;
 
-      const weekStats = new Map(); 
-      idx.weekBuckets.forEach((arr, key) => {
-        const scores = (arr || []).map(x => safeNum(x.score, NaN)).filter(Number.isFinite);
-        const mu = mean(scores);
-        const sd = stdev(scores) || 1;
-        const topCut = median(scores); 
-        weekStats.set(key, { mu, sd, topCut });
-      });
-
-      let currentYear = games.length ? games[0].year : null;
-
-      games.forEach((g, idxGame) => {
-        if (g.year !== currentYear) {
-          const yearlyRatings = [];
+      processedGames.forEach(g => {
+        if(g.year !== currentYear) {
+          const yearlyR = [];
           idx.managers.forEach(m => {
-            const currentR = rating[m];
-            seasonalEloHistory[m].push({ year: currentYear, elo: Math.round(currentR) });
-            yearlyRatings.push(currentR);
+            seasonalEloHistory[m].push({ year: currentYear, elo: Math.round(ratings[m]) });
+            yearlyR.push(ratings[m]);
           });
-          leagueSeasonalAverage[currentYear] = mean(yearlyRatings);
+          leagueSeasonalAverage[currentYear] = yearlyR.reduce((a,b)=>a+b,0) / yearlyR.length;
           currentYear = g.year;
         }
 
-        const A = g.manager1;
-        const B = g.manager2;
+        const m1 = g.manager1, m2 = g.manager2;
+        const r1 = ratings[m1], r2 = ratings[m2];
+        const e1 = 1 / (1 + Math.pow(10, (r2 - r1) / 400));
+        const s1 = g.score1 > g.score2 ? 1 : (g.score1 < g.score2 ? 0 : 0.5);
+        const k = 32;
+        const delta = k * (s1 - e1);
+        ratings[m1] += delta; ratings[m2] -= delta;
 
-        if (!(A in rating)) { rating[A] = BASE; gamesPlayed[A] = 0; history[A] = [BASE]; zHist[A] = []; seasonalEloHistory[A] = []; }
-        if (!(B in rating)) { rating[B] = BASE; gamesPlayed[B] = 0; history[B] = [BASE]; zHist[B] = []; seasonalEloHistory[B] = []; }
-
-        const wkKey = `${g.year}::${g.week}`;
-        const ws = weekStats.get(wkKey) || { mu: 0, sd: 1, topCut: Infinity };
-
-        const zA = (g.score1 - ws.mu) / ws.sd;
-        const zB = (g.score2 - ws.mu) / ws.sd;
-
-        const zAHist = zHist[A] || [];
-        const zBHist = zHist[B] || [];
-
-        const floorAraw = bottomQuantileAverage(zAHist.slice(-FLOOR_LOOKBACK), FLOOR_Q);
-        const floorBraw = bottomQuantileAverage(zBHist.slice(-FLOOR_LOOKBACK), FLOOR_Q);
-
-        const floorA = clamp(floorAraw, FLOOR_Z_CLIP, 0);
-        const floorB = clamp(floorBraw, FLOOR_Z_CLIP, 0);
-
-        const RA = rating[A];
-        const RB = rating[B];
-        const effRA = RA + FLOOR_FACTOR * floorA; 
-        const effRB = RB + FLOOR_FACTOR * floorB;
-
-        const EA = eloExpected(effRA, effRB);
-
-        let SA = 0.5;
-        if (g.score1 > g.score2) SA = 1;
-        else if (g.score1 < g.score2) SA = 0;
-
-        const zDiff = zA - zB;
-        const adj = clamp(ETA_Z_DIFF * zDiff, -Z_DIFF_CAP, Z_DIFF_CAP);
-        const SA_adj = clamp(SA + adj, 0, 1);
-
-        const mVal = Math.abs(g.score1 - g.score2);
-        const M = clamp(Math.log(mVal + 1), 0.2, 2.2);
-
-        const isPlayoff = (g.playoffs && g.playoffs !== "N/A") ? 1 : 0;
-        const P = isPlayoff ? PLAYOFF_MULT : 1.0;
-
-        const KA = K_BASE * (G0 / (G0 + (gamesPlayed[A] || 0)));
-        const KB = K_BASE * (G0 / (G0 + (gamesPlayed[B] || 0)));
-        const K = (KA + KB) / 2;
-
-        const delta = (K * P * M) * (SA_adj - EA);
-
-        rating[A] = RA + delta;
-        rating[B] = RB - delta;
-
-        gamesPlayed[A] = (gamesPlayed[A] || 0) + 1;
-        gamesPlayed[B] = (gamesPlayed[B] || 0) + 1;
-
-        history[A].push(rating[A]);
-        history[B].push(rating[B]);
-
-        zAHist.push(zA);
-        zBHist.push(zB);
-        zHist[A] = zAHist;
-        zHist[B] = zBHist;
-
-        if (idxGame === games.length - 1) {
-          const yearlyRatings = [];
-          idx.managers.forEach(m => {
-            const currentR = rating[m];
-            seasonalEloHistory[m].push({ year: g.year, elo: Math.round(currentR) });
-            yearlyRatings.push(currentR);
+        [m1, m2].forEach(m => {
+          if(!idx.gamesByManager.has(m)) idx.gamesByManager.set(m, []);
+          idx.gamesByManager.get(m).push({
+            year: g.year, week: g.week, 
+            score: m === m1 ? g.score1 : g.score2,
+            oppScore: m === m1 ? g.score2 : g.score1,
+            opponent: m === m1 ? m2 : m1,
+            result: (m === m1 ? g.score1 > g.score2 : g.score2 > g.score1) ? 'W' : 'L'
           });
-          leagueSeasonalAverage[g.year] = mean(yearlyRatings);
-        }
+        });
       });
 
-      const rankMap = {};
-      const eligibleManagers = idx.managers.filter(m => {
-        const seasons = idx.standingsByManager.get(m) || [];
-        return seasons.length >= 3;
-      });
+      // Ranks (3+ seasons only)
+      const eligible = idx.managers.filter(m => (idx.standingsByManager.get(m) || []).length >= 3);
+      const ranked = [...eligible].sort((a,b) => ratings[b] - ratings[a]);
       
-      const sorted = [...eligibleManagers].sort((a, b) => rating[b] - rating[a]);
-      sorted.forEach((m, i) => { rankMap[m] = i + 1; });
-
       idx.managers.forEach(m => {
-        const h = history[m] || [BASE];
-        const peak = Math.max(...h);
-        const floor = Math.min(...h);
-
-        const last = h[h.length - 1];
-        const prev10 = h.length > 10 ? h[h.length - 11] : h[0];
-        const d10 = last - prev10;
-
         leagueRatings[m] = {
-          elo: Math.round(last),
-          peak: Math.round(peak),
-          floor: Math.round(floor),
-          d10: Math.round(d10),
-          rank: rankMap[m] || '—'
+          elo: Math.round(ratings[m]),
+          rank: eligible.includes(m) ? ranked.indexOf(m) + 1 : '—'
         };
       });
-    }
+    };
 
-    function initManagerDropdown() {
-      const select = els.managerSelect;
-      select.innerHTML = '';
-      idx.managers.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m;
-        opt.textContent = m;
-        select.appendChild(opt);
-      });
-      select.addEventListener('change', (e) => loadManager(e.target.value));
-    }
-
-    function loadManager(name) {
-      const mySeasons = idx.standingsByManager.get(name) || [];
-      const myGames = idx.gamesByManager.get(name) || [];
-
-      const h2h = {};
-      myGames.forEach(g => {
-        if (!g.opponent) return;
-        if (!h2h[g.opponent]) h2h[g.opponent] = { w: 0, l: 0, t: 0, games: 0 };
-        h2h[g.opponent].games++;
-        if (g.result === 'W') h2h[g.opponent].w++;
-        else if (g.result === 'L') h2h[g.opponent].l++;
-        else h2h[g.opponent].t++;
-      });
-
-      renderHero(name, mySeasons);
-      renderStats(mySeasons, myGames, name);
-      renderRivalries(h2h);
-      renderSeasonTable(mySeasons, name);
-      renderLuckChart(mySeasons, name);
-      renderSpreadChart(myGames);
-      renderClutchChart(myGames);
-      renderFormStrip(myGames);
-      renderHardwareChart(mySeasons);
-      renderHeartAttackChart(myGames);
-      renderHighLow(myGames);
-      renderFateFlow(mySeasons, name);
-      renderEloProgressionChart(name);
-    }
-
-    function renderHero(name, seasons) {
-      const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase();
-      els.heroAvatar.textContent = initials;
-      els.heroName.textContent = name;
-      fitHeroName();
-      els.heroTenure.textContent = formatTenureRanges(seasons, name);
-
-      const caseEl = els.trophyCase;
-      caseEl.innerHTML = '';
-
-      let champs = 0, runners = 0, thirds = 0, divisions = 0;
-      seasons.forEach(s => {
-        if (s.final_standing === 1) champs++;
-        else if (s.final_standing === 2) runners++;
-        else if (s.final_standing === 3) thirds++;
-        if (s.division_finish === 1) divisions++;
-      });
-
-      const scoringTitles = idx.scoringTitlesByManager.get(name)?.size || 0;
-      const pills = [];
-
-      if (champs > 0) pills.push(`<span class="trophy-badge gold">🏆 Champion ×${champs}</span>`);
-      if (runners > 0) pills.push(`<span class="trophy-badge silver">🥈 Runner-Up ×${runners}</span>`);
-      if (thirds > 0) pills.push(`<span class="trophy-badge bronze">🥉 3rd Place ×${thirds}</span>`);
-      if (scoringTitles > 0) pills.push(`<span class="trophy-badge scoring">🕹️ Scoring Title ×${scoringTitles}</span>`);
-      if (divisions > 0) pills.push(`<span class="trophy-badge" style="background: rgba(34,197,94,0.15); border-color: rgba(34,197,94,0.4); color: var(--positive);">🏁 Division Title ×${divisions}</span>`);
-
-      caseEl.innerHTML = pills.length ? pills.join('') : `<span class="empty-case">No hardware... yet.</span>`;
-
+    const loadManager = (name) => {
+      const seasons = idx.standingsByManager.get(name) || [];
+      const games = idx.gamesByManager.get(name) || [];
       const r = leagueRatings[name];
-      const ovrEl = els.heroOvr;
-      const target = r.elo;
-      let current = clamp(Number(ovrEl.textContent) || 0, 0, target);
 
-      const step = () => {
-        current = Math.min(target, current + Math.max(1, Math.ceil(target / 40)));
-        ovrEl.textContent = current;
-        if (current < target) requestAnimationFrame(step);
-      };
-      step();
+      document.getElementById('heroName').textContent = name;
+      document.getElementById('heroAvatar').textContent = name.split(' ').map(n=>n[0]).join('');
+      document.getElementById('heroElo').textContent = r.elo;
+      document.getElementById('ratingRank').textContent = r.rank;
+      document.getElementById('heroTenure').textContent = `EST. ${Math.min(...seasons.map(s=>s.year))}`;
 
-      els.ratingSCOR.textContent = r.peak;
-      els.ratingGM.textContent = r.floor;
-      els.ratingCLT.textContent = (r.d10 >= 0 ? "+" : "") + r.d10;
-      els.ratingSTB.textContent = r.rank;
-    }
+      // Stats
+      const w = games.filter(g=>g.result==='W').length, l = games.filter(g=>g.result==='L').length;
+      document.getElementById('statRecord').textContent = `${w}-${l}`;
+      document.getElementById('statScore').textContent = (games.reduce((a,b)=>a+b.score,0)/games.length).toFixed(1);
+      
+      // Hardware
+      const trophyEl = document.getElementById('trophyCase');
+      trophyEl.innerHTML = '';
+      const champs = seasons.filter(s=>s.final_standing===1).length;
+      if(champs) trophyEl.innerHTML += `<span class="trophy-badge gold">🏆 Champion x${champs}</span>`;
+      
+      renderTicker(games);
+      renderRivals(games);
+      renderCharts(name, seasons, games);
+    };
 
-    function renderStats(seasons, games, managerName) {
-      const w = games.filter(g => g.result === 'W').length;
-      const l = games.filter(g => g.result === 'L').length;
-      const t = games.filter(g => g.result === 'T').length;
-      els.statRecord.textContent = `${w}-${l}-${t}`;
-
-      const pct = games.length ? (w + t * 0.5) / games.length : 0;
-      els.statWinPct.textContent = pct.toFixed(3);
-
-      const finishes = seasons.map(s => s.final_standing).filter(Number.isFinite);
-      const avgFin = finishes.length ? finishes.reduce((a, b) => a + b, 0) / finishes.length : 0;
-      els.statAvgFinish.textContent = avgFin > 0 ? avgFin.toFixed(1) : '-';
-
-      const totalScore = games.reduce((a, g) => a + g.score, 0);
-      const avgScore = games.length ? totalScore / games.length : 0;
-      els.statAvgScore.textContent = avgScore.toFixed(1);
-
-      let money = 0;
-      seasons.forEach(s => {
-        const hasScoring = (idx.scoringTitlesByManager.get(managerName) || new Set()).has(s.year);
-        money += getEarnings(s.year, s.final_standing, hasScoring);
-      });
-      els.statEarnings.textContent = moneyFmt(money);
-    }
-
-    function renderRivalries(h2h) {
-      let nemesis = { name: '-', pct: 1.0, rec: '' };
-      let pigeon = { name: '-', pct: 0.0, rec: '' };
-
-      Object.keys(h2h).forEach(opp => {
-        const d = h2h[opp];
-        if (d.games < 5) return;
-        const pct = (d.w + d.t * 0.5) / d.games;
-        if (pct <= nemesis.pct) nemesis = { name: opp, pct, rec: `${d.w}-${d.l}` };
-        if (pct >= pigeon.pct) pigeon = { name: opp, pct, rec: `${d.w}-${d.l}` };
-      });
-
-      els.nemesisName.textContent = nemesis.name;
-      els.nemesisStat.textContent = nemesis.rec || '-';
-      els.pigeonName.textContent = pigeon.name;
-      els.pigeonStat.textContent = pigeon.rec || '-';
-    }
-
-    function renderSeasonTable(seasons, managerName) {
-      const tbody = document.querySelector('#seasonTable tbody');
-      tbody.innerHTML = '';
-      const frag = document.createDocumentFragment();
-
-      seasons.forEach(s => {
-        const seed = idx.seedsByManagerYear.get(keyMY(managerName, s.year)) ?? '-';
-        const rank = s.final_standing;
-        const hasScoring = (idx.scoringTitlesByManager.get(managerName) || new Set()).has(s.year);
-        const money = getEarnings(s.year, rank, hasScoring);
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${s.year ?? '-'}</td>
-          <td>${s.wins}-${s.losses}-${s.ties}</td>
-          <td>${Number.isFinite(rank) ? rank : '-'}</td>
-          <td>${Math.round(s.points_for || 0).toLocaleString()}</td>
-          <td>${Math.round(s.points_against || 0).toLocaleString()}</td>
-          <td>${seed}</td>
-          <td style="color:${money > 0 ? 'var(--money)' : 'inherit'}">${money > 0 ? moneyFmt(money) : '-'}</td>
-        `;
-        frag.appendChild(tr);
-      });
-      tbody.appendChild(frag);
-    }
-
-    function renderFormStrip(games) {
-      const strip = els.formStrip;
-      const recEl = els.formRecord;
-      if (!strip || !recEl) return;
-      strip.innerHTML = '';
-
-      const last10 = [...games]
-        .filter(g => Number.isFinite(g.year) && Number.isFinite(g.week))
-        .sort((a, b) => (a.year !== b.year ? b.year - a.year : b.week - a.week))
-        .slice(0, 10);
-
-      let w = 0, l = 0, t = 0;
-      last10.forEach(g => {
-        if (g.result === 'W') w++;
-        else if (g.result === 'L') l++;
-        else t++;
-
-        const dot = document.createElement('div');
-        dot.className = 'form-dot';
-        dot.dataset.res = g.result;
-        dot.tabIndex = 0;
-
-        const opp = g.opponent || '?';
-        const score = Number.isFinite(g.score) ? g.score.toFixed(1) : '';
-        const oppScore = Number.isFinite(g.oppScore) ? g.oppScore.toFixed(1) : '';
-        dot.dataset.tooltip = `${g.year} Wk ${g.week}: ${g.result} vs ${opp} (${score}–${oppScore})`;
-
-        strip.appendChild(dot);
-      });
-      recEl.textContent = last10.length ? `${w}-${l}-${t}` : '—';
-    }
-
-    function renderHighLow(games) {
-      const el = $('hlTicker');
-      if(!el) return;
-      const validGames = games.filter(g => Number.isFinite(g.score));
-      if(!validGames.length) { el.innerHTML = ''; return; }
-      validGames.sort((a,b) => b.score - a.score);
-      const high = validGames[0];
-      const low = validGames[validGames.length - 1];
-      el.innerHTML = `
-        <div class="hl-row hl-high">
-          <div class="hl-icon">▲</div>
-          <div class="hl-data">
-            <div class="hl-score">${high.score.toFixed(2)}</div>
-            <div class="hl-meta">${high.year} Wk ${high.week} vs ${high.opponent}</div>
-          </div>
-        </div>
-        <div class="hl-row hl-low">
-          <div class="hl-icon">▼</div>
-          <div class="hl-data">
-            <div class="hl-score">${low.score.toFixed(2)}</div>
-            <div class="hl-meta">${low.year} Wk ${low.week} vs ${low.opponent}</div>
-          </div>
-        </div>
+    const renderTicker = (games) => {
+      const scores = games.map(g=>g.score).sort((a,b)=>b-a);
+      document.getElementById('hlTicker').innerHTML = `
+        <div class="hl-row hl-high"><div>▲ High</div><div class="hl-score">${scores[0]}</div></div>
+        <div class="hl-row hl-low"><div>▼ Low</div><div class="hl-score">${scores[scores.length-1]}</div></div>
       `;
-    }
+    };
 
-    function renderFateFlow(seasons, managerName) {
-      const container = $('fateFlow');
-      if(!container) return;
-      let total = 0, playoffs = 0, finals = 0, titles = 0;
-      seasons.forEach(s => {
-        if(!Number.isFinite(s.year)) return;
-        total++;
-        const seed = idx.seedsByManagerYear.get(keyMY(managerName, s.year));
-        const rank = s.final_standing;
-        let madePlayoffs = !!seed || (Number.isFinite(rank) && rank <= 6);
-        if(madePlayoffs) playoffs++;
-        if(Number.isFinite(rank)) {
-          if(rank <= 2) finals++;
-          if(rank === 1) titles++;
-        }
+    const renderRivals = (games) => {
+      const opponents = {};
+      games.forEach(g => {
+        if(!opponents[g.opponent]) opponents[g.opponent] = {w:0, g:0};
+        opponents[g.opponent].g++;
+        if(g.result==='W') opponents[g.opponent].w++;
       });
-      const pctP = total ? (playoffs / total * 100) : 0;
-      const pctF = total ? (finals / total * 100) : 0;
-      const pctT = total ? (titles / total * 100) : 0;
-      container.innerHTML = `
-        <div class="fate-step"><div class="fate-bar" style="width:100%"></div><div class="fate-label">Seasons Played</div><div class="fate-val">${total}</div></div>
-        <div class="fate-step step-playoffs"><div class="fate-bar" style="width:${pctP}%"></div><div class="fate-label">Made Playoffs</div><div class="fate-val">${playoffs}</div></div>
-        <div class="fate-step step-finals"><div class="fate-bar" style="width:${pctF}%"></div><div class="fate-label">Made Finals</div><div class="fate-val">${finals}</div></div>
-        <div class="fate-step step-titles"><div class="fate-bar" style="width:${pctT}%"></div><div class="fate-label">Champion</div><div class="fate-val">${titles}</div></div>
-      `;
-    }
+      const sorted = Object.keys(opponents).sort((a,b) => (opponents[b].w/opponents[b].g) - (opponents[a].w/opponents[a].g));
+      document.getElementById('pigeonName').textContent = sorted[0];
+      document.getElementById('nemesisName').textContent = sorted[sorted.length-1];
+    };
 
-    Chart.defaults.color = '#64748b';
-    Chart.defaults.font.family = 'system-ui';
-    const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
-
-    function renderEloProgressionChart(name) {
-      const canvas = $('eloProgressionChart');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (charts.eloProg) charts.eloProg.destroy();
-
-      const dataPoints = seasonalEloHistory[name] || [];
-      const years = dataPoints.map(d => d.year);
-      const leagueAvgData = years.map(y => leagueSeasonalAverage[y]);
-
-      charts.eloProg = new Chart(ctx, {
+    const renderCharts = (name, seasons, games) => {
+      if(charts.elo) charts.elo.destroy();
+      const eloData = seasonalEloHistory[name];
+      charts.elo = new Chart(document.getElementById('eloProgChart'), {
         type: 'line',
         data: {
-          labels: years,
+          labels: eloData.map(d=>d.year),
           datasets: [
-            {
-              label: 'Manager ELO',
-              data: dataPoints.map(d => d.elo),
-              borderColor: '#38bdf8',
-              backgroundColor: 'rgba(56, 189, 248, 0.1)',
-              borderWidth: 3,
-              pointRadius: 5,
-              pointHoverRadius: 8,
-              pointBackgroundColor: '#fff',
-              tension: 0.1,
-              fill: true,
-              zIndex: 2
-            },
-            {
-              label: 'League Average',
-              data: leagueAvgData,
-              borderColor: 'rgba(255, 255, 255, 0.25)',
-              borderWidth: 1.5,
-              borderDash: [5, 5],
-              pointRadius: 0,
-              fill: false,
-              tension: 0.1,
-              zIndex: 1
-            }
+            { data: eloData.map(d=>d.elo), borderColor: '#38bdf8', tension: 0.1 },
+            { data: eloData.map(d=>leagueSeasonalAverage[d.year]), borderColor: '#666', borderDash: [5,5], pointRadius: 0 }
           ]
         },
-        options: {
-          ...commonOptions,
-          plugins: {
-            legend: { 
-              display: true, 
-              position: 'top', 
-              align: 'end',
-              labels: { boxWidth: 12, font: { size: 10 }, color: '#94a3b8' } 
-            }
-          },
-          scales: {
-            y: { 
-              min: 1300, 
-              max: 1750, 
-              grid: { color: 'rgba(255,255,255,0.05)' }, 
-              ticks: { stepSize: 50 } 
-            },
-            x: { grid: { display: false } }
-          }
+        options: { 
+          maintainAspectRatio: false, 
+          plugins: { legend: { display: false } },
+          scales: { y: { min: 1300, max: 1750 } }
         }
       });
-    }
 
-    function renderLuckChart(seasons, managerName) {
-      const canvas = $('luckChart');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (charts.luck) charts.luck.destroy();
-      const points = seasons.map(s => {
-        const k = keyMY(managerName, s.year);
-        const ranks = idx.seasonRanks[k] || { pfRank: 6, paRank: 6 };
-        return { x: ranks.pfRank, y: ranks.paRank, year: s.year };
+      if(charts.heart) charts.heart.destroy();
+      const close = games.filter(g => Math.abs(g.score - g.oppScore) < 5);
+      charts.heart = new Chart(document.getElementById('heartChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['W', 'L'],
+          datasets: [{ data: [close.filter(g=>g.result==='W').length, close.filter(g=>g.result==='L').length], backgroundColor: ['#22c55e', '#ef4444'] }]
+        },
+        options: { maintainAspectRatio: false }
       });
-      const quadrantPlugin = {
-        id: 'quadrants',
-        beforeDraw(chart) {
-          const { ctx, chartArea: { top, bottom, left, right } } = chart;
-          const midX = (left + right) / 2;
-          const midY = (top + bottom) / 2;
-          ctx.save();
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-          ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
-          ctx.beginPath(); ctx.moveTo(midX, top); ctx.lineTo(midX, bottom); ctx.moveTo(left, midY); ctx.lineTo(right, midY); ctx.stroke();
-          ctx.font = '600 9px system-ui'; ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; ctx.textAlign = 'center';
-          ctx.fillText("DOMINANT & LUCKY", (left + midX) / 2, top + 15);
-          ctx.fillText("SUBPAR & LUCKY", (midX + right) / 2, top + 15);
-          ctx.fillText("DOMINANT & UNLUCKY", (left + midX) / 2, bottom - 10);
-          ctx.fillText("SUBPAR & UNLUCKY", (midX + right) / 2, bottom - 10);
-          ctx.restore();
-        }
-      };
-      charts.luck = new Chart(ctx, {
-        type: 'scatter',
-        data: { datasets: [{ data: points, backgroundColor: 'rgba(56, 189, 248, 0.55)', borderColor: 'rgba(56, 189, 248, 0.9)', pointBorderWidth: 2, pointRadius: 6 }] },
-        plugins: [quadrantPlugin],
-        options: { ...commonOptions, scales: { x: { min:0, max:12, ticks:{ stepSize:1 } }, y: { min:0, max:12, ticks:{ stepSize:1 } } } }
+    };
+
+    const init = async () => {
+      const fetchJSON = async (url) => (await fetch(url)).json();
+      [rawScores, rawStandings, rawSeeds] = await Promise.all([
+        fetchJSON('league-scores.json'), fetchJSON('final-standings.json'), fetchJSON('playoff-seeds.json')
+      ]);
+      buildIndexes();
+      calculateRatings();
+      
+      const sel = document.getElementById('managerSelect');
+      idx.managers.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m; opt.textContent = m;
+        sel.appendChild(opt);
       });
-    }
+      sel.addEventListener('change', e => loadManager(e.target.value));
+      loadManager(idx.managers[0]);
+    };
 
-    function renderSpreadChart(games) {
-      const canvas = $('spreadChart');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (charts.spread) charts.spread.destroy();
-      const years = [...new Set(games.map(g => g.year).filter(Number.isFinite))].sort((a, b) => a - b);
-      const data = years.map(y => {
-        const scores = games.filter(g => g.year === y).map(g => g.score).filter(Number.isFinite);
-        return scores.length ? [Math.min(...scores), Math.max(...scores)] : [0,0];
-      });
-      charts.spread = new Chart(ctx, { type: 'bar', data: { labels: years, datasets: [{ data, backgroundColor: 'rgba(56, 189, 248, 0.4)', borderRadius: 4 }] }, options: commonOptions });
-    }
-
-    function renderHeartAttackChart(games) {
-      const canvas = $('heartChart');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (charts.heart) charts.heart.destroy();
-      let wins=0, losses=0;
-      games.forEach(g => {
-        if(Number.isFinite(g.score) && Number.isFinite(g.oppScore)) {
-          const diff = Math.abs(g.score - g.oppScore);
-          if(diff < 5) { if(g.result === 'W') wins++; else if(g.result === 'L') losses++; }
-        }
-      });
-      charts.heart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Wins', 'Losses'], datasets: [{ data: [wins, losses], backgroundColor: ['#22c55e', '#ef4444'], borderWidth: 0 }] }, options: { ...commonOptions, cutout: '65%', plugins: { legend: { display: true, position: 'bottom' } } } });
-    }
-
-    function renderHardwareChart(seasons) {
-      const canvas = $('hardwareChart');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (charts.hw) charts.hw.destroy();
-      let g=0, s=0, b=0, none=0;
-      seasons.forEach(row => {
-        const r = row.final_standing;
-        if(r === 1) g++; else if(r === 2) s++; else if(r === 3) b++; else none++;
-      });
-      charts.hw = new Chart(ctx, {
-        type: 'bar',
-        data: { labels: ['Finishes'], datasets: [{ label: 'Gold', data: [g], backgroundColor: '#fbbf24' }, { label: 'Silver', data: [s], backgroundColor: '#cbd5e1' }, { label: 'Bronze', data: [b], backgroundColor: '#d97706' }, { label: 'Other', data: [none], backgroundColor: '#334155' }] },
-        options: { indexAxis: 'y', scales: { x: { stacked: true }, y: { stacked: true, display: false } } }
-      });
-    }
-
-    function showErrorCard(msg) {
-      const shell = document.querySelector('.shell');
-      if (!shell) return;
-      const div = document.createElement('div');
-      div.className = 'card';
-      div.innerHTML = `<div style="color:var(--text-main); font-weight:700;">${msg}</div>`;
-      shell.appendChild(div);
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      window.addEventListener('resize', () => { try { fitHeroName(); } catch(e){} });
-      [
-        'managerSelect', 'heroAvatar', 'heroName', 'heroTenure', 'trophyCase', 'heroOvr',
-        'ratingSCOR', 'ratingGM', 'ratingCLT', 'ratingSTB',
-        'statRecord', 'statWinPct', 'statAvgFinish', 'statAvgScore', 'statEarnings',
-        'nemesisName', 'nemesisStat', 'pigeonName', 'pigeonStat',
-        'formStrip'
-      ].forEach(id => els[id] = $(id));
-
-      try {
-        const [sRes, stRes, sdRes] = await Promise.all([
-          fetch('league-scores.json'),
-          fetch('final-standings.json'),
-          fetch('playoff-seeds.json')
-        ]);
-        if (!sRes.ok || !stRes.ok || !sdRes.ok) throw new Error("Data load failed");
-
-        rawScores = (await sRes.json()) || [];
-        rawStandings = ((await stRes.json()) || []).map(normalizeStandingsRow);
-        rawSeeds = (await sdRes.json()) || [];
-
-        const allYears = rawStandings.map(r => r.year).filter(Number.isFinite);
-        latestLeagueYear = allYears.length ? Math.max(...allYears) : null;
-
-        buildIndexes();
-        calculateAllRatings();
-        initManagerDropdown();
-
-        const firstMgr = els.managerSelect.options?.[0]?.value;
-        if (firstMgr) loadManager(firstMgr);
-      } catch (err) {
-        console.error(err);
-        showErrorCard("Unable to load league data.");
-      }
-    });
+    init();
   </script>
 </body>
 </html>
