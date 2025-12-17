@@ -1213,11 +1213,23 @@ function renderHero(name, seasons) {
     ? pills.join('')
     : `<span class="empty-case">No hardware... yet.</span>`;
 
-      els.ratingSCOR.textContent = r.peak;
-      els.ratingGM.textContent = r.floor;
-      els.ratingCLT.textContent = (r.d10 >= 0 ? "+" : "") + r.d10;
-      els.ratingSTB.textContent = r.rank;
-    }
+  const r = leagueRatings[name];
+  const ovrEl = els.heroOvr;
+  const target = r.elo;
+  let current = clamp(Number(ovrEl.textContent) || 0, 0, target);
+
+  const step = () => {
+    current = Math.min(target, current + Math.max(1, Math.ceil(target / 40)));
+    ovrEl.textContent = current;
+    if (current < target) requestAnimationFrame(step);
+    };
+  step();
+
+  els.ratingSCOR.textContent = r.peak;
+  els.ratingGM.textContent = r.floor;
+  els.ratingCLT.textContent = (r.d10 >= 0 ? "+" : "") + r.d10;
+  els.ratingSTB.textContent = r.rank;
+  }
 
     function renderStats(seasons, games, managerName) {
       const w = games.filter(g => g.result === 'W').length;
