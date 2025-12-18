@@ -1,7 +1,7 @@
 <nav class="league-nav">
   <div class="nav-container">
     <a href="index.html" class="nav-brand">LWFFL<span>RECORDS</span></a>
-    
+
     <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="lwfflNavMenu">
       <span class="bar"></span><span class="bar"></span><span class="bar"></span>
     </button>
@@ -47,9 +47,9 @@
 
   if (!nav || !toggle || !menu) return;
 
-  function closeAllDropdowns(except) {
+  function closeAllDropdowns(exceptTrigger) {
     triggers.forEach(t => {
-      if (t === except) return;
+      if (t === exceptTrigger) return;
       t.setAttribute('aria-expanded', 'false');
       t.closest('.nav-item')?.classList.remove('open');
     });
@@ -62,15 +62,17 @@
     if (!isOpen) closeAllDropdowns();
   });
 
-  // Dropdown click (works on desktop + touch)
+  // Dropdown click (stable on desktop + touch)
   triggers.forEach(trigger => {
     trigger.addEventListener('click', (e) => {
-      // allow normal navigation? no — these are category buttons
       e.preventDefault();
       const item = trigger.closest('.nav-item');
       const isOpen = item.classList.contains('open');
 
+      // close others first
       closeAllDropdowns(trigger);
+
+      // toggle this one
       item.classList.toggle('open', !isOpen);
       trigger.setAttribute('aria-expanded', String(!isOpen));
     });
@@ -92,6 +94,18 @@
       menu.classList.remove('is-open');
       toggle.setAttribute('aria-expanded', 'false');
     }
+  });
+
+  // If you tab away from a dropdown, close it (keyboard polish)
+  triggers.forEach(trigger => {
+    const item = trigger.closest('.nav-item');
+    item.addEventListener('focusout', (e) => {
+      // if focus moved outside the nav-item entirely, close it
+      if (!item.contains(e.relatedTarget)) {
+        item.classList.remove('open');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+    });
   });
 })();
 </script>
