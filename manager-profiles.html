@@ -1420,7 +1420,7 @@
         type: 'scatter',
         data: {
           datasets: [{
-            label: 'Luck Index', // Providing a label often fixes "undefined" issues
+            label: 'Luck Index',
             data: points,
             backgroundColor: 'rgba(56, 189, 248, 0.55)',
             borderColor: 'rgba(56, 189, 248, 0.9)',
@@ -1444,13 +1444,20 @@
             y: {
               title: { display: true, text: 'PA Rank (1=Unlucky)' },
               min: 0,
-              max: 12,
-              ticks: { stepSize: 1, callback: (v) => Number(v).toFixed(0) },
+              max: 13, // Extends the physical axis to 13
+              ticks: { 
+                stepSize: 1, 
+                callback: (value) => {
+                  // Hide the label for 13 while showing others
+                  if (value === 13) return null;
+                  return Number(value).toFixed(0);
+                }
+              },
               grid: { display: false }
             }
           },
           plugins: {
-            legend: { display: false }, // Legally disables the legend
+            legend: { display: false },
             tooltip: { 
               callbacks: { 
                 label: (c) => `${c.raw.year}: PF #${c.raw.x} | PA #${c.raw.y}` 
