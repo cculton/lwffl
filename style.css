@@ -1,5 +1,6 @@
 /* =========================
    NAV (REPLACE NAV SECTION)
+   Centered menu + no bullets
    ========================= */
 
 .league-nav{
@@ -28,8 +29,11 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-size: 13px;
-  color: #a855f7; /* matches your purple vibe */
+  color: #a855f7;
   white-space: nowrap;
+
+  /* keep brand pinned left while menu centers */
+  margin-right: auto;
 }
 .nav-brand span{
   color: var(--text-main);
@@ -38,7 +42,9 @@
 
 /* Hamburger */
 .nav-toggle{
+  /* keep toggle pinned right while menu centers */
   margin-left: auto;
+
   width: 42px;
   height: 38px;
   border-radius: 12px;
@@ -63,15 +69,16 @@
   border-radius: 999px;
 }
 
-/* Menu layout */
+/* Menu layout (CENTERED) */
 .nav-menu{
-  margin-left: auto;
+  margin: 0 auto;              /* centers menu in header */
   display: flex;
   list-style: none;
-  gap: 16px;
+  gap: 18px;
   align-items: center;
   padding: 0;
 }
+.nav-menu > li{ list-style: none; }
 
 .nav-item{ position: relative; }
 
@@ -86,7 +93,7 @@
   padding: 10px 12px;
   border-radius: 12px;
   border: 1px solid transparent;
-  cursor: pointer; /* FIX */
+  cursor: pointer;
   user-select: none;
   display: inline-flex;
   align-items: center;
@@ -102,7 +109,7 @@
   outline-offset: 2px;
 }
 
-/* Dropdown */
+/* Dropdown (NO BULLETS) */
 .dropdown-menu{
   display: none;
   position: absolute;
@@ -113,9 +120,19 @@
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: 14px;
+
+  /* remove bullets + default spacing */
+  list-style: none;
+  margin: 0;
   padding: 8px 0;
+
   box-shadow: 0 15px 35px rgba(0,0,0,0.6);
   z-index: 1000;
+}
+.dropdown-menu li{
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 /* Show on hover (desktop) */
@@ -145,7 +162,7 @@
   padding-left: 20px;
 }
 
-/* Prevent right-edge overflow */
+/* Prevent right-edge overflow on last item */
 .nav-item:last-child .dropdown-menu{
   right: 0;
   left: auto;
@@ -163,7 +180,7 @@
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
-    margin-left: 0;
+    margin: 0;                 /* mobile: full width */
     padding: 12px 0 2px;
   }
   .nav-menu.is-open{ display: flex; }
