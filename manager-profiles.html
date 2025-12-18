@@ -1486,14 +1486,49 @@
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (charts.heart) charts.heart.destroy();
-      let wins=0, losses=0;
+    
+      let wins = 0, losses = 0;
       games.forEach(g => {
-        if(Number.isFinite(g.score) && Number.isFinite(g.oppScore)) {
+        if (Number.isFinite(g.score) && Number.isFinite(g.oppScore)) {
           const diff = Math.abs(g.score - g.oppScore);
-          if(diff < 5) { if(g.result === 'W') wins++; else if(g.result === 'L') losses++; }
+          if (diff < 5) {
+            if (g.result === 'W') wins++;
+            else if (g.result === 'L') losses++;
+          }
         }
       });
-      charts.heart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Wins', 'Losses'], datasets: [{ data: [wins, losses], backgroundColor: ['#22c55e', '#ef4444'], borderWidth: 0 }] }, options: { ...commonOptions, cutout: '65%', plugins: { legend: { display: true, position: 'bottom' } } } });
+    
+      charts.heart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Wins', 'Losses'],
+          datasets: [{
+            data: [wins, losses],
+            backgroundColor: ['#22c55e', '#ef4444'],
+            borderWidth: 0,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          ...commonOptions,
+          cutout: '65%',
+          // Explicitly removing scales prevents any accidental Y-axis rendering
+          scales: {
+            x: { display: false },
+            y: { display: false }
+          },
+          plugins: {
+            legend: { 
+              display: true, 
+              position: 'bottom', 
+              labels: { color: '#94a3b8' } 
+            },
+            tooltip: {
+              enabled: true
+            }
+          }
+        }
+      });
     }
 
     function showErrorCard(msg) {
