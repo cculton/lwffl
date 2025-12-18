@@ -148,7 +148,6 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="nav-placeholder"></div>
   <div class="shell">
     <div class="container">
       <header>
@@ -256,60 +255,5 @@
       </main>
     </div>
   </div>
-  <script>
-  /**
-   * Fetches and injects the shared navigation bar
-   */
-  async function loadSharedNav() {
-    const placeholder = document.getElementById('nav-placeholder');
-    if (!placeholder) return;
-
-    try {
-      const response = await fetch('nav.html');
-      if (response.ok) {
-        const navHtml = await response.text();
-        placeholder.innerHTML = navHtml;
-        
-        // Initialize nav features after injection
-        highlightActiveLink();
-        initMobileMenu();
-      }
-    } catch (err) {
-      console.error("Error loading shared navigation:", err);
-    }
-  }
-
-  /**
-   * Highlights the link corresponding to the current page
-   */
-  function highlightActiveLink() {
-    const currentPath = window.location.pathname.split("/").pop() || "index.html";
-    const navLinks = document.querySelectorAll('.nav-menu a');
-    
-    navLinks.forEach(link => {
-      if (link.getAttribute('href') === currentPath) {
-        link.classList.add('active');
-      }
-    });
-  }
-
-  /**
-   * Sets up the mobile menu toggle logic
-   */
-  function initMobileMenu() {
-    const toggle = document.querySelector('.nav-toggle');
-    const menu = document.querySelector('.nav-menu');
-    
-    if (toggle && menu) {
-      toggle.addEventListener('click', () => {
-        menu.classList.toggle('active');
-        toggle.classList.toggle('open');
-      });
-    }
-  }
-
-  // Execute on page load
-  document.addEventListener('DOMContentLoaded', loadSharedNav);
-</script>
 </body>
 </html>
