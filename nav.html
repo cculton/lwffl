@@ -2,13 +2,13 @@
   <div class="nav-container">
     <a href="index.html" class="nav-brand">LWFFL<span>RECORDS</span></a>
     
-    <button class="nav-toggle" aria-label="Toggle navigation">
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="lwfflNavMenu">
       <span class="bar"></span><span class="bar"></span><span class="bar"></span>
     </button>
 
-    <ul class="nav-menu">
+    <ul class="nav-menu" id="lwfflNavMenu">
       <li class="nav-item dropdown">
-        <a href="#" class="dropdown-trigger">Administrative ▾</a>
+        <a href="#" class="dropdown-trigger" aria-haspopup="true" aria-expanded="false">Administrative ▾</a>
         <ul class="dropdown-menu">
           <li><a href="constitution.html">League Constitution</a></li>
           <li><a href="amendment-history.html">Amendment History</a></li>
@@ -16,7 +16,7 @@
       </li>
 
       <li class="nav-item dropdown">
-        <a href="#" class="dropdown-trigger">Stats & Records ▾</a>
+        <a href="#" class="dropdown-trigger" aria-haspopup="true" aria-expanded="false">Stats & Records ▾</a>
         <ul class="dropdown-menu">
           <li><a href="record-book.html">Record Book</a></li>
           <li><a href="postseason-accomplishments.html">Postseason Accomplishments</a></li>
@@ -27,7 +27,7 @@
       </li>
 
       <li class="nav-item dropdown">
-        <a href="#" class="dropdown-trigger">Amusement ▾</a>
+        <a href="#" class="dropdown-trigger" aria-haspopup="true" aria-expanded="false">Amusement ▾</a>
         <ul class="dropdown-menu">
           <li><a href="manager-cards.html">Manager Cards</a></li>
           <li><a href="probability-machine.html">Probability Machine</a></li>
@@ -37,3 +37,61 @@
     </ul>
   </div>
 </nav>
+
+<script>
+(function () {
+  const nav = document.querySelector('.league-nav');
+  const toggle = document.querySelector('.nav-toggle');
+  const menu = document.querySelector('.nav-menu');
+  const triggers = Array.from(document.querySelectorAll('.dropdown-trigger'));
+
+  if (!nav || !toggle || !menu) return;
+
+  function closeAllDropdowns(except) {
+    triggers.forEach(t => {
+      if (t === except) return;
+      t.setAttribute('aria-expanded', 'false');
+      t.closest('.nav-item')?.classList.remove('open');
+    });
+  }
+
+  // Mobile hamburger
+  toggle.addEventListener('click', () => {
+    const isOpen = menu.classList.toggle('is-open');
+    toggle.setAttribute('aria-expanded', String(isOpen));
+    if (!isOpen) closeAllDropdowns();
+  });
+
+  // Dropdown click (works on desktop + touch)
+  triggers.forEach(trigger => {
+    trigger.addEventListener('click', (e) => {
+      // allow normal navigation? no — these are category buttons
+      e.preventDefault();
+      const item = trigger.closest('.nav-item');
+      const isOpen = item.classList.contains('open');
+
+      closeAllDropdowns(trigger);
+      item.classList.toggle('open', !isOpen);
+      trigger.setAttribute('aria-expanded', String(!isOpen));
+    });
+  });
+
+  // Click outside closes dropdowns (and mobile menu)
+  document.addEventListener('click', (e) => {
+    if (!nav.contains(e.target)) {
+      closeAllDropdowns();
+      menu.classList.remove('is-open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // ESC closes
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAllDropdowns();
+      menu.classList.remove('is-open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+})();
+</script>
