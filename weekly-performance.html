@@ -310,10 +310,11 @@
               <thead>
                 <tr>
                   <th onclick="sortManagerTable('year')">Year</th>
+                  <th onclick="sortManagerTable('type')">Type</th>
                   <th onclick="sortManagerTable('score')">Score</th>
                   <th onclick="sortManagerTable('result')">Result</th>
                   <th onclick="sortManagerTable('opponent')">Opponent</th>
-                  <th onclick="sortManagerTable('diff')">Margin</th>
+                  <th onclick="sortManagerTable('oppScore')">Opp Score</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -508,8 +509,13 @@
         totalScore += score;
         const diff = score - oppScore;
         const res = diff > 0 ? "W" : (diff < 0 ? "L" : "T");
+        
+        let typeStr = m.playoffs;
+        if (!typeStr || typeStr === 'N/A') typeStr = '-';
+
         managerData.push({
           year: Number(m.year),
+          type: typeStr,
           score: score,
           oppScore: oppScore,
           opponent: oppName,
@@ -551,7 +557,7 @@
     } else {
       mgrSort.key = key;
       mgrSort.dir = 'desc'; 
-      if(key === 'year' || key === 'opponent') mgrSort.dir = 'asc';
+      if(key === 'year' || key === 'opponent' || key === 'type') mgrSort.dir = 'asc';
     }
     const total = managerData.reduce((acc, cur) => acc + cur.score, 0);
     const avg = managerData.length ? total / managerData.length : 0;
@@ -576,29 +582,21 @@
 
     managerData.forEach(row => {
       const tr = document.createElement('tr');
-      const diffClass = row.diff > 0 ? 'diff-pos' : (row.diff < 0 ? 'diff-neg' : '');
-      const diffSign = row.diff > 0 ? '+' : '';
+      // Set color class for W/L
+      const resClass = row.result === 'W' ? 'diff-pos' : (row.result === 'L' ? 'diff-neg' : '');
+
       tr.innerHTML = `
         <td class="val-col">${row.year}</td>
+        <td class="val-col" style="font-size:0.85em; color:var(--text-soft)">${row.type}</td>
         <td class="val-col highlight-val">${row.score.toFixed(2)}</td>
-        <td class="val-col ${diffClass}">${row.result}</td>
+        <td class="val-col ${resClass}">${row.result}</td>
         <td class="val-col">${row.opponent}</td>
-        <td class="val-col ${diffClass}">${diffSign}${row.diff.toFixed(2)}</td>
+        <td class="val-col">${row.oppScore.toFixed(2)}</td>
       `;
       tbody.appendChild(tr);
     });
 
-    const trFoot = document.createElement('tr');
-    trFoot.className = 'table-footer-row';
-    trFoot.innerHTML = `
-      <td class="val-col">TOTAL</td>
-      <td class="val-col highlight-val">${totalScore.toFixed(2)}</td>
-      <td class="val-col" colspan="3" style="text-align:right;">
-        <span style="font-weight:400; color:var(--text-muted); margin-right:10px;">AVERAGE:</span>
-        <span class="highlight-val">${avgScore.toFixed(2)}</span>
-      </td>
-    `;
-    tfoot.appendChild(trFoot);
+    // Footer Removed as requested
   }
 
   // --- 2. Comparison Scope Logic ---
