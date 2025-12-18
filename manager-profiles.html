@@ -282,7 +282,7 @@
     .chart-container { position: relative; flex: 1; width: 100%; min-height: 220px; }
 
     /* Rivalry Cards */
-    .rivalry-col { display: flex; flex-direction: column; gap: 20px; height: 100%; min-height: 350px; }
+    .rivalry-col { display: flex; flex-direction: column; gap: 20px; height: 100%; }
 
     .rival-card {
       background: rgba(15, 23, 42, 0.8);
@@ -304,6 +304,7 @@
     .pigeon .rival-stat { color: var(--positive); }
 
     /* --- High/Low Ticker Styles --- */
+    .hl-ticker-card { flex: 1; display: flex; flex-direction: column; }
     .hl-ticker {
       display: flex;
       flex-direction: column;
@@ -512,7 +513,7 @@
 
     <div class="analytics-grid">
       <div class="rivalry-col">
-        <div class="card" style="margin-bottom:0; padding:16px;">
+        <div class="card hl-ticker-card" style="margin-bottom:0; padding:16px;">
           <div class="chart-header" style="margin-bottom:10px;">
             <div class="chart-title-row">
               <div class="chart-icon">↕</div>
@@ -639,7 +640,19 @@
 
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
     const safeNum = (v, fallback = 0) => Number.isFinite(Number(v)) ? Number(v) : fallback;
-    const moneyFmt = (n) => `$${Number(n || 0).toLocaleString()}`;
+
+    /**
+     * Money formatting: all dollar amounts now show 2 decimals only when needed 
+     * (e.g., $175 but $175.50).
+     */
+    const moneyFmt = (n) => {
+      const val = Number(n || 0);
+      if (val % 1 === 0) {
+        return `$${val.toLocaleString()}`;
+      }
+      return `$${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    };
+
     const keyMY = (m, y) => `${m}::${y}`;
 
     let latestLeagueYear = null;
@@ -698,7 +711,23 @@
       return parts.join(', ');
     }
 
+    /**
+     * Updated getEarnings() starting 2022:
+     * 1st: $450, 2nd: $175, 3rd: $100, 4th: $75
+     * Regular season points (scoring title): $100
+     */
     function getEarnings(year, rank, hasScoringTitle) {
+      if (year >= 2022) {
+        let total = 0;
+        if (rank === 1) total += 450;
+        else if (rank === 2) total += 175;
+        else if (rank === 3) total += 100;
+        else if (rank === 4) total += 75;
+
+        if (hasScoringTitle) total += 100;
+        return total;
+      }
+
       let multiplier = 3.75; 
       if (year <= 2017) multiplier = 1.0;
       else if (year <= 2019) multiplier = 2.0;
@@ -1201,8 +1230,7 @@
 
     function renderFormStrip(games) {
       const strip = els.formStrip;
-      const recEl = els.formRecord;
-      if (!strip || !recEl) return;
+      if (!strip) return;
       strip.innerHTML = '';
 
       const last10 = [...games]
@@ -1210,12 +1238,7 @@
         .sort((a, b) => (a.year !== b.year ? b.year - a.year : b.week - a.week))
         .slice(0, 10);
 
-      let w = 0, l = 0, t = 0;
       last10.forEach(g => {
-        if (g.result === 'W') w++;
-        else if (g.result === 'L') l++;
-        else t++;
-
         const dot = document.createElement('div');
         dot.className = 'form-dot';
         dot.dataset.res = g.result;
@@ -1228,7 +1251,6 @@
 
         strip.appendChild(dot);
       });
-      recEl.textContent = last10.length ? `${w}-${l}-${t}` : '—';
     }
 
     function renderHighLow(games) {
@@ -1352,16 +1374,25 @@
       });
     }
 
+    /**
+     * Luck Index hover: tooltip now includes the year (YYYY: PF #x | PA #y).
+     */
     function renderLuckChart(seasons, managerName) {
       const canvas = $('luckChart');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (charts.luck) charts.luck.destroy();
+
       const points = seasons.map(s => {
         const k = keyMY(managerName, s.year);
         const ranks = idx.seasonRanks[k] || { pfRank: 6, paRank: 6 };
-        return { x: ranks.pfRank, y: ranks.paRank, year: s.year };
+        return { 
+          x: ranks.pfRank, 
+          y: ranks.paRank, 
+          year: s.year 
+        };
       });
+
       const quadrantPlugin = {
         id: 'quadrants',
         beforeDraw(chart) {
@@ -1380,11 +1411,36 @@
           ctx.restore();
         }
       };
+
       charts.luck = new Chart(ctx, {
         type: 'scatter',
-        data: { datasets: [{ data: points, backgroundColor: 'rgba(56, 189, 248, 0.55)', borderColor: 'rgba(56, 189, 248, 0.9)', pointBorderWidth: 2, pointRadius: 6 }] },
+        data: { 
+          datasets: [{ 
+            data: points, 
+            backgroundColor: 'rgba(56, 189, 248, 0.55)', 
+            borderColor: 'rgba(56, 189, 248, 0.9)', 
+            pointBorderWidth: 2, 
+            pointRadius: 6 
+          }] 
+        },
         plugins: [quadrantPlugin],
-        options: { ...commonOptions, scales: { x: { min:0, max:12, ticks:{ stepSize:1 } }, y: { min:0, max:12, ticks:{ stepSize:1 } } } }
+        options: { 
+          ...commonOptions, 
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const p = context.raw;
+                  return `${p.year}: PF #${p.x} | PA #${p.y}`;
+                }
+              }
+            }
+          },
+          scales: { 
+            x: { min: 0, max: 12, ticks: { stepSize: 1 } }, 
+            y: { min: 0, max: 12, ticks: { stepSize: 1 } } 
+          } 
+        }
       });
     }
 
@@ -1416,23 +1472,6 @@
       charts.heart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Wins', 'Losses'], datasets: [{ data: [wins, losses], backgroundColor: ['#22c55e', '#ef4444'], borderWidth: 0 }] }, options: { ...commonOptions, cutout: '65%', plugins: { legend: { display: true, position: 'bottom' } } } });
     }
 
-    function renderHardwareChart(seasons) {
-      const canvas = $('hardwareChart');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (charts.hw) charts.hw.destroy();
-      let g=0, s=0, b=0, none=0;
-      seasons.forEach(row => {
-        const r = row.final_standing;
-        if(r === 1) g++; else if(r === 2) s++; else if(r === 3) b++; else none++;
-      });
-      charts.hw = new Chart(ctx, {
-        type: 'bar',
-        data: { labels: ['Finishes'], datasets: [{ label: 'Gold', data: [g], backgroundColor: '#fbbf24' }, { label: 'Silver', data: [s], backgroundColor: '#cbd5e1' }, { label: 'Bronze', data: [b], backgroundColor: '#d97706' }, { label: 'Other', data: [none], backgroundColor: '#334155' }] },
-        options: { indexAxis: 'y', scales: { x: { stacked: true }, y: { stacked: true, display: false } } }
-      });
-    }
-
     function showErrorCard(msg) {
       const shell = document.querySelector('.shell');
       if (!shell) return;
@@ -1458,7 +1497,7 @@
           fetch('final-standings.json'),
           fetch('playoff-seeds.json')
         ]);
-        if (!sRes.ok || !stRes.ok || !sdRes.ok) throw new Error("Data load failed");
+        if (!sRes.ok) throw new Error("Data load failed");
 
         rawScores = (await sRes.json()) || [];
         rawStandings = ((await stRes.json()) || []).map(normalizeStandingsRow);
