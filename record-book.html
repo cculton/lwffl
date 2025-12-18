@@ -438,7 +438,7 @@
   let weeklyRowsByMatchupType = {};
 
   // UPDATED Matchup Types
-  const MATCHUP_TYPES = ["Regular Season + Playoffs (All) (All)", "Regular Season Only", "Playoffs Only"];
+  const MATCHUP_TYPES = ["Regular Season + Playoffs", "Regular Season Only", "Playoffs Only"];
 
   // ---------------------------
   // Category definitions
@@ -661,7 +661,7 @@
   // UPDATED Helper for new Matchup Types
   function getMatchupTypesForMatch(m){
     const types = new Set();
-    types.add("Regular Season + Playoffs (All)");
+    types.add("Regular Season + Playoffs");
     if (isPlayoffGame(m)) types.add("Playoffs Only");
     else types.add("Regular Season Only");
     return types;
@@ -2006,7 +2006,7 @@
     const categorySelect = document.getElementById("categorySelect");
 
     // DEFAULT SETTINGS ON LOAD
-    matchupSelect.value = "Regular Season + Playoffs (All)";
+    matchupSelect.value = "Regular Season + Playoffs";
     categorySelect.value = "Most Points For";
 
     function rerenderCurrent(){
