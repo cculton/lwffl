@@ -560,7 +560,7 @@
             <div class="chart-icon">⚡</div>
             <h3>ELO Progression</h3>
           </div>
-          <span class="chart-subtitle">End-of-season power rating relative to the league average (dashed).</span>
+          <span class="chart-subtitle">End-of-season power rating relative to past seasons and the default starting point for all managers (dashed).</span>
         </div>
         <div class="chart-container">
           <canvas id="eloProgressionChart"></canvas>
@@ -1339,7 +1339,7 @@
               zIndex: 2
             },
             {
-              label: 'League Average',
+              label: 'Starting Point',
               data: leagueAvgData,
               borderColor: 'rgba(255, 255, 255, 0.25)',
               borderWidth: 1.5,
@@ -1382,17 +1382,13 @@
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (charts.luck) charts.luck.destroy();
-
+    
       const points = seasons.map(s => {
         const k = keyMY(managerName, s.year);
         const ranks = idx.seasonRanks[k] || { pfRank: 6, paRank: 6 };
-        return { 
-          x: ranks.pfRank, 
-          y: ranks.paRank, 
-          year: s.year 
-        };
+        return { x: ranks.pfRank, y: ranks.paRank, year: s.year };
       });
-
+    
       const quadrantPlugin = {
         id: 'quadrants',
         beforeDraw(chart) {
@@ -1401,45 +1397,66 @@
           const midY = (top + bottom) / 2;
           ctx.save();
           ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-          ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
-          ctx.beginPath(); ctx.moveTo(midX, top); ctx.lineTo(midX, bottom); ctx.moveTo(left, midY); ctx.lineTo(right, midY); ctx.stroke();
-          ctx.font = '600 9px system-ui'; ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; ctx.textAlign = 'center';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(midX, top); ctx.lineTo(midX, bottom);
+          ctx.moveTo(left, midY); ctx.lineTo(right, midY);
+          ctx.stroke();
+          ctx.font = '600 9px system-ui';
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+          ctx.textAlign = 'center';
+    
           ctx.fillText("DOMINANT & LUCKY", (left + midX) / 2, top + 15);
           ctx.fillText("SUBPAR & LUCKY", (midX + right) / 2, top + 15);
           ctx.fillText("DOMINANT & UNLUCKY", (left + midX) / 2, bottom - 10);
           ctx.fillText("SUBPAR & UNLUCKY", (midX + right) / 2, bottom - 10);
+    
           ctx.restore();
         }
       };
-
+    
       charts.luck = new Chart(ctx, {
         type: 'scatter',
-        data: { 
-          datasets: [{ 
-            data: points, 
-            backgroundColor: 'rgba(56, 189, 248, 0.55)', 
-            borderColor: 'rgba(56, 189, 248, 0.9)', 
-            pointBorderWidth: 2, 
-            pointRadius: 6 
-          }] 
+        data: {
+          datasets: [{
+            label: 'Luck Index', // Providing a label often fixes "undefined" issues
+            data: points,
+            backgroundColor: 'rgba(56, 189, 248, 0.55)',
+            borderColor: 'rgba(56, 189, 248, 0.9)',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 8
+          }]
         },
         plugins: [quadrantPlugin],
-        options: { 
-          ...commonOptions, 
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const p = context.raw;
-                  return `${p.year}: PF #${p.x} | PA #${p.y}`;
-                }
-              }
+        options: {
+          ...commonOptions,
+          layout: { padding: { top: 10 } },
+          scales: {
+            x: {
+              title: { display: true, text: 'PF Rank (1=Best)' },
+              min: 0,
+              max: 12,
+              ticks: { stepSize: 1, callback: (v) => Number(v).toFixed(0) },
+              grid: { display: false }
+            },
+            y: {
+              title: { display: true, text: 'PA Rank (1=Unlucky)' },
+              min: 0,
+              max: 12,
+              ticks: { stepSize: 1, callback: (v) => Number(v).toFixed(0) },
+              grid: { display: false }
             }
           },
-          scales: { 
-            x: { min: 0, max: 12, ticks: { stepSize: 1 } }, 
-            y: { min: 0, max: 12, ticks: { stepSize: 1 } } 
-          } 
+          plugins: {
+            legend: { display: false }, // Legally disables the legend
+            tooltip: { 
+              callbacks: { 
+                label: (c) => `${c.raw.year}: PF #${c.raw.x} | PA #${c.raw.y}` 
+              } 
+            }
+          }
         }
       });
     }
