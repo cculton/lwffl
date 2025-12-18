@@ -1,6 +1,6 @@
 /* =========================
    NAV (REPLACE NAV SECTION)
-   Centered menu + no bullets
+   Perfect center + stable dropdowns
    ========================= */
 
 .league-nav{
@@ -13,17 +13,23 @@
   border-bottom: 1px solid var(--border-subtle);
 }
 
+/* True centering: brand | centered menu | toggle */
 .nav-container{
   max-width: 1200px;
   margin: 0 auto;
   padding: 14px 18px;
-  display: flex;
+
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 16px;
+  column-gap: 16px;
 }
 
-/* Brand */
+/* Brand pinned left */
 .nav-brand{
+  grid-column: 1;
+  justify-self: start;
+
   text-decoration: none;
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -31,19 +37,31 @@
   font-size: 13px;
   color: #a855f7;
   white-space: nowrap;
-
-  /* keep brand pinned left while menu centers */
-  margin-right: auto;
 }
 .nav-brand span{
   color: var(--text-main);
   margin-left: 2px;
 }
 
-/* Hamburger */
+/* Menu centered */
+.nav-menu{
+  grid-column: 2;
+  justify-self: center;
+
+  display: flex;
+  align-items: center;
+  gap: 18px;
+
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.nav-menu > li{ list-style: none; }
+
+/* Toggle pinned right */
 .nav-toggle{
-  /* keep toggle pinned right while menu centers */
-  margin-left: auto;
+  grid-column: 3;
+  justify-self: end;
 
   width: 42px;
   height: 38px;
@@ -69,20 +87,9 @@
   border-radius: 999px;
 }
 
-/* Menu layout (CENTERED) */
-.nav-menu{
-  margin: 0 auto;              /* centers menu in header */
-  display: flex;
-  list-style: none;
-  gap: 18px;
-  align-items: center;
-  padding: 0;
-}
-.nav-menu > li{ list-style: none; }
-
 .nav-item{ position: relative; }
 
-/* Top triggers */
+/* Triggers */
 .dropdown-trigger{
   color: var(--text-muted);
   text-decoration: none;
@@ -109,19 +116,19 @@
   outline-offset: 2px;
 }
 
-/* Dropdown (NO BULLETS) */
+/* Dropdown (no bullets) */
 .dropdown-menu{
   display: none;
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 6px);
   left: 0;
+
   min-width: 240px;
   background: rgba(15, 23, 42, 0.95);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: 14px;
 
-  /* remove bullets + default spacing */
   list-style: none;
   margin: 0;
   padding: 8px 0;
@@ -129,19 +136,32 @@
   box-shadow: 0 15px 35px rgba(0,0,0,0.6);
   z-index: 1000;
 }
+
+/* Hover bridge removes "gap flicker" if you move fast */
+.dropdown-menu::before{
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -10px;
+  height: 10px;
+}
+
+/* Make sure nested lis never show bullets */
 .dropdown-menu li{
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-/* Show on hover (desktop) */
-.nav-item:hover .dropdown-menu{ display: block; }
-.nav-item:hover .dropdown-trigger{ color: var(--accent); }
+/* OPEN behavior: click-open + keyboard focus (NOT hover-open) */
+.nav-item.open .dropdown-menu,
+.nav-item:focus-within .dropdown-menu{
+  display: block;
+}
 
-/* Show when JS toggles open */
-.nav-item.open .dropdown-menu{ display: block; }
-.nav-item.open .dropdown-trigger{
+.nav-item.open .dropdown-trigger,
+.nav-item:focus-within .dropdown-trigger{
   color: var(--text-main);
   background: rgba(56, 189, 248, 0.10);
   border-color: rgba(56, 189, 248, 0.22);
@@ -172,16 +192,25 @@
    MOBILE
    ========================= */
 @media (max-width: 840px){
+  .nav-container{
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+  }
+
   .nav-toggle{ display: inline-flex; }
 
   .nav-menu{
+    grid-column: 1 / -1;
+    grid-row: 2;
+
     display: none;
     width: 100%;
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
-    margin: 0;                 /* mobile: full width */
-    padding: 12px 0 2px;
+
+    margin-top: 12px;
+    padding: 0;
   }
   .nav-menu.is-open{ display: flex; }
 
@@ -195,16 +224,12 @@
 
   .dropdown-menu{
     position: static;
-    display: none;
+    display: none; /* only show when open/focus-within */
     margin-top: 8px;
     box-shadow: none;
     border-radius: 14px;
     background: rgba(15, 23, 42, 0.65);
   }
 
-  .nav-item.open .dropdown-menu{ display: block; }
-
-  /* Disable hover open on mobile */
-  .nav-item:hover .dropdown-menu{ display: none; }
-  .nav-item:hover .dropdown-trigger{ color: var(--text-main); }
+  .dropdown-menu::before{ display: none; }
 }
