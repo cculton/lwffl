@@ -3,10 +3,7 @@
    Perfect center + stable dropdowns
    ========================= */
 
-.page-hero,
-.page-header,
-.hero,
-header.page-header {
+.head{
   margin-top: 48px;
 }
 
