@@ -1,29 +1,47 @@
 /* =========================
-   NAV (REPLACE NAV SECTION)
-   Perfect center + stable dropdowns
+   LWFFL Shared Styles (Nav)
    ========================= */
 
+/* Variables (safe even if page already defines them) */
+:root{
+  --bg-main:#020617;
+  --card-bg:#020617;
+  --accent:#38bdf8;
+  --border-subtle:#1f2937;
+  --text-main:#e5e7eb;
+  --text-muted:#9ca3af;
+  --text-soft:#6b7280;
+}
+
+/* Small global offset so titles aren't glued to nav (only affects pages using style.css) */
 .header{
   margin-top: 24px;
 }
 
-.league-nav {
+/* =========================
+   NAV
+   - True centered menu
+   - Stable dropdowns (click + focus)
+   ========================= */
+
+.league-nav{
+  position: sticky;
+  top: 0;
+  z-index: 9999;
   min-height: 64px;
   display: flex;
   align-items: center;
-  position: relative; /* Essential for the absolute dropdown to "stick" below it */
-  z-index: 9999; /* Ensure the entire nav stays on top of page content */
-}
 
-.dropdown-trigger {
-  cursor: pointer; /* Visually tells the user they must click */
-  padding: 10px 15px;
-  user-select: none; /* Prevents text highlighting while clicking fast */
+  background: rgba(2, 6, 23, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 /* True centering: brand | centered menu | toggle */
 .nav-container{
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 14px 18px;
 
@@ -76,7 +94,8 @@
   border-radius: 12px;
   border: 1px solid var(--border-subtle);
   background: rgba(2,6,23,0.55);
-  display: none;
+
+  display: none; /* shown on mobile */
   align-items: center;
   justify-content: center;
   gap: 4px;
@@ -108,6 +127,7 @@
   padding: 10px 12px;
   border-radius: 12px;
   border: 1px solid transparent;
+
   cursor: pointer;
   user-select: none;
   display: inline-flex;
@@ -124,14 +144,13 @@
   outline-offset: 2px;
 }
 
-/* Dropdown (no bullets) */
+/* Dropdown menu (no bullets, stable, clickable) */
 .dropdown-menu{
-  display: none;
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-
   min-width: 240px;
+
   background: rgba(15, 23, 42, 0.95);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
@@ -142,50 +161,54 @@
   padding: 8px 0;
 
   box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-  z-index: 1000;
+  z-index: 10000;
+
+  /* animation that won't break clicking */
+  display: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
 }
 
-/* Hover bridge removes "gap flicker" if you move fast */
-.dropdown-menu::before{
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -10px;
-  height: 10px;
-}
-
-/* Make sure nested lis never show bullets */
+/* Keep nested lis clean */
 .dropdown-menu li{
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-/* OPEN behavior: click-open + keyboard focus (NOT hover-open) */
+/* Open states: JS adds .open, and keyboard uses focus-within */
 .nav-item.open .dropdown-menu,
 .nav-item:focus-within .dropdown-menu{
   display: block;
-}
-
-.nav-item.open .dropdown-menu {
-  display: block !important;
   opacity: 1;
   visibility: visible;
-  pointer-events: auto; /* Re-enable clicking links inside */
-  transform: translateY(0); /* Final position for animation */
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
-.dropdown-menu {
-  display: none; 
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 10000; /* High value to stay on top of all page content */
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(10px); /* Initial state for animation */
-  transition: opacity 0.2s ease, transform 0.2s ease;
+.nav-item.open .dropdown-trigger,
+.nav-item:focus-within .dropdown-trigger{
+  color: var(--text-main);
+  background: rgba(56, 189, 248, 0.10);
+  border-color: rgba(56, 189, 248, 0.22);
+}
+
+/* Links */
+.dropdown-menu li a{
+  padding: 12px 16px;
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-main);
+  text-decoration: none;
+  transition: all 0.18s ease;
+}
+.dropdown-menu li a:hover{
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--accent);
+  padding-left: 20px;
 }
 
 /* Prevent right-edge overflow on last item */
@@ -230,12 +253,24 @@
 
   .dropdown-menu{
     position: static;
-    display: none; /* only show when open/focus-within */
-    margin-top: 8px;
+    top: auto;
+    left: auto;
+    right: auto;
+    min-width: 0;
     box-shadow: none;
-    border-radius: 14px;
     background: rgba(15, 23, 42, 0.65);
+
+    /* mobile: open/close via .open/focus-within */
+    display: none;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
+    transition: none;
   }
 
-  .dropdown-menu::before{ display: none; }
+  .nav-item.open .dropdown-menu,
+  .nav-item:focus-within .dropdown-menu{
+    display: block;
+  }
 }
