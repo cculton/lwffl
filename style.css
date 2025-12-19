@@ -232,8 +232,4 @@
   }
 
   .dropdown-menu::before{ display: none; }
-
-   h1:first-child,
-   .page-title{
-     margin-top: 32px;
 }
