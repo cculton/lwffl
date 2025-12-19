@@ -3,6 +3,13 @@
    Perfect center + stable dropdowns
    ========================= */
 
+.page-hero,
+.page-header,
+.hero,
+header.page-header {
+  margin-top: 48px;
+}
+
 .league-nav{
   position: sticky;
   top: 0;
