@@ -1,6 +1,6 @@
 <nav class="league-nav">
   <div class="nav-container">
-    <a href="index.html" class="nav-brand"><span>LWFFL</span></a>
+    <a href="index.html" class="nav-brand">LWFFL<span>RECORDS</span></a>
 
     <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="lwfflNavMenu">
       <span class="bar"></span><span class="bar"></span><span class="bar"></span>
@@ -16,7 +16,7 @@
       </li>
 
       <li class="nav-item dropdown">
-        <a href="#" class="dropdown-trigger" aria-haspopup="true" aria-expanded="false">Stats & Records ▾</a>
+        <a href="#" class="dropdown-trigger" aria-haspopup="true" aria-expanded="false">Stats &amp; Records ▾</a>
         <ul class="dropdown-menu">
           <li><a href="record-book.html">Record Book</a></li>
           <li><a href="postseason-accomplishments.html">Postseason Accomplishments</a></li>
@@ -62,23 +62,20 @@
     if (!isOpen) closeAllDropdowns();
   });
 
-  // Dropdown click (stable on desktop + touch)
+  // Dropdown click (stable: no hover flicker)
   triggers.forEach(trigger => {
     trigger.addEventListener('click', (e) => {
       e.preventDefault();
       const item = trigger.closest('.nav-item');
       const isOpen = item.classList.contains('open');
 
-      // close others first
       closeAllDropdowns(trigger);
-
-      // toggle this one
       item.classList.toggle('open', !isOpen);
       trigger.setAttribute('aria-expanded', String(!isOpen));
     });
   });
 
-  // Click outside closes dropdowns (and mobile menu)
+  // Click outside closes dropdowns + mobile menu
   document.addEventListener('click', (e) => {
     if (!nav.contains(e.target)) {
       closeAllDropdowns();
@@ -96,11 +93,10 @@
     }
   });
 
-  // If you tab away from a dropdown, close it (keyboard polish)
+  // Keyboard polish: close when tabbing away from a dropdown
   triggers.forEach(trigger => {
     const item = trigger.closest('.nav-item');
     item.addEventListener('focusout', (e) => {
-      // if focus moved outside the nav-item entirely, close it
       if (!item.contains(e.relatedTarget)) {
         item.classList.remove('open');
         trigger.setAttribute('aria-expanded', 'false');
