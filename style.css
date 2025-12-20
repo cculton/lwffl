@@ -268,9 +268,21 @@
     pointer-events: auto;
     transition: none;
   }
-
   .nav-item.open .dropdown-menu,
   .nav-item:focus-within .dropdown-menu{
     display: block;
   }
+   /* Safari Compatibility Fixes */
+   .dropdown-trigger {
+     cursor: pointer; /* Required for Safari click events */
+     -webkit-tap-highlight-color: transparent; /* Removes the grey box on mobile tap */
+   }
+   .league-nav {
+     -webkit-backdrop-filter: blur(10px); /* Safari support for glass effect */
+     -webkit-transform: translate3d(0,0,0); /* Fixes z-index rendering bugs */
+   }
+   .dropdown-menu {
+     -webkit-transform: translate3d(0,0,0); /* Forces menu to render on top */
+     will-change: transform, opacity;
+   }
 }
