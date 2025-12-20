@@ -1,16 +1,14 @@
 <nav class="league-nav">
   <div class="nav-container">
-    <a href="index.html" class="nav-brand">LWFFL<span>RECORDS</span></a>
+    <a href="index.html" class="nav-brand"><span>LWFFL HUB</span></a>
 
-    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
-      <span class="hamburger-line"></span>
-      <span class="hamburger-line"></span>
-      <span class="hamburger-line"></span>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="lwfflNavMenu">
+      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
     </button>
 
-    <ul class="nav-menu" id="navMenu">
+    <ul class="nav-menu" id="lwfflNavMenu">
       <li class="nav-item dropdown">
-        <button class="dropdown-trigger">Administrative ▾</button>
+        <a href="#" class="dropdown-trigger" aria-haspopup="true" aria-expanded="false">Administrative ▾</a>
         <ul class="dropdown-menu">
           <li><a href="constitution.html">League Constitution</a></li>
           <li><a href="amendment-history.html">Amendment History</a></li>
@@ -18,7 +16,7 @@
       </li>
 
       <li class="nav-item dropdown">
-        <button class="dropdown-trigger">Stats & Records ▾</button>
+        <a href="#" class="dropdown-trigger" aria-haspopup="true" aria-expanded="false">Stats &amp; Records ▾</a>
         <ul class="dropdown-menu">
           <li><a href="record-book.html">Record Book</a></li>
           <li><a href="postseason-accomplishments.html">Postseason Accomplishments</a></li>
@@ -29,7 +27,7 @@
       </li>
 
       <li class="nav-item dropdown">
-        <button class="dropdown-trigger">Amusement ▾</button>
+        <a href="#" class="dropdown-trigger" aria-haspopup="true" aria-expanded="false">Amusement ▾</a>
         <ul class="dropdown-menu">
           <li><a href="manager-cards.html">Manager Cards</a></li>
           <li><a href="probability-machine.html">Probability Machine</a></li>
@@ -41,41 +39,69 @@
 </nav>
 
 <script>
-(function() {
-  const toggle = document.getElementById('navToggle');
-  const menu = document.getElementById('navMenu');
-  const dropdowns = document.querySelectorAll('.dropdown-trigger');
+(function () {
+  const nav = document.querySelector('.league-nav');
+  const toggle = document.querySelector('.nav-toggle');
+  const menu = document.querySelector('.nav-menu');
+  const triggers = Array.from(document.querySelectorAll('.dropdown-trigger'));
 
-  // Toggle Mobile Menu
-  toggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
-    toggle.setAttribute('aria-expanded', !isExpanded);
-    menu.classList.toggle('is-active');
-    toggle.classList.toggle('is-active');
+  if (!nav || !toggle || !menu) return;
+
+  function closeAllDropdowns(exceptTrigger) {
+    triggers.forEach(t => {
+      if (t === exceptTrigger) return;
+      t.setAttribute('aria-expanded', 'false');
+      t.closest('.nav-item')?.classList.remove('open');
+    });
+  }
+
+  // Mobile hamburger
+  toggle.addEventListener('click', () => {
+    const isOpen = menu.classList.toggle('is-open');
+    toggle.setAttribute('aria-expanded', String(isOpen));
+    if (!isOpen) closeAllDropdowns();
   });
 
-  // Toggle Dropdowns (Click-based for mobile/Safari stability)
-  dropdowns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const parent = btn.parentElement;
-      const isOpen = parent.classList.contains('is-open');
-      
-      // Close others
-      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('is-open'));
-      
-      // Toggle current
-      if (!isOpen) parent.classList.add('is-open');
+  // Dropdown click (stable: no hover flicker)
+  triggers.forEach(trigger => {
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      const item = trigger.closest('.nav-item');
+      const isOpen = item.classList.contains('open');
+
+      closeAllDropdowns(trigger);
+      item.classList.toggle('open', !isOpen);
+      trigger.setAttribute('aria-expanded', String(!isOpen));
     });
   });
 
-  // Global close
-  document.addEventListener('click', () => {
-    menu.classList.remove('is-active');
-    toggle.classList.remove('is-active');
-    toggle.setAttribute('aria-expanded', 'false');
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('is-open'));
+  // Click outside closes dropdowns + mobile menu
+  document.addEventListener('click', (e) => {
+    if (!nav.contains(e.target)) {
+      closeAllDropdowns();
+      menu.classList.remove('is-open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // ESC closes
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAllDropdowns();
+      menu.classList.remove('is-open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Keyboard polish: close when tabbing away from a dropdown
+  triggers.forEach(trigger => {
+    const item = trigger.closest('.nav-item');
+    item.addEventListener('focusout', (e) => {
+      if (!item.contains(e.relatedTarget)) {
+        item.classList.remove('open');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+    });
   });
 })();
 </script>
