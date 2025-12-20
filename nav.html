@@ -94,29 +94,62 @@
     }
   });
 
-  // Dropdown toggle functionality
+  // Hover functionality for desktop
+  navItems.forEach(function(item) {
+    item.addEventListener('mouseenter', function() {
+      // Only activate on hover if we're on desktop
+      if (window.innerWidth > 768) {
+        const trigger = this.querySelector('.dropdown-trigger');
+        this.classList.add('active');
+        if (trigger) {
+          trigger.setAttribute('aria-expanded', 'true');
+        }
+      }
+    });
+    
+    item.addEventListener('mouseleave', function() {
+      // Only deactivate on hover if we're on desktop
+      if (window.innerWidth > 768) {
+        const trigger = this.querySelector('.dropdown-trigger');
+        this.classList.remove('active');
+        if (trigger) {
+          trigger.setAttribute('aria-expanded', 'false');
+        }
+      }
+    });
+  });
+
+  // Click functionality for mobile and as backup
   dropdownTriggers.forEach(function(trigger) {
     trigger.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
       
       const parentItem = this.closest('.nav-item');
-      const isActive = parentItem.classList.contains('active');
+      const isCurrentlyActive = parentItem.classList.contains('active');
       
-      // Close other dropdowns
-      navItems.forEach(function(item) {
-        if (item !== parentItem) {
-          item.classList.remove('active');
-          const otherTrigger = item.querySelector('.dropdown-trigger');
-          if (otherTrigger) {
-            otherTrigger.setAttribute('aria-expanded', 'false');
+      // On mobile or as backup for desktop
+      if (window.innerWidth <= 768) {
+        // Close other dropdowns first on mobile
+        navItems.forEach(function(item) {
+          if (item !== parentItem) {
+            item.classList.remove('active');
+            const otherTrigger = item.querySelector('.dropdown-trigger');
+            if (otherTrigger) {
+              otherTrigger.setAttribute('aria-expanded', 'false');
+            }
           }
-        }
-      });
+        });
+      }
       
       // Toggle current dropdown
-      parentItem.classList.toggle('active');
-      this.setAttribute('aria-expanded', !isActive);
+      if (isCurrentlyActive) {
+        parentItem.classList.remove('active');
+        this.setAttribute('aria-expanded', 'false');
+      } else {
+        parentItem.classList.add('active');
+        this.setAttribute('aria-expanded', 'true');
+      }
     });
   });
 
