@@ -9088,5 +9088,23 @@
         "manager2": "Cobey Culton",
         "score2": 120.2,
         "playoffs": "First Round"
+      },
+      {
+        "year": 2025,
+        "week": 16,
+        "manager1": "Tom Hos",
+        "score1": 119.28,
+        "manager2": "Ryan Turnau",
+        "score2": 78.8,
+        "playoffs": "Semfinals"
+      },
+      {
+        "year": 2025,
+        "week": 16,
+        "manager1": "Cobey Culton",
+        "score1": 103.0,
+        "manager2": "Stuart Sundseth",
+        "score2": 119.08,
+        "playoffs": "Semfinals"
       }
 ]
