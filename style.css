@@ -46,20 +46,27 @@
 }
 
 /* =========================
-   League Title (Updated to match Screenshot)
+   League Title (Updated: Stark White, Larger, Link)
    ========================= */
 
 .nav-league-title {
-  font-weight: 500;        /* Reduced from 800 to match the cleaner look */
-  letter-spacing: 0.2em;   /* Wider spacing for that cinematic feel */
+  display: block;          /* Ensures it behaves like a block for clicks */
+  font-weight: 700;        /* Bold for contrast */
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  font-size: 0.75rem;
-  color: #94a3b8;          /* Cool slate gray (Slate-400) to match the image */
+  font-size: 1rem;         /* Increased size (was 0.75rem) */
+  color: #ffffff;          /* Stark White */
   margin-bottom: 10px;
   text-align: center;
   line-height: 1.4;
+  text-decoration: none;   /* Remove underline */
   z-index: 1001;
-  opacity: 0.9;            /* Slight transparency for the muted effect */
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.nav-league-title:hover {
+  opacity: 0.8;            /* Subtle interaction on hover */
+  color: #ffffff;          /* Keep it white */
 }
 
 /* =========================
@@ -239,9 +246,8 @@
   .nav-league-title {
     margin-bottom: 0;
     text-align: left;
-    font-size: 0.65rem;
+    font-size: 0.7rem; /* Keeping mobile slightly smaller so it fits */
     max-width: 80%;
-    /* On mobile, we might want less spacing to fit the text */
     letter-spacing: 0.05em; 
   }
 
@@ -284,4 +290,65 @@
     justify-content: space-between;
     padding: 14px 16px;
     font-size: 0.9rem;
-    border:
+    border: 1px solid var(--border-subtle);
+    background: rgba(15, 23, 42, 0.5);
+    margin-bottom: 8px;
+  }
+
+  .dropdown-menu {
+    position: static;
+    margin: 0 0 8px 0;
+    border-radius: 8px;
+    box-shadow: none;
+    background: rgba(15, 23, 42, 0.7);
+    transform: none;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: visible;
+    pointer-events: auto;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+  }
+
+  .nav-item.active .dropdown-menu {
+    max-height: 500px;
+    opacity: 1;
+    padding: 8px;
+    transform: none;
+  }
+
+  .dropdown-menu a {
+    padding: 12px 16px;
+  }
+
+  .dropdown-menu a:hover {
+    padding-left: 20px;
+  }
+}
+
+/* =========================
+   Browser Compatibility
+   ========================= */
+
+@supports (-webkit-appearance: none) {
+  .league-nav {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+  
+  .dropdown-menu {
+    -webkit-transform: translateX(-50%) translateY(-10px);
+  }
+  
+  .nav-item.active .dropdown-menu {
+    -webkit-transform: translateX(-50%) translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  select,
+  input,
+  textarea {
+    font-size: 16px;
+  }
+}
