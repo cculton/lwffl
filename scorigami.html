@@ -18,9 +18,9 @@
       --text-main: #e5e7eb;
       --text-muted: #9ca3af;
       --text-soft: #6b7280;
-      --positive: #22c55e;
-      --negative: #ef4444;
-      --warning: #f59e0b;
+      --positive: #22c55e; /* Green for Wins */
+      --negative: #ef4444; /* Red for Losses */
+      --warning: #f59e0b;  /* Orange for Ties */
       
       /* Scorigami Specifics */
       --scorigami-gradient: linear-gradient(135deg, #f472b6 0%, #a855f7 50%, #3b82f6 100%);
@@ -36,7 +36,7 @@
     }
 
     .shell {
-      max-width: 900px; /* Slightly narrower than stats page for focus */
+      max-width: 900px;
       margin: 0 auto;
     }
 
@@ -262,7 +262,7 @@
       color: var(--text-main);
     }
 
-    /* --- Table Styling (Matches Season Stats) --- */
+    /* --- Table Styling --- */
     .table-wrap {
       width: 100%;
       overflow-x: auto;
@@ -302,6 +302,8 @@
 
     .score-cell { font-weight: 700; color: var(--accent); font-family: monospace; font-size: 1rem; }
     .opp-score-cell { font-family: monospace; color: var(--text-muted); }
+    
+    /* Result Colors */
     .result-w { color: var(--positive); font-weight: 700; }
     .result-l { color: var(--negative); font-weight: 700; }
     .result-t { color: var(--warning); font-weight: 700; }
