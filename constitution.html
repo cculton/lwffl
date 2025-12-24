@@ -647,10 +647,13 @@
       });
     }
 
-    // Desktop hover
+    // Desktop hover - UPDATED WITH DELAY
     navItems.forEach(function(item) {
+      var closeTimer;
+
       item.addEventListener('mouseenter', function() {
         if (window.innerWidth > 768) {
+          clearTimeout(closeTimer);
           item.classList.add('active');
           var trigger = item.querySelector('.dropdown-trigger');
           if (trigger) trigger.setAttribute('aria-expanded', 'true');
@@ -659,9 +662,11 @@
       
       item.addEventListener('mouseleave', function() {
         if (window.innerWidth > 768) {
-          item.classList.remove('active');
-          var trigger = item.querySelector('.dropdown-trigger');
-          if (trigger) trigger.setAttribute('aria-expanded', 'false');
+          closeTimer = setTimeout(function() {
+            item.classList.remove('active');
+            var trigger = item.querySelector('.dropdown-trigger');
+            if (trigger) trigger.setAttribute('aria-expanded', 'false');
+          }, 300); // 300ms delay to bridge the gap
         }
       });
     });
