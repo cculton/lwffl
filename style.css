@@ -37,28 +37,29 @@
 .nav-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 12px 20px; /* Increased top/bottom padding for stacked layout */
+  padding: 12px 20px;
   display: flex;
-  flex-direction: column; /* Stack Title and Menu vertically */
-  align-items: center;    /* Center everything */
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  min-height: 80px;       /* Slightly taller for two rows */
+  min-height: 80px;
 }
 
 /* =========================
-   League Title (Replaces Brand)
+   League Title (Updated to match Screenshot)
    ========================= */
 
 .nav-league-title {
-  font-weight: 800;
-  letter-spacing: 0.15em;
+  font-weight: 500;        /* Reduced from 800 to match the cleaner look */
+  letter-spacing: 0.2em;   /* Wider spacing for that cinematic feel */
   text-transform: uppercase;
-  font-size: 0.75rem; /* Smaller, elegant header size */
-  color: #a855f7;     /* Purple accent */
-  margin-bottom: 8px; /* Space between title and menu */
+  font-size: 0.75rem;
+  color: #94a3b8;          /* Cool slate gray (Slate-400) to match the image */
+  margin-bottom: 10px;
   text-align: center;
   line-height: 1.4;
   z-index: 1001;
+  opacity: 0.9;            /* Slight transparency for the muted effect */
 }
 
 /* =========================
@@ -66,7 +67,7 @@
    ========================= */
 
 .nav-toggle {
-  display: none; /* Hidden on desktop */
+  display: none;
   flex-direction: column;
   justify-content: space-around;
   width: 36px;
@@ -119,8 +120,7 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  /* Removed absolute positioning since we are now stacking naturally */
-  position: static; 
+  position: static;
   transform: none;
 }
 
@@ -136,7 +136,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px; /* Slightly tighter padding for the lower row */
+  padding: 8px 16px;
   color: var(--text-muted);
   text-decoration: none;
   font-size: 0.875rem;
@@ -229,8 +229,7 @@
 
 @media (max-width: 768px) {
   .nav-container {
-    /* Revert to row layout for mobile to keep Hamburger on right */
-    flex-direction: row; 
+    flex-direction: row;
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
@@ -240,8 +239,10 @@
   .nav-league-title {
     margin-bottom: 0;
     text-align: left;
-    font-size: 0.65rem; /* Smaller text for mobile fit */
-    max-width: 80%; /* Ensure text doesn't overlap hamburger */
+    font-size: 0.65rem;
+    max-width: 80%;
+    /* On mobile, we might want less spacing to fit the text */
+    letter-spacing: 0.05em; 
   }
 
   .nav-toggle {
@@ -283,67 +284,4 @@
     justify-content: space-between;
     padding: 14px 16px;
     font-size: 0.9rem;
-    border: 1px solid var(--border-subtle);
-    background: rgba(15, 23, 42, 0.5);
-    margin-bottom: 8px;
-  }
-
-  .dropdown-menu {
-    position: static;
-    margin: 0 0 8px 0;
-    border-radius: 8px;
-    box-shadow: none;
-    background: rgba(15, 23, 42, 0.7);
-    transform: none;
-    max-height: 0;
-    overflow: hidden;
-    opacity: 0;
-    visibility: visible;
-    pointer-events: auto;
-    transition: max-height 0.3s ease, opacity 0.3s ease;
-  }
-
-  .nav-item.active .dropdown-menu {
-    max-height: 500px;
-    opacity: 1;
-    padding: 8px;
-    transform: none;
-  }
-
-  .dropdown-menu a {
-    padding: 12px 16px;
-  }
-
-  .dropdown-menu a:hover {
-    padding-left: 20px;
-  }
-}
-
-/* =========================
-   Browser Compatibility
-   ========================= */
-
-/* Safari-specific fixes */
-@supports (-webkit-appearance: none) {
-  .league-nav {
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-  }
-  
-  .dropdown-menu {
-    -webkit-transform: translateX(-50%) translateY(-10px);
-  }
-  
-  .nav-item.active .dropdown-menu {
-    -webkit-transform: translateX(-50%) translateY(0);
-  }
-}
-
-/* Prevent iOS zoom on input focus */
-@media (max-width: 768px) {
-  select,
-  input,
-  textarea {
-    font-size: 16px;
-  }
-}
+    border:
