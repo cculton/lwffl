@@ -37,33 +37,28 @@
 .nav-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 12px 20px; /* Increased top/bottom padding for stacked layout */
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 64px;
+  flex-direction: column; /* Stack Title and Menu vertically */
+  align-items: center;    /* Center everything */
+  justify-content: center;
+  min-height: 80px;       /* Slightly taller for two rows */
 }
 
 /* =========================
-   Brand
+   League Title (Replaces Brand)
    ========================= */
 
-.nav-brand {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  font-weight: 900;
-  letter-spacing: 0.08em;
+.nav-league-title {
+  font-weight: 800;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  font-size: 14px;
-  color: #a855f7;
-  white-space: nowrap;
+  font-size: 0.75rem; /* Smaller, elegant header size */
+  color: #a855f7;     /* Purple accent */
+  margin-bottom: 8px; /* Space between title and menu */
+  text-align: center;
+  line-height: 1.4;
   z-index: 1001;
-}
-
-.nav-brand span {
-  color: var(--text-main);
-  margin-left: 2px;
 }
 
 /* =========================
@@ -71,7 +66,7 @@
    ========================= */
 
 .nav-toggle {
-  display: none;
+  display: none; /* Hidden on desktop */
   flex-direction: column;
   justify-content: space-around;
   width: 36px;
@@ -113,7 +108,7 @@
 }
 
 /* =========================
-   Navigation Menu - CENTERED
+   Navigation Menu
    ========================= */
 
 .nav-menu {
@@ -124,9 +119,9 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  /* Removed absolute positioning since we are now stacking naturally */
+  position: static; 
+  transform: none;
 }
 
 .nav-item {
@@ -141,7 +136,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 16px;
+  padding: 8px 16px; /* Slightly tighter padding for the lower row */
   color: var(--text-muted);
   text-decoration: none;
   font-size: 0.875rem;
@@ -233,6 +228,22 @@
    ========================= */
 
 @media (max-width: 768px) {
+  .nav-container {
+    /* Revert to row layout for mobile to keep Hamburger on right */
+    flex-direction: row; 
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    min-height: 64px;
+  }
+
+  .nav-league-title {
+    margin-bottom: 0;
+    text-align: left;
+    font-size: 0.65rem; /* Smaller text for mobile fit */
+    max-width: 80%; /* Ensure text doesn't overlap hamburger */
+  }
+
   .nav-toggle {
     display: flex;
   }
