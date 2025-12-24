@@ -10,11 +10,10 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      /* Theme matches Record Book & Probability Machine */
+      /* Shared Theme */
       --bg-main: #020617;
       --card-bg: #020617;
       --accent: #38bdf8;
-      --accent-dim: rgba(56, 189, 248, 0.15);
       --border-subtle: #1f2937;
       --text-main: #e5e7eb;
       --text-muted: #9ca3af;
@@ -23,7 +22,7 @@
       --negative: #ef4444;
       --warning: #f59e0b;
       
-      /* Scorigami Specific Colors */
+      /* Scorigami Specifics */
       --scorigami-gradient: linear-gradient(135deg, #f472b6 0%, #a855f7 50%, #3b82f6 100%);
       --scorigami-glow: 0 0 40px rgba(168, 85, 247, 0.4);
     }
@@ -33,110 +32,73 @@
       background: radial-gradient(circle at top, #020617 0%, #020617 35%, #020617 100%);
       color: var(--text-main);
       min-height: 100vh;
-      padding: 32px 16px;
-      line-height: 1.5;
+      padding: 24px 16px;
     }
 
-    .shell { max-width: 800px; margin: 0 auto; }
+    .shell {
+      max-width: 900px; /* Slightly narrower than stats page for focus */
+      margin: 0 auto;
+    }
 
-    /* --- Header --- */
-    .header { text-align: center; margin-bottom: 40px; }
+    /* Main Container (Glassmorphism) */
+    .container {
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.18), transparent 55%),
+        var(--card-bg);
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      box-shadow:
+        0 40px 80px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+      padding: 32px 24px 32px;
+      backdrop-filter: blur(14px);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
     .header h1 {
-      font-size: 2.5rem;
-      font-weight: 800;
-      text-transform: uppercase;
+      font-size: 2rem;
       letter-spacing: 0.1em;
-      margin-bottom: 8px;
-      background: linear-gradient(to right, #fff, #94a3b8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #f9fafb;
     }
+
     .header p {
       color: var(--text-soft);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-    }
-
-    /* --- Search Card --- */
-    .search-card {
-      background:
-        radial-gradient(circle at top left, rgba(56, 189, 248, 0.08), transparent 60%),
-        var(--card-bg);
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      border-radius: 24px;
-      padding: 40px;
-      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
-      margin-bottom: 32px;
-      text-align: center;
-    }
-
-    .input-wrapper {
-      display: flex;
-      gap: 16px;
-      max-width: 500px;
-      margin: 0 auto;
-      align-items: center;
-    }
-
-    input[type="number"] {
-      flex: 1;
-      background: rgba(15, 23, 42, 0.8);
-      border: 2px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 16px 20px;
-      font-size: 1.5rem;
-      color: #fff;
-      font-weight: 700;
-      text-align: center;
-      transition: all 0.2s;
-      appearance: textfield; /* Remove spinner */
-    }
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    
-    input:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 4px var(--accent-dim);
-    }
-
-    button.search-btn {
-      background: var(--accent);
-      color: #0f172a;
-      border: none;
-      padding: 18px 32px;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    button.search-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px -5px rgba(56, 189, 248, 0.4);
     }
 
     /* --- Common Scores Section --- */
     .common-section {
       margin-bottom: 32px;
-      animation: fadeIn 0.5s ease-out;
     }
+    
     .section-title {
       text-align: center;
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.15em;
-      color: var(--text-soft);
+      color: var(--text-muted);
       margin-bottom: 12px;
+      font-weight: 600;
     }
+    
     .common-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 12px;
+      max-width: 800px;
+      margin: 0 auto;
     }
+    
     .common-item {
       background: rgba(30, 41, 59, 0.4);
       border: 1px solid var(--border-subtle);
@@ -144,68 +106,115 @@
       padding: 16px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.2s;
-      position: relative;
-      overflow: hidden;
+      transition: all 0.2s ease;
     }
+    
     .common-item:hover {
       background: rgba(56, 189, 248, 0.1);
       border-color: var(--accent);
       transform: translateY(-2px);
     }
-    .rank {
-      font-size: 0.7rem;
-      color: var(--text-soft);
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
+    
     .common-score {
       font-size: 1.4rem;
       font-weight: 800;
       color: #fff;
-      line-height: 1.1;
+      font-family: monospace;
+      margin-bottom: 4px;
     }
+    
     .common-count {
       font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: 4px;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
-    /* --- Results Section --- */
+    /* --- Search Input --- */
+    .search-area {
+      max-width: 500px;
+      margin: 0 auto 40px;
+      display: flex;
+      gap: 12px;
+    }
+
+    input[type="number"] {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 1.2rem;
+      color: #fff;
+      font-weight: 600;
+      text-align: center;
+      transition: all 0.2s;
+      appearance: textfield;
+      font-family: monospace;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+
+    button.search-btn {
+      background: var(--accent);
+      color: #0f172a;
+      border: none;
+      padding: 0 24px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    button.search-btn:hover {
+      background: #7dd3fc;
+      transform: translateY(-1px);
+    }
+
+    /* --- Result Container --- */
     .result-container {
       opacity: 0;
       transform: translateY(20px);
-      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       pointer-events: none;
     }
+    
     .result-container.active {
       opacity: 1;
       transform: translateY(0);
       pointer-events: all;
     }
 
-    /* Scorigami State */
+    /* --- Scorigami Box --- */
     .scorigami-box {
-      background: rgba(15, 23, 42, 0.9);
+      background: rgba(15, 23, 42, 0.8);
       border: 1px solid rgba(168, 85, 247, 0.3);
-      border-radius: 20px;
-      padding: 60px 20px;
+      border-radius: 16px;
+      padding: 40px 20px;
       text-align: center;
+      display: none;
       position: relative;
       overflow: hidden;
-      display: none;
     }
+    
     .scorigami-box.show { display: block; }
     
     .scorigami-box::before {
       content: '';
       position: absolute;
-      top: 0; left: 0; right: 0; height: 4px;
+      top: 0; left: 0; right: 0; height: 3px;
       background: var(--scorigami-gradient);
     }
 
     .scorigami-title {
-      font-size: 4rem;
+      font-size: 3rem;
       font-weight: 900;
       margin-bottom: 16px;
       background: var(--scorigami-gradient);
@@ -213,149 +222,143 @@
       -webkit-text-fill-color: transparent;
       letter-spacing: -0.02em;
       text-shadow: var(--scorigami-glow);
-      animation: pulse 2s infinite;
+      animation: pulse 3s infinite;
+      text-transform: uppercase;
     }
 
     .scorigami-desc {
-      font-size: 1.2rem;
-      color: #e5e7eb;
-      max-width: 600px;
-      margin: 0 auto;
+      font-size: 1.1rem;
+      color: #cbd5e1;
       line-height: 1.6;
     }
 
-    /* History State */
-    .history-box {
-      display: none;
-    }
+    /* --- History Box --- */
+    .history-box { display: none; }
     .history-box.show { display: block; }
 
     .count-banner {
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       margin-bottom: 24px;
-      padding: 20px;
-      background: rgba(56, 189, 248, 0.05);
-      border: 1px solid var(--border-subtle);
+      padding: 16px;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.2);
       border-radius: 12px;
     }
+    
     .count-val {
-      font-size: 2.5rem;
+      font-size: 2rem;
       font-weight: 800;
       color: var(--accent);
-      display: block;
       line-height: 1;
       margin-bottom: 4px;
     }
+    
     .count-label {
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      font-size: 0.8rem;
-      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      font-size: 0.75rem;
+      color: var(--text-main);
     }
 
-    /* Table */
-    .table-card {
-      background: var(--card-bg);
+    /* --- Table Styling (Matches Season Stats) --- */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 10px;
       border: 1px solid var(--border-subtle);
-      border-radius: 16px;
-      overflow: hidden;
     }
-    .table-wrap { overflow-x: auto; }
-    
-    table {
+
+    .leaderboard-table {
       width: 100%;
       border-collapse: collapse;
+      font-size: 0.9rem;
       min-width: 600px;
-      font-size: 0.95rem;
     }
-    
-    th {
-      background: rgba(30, 41, 59, 0.5);
-      text-align: left;
-      padding: 14px 20px;
-      font-size: 0.75rem;
+
+    .leaderboard-table thead {
+      background: linear-gradient(90deg, #020617, #020617);
+    }
+
+    .leaderboard-table th {
+      padding: 12px 16px;
+      font-size: 0.78rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
       color: var(--text-muted);
       border-bottom: 1px solid var(--border-subtle);
+      text-align: left;
     }
-    
-    td {
-      padding: 14px 20px;
+
+    .leaderboard-table td {
+      padding: 12px 16px;
       border-bottom: 1px solid rgba(255,255,255,0.03);
-      color: #e5e7eb;
+      color: var(--text-main);
     }
-    tr:last-child td { border-bottom: none; }
-    tbody tr:hover { background: rgba(56, 189, 248, 0.03); }
 
-    .score-cell { font-weight: 700; color: var(--accent); font-family: monospace; font-size: 1.1rem; }
+    .leaderboard-table tbody tr:nth-child(odd) { background: rgba(30, 41, 59, 0.2); }
+    .leaderboard-table tbody tr:hover { background: rgba(56, 189, 248, 0.05); }
+
+    .score-cell { font-weight: 700; color: var(--accent); font-family: monospace; font-size: 1rem; }
     .opp-score-cell { font-family: monospace; color: var(--text-muted); }
-    .manager-name { font-weight: 600; color: #fff; }
+    .result-w { color: var(--positive); font-weight: 700; }
+    .result-l { color: var(--negative); font-weight: 700; }
+    .result-t { color: var(--warning); font-weight: 700; }
 
-    /* Keyframes */
     @keyframes pulse {
-      0% { text-shadow: 0 0 30px rgba(168, 85, 247, 0.2); }
-      50% { text-shadow: 0 0 60px rgba(168, 85, 247, 0.6); }
-      100% { text-shadow: 0 0 30px rgba(168, 85, 247, 0.2); }
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      0%, 100% { text-shadow: 0 0 30px rgba(168, 85, 247, 0.2); }
+      50% { text-shadow: 0 0 50px rgba(168, 85, 247, 0.5); }
     }
 
-    /* Mobile */
     @media (max-width: 600px) {
-      .input-wrapper { flex-direction: column; }
-      .search-btn { width: 100%; }
-      .scorigami-title { font-size: 2.8rem; }
-      .header h1 { font-size: 2rem; }
-      .common-grid { grid-template-columns: repeat(3, 1fr); } 
+      .container { padding: 24px 16px; }
+      .header h1 { font-size: 1.6rem; }
+      .search-area { flex-direction: column; }
+      .search-btn { padding: 14px; width: 100%; }
+      .scorigami-title { font-size: 2.2rem; }
     }
   </style>
 </head>
 <body>
 <div id="nav-placeholder"></div>
 <div class="shell">
-  <header class="header">
-    <h1>Scorigami Search</h1>
-    <p>Has this score ever happened in LWFFL history?</p>
-  </header>
+  <div class="container">
+    <header class="header">
+      <h1>Scorigami Search</h1>
+      <p>Has this score ever happened in LWFFL history?</p>
+    </header>
 
-  <!-- Moved above search bar -->
-  <section class="common-section">
-    <div class="section-title">Most Common League Scores</div>
-    <div class="common-grid" id="commonGrid">
-      </div>
-  </section>
+    <section class="common-section">
+      <div class="section-title">Most Common League Scores</div>
+      <div class="common-grid" id="commonGrid">
+        </div>
+    </section>
 
-  <section class="search-card">
-    <div class="input-wrapper">
-      <input type="number" id="scoreInput" placeholder="Enter Score" step="0.01" />
-      <button class="search-btn" onclick="checkScorigami()">Check Score</button>
-    </div>
-  </section>
-
-  <div id="resultContainer" class="result-container">
-    
-    <div id="scorigamiBox" class="scorigami-box">
-      <div class="scorigami-title">SCORIGAMI!</div>
-      <p class="scorigami-desc">
-        This score has <strong>never</strong> happened in league history.
-        <br><br>
-        If you just scored <span id="targetScoreDisplay" style="color:var(--accent); font-weight:bold;">--</span>, you have made history.
-      </p>
+    <div class="search-area">
+      <input type="number" id="scoreInput" placeholder="Enter Score (e.g. 102.4)" step="0.01" />
+      <button class="search-btn" onclick="checkScorigami()">Check History</button>
     </div>
 
-    <div id="historyBox" class="history-box">
-      <div class="count-banner">
-        <span class="count-val" id="countDisplay">0</span>
-        <span class="count-label">Occurrences in League History</span>
+    <div id="resultContainer" class="result-container">
+      
+      <div id="scorigamiBox" class="scorigami-box">
+        <div class="scorigami-title">SCORIGAMI!</div>
+        <p class="scorigami-desc">
+          This score has <strong>never</strong> happened in league history.
+          <br><br>
+          If you just scored <span id="targetScoreDisplay" style="color:var(--accent); font-weight:bold;">--</span>, you have made history.
+        </p>
       </div>
 
-      <div class="table-card">
+      <div id="historyBox" class="history-box">
+        <div class="count-banner">
+          <span class="count-val" id="countDisplay">0</span>
+          <span class="count-label">Occurrences in League History</span>
+        </div>
+
         <div class="table-wrap">
-          <table>
+          <table class="leaderboard-table">
             <thead>
               <tr>
                 <th>Date</th>
@@ -371,8 +374,8 @@
           </table>
         </div>
       </div>
-    </div>
 
+    </div>
   </div>
 </div>
 
@@ -381,22 +384,19 @@
 
   document.addEventListener('DOMContentLoaded', async () => {
     try {
-      // Fetch league data
       const res = await fetch('league-scores.json');
       if (!res.ok) throw new Error("Failed to load league-scores.json");
       rawMatchups = await res.json();
       
-      // Calculate Common Scores
       renderCommonScores();
 
-      // Allow "Enter" key to trigger search
       document.getElementById('scoreInput').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') checkScorigami();
       });
 
     } catch (err) {
       console.error(err);
-      alert("Error loading league data. Please ensure league-scores.json is present.");
+      // Optional: Handle error UI
     }
   });
 
@@ -411,8 +411,7 @@
       [m.score1, m.score2].forEach(s => {
         const val = parseFloat(s);
         if(!isNaN(val)) {
-          // Store string key to prevent rounding errors in object keys, normalized to 2 decimals
-          const k = val.toFixed(2);
+          const k = val.toFixed(2); // Normalize keys
           if (!meta[k]) meta[k] = { count: 0, last: -Infinity };
           meta[k].count += 1;
           if (lastKey > meta[k].last) meta[k].last = lastKey;
@@ -420,15 +419,12 @@
       });
     });
 
-    // Convert to array and sort: count desc, then most-recent occurrence desc
+    // Sort by Count DESC, then Recency
     const sorted = Object.entries(meta)
       .sort((a,b) => (b[1].count - a[1].count) || (b[1].last - a[1].last))
-      .slice(0, 5); // Take top 5
+      .slice(0, 5);
 
     const container = document.getElementById('commonGrid');
-    
-    // Using formatted HTML for the cards
-    // NOTE: ranking removed to imply ties for first; order handles most-recent first (leftmost)
     container.innerHTML = sorted.map(([score, info]) => `
       <div class="common-item" onclick="autoSearch('${score}')">
         <div class="common-score">${parseFloat(score)}</div>
@@ -440,11 +436,6 @@
   function autoSearch(score) {
     document.getElementById('scoreInput').value = score;
     checkScorigami();
-    
-    // Smooth scroll to results
-    setTimeout(() => {
-        document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
   }
 
   function checkScorigami() {
@@ -454,13 +445,13 @@
     const targetScore = parseFloat(inputVal);
     const matches = [];
 
-    // Search logic: Check both manager1 and manager2 scores
+    // Search Logic
     rawMatchups.forEach(m => {
       const s1 = parseFloat(m.score1);
       const s2 = parseFloat(m.score2);
 
       // Check Team 1
-      if (Math.abs(s1 - targetScore) < 0.001) { // Float comparison safety
+      if (Math.abs(s1 - targetScore) < 0.001) {
         matches.push({
           year: m.year,
           week: m.week,
@@ -495,45 +486,44 @@
     const historyBox = document.getElementById('historyBox');
     const tbody = document.getElementById('historyBody');
 
-    // Reset UI state (fade out)
+    // Reset Animation
     container.classList.remove('active');
     
-    // Wait for transition, then update DOM
     setTimeout(() => {
       scorigamiBox.classList.remove('show');
       historyBox.classList.remove('show');
 
       if (matches.length === 0) {
-        // SCORIGAMI STATE
+        // SCORIGAMI
         document.getElementById('targetScoreDisplay').textContent = score;
         scorigamiBox.classList.add('show');
       } else {
-        // HISTORY STATE
+        // HISTORY FOUND
         document.getElementById('countDisplay').textContent = matches.length;
         
-        // Sort matches: Newest first
+        // Sort: Newest first
         matches.sort((a,b) => (b.year - a.year) || (b.week - a.week));
 
-        tbody.innerHTML = '';
-        matches.forEach(m => {
-          const tr = document.createElement('tr');
-          const resColor = m.result === 'W' ? 'var(--positive)' : (m.result === 'L' ? 'var(--negative)' : 'var(--warning)');
+        tbody.innerHTML = matches.map(m => {
+          let resClass = 'result-t';
+          if (m.result === 'W') resClass = 'result-w';
+          if (m.result === 'L') resClass = 'result-l';
           
-          tr.innerHTML = `
-            <td>${m.year} Wk ${m.week}</td>
-            <td class="manager-name">${m.manager}</td>
-            <td class="score-cell">${m.score.toFixed(2)}</td>
-            <td style="color:${resColor}; font-weight:700;">${m.result}</td>
-            <td>${m.opponent}</td>
-            <td class="opp-score-cell">${m.oppScore.toFixed(2)}</td>
+          return `
+            <tr>
+              <td>${m.year} Wk ${m.week}</td>
+              <td style="font-weight:600; color:#fff;">${m.manager}</td>
+              <td class="score-cell">${m.score.toFixed(2)}</td>
+              <td class="${resClass}">${m.result}</td>
+              <td>${m.opponent}</td>
+              <td class="opp-score-cell">${m.oppScore.toFixed(2)}</td>
+            </tr>
           `;
-          tbody.appendChild(tr);
-        });
+        }).join('');
 
         historyBox.classList.add('show');
       }
 
-      // Trigger Fade In
       container.classList.add('active');
     }, 300); 
   }
