@@ -46,27 +46,27 @@
 }
 
 /* =========================
-   League Title (Updated: Stark White, Larger, Link)
+   League Title
    ========================= */
 
 .nav-league-title {
-  display: block;          /* Ensures it behaves like a block for clicks */
-  font-weight: 700;        /* Bold for contrast */
+  display: block;
+  font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  font-size: 1rem;         /* Increased size (was 0.75rem) */
-  color: #ffffff;          /* Stark White */
+  font-size: 1rem;
+  color: #ffffff;
   margin-bottom: 10px;
   text-align: center;
   line-height: 1.4;
-  text-decoration: none;   /* Remove underline */
+  text-decoration: none;
   z-index: 1001;
   transition: opacity 0.2s ease, color 0.2s ease;
 }
 
 .nav-league-title:hover {
-  opacity: 0.8;            /* Subtle interaction on hover */
-  color: #ffffff;          /* Keep it white */
+  opacity: 0.8;
+  color: #ffffff;
 }
 
 /* =========================
@@ -174,13 +174,14 @@
 }
 
 /* =========================
-   Dropdown Menus
+   Dropdown Menus (Desktop Default)
    ========================= */
 
 .dropdown-menu {
   position: absolute;
   top: 100%;
   left: 50%;
+  /* Standard transform for centering */
   transform: translateX(-50%) translateY(-10px);
   margin-top: 8px;
   min-width: 220px;
@@ -246,7 +247,7 @@
   .nav-league-title {
     margin-bottom: 0;
     text-align: left;
-    font-size: 0.7rem; /* Keeping mobile slightly smaller so it fits */
+    font-size: 0.7rem;
     max-width: 80%;
     letter-spacing: 0.05em; 
   }
@@ -300,8 +301,13 @@
     margin: 0 0 8px 0;
     border-radius: 8px;
     box-shadow: none;
-    background: rgba(15, 23, 42, 0.7);
-    transform: none;
+    /* Use opaque background so text is readable over page content */
+    background: rgba(15, 23, 42, 0.98); 
+    
+    /* CRITICAL FIX: Explicitly reset all transforms for mobile */
+    transform: none !important;
+    -webkit-transform: none !important;
+    
     max-height: 0;
     overflow: hidden;
     opacity: 0;
@@ -314,7 +320,9 @@
     max-height: 500px;
     opacity: 1;
     padding: 8px;
-    transform: none;
+    /* CRITICAL FIX: Ensure active state doesn't re-apply desktop transforms */
+    transform: none !important;
+    -webkit-transform: none !important;
   }
 
   .dropdown-menu a {
@@ -330,18 +338,23 @@
    Browser Compatibility
    ========================= */
 
-@supports (-webkit-appearance: none) {
-  .league-nav {
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-  }
-  
-  .dropdown-menu {
-    -webkit-transform: translateX(-50%) translateY(-10px);
-  }
-  
-  .nav-item.active .dropdown-menu {
-    -webkit-transform: translateX(-50%) translateY(0);
+/* Wrap this in a media query so it only applies to desktop WebKit browsers.
+   This prevents iOS Mobile Safari from picking up these transforms when
+   we want the mobile view to be position:static. */
+@media (min-width: 769px) {
+  @supports (-webkit-appearance: none) {
+    .league-nav {
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+    }
+    
+    .dropdown-menu {
+      -webkit-transform: translateX(-50%) translateY(-10px);
+    }
+    
+    .nav-item.active .dropdown-menu {
+      -webkit-transform: translateX(-50%) translateY(0);
+    }
   }
 }
 
