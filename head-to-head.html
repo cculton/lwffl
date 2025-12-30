@@ -502,11 +502,11 @@
     
     document.getElementById('lblBanner1').textContent = m1;
     document.getElementById('valBanner1').textContent = m1Wins;
-    document.getElementById('subBanner1').textContent = `Wins`;
+    document.getElementById('subBanner1').textContent = `Win(s)`;
 
     document.getElementById('lblBanner2').textContent = m2Display;
     document.getElementById('valBanner2').textContent = m2Wins;
-    document.getElementById('subBanner2').textContent = `Wins`;
+    document.getElementById('subBanner2').textContent = `Win(s)`;
 
     // Streak
     let streakVal = 0, streakType = '';
@@ -530,7 +530,7 @@
     // Meta Box Text
     document.getElementById('seriesMeta').innerHTML = `
       <strong>Cumulative Score:</strong> ${m1} <strong>${m1Pts.toLocaleString()}</strong> — ${m2Display} <strong>${m2Pts.toLocaleString()}</strong><br>
-      <strong>Average Score:</strong> ${m1} ${(m1Pts/data.length).toFixed(2)} — ${m2Display} ${(m2Pts/data.length).toFixed(2)}
+      <strong>Average Score:</strong> ${m1} <strong>${(m1Pts/data.length).toFixed(2)}</strong> — <strong>${m2Display} ${(m2Pts/data.length).toFixed(2)}</strong>
     `;
   }
 
