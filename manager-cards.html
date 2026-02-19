@@ -1203,17 +1203,7 @@
         -Infinity
       );
 
-      if (!Number.isFinite(latestGameYear)) return existing;
-
-      if (seasonYears.has(latestGameYear)) {
-        return existing
-          .map((s) => {
-            if (safeNum(s.year, null) !== latestGameYear) return s;
-            const hasFinalStanding = Number.isFinite(safeNum(s.final_standing, null));
-            return hasFinalStanding ? s : { ...s, is_in_progress: true };
-          })
-          .sort((a, b) => b.year - a.year);
-      }
+      if (!Number.isFinite(latestGameYear) || seasonYears.has(latestGameYear)) return existing;
 
       const regGames = (games || []).filter(g => Number.isFinite(g.year) && g.year === latestGameYear && !g.isPlayoff);
       if (!regGames.length) return existing;
@@ -1227,8 +1217,7 @@
         final_standing: null,
         division_finish: null,
         points_for: 0,
-        points_against: 0,
-        is_in_progress: true
+        points_against: 0
       };
 
       regGames.forEach(g => {
@@ -1277,7 +1266,7 @@
         const hasScoring = (idx.scoringTitlesByManager.get(managerName) || new Set()).has(s.year);
         const money = getEarnings(s.year, rank, hasScoring);
 
-        const isSeasonInProgress = !!s.is_in_progress;
+        const isSeasonInProgress = Number.isFinite(s.year) && s.year === latestLeagueYear && !Number.isFinite(rank);
 
         const tr = document.createElement('tr');
         if (isSeasonInProgress) tr.classList.add('season-in-progress');
