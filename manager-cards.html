@@ -204,6 +204,8 @@
     .trophy-badge.scoring { background: rgba(59, 130, 246, 0.16); color: #93c5fd; border-color: rgba(59, 130, 246, 0.35); }
 
     .empty-case { font-size: 0.85rem; color: var(--text-soft); font-style: italic; }
+    .season-footnote { margin-top: 8px; color: var(--text-soft); font-size: 0.82rem; }
+    #seasonTable tr.season-in-progress td { font-style: italic; }
 
     /* Right: OVR Rating & Attributes */
     .rating-container { display: flex; align-items: center; gap: 32px; flex: 1; justify-content: flex-end; min-width: 320px; }
@@ -619,13 +621,14 @@
               <th>Finish</th>
               <th>Points For</th>
               <th>Points Against</th>
-              <th>Seed</th>
+              <th>Playoff Seed</th>
               <th>Earnings</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
+      <p class="season-footnote"><em>Italics denote a season in progress.</em></p>
     </div>
 
   </div>
@@ -1090,6 +1093,7 @@
     function loadManager(name) {
       const mySeasons = idx.standingsByManager.get(name) || [];
       const myGames = idx.gamesByManager.get(name) || [];
+      const mySeasonsForTable = withLiveCurrentSeason(name, mySeasons, myGames);
 
       const h2h = {};
       myGames.forEach(g => {
@@ -1104,7 +1108,7 @@
       renderHero(name, mySeasons);
       renderStats(mySeasons, myGames, name);
       renderRivalries(h2h);
-      renderSeasonTable(mySeasons, name);
+      renderSeasonTable(mySeasonsForTable, name);
       renderLuckChart(mySeasons, name);
       renderSpreadChart(myGames);
       renderFormStrip(myGames);
@@ -1186,6 +1190,53 @@
       els.statEarnings.textContent = moneyFmt(money);
     }
 
+
+
+    function withLiveCurrentSeason(managerName, seasons, games) {
+      const existing = (seasons || []).map(s => ({ ...s }));
+      const seasonYears = new Set(existing.map(s => safeNum(s.year, null)).filter(Number.isFinite));
+
+      const latestGameYear = Math.max(
+        ...((games || [])
+          .map(g => safeNum(g.year, null))
+          .filter(Number.isFinite)),
+        -Infinity
+      );
+
+      if (!Number.isFinite(latestGameYear) || seasonYears.has(latestGameYear)) return existing;
+
+      const regGames = (games || []).filter(g => Number.isFinite(g.year) && g.year === latestGameYear && !g.isPlayoff);
+      if (!regGames.length) return existing;
+
+      const liveRow = {
+        year: latestGameYear,
+        manager: managerName,
+        wins: 0,
+        losses: 0,
+        ties: 0,
+        final_standing: null,
+        division_finish: null,
+        points_for: 0,
+        points_against: 0
+      };
+
+      regGames.forEach(g => {
+        const myScore = safeNum(g.score, NaN);
+        const oppScore = safeNum(g.oppScore, NaN);
+        if (!Number.isFinite(myScore) || !Number.isFinite(oppScore)) return;
+
+        liveRow.points_for += myScore;
+        liveRow.points_against += oppScore;
+
+        if (myScore > oppScore) liveRow.wins += 1;
+        else if (myScore < oppScore) liveRow.losses += 1;
+        else liveRow.ties += 1;
+      });
+
+      existing.push(liveRow);
+      existing.sort((a, b) => b.year - a.year);
+      return existing;
+    }
     function renderRivalries(h2h) {
       let nemesis = { name: '-', pct: 1.0, rec: '' };
       let pigeon = { name: '-', pct: 0.0, rec: '' };
@@ -1215,7 +1266,10 @@
         const hasScoring = (idx.scoringTitlesByManager.get(managerName) || new Set()).has(s.year);
         const money = getEarnings(s.year, rank, hasScoring);
 
+        const isSeasonInProgress = Number.isFinite(s.year) && s.year === latestLeagueYear && !Number.isFinite(rank);
+
         const tr = document.createElement('tr');
+        if (isSeasonInProgress) tr.classList.add('season-in-progress');
         tr.innerHTML = `
           <td>${s.year ?? '-'}</td>
           <td>${s.wins}-${s.losses}-${s.ties}</td>
