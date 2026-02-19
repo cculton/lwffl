@@ -1,11 +1,13 @@
 /* nav-loader.js */
 
-document.addEventListener('DOMContentLoaded', function() {
+const MOBILE_BREAKPOINT = 768;
+
+document.addEventListener('DOMContentLoaded', () => {
   loadSharedNav();
 });
 
 /**
- * Fetches and injects the shared navigation bar
+ * Fetches and injects the shared navigation bar.
  */
 async function loadSharedNav() {
   const placeholder = document.getElementById('nav-placeholder');
@@ -13,172 +15,150 @@ async function loadSharedNav() {
 
   try {
     const response = await fetch('nav.html');
-    if (response.ok) {
-      const navHtml = await response.text();
-      placeholder.innerHTML = navHtml;
-      
-      // Initialize nav features after injection
-      highlightActiveLink();
-      initializeNavLogic();
-    }
-  } catch (err) {
-    console.error("Error loading shared navigation:", err);
+    if (!response.ok) throw new Error(`Navigation request failed: ${response.status}`);
+
+    placeholder.innerHTML = await response.text();
+    highlightActiveLink();
+    initializeNavLogic();
+  } catch (error) {
+    console.error('Error loading shared navigation:', error);
+    placeholder.innerHTML = '<p style="padding:12px;color:#9ca3af;">Navigation failed to load.</p>';
   }
 }
 
 /**
- * Highlights the link corresponding to the current page
+ * Returns the normalized current page filename.
+ */
+function getCurrentPage() {
+  const path = window.location.pathname;
+  const lastSegment = path.split('/').pop();
+  return lastSegment && lastSegment.length > 0 ? lastSegment : 'index.html';
+}
+
+/**
+ * Highlights the nav link that matches the current page.
  */
 function highlightActiveLink() {
-  const currentPath = window.location.pathname.split("/").pop() || "index.html";
-  const navLinks = document.querySelectorAll('.nav-menu a');
-  
-  navLinks.forEach(link => {
-    // Check if the href matches the current path
-    if (link.getAttribute('href') === currentPath) {
+  const currentPath = getCurrentPage();
+  const navLinks = document.querySelectorAll('.nav-menu a[href]');
+
+  navLinks.forEach((link) => {
+    const href = (link.getAttribute('href') || '').split('#')[0].split('?')[0];
+    if (href === currentPath) {
       link.classList.add('active');
-      
-      // Optional: Also highlight the parent dropdown button if it exists
       const parentDropdown = link.closest('.nav-item');
-      if (parentDropdown) {
-        parentDropdown.classList.add('active-parent'); // You can style this class in CSS if you want
-      }
+      if (parentDropdown) parentDropdown.classList.add('active-parent');
     }
   });
 }
 
 /**
- * Initializes all navigation logic (Mobile toggle, dropdowns, hover effects)
+ * Closes all dropdowns and mobile nav state.
+ */
+function closeAllMenus(navItems, navMenu, navToggle) {
+  navItems.forEach((item) => {
+    item.classList.remove('active');
+    const trigger = item.querySelector('.dropdown-trigger');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+  });
+
+  if (navMenu) navMenu.classList.remove('active');
+  if (navToggle) {
+    navToggle.classList.remove('active');
+    navToggle.setAttribute('aria-expanded', 'false');
+  }
+}
+
+/**
+ * Initializes mobile toggle, dropdown, and keyboard/outside-click handling.
  */
 function initializeNavLogic() {
-  var navToggle = document.querySelector('.nav-toggle');
-  var navMenu = document.querySelector('.nav-menu');
-  var navItems = document.querySelectorAll('.nav-item');
-  var dropdownTriggers = document.querySelectorAll('.dropdown-trigger');
-  
-  // Mobile menu toggle
-  if (navToggle && navMenu) {
-    navToggle.addEventListener('click', function(e) {
-      e.stopPropagation();
-      var isActive = navMenu.classList.contains('active');
-      
-      if (isActive) {
-        navMenu.classList.remove('active');
-        navToggle.classList.remove('active');
-        navToggle.setAttribute('aria-expanded', 'false');
-      } else {
-        navMenu.classList.add('active');
-        navToggle.classList.add('active');
-        navToggle.setAttribute('aria-expanded', 'true');
-      }
+  const navToggle = document.querySelector('.nav-toggle');
+  const navMenu = document.querySelector('.nav-menu');
+  const navItems = Array.from(document.querySelectorAll('.nav-item'));
+  const dropdownTriggers = Array.from(document.querySelectorAll('.dropdown-trigger'));
+
+  if (!navMenu || navItems.length === 0) return;
+
+  // Prevent duplicate listeners if this function is called again.
+  if (navMenu.dataset.initialized === 'true') return;
+  navMenu.dataset.initialized = 'true';
+
+  if (navToggle) {
+    navToggle.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const isActive = navMenu.classList.contains('active');
+
+      navMenu.classList.toggle('active', !isActive);
+      navToggle.classList.toggle('active', !isActive);
+      navToggle.setAttribute('aria-expanded', String(!isActive));
     });
   }
 
-  // Desktop hover with Delay Fix
-  navItems.forEach(function(item) {
-    var closeTimer;
+  navItems.forEach((item) => {
+    let closeTimer;
 
-    item.addEventListener('mouseenter', function() {
-      if (window.innerWidth > 768) {
+    item.addEventListener('mouseenter', () => {
+      if (window.innerWidth > MOBILE_BREAKPOINT) {
         clearTimeout(closeTimer);
         item.classList.add('active');
-        var trigger = item.querySelector('.dropdown-trigger');
+        const trigger = item.querySelector('.dropdown-trigger');
         if (trigger) trigger.setAttribute('aria-expanded', 'true');
       }
     });
-    
-    item.addEventListener('mouseleave', function() {
-      if (window.innerWidth > 768) {
-        // 300ms delay to bridge the gap between button and menu
-        closeTimer = setTimeout(function() {
+
+    item.addEventListener('mouseleave', () => {
+      if (window.innerWidth > MOBILE_BREAKPOINT) {
+        closeTimer = setTimeout(() => {
           item.classList.remove('active');
-          var trigger = item.querySelector('.dropdown-trigger');
+          const trigger = item.querySelector('.dropdown-trigger');
           if (trigger) trigger.setAttribute('aria-expanded', 'false');
-        }, 300); 
+        }, 300);
       }
     });
   });
 
-  // Click/tap for all devices (Mobile handling)
-  dropdownTriggers.forEach(function(trigger) {
-    trigger.addEventListener('click', function(e) {
-      // Only prevent default on mobile where click is the primary interaction
-      if (window.innerWidth <= 768) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        var parentItem = trigger.closest('.nav-item');
-        var isActive = parentItem.classList.contains('active');
-        
-        // Close others on mobile
-        navItems.forEach(function(item) {
-          if (item !== parentItem) {
-            item.classList.remove('active');
-            var otherTrigger = item.querySelector('.dropdown-trigger');
-            if (otherTrigger) otherTrigger.setAttribute('aria-expanded', 'false');
-          }
-        });
-        
-        // Toggle this one
-        if (isActive) {
-          parentItem.classList.remove('active');
-          trigger.setAttribute('aria-expanded', 'false');
-        } else {
-          parentItem.classList.add('active');
-          trigger.setAttribute('aria-expanded', 'true');
-        }
-      }
+  dropdownTriggers.forEach((trigger) => {
+    trigger.addEventListener('click', (event) => {
+      if (window.innerWidth > MOBILE_BREAKPOINT) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const parentItem = trigger.closest('.nav-item');
+      if (!parentItem) return;
+
+      const isActive = parentItem.classList.contains('active');
+      navItems.forEach((item) => {
+        if (item === parentItem) return;
+        item.classList.remove('active');
+        const otherTrigger = item.querySelector('.dropdown-trigger');
+        if (otherTrigger) otherTrigger.setAttribute('aria-expanded', 'false');
+      });
+
+      parentItem.classList.toggle('active', !isActive);
+      trigger.setAttribute('aria-expanded', String(!isActive));
     });
   });
 
-  // Close on outside click
-  document.addEventListener('click', function(e) {
-    if (!e.target.closest('.league-nav')) {
-      navItems.forEach(function(item) {
-        item.classList.remove('active');
-        var trigger = item.querySelector('.dropdown-trigger');
-        if (trigger) trigger.setAttribute('aria-expanded', 'false');
-      });
-      
-      if (navMenu) navMenu.classList.remove('active');
-      if (navToggle) {
-        navToggle.classList.remove('active');
-        navToggle.setAttribute('aria-expanded', 'false');
-      }
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('.league-nav')) {
+      closeAllMenus(navItems, navMenu, navToggle);
     }
   });
 
-  // Close on escape
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      navItems.forEach(function(item) {
-        item.classList.remove('active');
-        var trigger = item.querySelector('.dropdown-trigger');
-        if (trigger) trigger.setAttribute('aria-expanded', 'false');
-      });
-      
-      if (navMenu) navMenu.classList.remove('active');
-      if (navToggle) {
-        navToggle.classList.remove('active');
-        navToggle.setAttribute('aria-expanded', 'false');
-      }
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeAllMenus(navItems, navMenu, navToggle);
     }
   });
 
-  // Handle resize (Reset menus when switching mobile/desktop)
-  var resizeTimer;
-  window.addEventListener('resize', function() {
+  let resizeTimer;
+  window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function() {
-      if (window.innerWidth > 768) {
-        if (navMenu) navMenu.classList.remove('active');
-        if (navToggle) {
-          navToggle.classList.remove('active');
-          navToggle.setAttribute('aria-expanded', 'false');
-        }
-        navItems.forEach(function(item) {
-          item.classList.remove('active');
-        });
+    resizeTimer = setTimeout(() => {
+      if (window.innerWidth > MOBILE_BREAKPOINT) {
+        closeAllMenus(navItems, navMenu, navToggle);
       }
     }, 250);
   });
