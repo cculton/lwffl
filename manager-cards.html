@@ -1259,6 +1259,10 @@
       const tbody = document.querySelector('#seasonTable tbody');
       tbody.innerHTML = '';
       const frag = document.createDocumentFragment();
+      const mostRecentSeasonYear = seasons.reduce((maxYear, season) => {
+        const year = safeNum(season?.year, null);
+        return Number.isFinite(year) ? Math.max(maxYear, year) : maxYear;
+      }, -Infinity);
 
       seasons.forEach(s => {
         const seed = idx.seedsByManagerYear.get(keyMY(managerName, s.year)) ?? '-';
@@ -1266,7 +1270,9 @@
         const hasScoring = (idx.scoringTitlesByManager.get(managerName) || new Set()).has(s.year);
         const money = getEarnings(s.year, rank, hasScoring);
 
-        const isSeasonInProgress = Number.isFinite(s.year) && s.year === latestLeagueYear && !Number.isFinite(rank);
+        const isSeasonInProgress = Number.isFinite(s.year)
+          && s.year === mostRecentSeasonYear
+          && !Number.isFinite(rank);
 
         const tr = document.createElement('tr');
         if (isSeasonInProgress) tr.classList.add('season-in-progress');
