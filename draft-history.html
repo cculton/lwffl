@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Draft History Archive – LWFFL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-main: #020617;
+      --card-bg: #020617;
+      --accent: #38bdf8;
+      --border-subtle: #1f2937;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --text-soft: #6b7280;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #020617 0%, #020617 35%, #020617 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    .shell { max-width: 1120px; margin: 24px auto; }
+
+    .container {
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.18), transparent 55%),
+        var(--card-bg);
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      box-shadow: 0 40px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(15,23,42,0.9);
+      padding: 32px 24px;
+      backdrop-filter: blur(14px);
+    }
+
+    .header { text-align: center; margin-bottom: 24px; }
+    .header h1 {
+      font-size: 2rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .header p {
+      color: var(--text-soft);
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+      background: rgba(30, 41, 59, 0.4);
+      padding: 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(55,65,81,0.5);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    select {
+      width: 100%;
+      padding: 11px 14px;
+      background-color: #0b1120;
+      border: 1px solid rgba(75, 85, 99, 0.8);
+      border-radius: 8px;
+      color: #f9fafb;
+      font-size: 1rem;
+      appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      background-size: 1em;
+    }
+
+    .panel {
+      background: radial-gradient(circle at top, rgba(15,23,42,0.9), rgba(2,6,23,0.95));
+      border: 1px solid rgba(55,65,81,0.6);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .panel h2 {
+      font-size: 0.95rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid rgba(55, 65, 81, 0.5);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 740px;
+      font-size: 0.93rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(55, 65, 81, 0.3);
+    }
+
+    th {
+      background: rgba(30, 41, 59, 0.7);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.75rem;
+      position: sticky;
+      top: 0;
+    }
+
+    tbody tr:hover { background: rgba(56, 189, 248, 0.06); }
+
+    .status {
+      color: var(--text-soft);
+      margin-bottom: 14px;
+      font-size: 0.9rem;
+    }
+
+    .empty-row td {
+      text-align: center;
+      color: var(--text-soft);
+      font-style: italic;
+      padding: 24px 14px;
+    }
+
+    .view-toggle {
+      display: inline-flex;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .view-btn {
+      border: 0;
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .view-btn.active {
+      background: rgba(56, 189, 248, 0.18);
+      color: #f8fbff;
+    }
+
+    .hidden { display: none; }
+
+    .viz-wrap {
+      border: 1px solid rgba(55, 65, 81, 0.5);
+      border-radius: 8px;
+      padding: 14px;
+      max-height: 520px;
+      overflow: auto;
+      background: rgba(2, 6, 23, 0.45);
+    }
+
+    .round-block {
+      margin-bottom: 16px;
+    }
+
+    .round-title {
+      color: var(--accent);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .tile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(172px, 1fr));
+      gap: 8px;
+    }
+
+    .draft-tile {
+      border-radius: 9px;
+      padding: 8px 9px;
+      min-height: 78px;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: linear-gradient(160deg, rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.92));
+      box-shadow: inset 0 0 0 1px rgba(2, 6, 23, 0.45);
+    }
+
+    .pos-rb { border-color: rgba(34, 197, 94, 0.38); background: linear-gradient(160deg, rgba(34, 197, 94, 0.15), rgba(15, 23, 42, 0.92)); }
+    .pos-wr { border-color: rgba(245, 158, 11, 0.38); background: linear-gradient(160deg, rgba(245, 158, 11, 0.15), rgba(15, 23, 42, 0.92)); }
+    .pos-qb { border-color: rgba(239, 68, 68, 0.38); background: linear-gradient(160deg, rgba(239, 68, 68, 0.15), rgba(15, 23, 42, 0.92)); }
+    .pos-te { border-color: rgba(168, 85, 247, 0.38); background: linear-gradient(160deg, rgba(168, 85, 247, 0.15), rgba(15, 23, 42, 0.92)); }
+    .pos-k { border-color: rgba(20, 184, 166, 0.38); background: linear-gradient(160deg, rgba(20, 184, 166, 0.15), rgba(15, 23, 42, 0.92)); }
+    .pos-dst { border-color: rgba(99, 102, 241, 0.38); background: linear-gradient(160deg, rgba(99, 102, 241, 0.15), rgba(15, 23, 42, 0.92)); }
+
+    .tile-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .tile-pick {
+      color: var(--text-muted);
+      font-size: 0.67rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .tile-position {
+      color: #dbeafe;
+      font-size: 0.64rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(2, 6, 23, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: 999px;
+      padding: 2px 6px;
+      line-height: 1.2;
+    }
+
+    .tile-name {
+      color: #f8fafc;
+      font-size: 0.86rem;
+      font-weight: 700;
+      margin-bottom: 3px;
+      line-height: 1.2;
+    }
+
+    .tile-meta {
+      color: var(--text-soft);
+      font-size: 0.74rem;
+      line-height: 1.25;
+    }
+
+    @media (max-width: 720px) {
+      .controls { grid-template-columns: 1fr; }
+      .header h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <div class="shell">
+    <div class="container">
+      <div class="header">
+        <h1>Draft History Archive</h1>
+        <p>Filter by manager and year to review historical draft results</p>
+      </div>
+
+      <div class="controls">
+        <div>
+          <label for="teamSelect">Manager</label>
+          <select id="teamSelect"></select>
+        </div>
+        <div>
+          <label for="yearSelect">Draft Year</label>
+          <select id="yearSelect"></select>
+        </div>
+      </div>
+
+      <div id="status" class="status">Loading draft history...</div>
+
+      <section class="panel">
+        <h2 id="teamPanelTitle">Manager Draft Log</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Round</th>
+                <th>Overall</th>
+                <th>Name</th>
+                <th>Position</th>
+                <th>NFL</th>
+                <th>Manager</th>
+              </tr>
+            </thead>
+            <tbody id="teamLogBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2 id="yearPanelTitle">Draft Board</h2>
+        <div class="view-toggle" role="tablist" aria-label="Draft board view toggle">
+          <button id="tableViewBtn" class="view-btn active" type="button" role="tab" aria-selected="true">Table View</button>
+          <button id="vizViewBtn" class="view-btn" type="button" role="tab" aria-selected="false">Visualization</button>
+        </div>
+
+        <div id="yearTableWrap" class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Round</th>
+                <th>Overall</th>
+                <th>Name</th>
+                <th>Position</th>
+                <th>NFL</th>
+                <th>Manager</th>
+              </tr>
+            </thead>
+            <tbody id="yearBoardBody"></tbody>
+          </table>
+        </div>
+
+        <div id="yearVizWrap" class="viz-wrap hidden" aria-live="polite"></div>
+      </section>
+    </div>
+  </div>
+
+  <script src="nav-loader.js"></script>
+  <script>
+    const teamSelect = document.getElementById('teamSelect');
+    const yearSelect = document.getElementById('yearSelect');
+    const statusEl = document.getElementById('status');
+    const teamLogBody = document.getElementById('teamLogBody');
+    const yearBoardBody = document.getElementById('yearBoardBody');
+    const teamPanelTitle = document.getElementById('teamPanelTitle');
+    const yearPanelTitle = document.getElementById('yearPanelTitle');
+    const tableViewBtn = document.getElementById('tableViewBtn');
+    const vizViewBtn = document.getElementById('vizViewBtn');
+    const yearTableWrap = document.getElementById('yearTableWrap');
+    const yearVizWrap = document.getElementById('yearVizWrap');
+
+    let picks = [];
+
+    document.addEventListener('DOMContentLoaded', loadDraftData);
+
+    async function loadDraftData() {
+      try {
+        const response = await fetch('draft-history.json');
+        if (!response.ok) throw new Error(`Failed to load draft-history.json (${response.status})`);
+
+        const data = await response.json();
+        picks = Array.isArray(data) ? data : [];
+
+        picks = picks.map(pick => ({
+          ...pick,
+          manager: pick.manager ?? pick.team ?? '-',
+          nflTeam: (pick.nflTeam ?? pick.nfl ?? '-').toString().toUpperCase()
+        }));
+
+        populateFilters();
+        renderTables();
+        statusEl.textContent = `Loaded ${picks.length} draft picks from archive.`;
+      } catch (error) {
+        console.error(error);
+        statusEl.textContent = 'Unable to load draft history data. Add draft-history.json and refresh.';
+      }
+    }
+
+    function populateFilters() {
+      const teams = [...new Set(picks.map(pick => pick.manager ?? pick.team).filter(Boolean))].sort();
+      const years = [...new Set(picks.map(pick => Number(pick.year)).filter(Number.isFinite))].sort((a, b) => b - a);
+
+      teamSelect.innerHTML = '<option value="">Select a manager</option>' + teams.map(team => `<option value="${team}">${team}</option>`).join('');
+      yearSelect.innerHTML = '<option value="">Select a year</option>' + years.map(year => `<option value="${year}">${year}</option>`).join('');
+
+      teamSelect.addEventListener('change', renderTables);
+      yearSelect.addEventListener('change', renderTables);
+      tableViewBtn.addEventListener('click', () => setYearView('table'));
+      vizViewBtn.addEventListener('click', () => setYearView('viz'));
+
+      if (teams.length) teamSelect.value = teams[0];
+      if (years.length) yearSelect.value = String(years[0]);
+    }
+
+    function renderTables() {
+      const selectedTeam = teamSelect.value;
+      const selectedYear = Number(yearSelect.value);
+
+      const teamRows = picks
+        .filter(pick => !selectedTeam || (pick.manager ?? pick.team) === selectedTeam)
+        .sort((a, b) => Number(b.year) - Number(a.year) || Number(a.overall) - Number(b.overall));
+
+      const yearRows = picks
+        .filter(pick => !selectedYear || Number(pick.year) === selectedYear)
+        .sort((a, b) => Number(a.overall) - Number(b.overall));
+
+      teamPanelTitle.textContent = selectedTeam ? `${selectedTeam} Draft Log` : 'Manager Draft Log';
+      yearPanelTitle.textContent = selectedYear ? `${selectedYear} Comprehensive Draft Board` : 'Draft Board';
+
+      fillTable(teamLogBody, teamRows, ['year', 'round', 'overall', 'name', 'position', 'nflTeam', 'manager'], 'No draft picks found for this manager.');
+      fillTable(yearBoardBody, yearRows, ['round', 'overall', 'name', 'position', 'nflTeam', 'manager'], 'No picks found for this draft year.');
+      renderYearVisualization(yearRows);
+    }
+
+    function fillTable(tbody, rows, columns, emptyMessage) {
+      if (!rows.length) {
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="${columns.length}">${emptyMessage}</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rows.map(row => {
+        const cells = columns.map(column => `<td>${escapeHtml(String(row[column] ?? '-'))}</td>`).join('');
+        return `<tr>${cells}</tr>`;
+      }).join('');
+    }
+
+    function setYearView(mode) {
+      const showViz = mode === 'viz';
+      yearTableWrap.classList.toggle('hidden', showViz);
+      yearVizWrap.classList.toggle('hidden', !showViz);
+      tableViewBtn.classList.toggle('active', !showViz);
+      vizViewBtn.classList.toggle('active', showViz);
+      tableViewBtn.setAttribute('aria-selected', String(!showViz));
+      vizViewBtn.setAttribute('aria-selected', String(showViz));
+    }
+
+    function renderYearVisualization(rows) {
+      if (!rows.length) {
+        yearVizWrap.innerHTML = '<div class="status">No picks available to visualize for this draft year.</div>';
+        return;
+      }
+
+      const groupedByRound = rows.reduce((acc, row) => {
+        const round = Number(row.round) || 0;
+        if (!acc[round]) acc[round] = [];
+        acc[round].push(row);
+        return acc;
+      }, {});
+
+      const rounds = Object.keys(groupedByRound)
+        .map(Number)
+        .sort((a, b) => a - b);
+
+      yearVizWrap.innerHTML = rounds.map(round => {
+        const tiles = groupedByRound[round]
+          .sort((a, b) => Number(a.overall) - Number(b.overall))
+          .map(row => {
+            const positionLabel = String(row.position ?? '-').toUpperCase();
+            const posClass = getPositionClass(positionLabel);
+            return `
+            <article class="draft-tile ${posClass}">
+              <div class="tile-head">
+                <div class="tile-pick">Pick ${escapeHtml(String(row.overall ?? '-'))}</div>
+                <div class="tile-position">${escapeHtml(positionLabel)}</div>
+              </div>
+              <div class="tile-name">${escapeHtml(String(row.name ?? '-'))}</div>
+              <div class="tile-meta">${escapeHtml(String(row.nflTeam ?? '-'))} · ${escapeHtml(String(row.manager ?? row.team ?? '-'))}</div>
+            </article>
+          `;
+          })
+          .join('');
+
+        return `
+          <section class="round-block">
+            <h3 class="round-title">Round ${escapeHtml(String(round || '-'))}</h3>
+            <div class="tile-grid">${tiles}</div>
+          </section>
+        `;
+      }).join('');
+    }
+
+    function getPositionClass(position) {
+      if (position.includes('RB')) return 'pos-rb';
+      if (position.includes('WR')) return 'pos-wr';
+      if (position.includes('QB')) return 'pos-qb';
+      if (position.includes('TE')) return 'pos-te';
+      if (position.includes('K')) return 'pos-k';
+      if (position.includes('DST') || position.includes('DEF')) return 'pos-dst';
+      return '';
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+  </script>
+</body>
+</html>
