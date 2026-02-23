@@ -1,0 +1,14 @@
+[
+  {"year": 2024, "round": 1, "overall": 1, "name": "Christian McCaffrey", "position": "RB", "manager": "Legion of Whom", "nflTeam": "SF"},
+  {"year": 2024, "round": 1, "overall": 2, "name": "Tyreek Hill", "position": "WR", "manager": "South Park Cows", "nflTeam": "MIA"},
+  {"year": 2024, "round": 1, "overall": 3, "name": "CeeDee Lamb", "position": "WR", "manager": "Gridiron Ghouls", "nflTeam": "DAL"},
+  {"year": 2024, "round": 2, "overall": 10, "name": "A.J. Brown", "position": "WR", "manager": "Legion of Whom", "nflTeam": "PHI"},
+  {"year": 2024, "round": 2, "overall": 11, "name": "Breece Hall", "position": "RB", "manager": "South Park Cows", "nflTeam": "NYJ"},
+  {"year": 2024, "round": 2, "overall": 12, "name": "Lamar Jackson", "position": "QB", "manager": "Gridiron Ghouls", "nflTeam": "BAL"},
+  {"year": 2023, "round": 1, "overall": 1, "name": "Justin Jefferson", "position": "WR", "manager": "Legion of Whom", "nflTeam": "MIN"},
+  {"year": 2023, "round": 1, "overall": 2, "name": "Ja'Marr Chase", "position": "WR", "manager": "South Park Cows", "nflTeam": "CIN"},
+  {"year": 2023, "round": 1, "overall": 3, "name": "Austin Ekeler", "position": "RB", "manager": "Gridiron Ghouls", "nflTeam": "LAC"},
+  {"year": 2023, "round": 2, "overall": 10, "name": "Amon-Ra St. Brown", "position": "WR", "manager": "Legion of Whom", "nflTeam": "DET"},
+  {"year": 2023, "round": 2, "overall": 11, "name": "Chris Olave", "position": "WR", "manager": "South Park Cows", "nflTeam": "NO"},
+  {"year": 2023, "round": 2, "overall": 12, "name": "Patrick Mahomes", "position": "QB", "manager": "Gridiron Ghouls", "nflTeam": "KC"}
+]
