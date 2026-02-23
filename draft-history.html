@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Draft History Archive – LWFFL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-main: #020617;
+      --card-bg: #020617;
+      --accent: #38bdf8;
+      --border-subtle: #1f2937;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --text-soft: #6b7280;
+    }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #020617 0%, #020617 35%, #020617 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+    .shell { max-width: 1240px; margin: 24px auto; }
+    .container {
+      background: radial-gradient(circle at top left, rgba(56,189,248,0.12), transparent 55%), radial-gradient(circle at bottom right, rgba(59,130,246,0.18), transparent 55%), var(--card-bg);
+      border-radius: 18px;
+      border: 1px solid rgba(148,163,184,0.3);
+      box-shadow: 0 40px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(15,23,42,0.9);
+      padding: 28px 22px;
+      backdrop-filter: blur(14px);
+    }
+    .header { text-align: center; margin-bottom: 20px; }
+    .header h1 { font-size: 1.9rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+    .header p { color: var(--text-soft); font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+      background: rgba(30,41,59,0.4);
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(55,65,81,0.5);
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    select {
+      width: 100%;
+      padding: 9px 11px;
+      background-color: #0b1120;
+      border: 1px solid rgba(75,85,99,0.8);
+      border-radius: 8px;
+      color: #f9fafb;
+      font-size: 0.92rem;
+      appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.8rem center;
+      background-size: 0.9em;
+    }
+    select[multiple] {
+      appearance: auto;
+      background-image: none;
+      min-height: 112px;
+      padding: 8px;
+    }
+
+    .status { color: var(--text-soft); margin-bottom: 12px; font-size: 0.86rem; }
+    .panel {
+      background: radial-gradient(circle at top, rgba(15,23,42,0.9), rgba(2,6,23,0.95));
+      border: 1px solid rgba(55,65,81,0.6);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .panel h2 { font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
+
+    .table-wrap { width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid rgba(55,65,81,0.5); }
+    table { width: 100%; border-collapse: collapse; min-width: 920px; font-size: 0.88rem; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid rgba(55,65,81,0.3); }
+    th {
+      background: rgba(30,41,59,0.7);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.69rem;
+      position: sticky;
+      top: 0;
+    }
+    tbody tr:hover { background: rgba(56,189,248,0.05); }
+    .empty-row td { text-align: center; color: var(--text-soft); font-style: italic; padding: 18px 12px; }
+
+    .view-toggle { display: inline-flex; border: 1px solid rgba(56,189,248,0.3); border-radius: 999px; overflow: hidden; margin-bottom: 10px; }
+    .view-btn { border: 0; background: rgba(15,23,42,0.9); color: var(--text-muted); padding: 7px 13px; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
+    .view-btn.active { background: rgba(56,189,248,0.18); color: #f8fbff; }
+    .hidden { display: none; }
+
+    .board-wrap { border: 1px solid rgba(55,65,81,0.5); border-radius: 8px; padding: 10px; overflow: auto; background: rgba(2,6,23,0.45); }
+    .board-grid { display: grid; gap: 8px; min-width: 920px; }
+    .board-cell { border-radius: 8px; border: 1px solid rgba(55,65,81,0.55); background: rgba(15,23,42,0.75); padding: 7px; min-height: 54px; }
+    .board-header { text-align: center; font-size: 0.69rem; letter-spacing: 0.08em; text-transform: uppercase; color: #dbeafe; border-color: rgba(56,189,248,0.35); background: rgba(56,189,248,0.12); font-weight: 700; min-height: auto; }
+    .board-round-label { text-align: center; font-size: 0.72rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+
+    .pick-stack { display: grid; gap: 6px; }
+    .draft-tile { border-radius: 8px; padding: 6px 7px; min-height: 62px; border: 1px solid rgba(56,189,248,0.25); background: linear-gradient(160deg, rgba(56,189,248,0.12), rgba(15,23,42,0.92)); box-shadow: inset 0 0 0 1px rgba(2,6,23,0.45); }
+    .pos-rb { border-color: rgba(34,197,94,0.38); background: linear-gradient(160deg, rgba(34,197,94,0.15), rgba(15,23,42,0.92)); }
+    .pos-wr { border-color: rgba(245,158,11,0.38); background: linear-gradient(160deg, rgba(245,158,11,0.15), rgba(15,23,42,0.92)); }
+    .pos-qb { border-color: rgba(239,68,68,0.38); background: linear-gradient(160deg, rgba(239,68,68,0.15), rgba(15,23,42,0.92)); }
+    .pos-te { border-color: rgba(168,85,247,0.38); background: linear-gradient(160deg, rgba(168,85,247,0.15), rgba(15,23,42,0.92)); }
+    .pos-k { border-color: rgba(20,184,166,0.38); background: linear-gradient(160deg, rgba(20,184,166,0.15), rgba(15,23,42,0.92)); }
+    .pos-dst { border-color: rgba(99,102,241,0.38); background: linear-gradient(160deg, rgba(99,102,241,0.15), rgba(15,23,42,0.92)); }
+
+    .tile-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .tile-pick { color: var(--text-muted); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    .tile-position { color: #dbeafe; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(2,6,23,0.55); border: 1px solid rgba(148,163,184,0.3); border-radius: 999px; padding: 2px 6px; line-height: 1.2; }
+    .tile-name { color: #f8fafc; font-size: 0.78rem; font-weight: 700; margin-bottom: 2px; line-height: 1.2; }
+    .tile-meta { color: var(--text-soft); font-size: 0.68rem; line-height: 1.2; }
+
+    @media (max-width: 1000px) { .controls { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 680px) { .controls { grid-template-columns: 1fr; } .header h1 { font-size: 1.6rem; } }
+  </style>
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <div class="shell">
+    <div class="container">
+      <div class="header">
+        <h1>Draft History Archive</h1>
+        <p>Filter by manager, years, and round / price</p>
+      </div>
+
+      <div class="controls">
+        <div>
+          <label for="managerSelect">Manager</label>
+          <select id="managerSelect"></select>
+        </div>
+        <div>
+          <label for="yearSelect">Draft Year (Multi-Select)</label>
+          <select id="yearSelect" multiple></select>
+        </div>
+        <div>
+          <label for="managerViewSelect">Manager View</label>
+          <select id="managerViewSelect">
+            <option value="year">By Draft Year</option>
+            <option value="round">By Round / Price</option>
+          </select>
+        </div>
+        <div>
+          <label for="roundSelect">Round / Price Filter</label>
+          <select id="roundSelect"></select>
+        </div>
+      </div>
+
+      <div id="status" class="status">Loading draft history...</div>
+
+      <section class="panel">
+        <h2 id="managerPanelTitle">Manager Draft Log</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Manager</th>
+                <th>Round</th>
+                <th>Overall / Price</th>
+                <th>Name</th>
+                <th>Position</th>
+                <th>NFL</th>
+              </tr>
+            </thead>
+            <tbody id="managerLogBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="allManagersBoardSection" class="panel hidden">
+        <h2 id="yearPanelTitle">Comprehensive Draft Board</h2>
+        <div class="view-toggle" role="tablist" aria-label="Draft board view toggle">
+          <button id="tableViewBtn" class="view-btn active" type="button" role="tab" aria-selected="true">Table View</button>
+          <button id="vizViewBtn" class="view-btn" type="button" role="tab" aria-selected="false">Visualization</button>
+        </div>
+
+        <div id="yearTableWrap" class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Manager</th>
+                <th>Round</th>
+                <th>Overall / Price</th>
+                <th>Name</th>
+                <th>Position</th>
+                <th>NFL</th>
+              </tr>
+            </thead>
+            <tbody id="yearBoardBody"></tbody>
+          </table>
+        </div>
+
+        <div id="yearVizWrap" class="board-wrap hidden" aria-live="polite"></div>
+      </section>
+    </div>
+  </div>
+
+  <script src="nav-loader.js"></script>
+  <script>
+    const managerSelect = document.getElementById('managerSelect');
+    const yearSelect = document.getElementById('yearSelect');
+    const managerViewSelect = document.getElementById('managerViewSelect');
+    const roundSelect = document.getElementById('roundSelect');
+    const statusEl = document.getElementById('status');
+    const managerLogBody = document.getElementById('managerLogBody');
+    const yearBoardBody = document.getElementById('yearBoardBody');
+    const managerPanelTitle = document.getElementById('managerPanelTitle');
+    const yearPanelTitle = document.getElementById('yearPanelTitle');
+    const allManagersBoardSection = document.getElementById('allManagersBoardSection');
+    const tableViewBtn = document.getElementById('tableViewBtn');
+    const vizViewBtn = document.getElementById('vizViewBtn');
+    const yearTableWrap = document.getElementById('yearTableWrap');
+    const yearVizWrap = document.getElementById('yearVizWrap');
+
+    let picks = [];
+
+    document.addEventListener('DOMContentLoaded', loadDraftData);
+
+    async function loadDraftData() {
+      try {
+        const response = await fetch('draft-history.json');
+        if (!response.ok) throw new Error(`Failed to load draft-history.json (${response.status})`);
+
+        const data = await response.json();
+        picks = (Array.isArray(data) ? data : []).map((pick) => ({
+          ...pick,
+          manager: pick.manager ?? pick.team ?? '-',
+          nflTeam: (pick.nflTeam ?? pick.nfl ?? '-').toString().toUpperCase()
+        }));
+
+        populateFilters();
+        renderTables();
+        statusEl.textContent = `Loaded ${picks.length} draft picks from archive.`;
+      } catch (error) {
+        console.error(error);
+        statusEl.textContent = 'Unable to load draft history data. Add draft-history.json and refresh.';
+      }
+    }
+
+    function populateFilters() {
+      const managers = [...new Set(picks.map((pick) => pick.manager).filter(Boolean))].sort();
+      const years = [...new Set(picks.map((pick) => Number(pick.year)).filter(Number.isFinite))].sort((a, b) => b - a);
+      const rounds = [...new Set(picks.map((pick) => Number(pick.round)).filter(Number.isFinite))].sort((a, b) => a - b);
+
+      managerSelect.innerHTML = ['<option value="__ALL__">All Managers</option>']
+        .concat(managers.map((m) => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`))
+        .join('');
+
+      yearSelect.innerHTML = years.map((year) => `<option value="${year}">${year}</option>`).join('');
+      Array.from(yearSelect.options).forEach((opt) => { opt.selected = true; });
+
+      const roundOptions = ['<option value="">All Rounds / Prices</option>']
+        .concat(rounds.map((round) => `<option value="round:${round}">Round ${round}</option>`))
+        .concat(['<option value="top:3">Top 3 Overall / Price</option>', '<option value="top:6">Top 6 Overall / Price</option>', '<option value="top:12">Top 12 Overall / Price</option>']);
+      roundSelect.innerHTML = roundOptions.join('');
+
+      managerSelect.addEventListener('change', renderTables);
+      yearSelect.addEventListener('change', renderTables);
+      managerViewSelect.addEventListener('change', renderTables);
+      roundSelect.addEventListener('change', renderTables);
+      tableViewBtn.addEventListener('click', () => setYearView('table'));
+      vizViewBtn.addEventListener('click', () => setYearView('viz'));
+    }
+
+    function getSelectedYears() {
+      const vals = Array.from(yearSelect.selectedOptions).map((opt) => Number(opt.value)).filter(Number.isFinite);
+      return vals.length ? vals : [...new Set(picks.map((pick) => Number(pick.year)).filter(Number.isFinite))];
+    }
+
+    function renderTables() {
+      const selectedManager = managerSelect.value;
+      const selectedYears = getSelectedYears();
+      const managerView = managerViewSelect.value;
+      const roundFilter = roundSelect.value;
+
+      const yearSet = new Set(selectedYears);
+      const baseRows = picks.filter((pick) => yearSet.has(Number(pick.year)));
+
+      roundSelect.disabled = managerView !== 'round';
+
+      let managerRows = baseRows.filter((pick) => selectedManager === '__ALL__' || pick.manager === selectedManager);
+      if (managerView === 'round' && roundFilter) {
+        if (roundFilter.startsWith('round:')) {
+          const round = Number(roundFilter.split(':')[1]);
+          managerRows = managerRows.filter((pick) => Number(pick.round) === round);
+        } else if (roundFilter.startsWith('top:')) {
+          const maxOverall = Number(roundFilter.split(':')[1]);
+          managerRows = managerRows.filter((pick) => Number(pick.overall) <= maxOverall);
+        }
+      }
+
+      managerRows.sort((a, b) => Number(b.year) - Number(a.year) || a.manager.localeCompare(b.manager) || Number(a.overall) - Number(b.overall));
+
+      managerPanelTitle.textContent = selectedManager === '__ALL__' ? 'All Managers Draft Log' : `${selectedManager} Draft Log`;
+      if (managerView === 'round' && roundFilter) {
+        const roundLabel = roundFilter.startsWith('round:')
+          ? `Round ${roundFilter.split(':')[1]}`
+          : `Top ${roundFilter.split(':')[1]} Overall / Price`;
+        managerPanelTitle.textContent += ` • ${roundLabel}`;
+      }
+
+      fillTable(managerLogBody, managerRows, ['year', 'manager', 'round', 'overall', 'name', 'position', 'nflTeam'], 'No draft picks found for current filters.');
+
+      const showAllManagerBoard = selectedManager === '__ALL__';
+      allManagersBoardSection.classList.toggle('hidden', !showAllManagerBoard);
+      if (!showAllManagerBoard) return;
+
+      const boardRows = baseRows.slice().sort((a, b) => Number(b.year) - Number(a.year) || Number(a.round) - Number(b.round) || Number(a.overall) - Number(b.overall));
+      const yearLabel = selectedYears.length === 1 ? String(selectedYears[0]) : `${selectedYears.length} Years Selected`;
+      yearPanelTitle.textContent = `${yearLabel} Comprehensive Draft Board`;
+
+      fillTable(yearBoardBody, boardRows, ['year', 'manager', 'round', 'overall', 'name', 'position', 'nflTeam'], 'No picks found for selected years.');
+      renderManagerColumnBoard(boardRows, selectedYears);
+    }
+
+    function fillTable(tbody, rows, columns, emptyMessage) {
+      if (!rows.length) {
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="${columns.length}">${emptyMessage}</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = rows.map((row) => {
+        const cells = columns.map((column) => `<td>${escapeHtml(String(row[column] ?? '-'))}</td>`).join('');
+        return `<tr>${cells}</tr>`;
+      }).join('');
+    }
+
+    function setYearView(mode) {
+      const showViz = mode === 'viz';
+      yearTableWrap.classList.toggle('hidden', showViz);
+      yearVizWrap.classList.toggle('hidden', !showViz);
+      tableViewBtn.classList.toggle('active', !showViz);
+      vizViewBtn.classList.toggle('active', showViz);
+      tableViewBtn.setAttribute('aria-selected', String(!showViz));
+      vizViewBtn.setAttribute('aria-selected', String(showViz));
+    }
+
+    function renderManagerColumnBoard(rows, selectedYears) {
+      if (!rows.length) {
+        yearVizWrap.innerHTML = '<div class="status">No picks available to visualize for selected years.</div>';
+        return;
+      }
+
+      const managers = [...new Set(rows.map((row) => row.manager).filter(Boolean))].sort();
+      const yearRoundKeys = [...new Set(rows.map((row) => `${row.year}::${row.round}`))]
+        .map((key) => {
+          const [year, round] = key.split('::').map(Number);
+          return { year, round, key };
+        })
+        .sort((a, b) => Number(b.year) - Number(a.year) || Number(a.round) - Number(b.round));
+
+      const columns = managers.length + 1;
+      const headerCells = ['<div class="board-cell board-header">Year / Round</div>']
+        .concat(managers.map((m) => `<div class="board-cell board-header">${escapeHtml(m)}</div>`))
+        .join('');
+
+      const bodyCells = yearRoundKeys.map(({ year, round }) => {
+        const rowCells = [`<div class="board-cell board-round-label">${escapeHtml(String(year))} · R${escapeHtml(String(round))}</div>`];
+
+        managers.forEach((manager) => {
+          const picksForCell = rows
+            .filter((p) => Number(p.year) === year && Number(p.round) === round && p.manager === manager)
+            .sort((a, b) => Number(a.overall) - Number(b.overall));
+
+          if (!picksForCell.length) {
+            rowCells.push('<div class="board-cell"></div>');
+            return;
+          }
+
+          const tiles = picksForCell.map((pick) => {
+            const positionLabel = String(pick.position ?? '-').toUpperCase();
+            const posClass = getPositionClass(positionLabel);
+            return `
+              <article class="draft-tile ${posClass}">
+                <div class="tile-head">
+                  <div class="tile-pick">Overall / Price ${escapeHtml(String(pick.overall ?? '-'))}</div>
+                  <div class="tile-position">${escapeHtml(positionLabel)}</div>
+                </div>
+                <div class="tile-name">${escapeHtml(String(pick.name ?? '-'))}</div>
+                <div class="tile-meta">${escapeHtml(String(pick.nflTeam ?? '-'))}</div>
+              </article>
+            `;
+          }).join('');
+
+          rowCells.push(`<div class="board-cell"><div class="pick-stack">${tiles}</div></div>`);
+        });
+
+        return rowCells.join('');
+      }).join('');
+
+      yearVizWrap.innerHTML = `<div class="board-grid" style="grid-template-columns: repeat(${columns}, minmax(128px, 1fr));">${headerCells}${bodyCells}</div>`;
+    }
+
+    function getPositionClass(position) {
+      if (position.includes('RB')) return 'pos-rb';
+      if (position.includes('WR')) return 'pos-wr';
+      if (position.includes('QB')) return 'pos-qb';
+      if (position.includes('TE')) return 'pos-te';
+      if (position.includes('K')) return 'pos-k';
+      if (position.includes('DST') || position.includes('DEF')) return 'pos-dst';
+      return '';
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+  </script>
+</body>
+</html>
