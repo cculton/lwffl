@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Draft Analytics – LWFFL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-main: #020617;
+      --card-bg: #020617;
+      --accent: #38bdf8;
+      --border-subtle: #1f2937;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --text-soft: #6b7280;
+      --positive: #22c55e;
+      --warning: #f59e0b;
+      --negative: #ef4444;
+    }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #020617 0%, #020617 35%, #020617 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+    .shell { max-width: 1240px; margin: 24px auto; }
+    .container {
+      background: radial-gradient(circle at top left, rgba(56,189,248,0.12), transparent 55%), radial-gradient(circle at bottom right, rgba(59,130,246,0.18), transparent 55%), var(--card-bg);
+      border-radius: 18px;
+      border: 1px solid rgba(148,163,184,0.3);
+      box-shadow: 0 40px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(15,23,42,0.9);
+      padding: 28px 22px;
+      backdrop-filter: blur(14px);
+    }
+    .header { text-align: center; margin-bottom: 20px; }
+    .header h1 { font-size: 1.9rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+    .header p { color: var(--text-soft); font-size: 0.86rem; letter-spacing: 0.08em; text-transform: uppercase; }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+      background: rgba(30,41,59,0.4);
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(55,65,81,0.5);
+    }
+    label { display: block; margin-bottom: 6px; color: var(--text-muted); font-weight: 600; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; }
+    select {
+      width: 100%; padding: 9px 11px; background-color: #0b1120; border: 1px solid rgba(75,85,99,0.8);
+      border-radius: 8px; color: #f9fafb; font-size: 0.92rem; appearance: none; cursor: pointer;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat; background-position: right 0.8rem center; background-size: 0.9em;
+    }
+
+    .cards-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+    .stat-card {
+      border: 1px solid rgba(55,65,81,0.6); border-radius: 12px; padding: 12px;
+      background: linear-gradient(160deg, rgba(56,189,248,0.12), rgba(15,23,42,0.92));
+      min-height: 96px;
+    }
+    .stat-label { color: var(--text-muted); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    .stat-value { margin-top: 6px; font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
+    .stat-note { margin-top: 6px; font-size: 0.75rem; color: var(--text-soft); }
+
+    .panel { background: radial-gradient(circle at top, rgba(15,23,42,0.9), rgba(2,6,23,0.95)); border: 1px solid rgba(55,65,81,0.6); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
+    .panel h2 { font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+    .subtle { color: var(--text-soft); font-size: 0.8rem; margin-bottom: 12px; }
+    .table-wrap { width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid rgba(55,65,81,0.5); }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; font-size: 0.86rem; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid rgba(55,65,81,0.3); }
+    th { background: rgba(30,41,59,0.7); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.69rem; }
+    tbody tr:hover { background: rgba(56,189,248,0.05); }
+    .ratio-good { color: var(--positive); font-weight: 700; }
+    .ratio-mid { color: var(--warning); font-weight: 700; }
+    .ratio-bad { color: var(--negative); font-weight: 700; }
+    .status { color: var(--text-soft); margin-bottom: 12px; font-size: 0.86rem; }
+
+    @media (max-width: 960px) { .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .controls { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) { .cards-grid { grid-template-columns: 1fr; } .header h1 { font-size: 1.6rem; } }
+  </style>
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <div class="shell">
+    <div class="container">
+      <div class="header">
+        <h1>Draft Analytics</h1>
+        <p>Manager tendencies, favorite targets, and draft value scores over time</p>
+      </div>
+
+      <div class="controls">
+        <div>
+          <label for="managerSelect">Manager</label>
+          <select id="managerSelect"></select>
+        </div>
+        <div>
+          <label for="yearSelect">Year</label>
+          <select id="yearSelect"></select>
+        </div>
+        <div>
+          <label for="positionSelect">Position</label>
+          <select id="positionSelect"></select>
+        </div>
+      </div>
+
+      <div id="status" class="status">Loading draft analytics...</div>
+
+
+
+      <section class="panel">
+        <h2>How to Read the Value Score</h2>
+        <p class="subtle">
+          <strong>Value Score = ln(positional draft slot ÷ end-of-year position finish).</strong>
+          Positive is good (outperformed draft cost), zero is neutral, and negative is bad (underperformed draft cost).
+          This log form is symmetric, so equal over/under performance has equal-and-opposite impact.
+          Examples: RB10 → RB5 gives ln(2) = +0.693, while RB5 → RB10 gives ln(0.5) = -0.693.
+        </p>
+      </section>
+
+      <section class="cards-grid">
+        <article class="stat-card"><div class="stat-label">Favorite Draft Target</div><div id="favoritePlayer" class="stat-value">-</div><div id="favoritePlayerNote" class="stat-note"></div></article>
+        <article class="stat-card"><div class="stat-label">Average Value Score</div><div id="avgScore" class="stat-value">-</div><div class="stat-note">ln(positional draft slot ÷ finish rank)</div></article>
+        <article class="stat-card"><div class="stat-label">Strong Picks</div><div id="strongPickRate" class="stat-value">-</div><div class="stat-note">Share of picks with positive value score</div></article>
+        <article class="stat-card"><div class="stat-label">Qualified Picks</div><div id="qualifiedPicks" class="stat-value">-</div><div class="stat-note">Picks with a known finish rank</div></article>
+      </section>
+
+      <section class="panel">
+        <h2>Manager Overview</h2>
+        <p class="subtle">Most drafted player for each manager and aggregate value-score performance.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Manager</th>
+                <th>Most Drafted Player</th>
+                <th>Times</th>
+                <th>Avg Score</th>
+                <th>Top Position Score</th>
+                <th>Qualified Picks</th>
+              </tr>
+            </thead>
+            <tbody id="managerOverviewBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Position Breakdown</h2>
+        <p class="subtle">How efficiently each position was drafted in the filtered sample (higher score is better).</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Position</th>
+                <th>Picks</th>
+                <th>Avg Score</th>
+                <th>Median Score</th>
+                <th>Strong Picks</th>
+              </tr>
+            </thead>
+            <tbody id="positionBreakdownBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Yearly Trend</h2>
+        <p class="subtle">Draft tendencies by season for the selected manager/position filters.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Most Drafted Player</th>
+                <th>Favorite Position</th>
+                <th>Avg Score</th>
+                <th>Strong Picks</th>
+                <th>Qualified Picks</th>
+              </tr>
+            </thead>
+            <tbody id="yearlyTrendBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="nav-loader.js"></script>
+  <script type="module">
+    import { enrichDraftEntries } from './draft-metrics.mjs';
+
+    const state = { rows: [], manager: 'All Managers', year: 'All Years', position: 'All Positions' };
+
+    const managerSelect = document.getElementById('managerSelect');
+    const yearSelect = document.getElementById('yearSelect');
+    const positionSelect = document.getElementById('positionSelect');
+    const statusEl = document.getElementById('status');
+
+    function average(values) {
+      if (!values.length) return null;
+      return values.reduce((a, b) => a + b, 0) / values.length;
+    }
+
+    function median(values) {
+      if (!values.length) return null;
+      const sorted = [...values].sort((a, b) => a - b);
+      const mid = Math.floor(sorted.length / 2);
+      return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+    }
+
+    function getFavoritePlayer(rows) {
+      const counts = new Map();
+      rows.forEach((r) => counts.set(r.name, (counts.get(r.name) || 0) + 1));
+      const entries = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+      if (!entries.length) return { name: '—', count: 0 };
+      return { name: entries[0][0], count: entries[0][1] };
+    }
+
+    function scoreClass(score) {
+      if (score == null) return '';
+      if (score > 0.15) return 'ratio-good';
+      if (score >= -0.15) return 'ratio-mid';
+      return 'ratio-bad';
+    }
+
+    function formatScore(score) {
+      return score == null ? '—' : score.toFixed(2);
+    }
+
+    function applyFilters(rows) {
+      return rows.filter((row) => {
+        if (state.manager !== 'All Managers' && row.manager !== state.manager) return false;
+        if (state.year !== 'All Years' && String(row.year) !== state.year) return false;
+        if (state.position !== 'All Positions' && row.position !== state.position) return false;
+        return true;
+      });
+    }
+
+    function renderCards(filtered) {
+      const qualified = filtered.filter((r) => r.valueScore != null);
+      const favorite = getFavoritePlayer(filtered);
+      const avgScore = average(qualified.map((r) => r.valueScore));
+      const strongCount = qualified.filter((r) => r.valueScore > 0).length;
+
+      document.getElementById('favoritePlayer').textContent = favorite.name;
+      document.getElementById('favoritePlayerNote').textContent = favorite.count ? `${favorite.count} draft selections` : 'No picks in filter';
+      document.getElementById('avgScore').textContent = formatScore(avgScore);
+      document.getElementById('strongPickRate').textContent = qualified.length ? `${((strongCount / qualified.length) * 100).toFixed(1)}%` : '—';
+      document.getElementById('qualifiedPicks').textContent = String(qualified.length);
+    }
+
+    function renderManagerOverview(allRows) {
+      const tbody = document.getElementById('managerOverviewBody');
+      const grouped = new Map();
+      allRows.forEach((row) => {
+        if (!grouped.has(row.manager)) grouped.set(row.manager, []);
+        grouped.get(row.manager).push(row);
+      });
+
+      const summary = [...grouped.entries()].map(([manager, rows]) => {
+        const favorite = getFavoritePlayer(rows);
+        const qualified = rows.filter((r) => r.valueScore != null);
+        const avgScore = average(qualified.map((r) => r.valueScore));
+
+        const posMap = new Map();
+        qualified.forEach((r) => {
+          if (!posMap.has(r.position)) posMap.set(r.position, []);
+          posMap.get(r.position).push(r.valueScore);
+        });
+
+        let bestPos = '—';
+        let bestScore = null;
+        posMap.forEach((scores, pos) => {
+          const val = average(scores);
+          if (bestScore == null || val > bestScore) {
+            bestScore = val;
+            bestPos = pos;
+          }
+        });
+
+        return { manager, favorite, avgScore, bestPos, bestScore, qualifiedCount: qualified.length };
+      }).sort((a, b) => a.manager.localeCompare(b.manager));
+
+      tbody.innerHTML = summary.map((item) => `
+        <tr>
+          <td>${item.manager}</td>
+          <td>${item.favorite.name}</td>
+          <td>${item.favorite.count}</td>
+          <td class="${scoreClass(item.avgScore)}">${formatScore(item.avgScore)}</td>
+          <td>${item.bestPos} (${formatScore(item.bestScore)})</td>
+          <td>${item.qualifiedCount}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderPositionBreakdown(filtered) {
+      const tbody = document.getElementById('positionBreakdownBody');
+      const grouped = new Map();
+      filtered.forEach((row) => {
+        if (row.valueScore == null) return;
+        if (!grouped.has(row.position)) grouped.set(row.position, []);
+        grouped.get(row.position).push(row.valueScore);
+      });
+
+      const rows = [...grouped.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="5">No qualified picks available for this filter.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = rows.map(([position, scores]) => {
+        const avgScore = average(scores);
+        const medianScore = median(scores);
+        const strong = scores.filter((r) => r > 0).length;
+        return `
+          <tr>
+            <td>${position}</td>
+            <td>${scores.length}</td>
+            <td class="${scoreClass(avgScore)}">${formatScore(avgScore)}</td>
+            <td class="${scoreClass(medianScore)}">${formatScore(medianScore)}</td>
+            <td>${strong} (${((strong / scores.length) * 100).toFixed(1)}%)</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderYearlyTrend(filtered) {
+      const tbody = document.getElementById('yearlyTrendBody');
+      const grouped = new Map();
+      filtered.forEach((row) => {
+        if (!grouped.has(row.year)) grouped.set(row.year, []);
+        grouped.get(row.year).push(row);
+      });
+
+      const rows = [...grouped.entries()].sort((a, b) => a[0] - b[0]);
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="6">No draft picks available for this filter.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = rows.map(([year, yearRows]) => {
+        const favorite = getFavoritePlayer(yearRows);
+        const qualified = yearRows.filter((r) => r.valueScore != null);
+        const avgScore = average(qualified.map((r) => r.valueScore));
+        const strong = qualified.filter((r) => r.valueScore > 0).length;
+
+        const posCounts = new Map();
+        yearRows.forEach((r) => posCounts.set(r.position, (posCounts.get(r.position) || 0) + 1));
+        const favoritePosition = [...posCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] || '—';
+
+        return `
+          <tr>
+            <td>${year}</td>
+            <td>${favorite.name} (${favorite.count})</td>
+            <td>${favoritePosition}</td>
+            <td class="${scoreClass(avgScore)}">${formatScore(avgScore)}</td>
+            <td>${qualified.length ? `${strong} (${((strong / qualified.length) * 100).toFixed(1)}%)` : '—'}</td>
+            <td>${qualified.length}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function render() {
+      const filtered = applyFilters(state.rows);
+      renderCards(filtered);
+      renderManagerOverview(filtered);
+      renderPositionBreakdown(filtered);
+      renderYearlyTrend(filtered);
+      statusEl.textContent = `${filtered.length} picks shown • ${filtered.filter((r) => r.valueScore != null).length} with value scores`;
+    }
+
+    function populateSelectors(rows) {
+      const managers = [...new Set(rows.map((r) => r.manager))].sort();
+      const years = [...new Set(rows.map((r) => r.year))].sort((a, b) => a - b);
+      const positions = [...new Set(rows.map((r) => r.position))].sort();
+
+      managerSelect.innerHTML = `<option>All Managers</option>${managers.map((m) => `<option>${m}</option>`).join('')}`;
+      yearSelect.innerHTML = `<option>All Years</option>${years.map((y) => `<option>${y}</option>`).join('')}`;
+      positionSelect.innerHTML = `<option>All Positions</option>${positions.map((p) => `<option>${p}</option>`).join('')}`;
+    }
+
+    async function init() {
+      try {
+        const response = await fetch('draft-history-2.json');
+        if (!response.ok) throw new Error(`Failed to load draft-history-2.json (${response.status})`);
+
+        const raw = await response.json();
+        const enrichedRows = enrichDraftEntries(raw);
+
+        state.rows = enrichedRows.map((row) => {
+          const valueScore = row.valueRatio != null ? Math.log(row.valueRatio) : null;
+          return {
+            ...row,
+            manager: row.managerValue || row.manager || 'Unknown Manager',
+            position: row.normalizedPosition,
+            valueScore
+          };
+        });
+
+        populateSelectors(state.rows);
+        managerSelect.addEventListener('change', () => { state.manager = managerSelect.value; render(); });
+        yearSelect.addEventListener('change', () => { state.year = yearSelect.value; render(); });
+        positionSelect.addEventListener('change', () => { state.position = positionSelect.value; render(); });
+
+        render();
+      } catch (error) {
+        console.error(error);
+        statusEl.textContent = 'Unable to load draft analytics data.';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
