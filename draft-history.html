@@ -4,7 +4,7 @@
   <link rel="stylesheet" href="style.css">
   <meta charset="UTF-8">
   <meta name="robots" content="noindex, nofollow">
-  <title>Draft History Archive – LWFFL</title>
+  <title>Draft History – LWFFL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -107,6 +107,17 @@
     .view-btn { border: 0; background: rgba(15,23,42,0.9); color: var(--text-muted); padding: 7px 13px; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
     .view-btn.active { background: rgba(56,189,248,0.18); color: #f8fbff; }
     .hidden { display: none; }
+    .year-separator td {
+      background: rgba(56,189,248,0.1);
+      color: #dbeafe;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      border-top: 1px solid rgba(56,189,248,0.4);
+      border-bottom: 1px solid rgba(56,189,248,0.4);
+      padding: 8px 12px;
+    }
 
     .board-wrap { border: 1px solid rgba(55,65,81,0.5); border-radius: 8px; padding: 10px; overflow: auto; background: rgba(2,6,23,0.45); }
     .board-grid { display: grid; gap: 8px; min-width: 920px; }
@@ -139,7 +150,7 @@
   <div class="shell">
     <div class="container">
       <div class="header">
-        <h1>Draft History Archive</h1>
+        <h1>Draft History</h1>
         <p>Filter by manager, years, and round / price</p>
       </div>
 
@@ -159,7 +170,7 @@
             <option value="round">By Round / Price</option>
           </select>
         </div>
-        <div>
+        <div class="round-filter-control">
           <label for="roundSelect">Round / Price Filter</label>
           <select id="roundSelect"></select>
         </div>
@@ -176,7 +187,8 @@
                 <th>Year</th>
                 <th>Manager</th>
                 <th>Round</th>
-                <th>Overall / Price</th>
+                <th>Overall</th>
+                <th>Price</th>
                 <th>Name</th>
                 <th>Position</th>
                 <th>NFL</th>
@@ -201,7 +213,8 @@
                 <th>Year</th>
                 <th>Manager</th>
                 <th>Round</th>
-                <th>Overall / Price</th>
+                <th>Overall</th>
+                <th>Price</th>
                 <th>Name</th>
                 <th>Position</th>
                 <th>NFL</th>
@@ -232,6 +245,7 @@
     const vizViewBtn = document.getElementById('vizViewBtn');
     const yearTableWrap = document.getElementById('yearTableWrap');
     const yearVizWrap = document.getElementById('yearVizWrap');
+    const roundFilterControl = document.querySelector('.round-filter-control');
 
     let picks = [];
 
@@ -246,6 +260,7 @@
         picks = (Array.isArray(data) ? data : []).map((pick) => ({
           ...pick,
           manager: pick.manager ?? pick.team ?? '-',
+          price: pick.price ?? '-',
           nflTeam: (pick.nflTeam ?? pick.nfl ?? '-').toString().toUpperCase()
         }));
 
@@ -263,9 +278,7 @@
       const years = [...new Set(picks.map((pick) => Number(pick.year)).filter(Number.isFinite))].sort((a, b) => b - a);
       const rounds = [...new Set(picks.map((pick) => Number(pick.round)).filter(Number.isFinite))].sort((a, b) => a - b);
 
-      managerSelect.innerHTML = ['<option value="__ALL__">All Managers</option>']
-        .concat(managers.map((m) => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`))
-        .join('');
+      managerSelect.innerHTML = managers.map((m) => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
 
       yearSelect.innerHTML = years.map((year) => `<option value="${year}">${year}</option>`).join('');
       Array.from(yearSelect.options).forEach((opt) => { opt.selected = true; });
@@ -273,7 +286,8 @@
       const roundOptions = ['<option value="">All Rounds / Prices</option>']
         .concat(rounds.map((round) => `<option value="round:${round}">Round ${round}</option>`))
         .concat(['<option value="top:3">Top 3 Overall / Price</option>', '<option value="top:6">Top 6 Overall / Price</option>', '<option value="top:12">Top 12 Overall / Price</option>']);
-      roundSelect.innerHTML = roundOptions.join('');
+      roundSelect.dataset.options = roundOptions.join('');
+      roundSelect.innerHTML = '';
 
       managerSelect.addEventListener('change', renderTables);
       yearSelect.addEventListener('change', renderTables);
@@ -297,9 +311,17 @@
       const yearSet = new Set(selectedYears);
       const baseRows = picks.filter((pick) => yearSet.has(Number(pick.year)));
 
-      roundSelect.disabled = managerView !== 'round';
+      const isRoundView = managerView === 'round';
+      roundFilterControl.classList.toggle('hidden', !isRoundView);
+      roundSelect.disabled = !isRoundView;
+      if (isRoundView && !roundSelect.innerHTML) {
+        roundSelect.innerHTML = roundSelect.dataset.options || '';
+      }
+      if (!isRoundView) {
+        roundSelect.innerHTML = '';
+      }
 
-      let managerRows = baseRows.filter((pick) => selectedManager === '__ALL__' || pick.manager === selectedManager);
+      let managerRows = baseRows.filter((pick) => pick.manager === selectedManager);
       if (managerView === 'round' && roundFilter) {
         if (roundFilter.startsWith('round:')) {
           const round = Number(roundFilter.split(':')[1]);
@@ -312,7 +334,7 @@
 
       managerRows.sort((a, b) => Number(b.year) - Number(a.year) || a.manager.localeCompare(b.manager) || Number(a.overall) - Number(b.overall));
 
-      managerPanelTitle.textContent = selectedManager === '__ALL__' ? 'All Managers Draft Log' : `${selectedManager} Draft Log`;
+      managerPanelTitle.textContent = `${selectedManager} Draft Log`;
       if (managerView === 'round' && roundFilter) {
         const roundLabel = roundFilter.startsWith('round:')
           ? `Round ${roundFilter.split(':')[1]}`
@@ -320,9 +342,9 @@
         managerPanelTitle.textContent += ` • ${roundLabel}`;
       }
 
-      fillTable(managerLogBody, managerRows, ['year', 'manager', 'round', 'overall', 'name', 'position', 'nflTeam'], 'No draft picks found for current filters.');
+      fillManagerTable(managerLogBody, managerRows, selectedYears, 'No draft picks found for current filters.');
 
-      const showAllManagerBoard = selectedManager === '__ALL__';
+      const showAllManagerBoard = false;
       allManagersBoardSection.classList.toggle('hidden', !showAllManagerBoard);
       if (!showAllManagerBoard) return;
 
@@ -330,8 +352,38 @@
       const yearLabel = selectedYears.length === 1 ? String(selectedYears[0]) : `${selectedYears.length} Years Selected`;
       yearPanelTitle.textContent = `${yearLabel} Comprehensive Draft Board`;
 
-      fillTable(yearBoardBody, boardRows, ['year', 'manager', 'round', 'overall', 'name', 'position', 'nflTeam'], 'No picks found for selected years.');
+      fillTable(yearBoardBody, boardRows, ['year', 'manager', 'round', 'overall', 'price', 'name', 'position', 'nflTeam'], 'No picks found for selected years.');
       renderManagerColumnBoard(boardRows, selectedYears);
+    }
+
+    function fillManagerTable(tbody, rows, selectedYears, emptyMessage) {
+      if (!rows.length) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="8">' + emptyMessage + '</td></tr>';
+        return;
+      }
+
+      const showYearSeparators = selectedYears.length > 1;
+      let lastYear = null;
+      const bodyRows = [];
+
+      rows.forEach((row) => {
+        if (showYearSeparators && row.year !== lastYear) {
+          bodyRows.push(`<tr class="year-separator"><td colspan="8">Draft Year ${escapeHtml(String(row.year ?? '-'))}</td></tr>`);
+          lastYear = row.year;
+        }
+        bodyRows.push(`<tr>
+          <td>${escapeHtml(String(row.year ?? '-'))}</td>
+          <td>${escapeHtml(String(row.manager ?? '-'))}</td>
+          <td>${escapeHtml(String(row.round ?? '-'))}</td>
+          <td>${escapeHtml(String(row.overall ?? '-'))}</td>
+          <td>${escapeHtml(String(row.price ?? '-'))}</td>
+          <td>${escapeHtml(String(row.name ?? '-'))}</td>
+          <td>${escapeHtml(String(row.position ?? '-'))}</td>
+          <td>${escapeHtml(String(row.nflTeam ?? '-'))}</td>
+        </tr>`);
+      });
+
+      tbody.innerHTML = bodyRows.join('');
     }
 
     function fillTable(tbody, rows, columns, emptyMessage) {
@@ -393,7 +445,7 @@
             return `
               <article class="draft-tile ${posClass}">
                 <div class="tile-head">
-                  <div class="tile-pick">Overall / Price ${escapeHtml(String(pick.overall ?? '-'))}</div>
+                  <div class="tile-pick">Overall ${escapeHtml(String(pick.overall ?? '-'))}</div>
                   <div class="tile-position">${escapeHtml(positionLabel)}</div>
                 </div>
                 <div class="tile-name">${escapeHtml(String(pick.name ?? '-'))}</div>
