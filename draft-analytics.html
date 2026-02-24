@@ -193,18 +193,15 @@
   </div>
 
   <script src="nav-loader.js"></script>
-  <script>
+  <script type="module">
+    import { enrichDraftEntries } from './draft-metrics.mjs';
+
     const state = { rows: [], manager: 'All Managers', year: 'All Years', position: 'All Positions' };
 
     const managerSelect = document.getElementById('managerSelect');
     const yearSelect = document.getElementById('yearSelect');
     const positionSelect = document.getElementById('positionSelect');
     const statusEl = document.getElementById('status');
-
-    function toNumber(value) {
-      const num = Number(value);
-      return Number.isFinite(num) ? num : null;
-    }
 
     function average(values) {
       if (!values.length) return null;
@@ -226,15 +223,15 @@
       return { name: entries[0][0], count: entries[0][1] };
     }
 
-    function scoreClass(ratio) {
-      if (ratio == null) return '';
-      if (ratio > 0.15) return 'ratio-good';
-      if (ratio >= -0.15) return 'ratio-mid';
+    function scoreClass(score) {
+      if (score == null) return '';
+      if (score > 0.15) return 'ratio-good';
+      if (score >= -0.15) return 'ratio-mid';
       return 'ratio-bad';
     }
 
-    function formatScore(ratio) {
-      return ratio == null ? '—' : ratio.toFixed(2);
+    function formatScore(score) {
+      return score == null ? '—' : score.toFixed(2);
     }
 
     function applyFilters(rows) {
@@ -247,10 +244,10 @@
     }
 
     function renderCards(filtered) {
-      const qualified = filtered.filter((r) => r.ratio != null);
+      const qualified = filtered.filter((r) => r.valueScore != null);
       const favorite = getFavoritePlayer(filtered);
-      const avgScore = average(qualified.map((r) => r.ratio));
-      const strongCount = qualified.filter((r) => r.ratio > 0).length;
+      const avgScore = average(qualified.map((r) => r.valueScore));
+      const strongCount = qualified.filter((r) => r.valueScore > 0).length;
 
       document.getElementById('favoritePlayer').textContent = favorite.name;
       document.getElementById('favoritePlayerNote').textContent = favorite.count ? `${favorite.count} draft selections` : 'No picks in filter';
@@ -269,19 +266,19 @@
 
       const summary = [...grouped.entries()].map(([manager, rows]) => {
         const favorite = getFavoritePlayer(rows);
-        const qualified = rows.filter((r) => r.ratio != null);
-        const avgScore = average(qualified.map((r) => r.ratio));
+        const qualified = rows.filter((r) => r.valueScore != null);
+        const avgScore = average(qualified.map((r) => r.valueScore));
 
         const posMap = new Map();
         qualified.forEach((r) => {
           if (!posMap.has(r.position)) posMap.set(r.position, []);
-          posMap.get(r.position).push(r.ratio);
+          posMap.get(r.position).push(r.valueScore);
         });
 
         let bestPos = '—';
         let bestScore = null;
-        posMap.forEach((ratios, pos) => {
-          const val = average(ratios);
+        posMap.forEach((scores, pos) => {
+          const val = average(scores);
           if (bestScore == null || val > bestScore) {
             bestScore = val;
             bestPos = pos;
@@ -307,9 +304,9 @@
       const tbody = document.getElementById('positionBreakdownBody');
       const grouped = new Map();
       filtered.forEach((row) => {
-        if (row.ratio == null) return;
+        if (row.valueScore == null) return;
         if (!grouped.has(row.position)) grouped.set(row.position, []);
-        grouped.get(row.position).push(row.ratio);
+        grouped.get(row.position).push(row.valueScore);
       });
 
       const rows = [...grouped.entries()].sort((a, b) => a[0].localeCompare(b[0]));
@@ -318,17 +315,17 @@
         return;
       }
 
-      tbody.innerHTML = rows.map(([position, ratios]) => {
-        const avgScore = average(ratios);
-        const medianScore = median(ratios);
-        const strong = ratios.filter((r) => r > 0).length;
+      tbody.innerHTML = rows.map(([position, scores]) => {
+        const avgScore = average(scores);
+        const medianScore = median(scores);
+        const strong = scores.filter((r) => r > 0).length;
         return `
           <tr>
             <td>${position}</td>
-            <td>${ratios.length}</td>
+            <td>${scores.length}</td>
             <td class="${scoreClass(avgScore)}">${formatScore(avgScore)}</td>
             <td class="${scoreClass(medianScore)}">${formatScore(medianScore)}</td>
-            <td>${strong} (${((strong / ratios.length) * 100).toFixed(1)}%)</td>
+            <td>${strong} (${((strong / scores.length) * 100).toFixed(1)}%)</td>
           </tr>
         `;
       }).join('');
@@ -350,9 +347,9 @@
 
       tbody.innerHTML = rows.map(([year, yearRows]) => {
         const favorite = getFavoritePlayer(yearRows);
-        const qualified = yearRows.filter((r) => r.ratio != null);
-        const avgScore = average(qualified.map((r) => r.ratio));
-        const strong = qualified.filter((r) => r.ratio > 0).length;
+        const qualified = yearRows.filter((r) => r.valueScore != null);
+        const avgScore = average(qualified.map((r) => r.valueScore));
+        const strong = qualified.filter((r) => r.valueScore > 0).length;
 
         const posCounts = new Map();
         yearRows.forEach((r) => posCounts.set(r.position, (posCounts.get(r.position) || 0) + 1));
@@ -377,7 +374,7 @@
       renderManagerOverview(filtered);
       renderPositionBreakdown(filtered);
       renderYearlyTrend(filtered);
-      statusEl.textContent = `${filtered.length} picks shown • ${filtered.filter((r) => r.ratio != null).length} with value scores`;
+      statusEl.textContent = `${filtered.length} picks shown • ${filtered.filter((r) => r.valueScore != null).length} with value scores`;
     }
 
     function populateSelectors(rows) {
@@ -390,36 +387,22 @@
       positionSelect.innerHTML = `<option>All Positions</option>${positions.map((p) => `<option>${p}</option>`).join('')}`;
     }
 
-    function buildPositionalSlots(rows) {
-      const groups = new Map();
-      rows.forEach((row) => {
-        const key = `${row.year}__${row.position}`;
-        if (!groups.has(key)) groups.set(key, []);
-        groups.get(key).push(row);
-      });
-
-      const slots = new Map();
-      groups.forEach((items, key) => {
-        items.sort((a, b) => a.overall - b.overall);
-        items.forEach((row, index) => slots.set(row._id, index + 1));
-      });
-      return slots;
-    }
-
     async function init() {
       try {
         const response = await fetch('draft-history-2.json');
         if (!response.ok) throw new Error(`Failed to load draft-history-2.json (${response.status})`);
 
         const raw = await response.json();
-        const rows = raw.map((row, index) => ({ ...row, _id: `${row.year}-${row.overall}-${index}` }));
-        const slots = buildPositionalSlots(rows);
+        const enrichedRows = enrichDraftEntries(raw);
 
-        state.rows = rows.map((row) => {
-          const finish = toNumber(row.positionrank);
-          const slot = slots.get(row._id) || null;
-          const ratio = finish && slot ? Math.log(slot / finish) : null;
-          return { ...row, slot, ratio };
+        state.rows = enrichedRows.map((row) => {
+          const valueScore = row.valueRatio != null ? Math.log(row.valueRatio) : null;
+          return {
+            ...row,
+            manager: row.managerValue || row.manager || 'Unknown Manager',
+            position: row.normalizedPosition,
+            valueScore
+          };
         });
 
         populateSelectors(state.rows);
