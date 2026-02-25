@@ -250,20 +250,26 @@ export function enrichDraftEntries(sourceEntries, config = defaultMetricConfig()
     const posPriceCount = auctionMeta.posPriceCount;
     const finishRank = row.finishRank;
     const cap = cfg.positionCaps[row.normalizedPosition] ?? null;
-    const cappedFinishRank = finishRank != null && cap != null ? Math.min(finishRank, cap) : null;
     const isDefenseOrKicker = row.isDefenseOrKicker;
-    const isRankEligible = !isDefenseOrKicker && finishRank != null;
 
     const finishPoolSize = cfg.finishPoolStrategy === 'cap' && cap != null
       ? cap
       : posDraftCount;
+
+    const imputedFinishRank = !isDefenseOrKicker && finishRank == null && finishPoolSize != null
+      ? finishPoolSize
+      : null;
+
+    const effectiveFinishRank = finishRank ?? imputedFinishRank;
+    const cappedFinishRank = effectiveFinishRank != null && cap != null ? Math.min(effectiveFinishRank, cap) : null;
+    const isRankEligible = !isDefenseOrKicker && effectiveFinishRank != null;
 
     const draftPercentileWithinPos = !isDefenseOrKicker
       ? percentileFromRank(posDraftOrder, posDraftCount)
       : null;
 
     const finishPercentileWithinPos = isRankEligible
-      ? percentileFromRank(finishRank, finishPoolSize)
+      ? percentileFromRank(effectiveFinishRank, finishPoolSize)
       : null;
 
     const percentileDelta =
@@ -271,16 +277,16 @@ export function enrichDraftEntries(sourceEntries, config = defaultMetricConfig()
         ? finishPercentileWithinPos - draftPercentileWithinPos
         : null;
 
-    const posRankDelta = isRankEligible ? posDraftOrder - finishRank : null;
+    const posRankDelta = isRankEligible ? posDraftOrder - effectiveFinishRank : null;
     const cappedPosRankDelta = isRankEligible && cappedFinishRank != null ? posDraftOrder - cappedFinishRank : null;
-    const priceVsFinishDelta = isRankEligible && posPriceOrder != null ? posPriceOrder - finishRank : null;
+    const priceVsFinishDelta = isRankEligible && posPriceOrder != null ? posPriceOrder - effectiveFinishRank : null;
 
-    const valueRatio = isRankEligible ? posDraftOrder / finishRank : null;
+    const valueRatio = isRankEligible ? posDraftOrder / effectiveFinishRank : null;
     const cappedValueRatio = isRankEligible && cappedFinishRank != null ? posDraftOrder / cappedFinishRank : null;
 
-    const beatCost = isRankEligible ? finishRank < posDraftOrder : false;
-    const metCost = isRankEligible ? finishRank === posDraftOrder : false;
-    const missedCost = isRankEligible ? finishRank > posDraftOrder : false;
+    const beatCost = isRankEligible ? effectiveFinishRank < posDraftOrder : false;
+    const metCost = isRankEligible ? effectiveFinishRank === posDraftOrder : false;
+    const missedCost = isRankEligible ? effectiveFinishRank > posDraftOrder : false;
 
     let hitTier = 'neutral';
     if (isDefenseOrKicker) hitTier = 'excluded';
@@ -303,6 +309,8 @@ export function enrichDraftEntries(sourceEntries, config = defaultMetricConfig()
       posPriceOrder,
       posPriceCount,
       finishRank,
+      imputedFinishRank,
+      effectiveFinishRank,
       cappedFinishRank,
       posRankDelta,
       cappedPosRankDelta,
