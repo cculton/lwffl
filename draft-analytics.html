@@ -162,7 +162,7 @@
           <select id="positionSelect" multiple></select>
         </div>
         <div>
-          <label for="roundCostSelect">Round / Cost Tier</label>
+          <label for="roundCostSelect">Round / Cost (Draft-Context Round Equivalent)</label>
           <select id="roundCostSelect" multiple></select>
         </div>
       </div>
@@ -273,7 +273,7 @@
       roundCost: [],
       sorts: {
         managerLeaderboard: { key: 'beatCostRate', dir: 'desc' },
-        yearComparison: { key: 'year', dir: 'asc' },
+        yearComparison: { key: 'year', dir: 'desc' },
         positionBreakdown: { key: 'position', dir: 'asc' },
         auctionBargains: { key: 'valueScore', dir: 'desc' }
       }
@@ -284,6 +284,7 @@
     const positionSelect = document.getElementById('positionSelect');
     const roundCostSelect = document.getElementById('roundCostSelect');
     const statusEl = document.getElementById('status');
+    const ALL_OPTION_VALUE = '__ALL__';
 
     function average(values) {
       if (!values.length) return null;
@@ -358,12 +359,84 @@
     }
 
 
-    function applyFilters(rows) {
+    function includesAll(values) {
+      return values.includes(ALL_OPTION_VALUE);
+    }
+
+    function normalizeSelection(selectedValues) {
+      if (!selectedValues.length || selectedValues.includes(ALL_OPTION_VALUE)) return [ALL_OPTION_VALUE];
+      return selectedValues;
+    }
+
+    function filterByManagerYearPosition(rows) {
       return rows.filter((row) => {
-        if (state.manager.length && !state.manager.includes(row.manager)) return false;
-        if (state.year.length && !state.year.includes(String(row.year))) return false;
-        if (state.position.length && !state.position.includes(row.position)) return false;
-        if (state.roundCost.length && !state.roundCost.includes(String(getRoundCostBucket(row)))) return false;
+        if (!includesAll(state.manager) && !state.manager.includes(row.manager)) return false;
+        if (!includesAll(state.year) && !state.year.includes(String(row.year))) return false;
+        if (!includesAll(state.position) && !state.position.includes(row.position)) return false;
+        return true;
+      });
+    }
+
+    function buildRoundCostResolver(scopeRows) {
+      const auctionRoundByRow = new Map();
+      const byYear = new Map();
+
+      scopeRows.forEach((row) => {
+        if (row.auctionPrice == null) return;
+        if (!byYear.has(row.year)) byYear.set(row.year, []);
+        byYear.get(row.year).push(row);
+      });
+
+      byYear.forEach((rows) => {
+        const managersInYear = new Set(rows.map((row) => row.manager)).size || 1;
+        const sorted = [...rows].sort((a, b) => {
+          if (a.auctionPrice !== b.auctionPrice) return b.auctionPrice - a.auctionPrice;
+          return compareValues(a.overall, b.overall);
+        });
+
+        // Tie handling: players with equal auction prices share the same round-equivalent.
+        // The shared round is based on the first rank where that price appears.
+        for (let idx = 0; idx < sorted.length;) {
+          const price = sorted[idx].auctionPrice;
+          const startRank = idx + 1;
+          const roundEquivalent = Math.ceil(startRank / managersInYear);
+
+          let j = idx;
+          while (j < sorted.length && sorted[j].auctionPrice === price) {
+            auctionRoundByRow.set(sorted[j], roundEquivalent);
+            j += 1;
+          }
+          idx = j;
+        }
+      });
+
+      return (row) => {
+        if (row.auctionPrice == null) return row.round ?? null;
+        return auctionRoundByRow.get(row) ?? null;
+      };
+    }
+
+
+    function syncRoundCostOptions(scopeRows, resolveRoundCostBucket) {
+      const roundCosts = [...new Set(scopeRows.map((row) => resolveRoundCostBucket(row)).filter((v) => Number.isFinite(v) && v > 0))]
+        .sort((a, b) => a - b)
+        .map(String);
+
+      const selected = state.roundCost.filter((value) => value === ALL_OPTION_VALUE || roundCosts.includes(value));
+      state.roundCost = normalizeSelection(selected);
+
+      roundCostSelect.innerHTML = `<option value="${ALL_OPTION_VALUE}"${includesAll(state.roundCost) ? ' selected' : ''}>All Round/Cost Tiers</option>${roundCosts
+        .map((rc) => `<option value="${rc}"${state.roundCost.includes(rc) ? ' selected' : ''}>${rc}</option>`)
+        .join('')}`;
+    }
+
+    function applyFilters(rows) {
+      const scopeRows = filterByManagerYearPosition(rows);
+      const resolveRoundCostBucket = buildRoundCostResolver(scopeRows);
+      syncRoundCostOptions(scopeRows, resolveRoundCostBucket);
+
+      return scopeRows.filter((row) => {
+        if (!includesAll(state.roundCost) && !state.roundCost.includes(String(resolveRoundCostBucket(row)))) return false;
         return true;
       });
     }
@@ -696,6 +769,17 @@
       state.roundCost = [...roundCosts];
     }
 
+      managerSelect.innerHTML = `<option value="${ALL_OPTION_VALUE}" selected>All Managers</option>${managers.map((m) => `<option value="${m}">${m}</option>`).join('')}`;
+      yearSelect.innerHTML = `<option value="${ALL_OPTION_VALUE}" selected>All Years</option>${years.map((y) => `<option value="${y}">${y}</option>`).join('')}`;
+      positionSelect.innerHTML = `<option value="${ALL_OPTION_VALUE}" selected>All Positions</option>${positions.map((p) => `<option value="${p}">${p}</option>`).join('')}`;
+      roundCostSelect.innerHTML = '';
+
+      state.manager = [ALL_OPTION_VALUE];
+      state.year = [ALL_OPTION_VALUE];
+      state.position = [ALL_OPTION_VALUE];
+      state.roundCost = [ALL_OPTION_VALUE];
+    }
+
     function getSelectedValues(selectEl) {
       return [...selectEl.selectedOptions].map((option) => option.value);
     }
@@ -722,10 +806,10 @@
         populateSelectors(state.rows);
         wireSortableHeaders();
         applyColumnExplainers();
-        managerSelect.addEventListener('change', () => { state.manager = getSelectedValues(managerSelect); render(); });
-        yearSelect.addEventListener('change', () => { state.year = getSelectedValues(yearSelect); render(); });
-        positionSelect.addEventListener('change', () => { state.position = getSelectedValues(positionSelect); render(); });
-        roundCostSelect.addEventListener('change', () => { state.roundCost = getSelectedValues(roundCostSelect); render(); });
+        managerSelect.addEventListener('change', () => { state.manager = normalizeSelection(getSelectedValues(managerSelect)); render(); });
+        yearSelect.addEventListener('change', () => { state.year = normalizeSelection(getSelectedValues(yearSelect)); render(); });
+        positionSelect.addEventListener('change', () => { state.position = normalizeSelection(getSelectedValues(positionSelect)); render(); });
+        roundCostSelect.addEventListener('change', () => { state.roundCost = normalizeSelection(getSelectedValues(roundCostSelect)); render(); });
 
         render();
       } catch (error) {
