@@ -57,6 +57,12 @@
       background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
       background-repeat: no-repeat; background-position: right 0.8rem center; background-size: 0.9em;
     }
+    select[multiple] {
+      appearance: auto;
+      background-image: none;
+      min-height: 108px;
+      padding: 8px;
+    }
 
     .cards-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
     .stat-card {
@@ -128,8 +134,6 @@
       margin-bottom: 8px;
     }
     details.explainer[open] summary { margin-bottom: 10px; }
-    .hidden-by-mode { display: none; }
-
     @media (max-width: 960px) { .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .controls { grid-template-columns: 1fr; } }
     @media (max-width: 640px) { .cards-grid { grid-template-columns: 1fr; } .header h1 { font-size: 1.6rem; } }
   </style>
@@ -147,22 +151,19 @@
       <div class="controls">
         <div>
           <label for="managerSelect">Manager</label>
-          <select id="managerSelect"></select>
+          <select id="managerSelect" multiple></select>
         </div>
         <div>
           <label for="yearSelect">Year</label>
-          <select id="yearSelect"></select>
+          <select id="yearSelect" multiple></select>
         </div>
         <div>
           <label for="positionSelect">Position</label>
-          <select id="positionSelect"></select>
+          <select id="positionSelect" multiple></select>
         </div>
         <div>
-          <label for="viewModeSelect">View Mode</label>
-          <select id="viewModeSelect">
-            <option value="simplified">Simplified (recommended)</option>
-            <option value="full">Full Detail</option>
-          </select>
+          <label for="roundCostSelect">Round / Cost (Draft-Context Round Equivalent)</label>
+          <select id="roundCostSelect" multiple></select>
         </div>
       </div>
 
@@ -177,7 +178,7 @@
 
       <section class="panel">
         <h2>Manager Leaderboard</h2>
-        <p class="subtle">Managers ranked by beat-cost rate, avg percentile gain, and late-round success (round 8+).</p>
+        <p class="subtle">Managers ranked by beat-cost rate, avg percentile gain, and filtered risk control.</p>
         <div class="table-wrap">
           <table data-sort-table="managerLeaderboard">
             <thead>
@@ -187,7 +188,8 @@
                 <th class="sortable" data-sort-key="beatCostRate">Beat Cost Rate</th>
                 <th class="sortable" data-sort-key="avgPercentileDelta">Avg Percentile Δ</th>
                 <th class="sortable" data-sort-key="bestPosition">Best Position</th>
-                <th class="sortable" data-sort-key="lateRoundHitRate">Late-Round Hit Rate</th>
+                <th class="sortable" data-sort-key="safetyRate">Safety Rate</th>
+                <th class="sortable" data-sort-key="bustRate">Bust Rate</th>
                 <th class="sortable" data-sort-key="eligiblePicks">Eligible Picks</th>
               </tr>
             </thead>
@@ -196,7 +198,7 @@
         </div>
       </section>
 
-      <section class="panel" data-detail-level="advanced">
+      <section class="panel">
         <h2>Year Comparison</h2>
         <p class="subtle">Compare draft classes by value hits, busts, and positional trend strength.</p>
         <div class="table-wrap">
@@ -212,28 +214,6 @@
               </tr>
             </thead>
             <tbody id="yearComparisonBody"></tbody>
-          </table>
-        </div>
-      </section>
-
-
-
-      <section class="panel" data-detail-level="advanced">
-        <h2>First-Round Risk Management</h2>
-        <p class="subtle">How each manager protects their most important pick (round 1 only).</p>
-        <div class="table-wrap">
-          <table data-sort-table="firstRoundRisk">
-            <thead>
-              <tr>
-                <th class="sortable" data-sort-key="manager">Manager</th>
-                <th class="sortable" data-sort-key="firstRoundPicks">1st-Round Picks</th>
-                <th class="sortable" data-sort-key="hitRate">Hit Rate</th>
-                <th class="sortable" data-sort-key="safetyRate">Safety Rate</th>
-                <th class="sortable" data-sort-key="bustRate">Bust Rate</th>
-                <th class="sortable" data-sort-key="avgPercentileDelta">Avg Percentile Δ</th>
-              </tr>
-            </thead>
-            <tbody id="firstRoundRiskBody"></tbody>
           </table>
         </div>
       </section>
@@ -257,7 +237,7 @@
         </div>
       </section>
 
-      <section class="panel" data-detail-level="advanced">
+      <section class="panel">
         <h2>Best Value Picks in Current Filter</h2>
         <p class="subtle">Top value picks by value score for the currently selected manager, year, and position filters.</p>
         <div class="table-wrap">
@@ -287,14 +267,13 @@
 
     const state = {
       rows: [],
-      manager: 'All Managers',
-      year: 'All Years',
-      position: 'All Positions',
-      viewMode: 'simplified',
+      manager: [],
+      year: [],
+      position: [],
+      roundCost: [],
       sorts: {
         managerLeaderboard: { key: 'beatCostRate', dir: 'desc' },
-        yearComparison: { key: 'year', dir: 'asc' },
-        firstRoundRisk: { key: 'hitRate', dir: 'desc' },
+        yearComparison: { key: 'year', dir: 'desc' },
         positionBreakdown: { key: 'position', dir: 'asc' },
         auctionBargains: { key: 'valueScore', dir: 'desc' }
       }
@@ -303,8 +282,9 @@
     const managerSelect = document.getElementById('managerSelect');
     const yearSelect = document.getElementById('yearSelect');
     const positionSelect = document.getElementById('positionSelect');
-    const viewModeSelect = document.getElementById('viewModeSelect');
+    const roundCostSelect = document.getElementById('roundCostSelect');
     const statusEl = document.getElementById('status');
+    const ALL_OPTION_VALUE = '__ALL__';
 
     function average(values) {
       if (!values.length) return null;
@@ -324,6 +304,22 @@
       if (score > 0.15) return 'ratio-good';
       if (score >= -0.15) return 'ratio-mid';
       return 'ratio-bad';
+    }
+
+    function valueToHeatColor(value, min, max) {
+      if (value == null || min == null || max == null) return '';
+      if (max === min) return 'hsl(60 85% 52%)';
+      const ratio = Math.max(0, Math.min(1, (value - min) / (max - min)));
+      const hue = ratio * 120;
+      return `hsl(${hue} 85% 52%)`;
+    }
+
+    function minMax(values) {
+      if (!values.length) return { min: null, max: null };
+      return {
+        min: Math.min(...values),
+        max: Math.max(...values)
+      };
     }
 
     function formatScore(score, digits = 2) {
@@ -363,11 +359,84 @@
     }
 
 
-    function applyFilters(rows) {
+    function includesAll(values) {
+      return values.includes(ALL_OPTION_VALUE);
+    }
+
+    function normalizeSelection(selectedValues) {
+      if (!selectedValues.length || selectedValues.includes(ALL_OPTION_VALUE)) return [ALL_OPTION_VALUE];
+      return selectedValues;
+    }
+
+    function filterByManagerYearPosition(rows) {
       return rows.filter((row) => {
-        if (state.manager !== 'All Managers' && row.manager !== state.manager) return false;
-        if (state.year !== 'All Years' && String(row.year) !== state.year) return false;
-        if (state.position !== 'All Positions' && row.position !== state.position) return false;
+        if (!includesAll(state.manager) && !state.manager.includes(row.manager)) return false;
+        if (!includesAll(state.year) && !state.year.includes(String(row.year))) return false;
+        if (!includesAll(state.position) && !state.position.includes(row.position)) return false;
+        return true;
+      });
+    }
+
+    function buildRoundCostResolver(scopeRows) {
+      const auctionRoundByRow = new Map();
+      const byYear = new Map();
+
+      scopeRows.forEach((row) => {
+        if (row.auctionPrice == null) return;
+        if (!byYear.has(row.year)) byYear.set(row.year, []);
+        byYear.get(row.year).push(row);
+      });
+
+      byYear.forEach((rows) => {
+        const managersInYear = new Set(rows.map((row) => row.manager)).size || 1;
+        const sorted = [...rows].sort((a, b) => {
+          if (a.auctionPrice !== b.auctionPrice) return b.auctionPrice - a.auctionPrice;
+          return compareValues(a.overall, b.overall);
+        });
+
+        // Tie handling: players with equal auction prices share the same round-equivalent.
+        // The shared round is based on the first rank where that price appears.
+        for (let idx = 0; idx < sorted.length;) {
+          const price = sorted[idx].auctionPrice;
+          const startRank = idx + 1;
+          const roundEquivalent = Math.ceil(startRank / managersInYear);
+
+          let j = idx;
+          while (j < sorted.length && sorted[j].auctionPrice === price) {
+            auctionRoundByRow.set(sorted[j], roundEquivalent);
+            j += 1;
+          }
+          idx = j;
+        }
+      });
+
+      return (row) => {
+        if (row.auctionPrice == null) return row.round ?? null;
+        return auctionRoundByRow.get(row) ?? null;
+      };
+    }
+
+
+    function syncRoundCostOptions(scopeRows, resolveRoundCostBucket) {
+      const roundCosts = [...new Set(scopeRows.map((row) => resolveRoundCostBucket(row)).filter((v) => Number.isFinite(v) && v > 0))]
+        .sort((a, b) => a - b)
+        .map(String);
+
+      const selected = state.roundCost.filter((value) => value === ALL_OPTION_VALUE || roundCosts.includes(value));
+      state.roundCost = normalizeSelection(selected);
+
+      roundCostSelect.innerHTML = `<option value="${ALL_OPTION_VALUE}"${includesAll(state.roundCost) ? ' selected' : ''}>All Round/Cost Tiers</option>${roundCosts
+        .map((rc) => `<option value="${rc}"${state.roundCost.includes(rc) ? ' selected' : ''}>${rc}</option>`)
+        .join('')}`;
+    }
+
+    function applyFilters(rows) {
+      const scopeRows = filterByManagerYearPosition(rows);
+      const resolveRoundCostBucket = buildRoundCostResolver(scopeRows);
+      syncRoundCostOptions(scopeRows, resolveRoundCostBucket);
+
+      return scopeRows.filter((row) => {
+        if (!includesAll(state.roundCost) && !state.roundCost.includes(String(resolveRoundCostBucket(row)))) return false;
         return true;
       });
     }
@@ -422,9 +491,11 @@
 
       let leaderboard = summarizeByManager(filtered).map((summary) => {
         const managerRows = grouped.get(summary.manager) || [];
-        const lateRows = managerRows.filter((r) => r.round >= 8 && r.isRankEligible);
-        const lateHits = lateRows.filter((r) => r.beatCost).length;
-        const lateRoundHitRate = lateRows.length ? lateHits / lateRows.length : null;
+        const eligible = managerRows.filter((r) => r.isRankEligible);
+        const majorBusts = eligible.filter((r) => r.posRankDelta != null && r.posRankDelta <= -10).length;
+        const safe = eligible.filter((r) => !(r.posRankDelta != null && r.posRankDelta <= -10)).length;
+        const safetyRate = eligible.length ? safe / eligible.length : null;
+        const bustRate = eligible.length ? majorBusts / eligible.length : null;
         const { bestPosition, bestScore } = getBestCorePosition(managerRows);
 
         return {
@@ -432,7 +503,8 @@
           beatCostRate: summary.beatCostRate,
           avgPercentileDelta: summary.avgPercentileDelta,
           eligiblePicks: summary.eligiblePicks,
-          lateRoundHitRate,
+          safetyRate,
+          bustRate,
           bestPosition,
           bestScore
         };
@@ -441,18 +513,21 @@
       leaderboard = sortRows(leaderboard, 'managerLeaderboard').map((item, idx) => ({ ...item, rank: idx + 1 }));
 
       if (!leaderboard.length) {
-        tbody.innerHTML = '<tr><td colspan="7">No manager data for this filter.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8">No manager data for this filter.</td></tr>';
         return;
       }
+
+      const percentileBounds = minMax(leaderboard.map((item) => item.avgPercentileDelta).filter((v) => v != null));
 
       tbody.innerHTML = leaderboard.map((item) => `
         <tr>
           <td>${item.rank}</td>
           <td>${item.manager}</td>
           <td>${formatPct(item.beatCostRate)}</td>
-          <td class="${scoreClass(item.avgPercentileDelta)}">${formatScore(item.avgPercentileDelta)}</td>
+          <td style="color: ${valueToHeatColor(item.avgPercentileDelta, percentileBounds.min, percentileBounds.max)}">${formatScore(item.avgPercentileDelta)}</td>
           <td>${item.bestPosition} (${formatScore(item.bestScore)})</td>
-          <td>${formatPct(item.lateRoundHitRate)}</td>
+          <td>${formatPct(item.safetyRate)}</td>
+          <td>${formatPct(item.bustRate)}</td>
           <td>${item.eligiblePicks}</td>
         </tr>
       `).join('');
@@ -518,51 +593,6 @@
       `).join('');
     }
 
-    function renderFirstRoundRisk(filtered) {
-      const tbody = document.getElementById('firstRoundRiskBody');
-      const grouped = new Map();
-      filtered.forEach((row) => {
-        if (row.round !== 1) return;
-        if (!grouped.has(row.manager)) grouped.set(row.manager, []);
-        grouped.get(row.manager).push(row);
-      });
-
-      let rows = [...grouped.entries()].map(([manager, managerRows]) => {
-        const eligible = managerRows.filter((r) => r.isRankEligible);
-        const metOrBeat = eligible.filter((r) => r.metCost || r.beatCost).length;
-        const majorBusts = eligible.filter((r) => r.posRankDelta != null && r.posRankDelta <= -10).length;
-        const safe = eligible.filter((r) => !(r.posRankDelta != null && r.posRankDelta <= -10)).length;
-
-        return {
-          manager,
-          firstRoundPicks: managerRows.length,
-          hitRate: eligible.length ? metOrBeat / eligible.length : null,
-          safetyRate: eligible.length ? safe / eligible.length : null,
-          bustRate: eligible.length ? majorBusts / eligible.length : null,
-          avgPercentileDelta: average(eligible.map((r) => r.percentileDelta).filter((v) => v != null)),
-          eligiblePicks: eligible.length
-        };
-      });
-
-      rows = sortRows(rows, 'firstRoundRisk');
-
-      if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="6">No first-round data for this filter.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = rows.map((item) => `
-        <tr>
-          <td>${item.manager}</td>
-          <td>${item.firstRoundPicks}</td>
-          <td>${formatPct(item.hitRate)}</td>
-          <td>${formatPct(item.safetyRate)}</td>
-          <td>${formatPct(item.bustRate)}</td>
-          <td class="${scoreClass(item.avgPercentileDelta)}">${formatScore(item.avgPercentileDelta)}</td>
-        </tr>
-      `).join('');
-    }
-
     function renderPositionBreakdown(filtered) {
       const tbody = document.getElementById('positionBreakdownBody');
       const grouped = new Map();
@@ -596,12 +626,6 @@
             <td>${item.strong} (${formatPct(item.strongRate)})</td>
           </tr>
         `).join('');
-    }
-
-    function applyViewMode() {
-      document.querySelectorAll('[data-detail-level="advanced"]').forEach((panel) => {
-        panel.classList.toggle('hidden-by-mode', state.viewMode === 'simplified');
-      });
     }
 
     function renderAuctionBargains(filtered) {
@@ -642,12 +666,10 @@
       renderCards(filtered);
       renderManagerLeaderboard(filtered);
       renderYearComparison(filtered);
-      renderFirstRoundRisk(filtered);
       renderPositionBreakdown(filtered);
       renderAuctionBargains(filtered);
       refreshSortHeaderUi();
-      statusEl.textContent = `${filtered.length} picks shown • ${filtered.filter((r) => r.valueScore != null).length} with value scores • ${state.viewMode === 'simplified' ? 'Simplified view' : 'Full detail view'}`;
-      applyViewMode();
+      statusEl.textContent = `${filtered.length} picks shown • ${filtered.filter((r) => r.valueScore != null).length} with value scores`;
     }
 
 
@@ -658,7 +680,8 @@
         beatCostRate: 'Share of rank-eligible picks that beat draft cost. Equation: Beat Cost Rate = beatCost picks / eligible picks.',
         avgPercentileDelta: 'Average movement versus draft percentile. Equation: Avg Percentile Δ = mean(finishPercentile − draftPercentile). Positive is better.',
         bestPosition: "Manager's strongest core position (QB/RB/WR/TE) by average percentile delta.",
-        lateRoundHitRate: 'How often round 8+ picks beat cost. Equation: Late-Round Hit Rate = late-round beatCost picks / late-round eligible picks.',
+        safetyRate: 'How often filtered eligible picks avoided a major bust (worse than −10 rank delta). Equation: Safety Rate = safe eligible picks / eligible picks.',
+        bustRate: 'Major bust frequency for filtered eligible picks. Equation: Bust Rate = major-bust eligible picks / eligible picks.',
         eligiblePicks: 'Count of picks with a valid positional finish rank used in rate calculations.'
       },
       yearComparison: {
@@ -668,14 +691,6 @@
         hitRate: 'Season success rate. Equation: Hit Rate = value hits / eligible picks.',
         bustRate: 'Season miss rate. Equation: Bust Rate = busts / eligible picks.',
         topPosScore: 'Position with the strongest average percentile trend for that year.'
-      },
-      firstRoundRisk: {
-        manager: 'Draft manager/owner for the selected slice.',
-        firstRoundPicks: 'Total number of round-1 selections in the filter.',
-        hitRate: 'Round-1 picks that met or beat cost. Equation: Hit Rate = (metCost + beatCost picks) / eligible round-1 picks.',
-        safetyRate: 'Round-1 picks that avoided a major bust (worse than −10 rank delta). Equation: Safety Rate = safe round-1 picks / eligible round-1 picks.',
-        bustRate: 'Major bust frequency for round-1 picks. Equation: Bust Rate = major bust round-1 picks / eligible round-1 picks.',
-        avgPercentileDelta: 'Average percentile movement for eligible round-1 picks (positive is better).'
       },
       positionBreakdown: {
         position: 'Fantasy position bucket for the filtered picks.',
@@ -705,7 +720,6 @@
           const text = explainers[key];
           if (!text) return;
           th.dataset.tooltip = text;
-          th.title = text;
           th.tabIndex = 0;
         });
       });
@@ -736,9 +750,19 @@
       const seenPositions = new Set(rows.map((r) => r.position));
       const positions = orderedCorePositions.filter((position) => seenPositions.has(position));
 
-      managerSelect.innerHTML = `<option>All Managers</option>${managers.map((m) => `<option>${m}</option>`).join('')}`;
-      yearSelect.innerHTML = `<option>All Years</option>${years.map((y) => `<option>${y}</option>`).join('')}`;
-      positionSelect.innerHTML = `<option>All Positions</option>${positions.map((p) => `<option>${p}</option>`).join('')}`;
+      managerSelect.innerHTML = `<option value="${ALL_OPTION_VALUE}" selected>All Managers</option>${managers.map((m) => `<option value="${m}">${m}</option>`).join('')}`;
+      yearSelect.innerHTML = `<option value="${ALL_OPTION_VALUE}" selected>All Years</option>${years.map((y) => `<option value="${y}">${y}</option>`).join('')}`;
+      positionSelect.innerHTML = `<option value="${ALL_OPTION_VALUE}" selected>All Positions</option>${positions.map((p) => `<option value="${p}">${p}</option>`).join('')}`;
+      roundCostSelect.innerHTML = '';
+
+      state.manager = [ALL_OPTION_VALUE];
+      state.year = [ALL_OPTION_VALUE];
+      state.position = [ALL_OPTION_VALUE];
+      state.roundCost = [ALL_OPTION_VALUE];
+    }
+
+    function getSelectedValues(selectEl) {
+      return [...selectEl.selectedOptions].map((option) => option.value);
     }
 
     async function init() {
@@ -763,10 +787,10 @@
         populateSelectors(state.rows);
         wireSortableHeaders();
         applyColumnExplainers();
-        managerSelect.addEventListener('change', () => { state.manager = managerSelect.value; render(); });
-        yearSelect.addEventListener('change', () => { state.year = yearSelect.value; render(); });
-        positionSelect.addEventListener('change', () => { state.position = positionSelect.value; render(); });
-        viewModeSelect.addEventListener('change', () => { state.viewMode = viewModeSelect.value; render(); });
+        managerSelect.addEventListener('change', () => { state.manager = normalizeSelection(getSelectedValues(managerSelect)); render(); });
+        yearSelect.addEventListener('change', () => { state.year = normalizeSelection(getSelectedValues(yearSelect)); render(); });
+        positionSelect.addEventListener('change', () => { state.position = normalizeSelection(getSelectedValues(positionSelect)); render(); });
+        roundCostSelect.addEventListener('change', () => { state.roundCost = normalizeSelection(getSelectedValues(roundCostSelect)); render(); });
 
         render();
       } catch (error) {
