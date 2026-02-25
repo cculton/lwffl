@@ -132,21 +132,42 @@
       </section>
 
       <section class="panel">
-        <h2>Manager Overview</h2>
-        <p class="subtle">Most drafted player for each manager and aggregate value-score performance.</p>
+        <h2>Manager Leaderboard</h2>
+        <p class="subtle">Managers ranked by beat-cost rate, avg percentile gain, and late-round success (round 8+).</p>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
+                <th>Rank</th>
                 <th>Manager</th>
-                <th>Most Drafted Player</th>
-                <th>Times</th>
-                <th>Avg Score</th>
-                <th>Top Position Score</th>
-                <th>Qualified Picks</th>
+                <th>Beat Cost Rate</th>
+                <th>Avg Percentile Δ</th>
+                <th>Best Position</th>
+                <th>Late-Round Hit Rate</th>
+                <th>Eligible Picks</th>
               </tr>
             </thead>
-            <tbody id="managerOverviewBody"></tbody>
+            <tbody id="managerLeaderboardBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Year Comparison</h2>
+        <p class="subtle">Compare draft classes by value hits, busts, and positional trend strength.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Value Hits</th>
+                <th>Busts</th>
+                <th>Hit Rate</th>
+                <th>Bust Rate</th>
+                <th>Top Position Trend</th>
+              </tr>
+            </thead>
+            <tbody id="yearComparisonBody"></tbody>
           </table>
         </div>
       </section>
@@ -171,21 +192,23 @@
       </section>
 
       <section class="panel">
-        <h2>Yearly Trend</h2>
-        <p class="subtle">Draft tendencies by season for the selected manager/position filters.</p>
+        <h2>Auction Analysis (Preview)</h2>
+        <p class="subtle">Early view of auction value using positional price order vs finish rank.</p>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
                 <th>Year</th>
-                <th>Most Drafted Player</th>
-                <th>Favorite Position</th>
-                <th>Avg Score</th>
-                <th>Strong Picks</th>
-                <th>Qualified Picks</th>
+                <th>Player</th>
+                <th>Manager</th>
+                <th>Pos</th>
+                <th>Price</th>
+                <th>Pos Price Order</th>
+                <th>Finish Rank</th>
+                <th>Price vs Finish Δ</th>
               </tr>
             </thead>
-            <tbody id="yearlyTrendBody"></tbody>
+            <tbody id="auctionBargainBody"></tbody>
           </table>
         </div>
       </section>
@@ -194,7 +217,7 @@
 
   <script src="nav-loader.js"></script>
   <script type="module">
-    import { enrichDraftEntries } from './draft-metrics.mjs';
+    import { enrichDraftEntries, summarizeByManager, summarizeByYear } from './draft-metrics.mjs';
 
     const state = { rows: [], manager: 'All Managers', year: 'All Years', position: 'All Positions' };
 
@@ -230,8 +253,12 @@
       return 'ratio-bad';
     }
 
-    function formatScore(score) {
-      return score == null ? '—' : score.toFixed(2);
+    function formatScore(score, digits = 2) {
+      return score == null ? '—' : score.toFixed(digits);
+    }
+
+    function formatPct(value) {
+      return value == null ? '—' : `${(value * 100).toFixed(1)}%`;
     }
 
     function applyFilters(rows) {
@@ -241,6 +268,27 @@
         if (state.position !== 'All Positions' && row.position !== state.position) return false;
         return true;
       });
+    }
+
+    function getBestCorePosition(rows) {
+      const core = ['QB', 'RB', 'WR', 'TE'];
+      const byPos = new Map();
+      rows.forEach((row) => {
+        if (!core.includes(row.position) || row.percentileDelta == null) return;
+        if (!byPos.has(row.position)) byPos.set(row.position, []);
+        byPos.get(row.position).push(row.percentileDelta);
+      });
+
+      let bestPosition = '—';
+      let bestScore = null;
+      byPos.forEach((scores, position) => {
+        const score = average(scores);
+        if (bestScore == null || score > bestScore) {
+          bestScore = score;
+          bestPosition = position;
+        }
+      });
+      return { bestPosition, bestScore };
     }
 
     function renderCards(filtered) {
@@ -256,46 +304,110 @@
       document.getElementById('qualifiedPicks').textContent = String(qualified.length);
     }
 
-    function renderManagerOverview(allRows) {
-      const tbody = document.getElementById('managerOverviewBody');
+    function renderManagerLeaderboard(filtered) {
+      const tbody = document.getElementById('managerLeaderboardBody');
       const grouped = new Map();
-      allRows.forEach((row) => {
+      filtered.forEach((row) => {
         if (!grouped.has(row.manager)) grouped.set(row.manager, []);
         grouped.get(row.manager).push(row);
       });
 
-      const summary = [...grouped.entries()].map(([manager, rows]) => {
-        const favorite = getFavoritePlayer(rows);
-        const qualified = rows.filter((r) => r.valueScore != null);
-        const avgScore = average(qualified.map((r) => r.valueScore));
+      const leaderboard = summarizeByManager(filtered).map((summary) => {
+        const managerRows = grouped.get(summary.manager) || [];
+        const lateRows = managerRows.filter((r) => r.round >= 8 && r.isRankEligible);
+        const lateHits = lateRows.filter((r) => r.beatCost).length;
+        const lateRoundHitRate = lateRows.length ? lateHits / lateRows.length : null;
+        const { bestPosition, bestScore } = getBestCorePosition(managerRows);
+
+        return {
+          manager: summary.manager,
+          beatCostRate: summary.beatCostRate,
+          avgPercentileDelta: summary.avgPercentileDelta,
+          eligiblePicks: summary.eligiblePicks,
+          lateRoundHitRate,
+          bestPosition,
+          bestScore
+        };
+      }).sort((a, b) => {
+        const beatDiff = (b.beatCostRate ?? -1) - (a.beatCostRate ?? -1);
+        if (Math.abs(beatDiff) > 1e-9) return beatDiff;
+        const pctDiff = (b.avgPercentileDelta ?? -99) - (a.avgPercentileDelta ?? -99);
+        if (Math.abs(pctDiff) > 1e-9) return pctDiff;
+        return a.manager.localeCompare(b.manager);
+      });
+
+      if (!leaderboard.length) {
+        tbody.innerHTML = '<tr><td colspan="7">No manager data for this filter.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = leaderboard.map((item, idx) => `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>${item.manager}</td>
+          <td>${formatPct(item.beatCostRate)}</td>
+          <td class="${scoreClass(item.avgPercentileDelta)}">${formatScore(item.avgPercentileDelta)}</td>
+          <td>${item.bestPosition} (${formatScore(item.bestScore)})</td>
+          <td>${formatPct(item.lateRoundHitRate)}</td>
+          <td>${item.eligiblePicks}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderYearComparison(filtered) {
+      const tbody = document.getElementById('yearComparisonBody');
+      const byYearRows = new Map();
+      filtered.forEach((row) => {
+        if (!byYearRows.has(row.year)) byYearRows.set(row.year, []);
+        byYearRows.get(row.year).push(row);
+      });
+
+      const rows = summarizeByYear(filtered).map((summary) => {
+        const yearRows = byYearRows.get(summary.year) || [];
+        const eligible = yearRows.filter((r) => r.isRankEligible);
+        const hits = eligible.filter((r) => r.beatCost).length;
+        const busts = eligible.filter((r) => r.missedCost).length;
 
         const posMap = new Map();
-        qualified.forEach((r) => {
+        eligible.forEach((r) => {
           if (!posMap.has(r.position)) posMap.set(r.position, []);
-          posMap.get(r.position).push(r.valueScore);
+          if (r.percentileDelta != null) posMap.get(r.position).push(r.percentileDelta);
         });
 
-        let bestPos = '—';
-        let bestScore = null;
-        posMap.forEach((scores, pos) => {
-          const val = average(scores);
-          if (bestScore == null || val > bestScore) {
-            bestScore = val;
-            bestPos = pos;
+        let topPos = '—';
+        let topPosScore = null;
+        posMap.forEach((values, pos) => {
+          const avg = average(values);
+          if (avg != null && (topPosScore == null || avg > topPosScore)) {
+            topPos = pos;
+            topPosScore = avg;
           }
         });
 
-        return { manager, favorite, avgScore, bestPos, bestScore, qualifiedCount: qualified.length };
-      }).sort((a, b) => a.manager.localeCompare(b.manager));
+        return {
+          year: summary.year,
+          hits,
+          busts,
+          hitRate: summary.beatCostRate,
+          bustRate: summary.eligiblePicks ? busts / summary.eligiblePicks : null,
+          topPos,
+          topPosScore
+        };
+      }).sort((a, b) => Number(a.year) - Number(b.year));
 
-      tbody.innerHTML = summary.map((item) => `
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="6">No yearly data for this filter.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = rows.map((item) => `
         <tr>
-          <td>${item.manager}</td>
-          <td>${item.favorite.name}</td>
-          <td>${item.favorite.count}</td>
-          <td class="${scoreClass(item.avgScore)}">${formatScore(item.avgScore)}</td>
-          <td>${item.bestPos} (${formatScore(item.bestScore)})</td>
-          <td>${item.qualifiedCount}</td>
+          <td>${item.year}</td>
+          <td>${item.hits}</td>
+          <td>${item.busts}</td>
+          <td>${formatPct(item.hitRate)}</td>
+          <td>${formatPct(item.bustRate)}</td>
+          <td>${item.topPos} (${formatScore(item.topPosScore)})</td>
         </tr>
       `).join('');
     }
@@ -331,49 +443,39 @@
       }).join('');
     }
 
-    function renderYearlyTrend(filtered) {
-      const tbody = document.getElementById('yearlyTrendBody');
-      const grouped = new Map();
-      filtered.forEach((row) => {
-        if (!grouped.has(row.year)) grouped.set(row.year, []);
-        grouped.get(row.year).push(row);
-      });
+    function renderAuctionBargains(filtered) {
+      const tbody = document.getElementById('auctionBargainBody');
+      const bargains = filtered
+        .filter((row) => row.priceVsFinishDelta != null)
+        .sort((a, b) => b.priceVsFinishDelta - a.priceVsFinishDelta || a.name.localeCompare(b.name))
+        .slice(0, 15);
 
-      const rows = [...grouped.entries()].sort((a, b) => a[0] - b[0]);
-      if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="6">No draft picks available for this filter.</td></tr>';
+      if (!bargains.length) {
+        tbody.innerHTML = '<tr><td colspan="8">No auction price data available for this filter.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = rows.map(([year, yearRows]) => {
-        const favorite = getFavoritePlayer(yearRows);
-        const qualified = yearRows.filter((r) => r.valueScore != null);
-        const avgScore = average(qualified.map((r) => r.valueScore));
-        const strong = qualified.filter((r) => r.valueScore > 0).length;
-
-        const posCounts = new Map();
-        yearRows.forEach((r) => posCounts.set(r.position, (posCounts.get(r.position) || 0) + 1));
-        const favoritePosition = [...posCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] || '—';
-
-        return `
-          <tr>
-            <td>${year}</td>
-            <td>${favorite.name} (${favorite.count})</td>
-            <td>${favoritePosition}</td>
-            <td class="${scoreClass(avgScore)}">${formatScore(avgScore)}</td>
-            <td>${qualified.length ? `${strong} (${((strong / qualified.length) * 100).toFixed(1)}%)` : '—'}</td>
-            <td>${qualified.length}</td>
-          </tr>
-        `;
-      }).join('');
+      tbody.innerHTML = bargains.map((row) => `
+        <tr>
+          <td>${row.year}</td>
+          <td>${row.name}</td>
+          <td>${row.manager}</td>
+          <td>${row.position}</td>
+          <td>${row.auctionPrice == null ? '—' : `$${row.auctionPrice}`}</td>
+          <td>${row.posPriceOrder}</td>
+          <td>${row.finishRank ?? '—'}</td>
+          <td class="${scoreClass(row.priceVsFinishDelta / 10)}">${formatScore(row.priceVsFinishDelta, 1)}</td>
+        </tr>
+      `).join('');
     }
 
     function render() {
       const filtered = applyFilters(state.rows);
       renderCards(filtered);
-      renderManagerOverview(filtered);
+      renderManagerLeaderboard(filtered);
+      renderYearComparison(filtered);
       renderPositionBreakdown(filtered);
-      renderYearlyTrend(filtered);
+      renderAuctionBargains(filtered);
       statusEl.textContent = `${filtered.length} picks shown • ${filtered.filter((r) => r.valueScore != null).length} with value scores`;
     }
 
