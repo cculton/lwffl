@@ -25,6 +25,7 @@ export const DEFAULT_POSITION_CAPS = {
 const MANAGER_FIELD_CANDIDATES = ['manager', 'owner', 'teamOwner', 'team_owner', 'gm'];
 const FINISH_RANK_FIELD_CANDIDATES = ['positionrank', 'position rank', 'positionRank'];
 const PLAYER_FIELD_CANDIDATES = ['player', 'name'];
+const PRICE_FIELD_CANDIDATES = ['price', 'auctionPrice', 'auction_price', 'cost'];
 
 /**
  * @typedef {Object} MetricConfig
@@ -104,6 +105,16 @@ export function detectPlayerValue(row) {
 }
 
 /**
+ * @param {Record<string, any>} row
+ * @returns {number|null}
+ */
+export function parseAuctionPrice(row) {
+  const raw = firstPresentValue(row, PRICE_FIELD_CANDIDATES);
+  const parsed = toFiniteNumber(raw);
+  return parsed != null && parsed >= 0 ? parsed : null;
+}
+
+/**
  * Convert source entries into a stable analysis-ready shape (without mutating source objects).
  * @param {Record<string, any>[]} sourceEntries
  */
@@ -122,7 +133,8 @@ export function normalizeEntries(sourceEntries) {
       isDefenseOrKicker: normalizedPosition === 'DST' || normalizedPosition === 'K',
       managerValue: detectManagerValue(row),
       playerValue: detectPlayerValue(row),
-      finishRank: parseFinishRank(row)
+      finishRank: parseFinishRank(row),
+      auctionPrice: parseAuctionPrice(row)
     };
   });
 }
@@ -166,6 +178,34 @@ function withPositionDraftOrder(normalizedRows) {
   return indexMeta;
 }
 
+function withPositionPriceOrder(normalizedRows) {
+  /** @type {Map<string, any[]>} */
+  const byYearPos = new Map();
+
+  for (const row of normalizedRows) {
+    const key = `${row.__analysisYear ?? 'unknown'}__${row.normalizedPosition}`;
+    if (!byYearPos.has(key)) byYearPos.set(key, []);
+    if (row.auctionPrice != null) byYearPos.get(key).push(row);
+  }
+
+  /** @type {Map<number, {posPriceOrder:number,posPriceCount:number}>} */
+  const indexMeta = new Map();
+
+  for (const rows of byYearPos.values()) {
+    rows.sort((a, b) => {
+      if (a.auctionPrice !== b.auctionPrice) return b.auctionPrice - a.auctionPrice;
+      return a.__sourceIndex - b.__sourceIndex;
+    });
+
+    const count = rows.length;
+    rows.forEach((row, idx) => {
+      indexMeta.set(row.__sourceIndex, { posPriceOrder: idx + 1, posPriceCount: count });
+    });
+  }
+
+  return indexMeta;
+}
+
 function median(values) {
   if (!values.length) return null;
   const sorted = [...values].sort((a, b) => a - b);
@@ -199,11 +239,15 @@ export function enrichDraftEntries(sourceEntries, config = defaultMetricConfig()
   const cfg = { ...defaultMetricConfig(), ...config, positionCaps: { ...DEFAULT_POSITION_CAPS, ...(config.positionCaps || {}) } };
   const normalized = normalizeEntries(sourceEntries);
   const draftOrderMeta = withPositionDraftOrder(normalized);
+  const priceOrderMeta = withPositionPriceOrder(normalized);
 
   return normalized.map((row) => {
     const orderMeta = draftOrderMeta.get(row.__sourceIndex) || { posDraftOrder: null, posDraftCount: null };
+    const auctionMeta = priceOrderMeta.get(row.__sourceIndex) || { posPriceOrder: null, posPriceCount: null };
     const posDraftOrder = orderMeta.posDraftOrder;
     const posDraftCount = orderMeta.posDraftCount;
+    const posPriceOrder = auctionMeta.posPriceOrder;
+    const posPriceCount = auctionMeta.posPriceCount;
     const finishRank = row.finishRank;
     const cap = cfg.positionCaps[row.normalizedPosition] ?? null;
     const cappedFinishRank = finishRank != null && cap != null ? Math.min(finishRank, cap) : null;
@@ -229,6 +273,7 @@ export function enrichDraftEntries(sourceEntries, config = defaultMetricConfig()
 
     const posRankDelta = isRankEligible ? posDraftOrder - finishRank : null;
     const cappedPosRankDelta = isRankEligible && cappedFinishRank != null ? posDraftOrder - cappedFinishRank : null;
+    const priceVsFinishDelta = isRankEligible && posPriceOrder != null ? posPriceOrder - finishRank : null;
 
     const valueRatio = isRankEligible ? posDraftOrder / finishRank : null;
     const cappedValueRatio = isRankEligible && cappedFinishRank != null ? posDraftOrder / cappedFinishRank : null;
@@ -254,10 +299,14 @@ export function enrichDraftEntries(sourceEntries, config = defaultMetricConfig()
       isRankEligible,
       posDraftOrder,
       posDraftCount,
+      auctionPrice: row.auctionPrice,
+      posPriceOrder,
+      posPriceCount,
       finishRank,
       cappedFinishRank,
       posRankDelta,
       cappedPosRankDelta,
+      priceVsFinishDelta,
       valueRatio,
       cappedValueRatio,
       draftPercentileWithinPos,
