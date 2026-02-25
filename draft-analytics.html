@@ -42,7 +42,7 @@
 
     .controls {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 12px;
       margin-bottom: 18px;
       background: rgba(30,41,59,0.4);
@@ -85,6 +85,28 @@
     .ratio-bad { color: var(--negative); font-weight: 700; }
     .status { color: var(--text-soft); margin-bottom: 12px; font-size: 0.86rem; }
 
+    .insight-list { margin: 6px 0 0 18px; color: var(--text-main); }
+    .insight-list li { margin-bottom: 8px; line-height: 1.4; }
+    .insight-list li:last-child { margin-bottom: 0; }
+    details.explainer {
+      border: 1px solid rgba(56,189,248,0.35);
+      background: rgba(15,23,42,0.55);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-top: 10px;
+    }
+    details.explainer summary {
+      cursor: pointer;
+      color: var(--accent);
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    details.explainer[open] summary { margin-bottom: 10px; }
+    .hidden-by-mode { display: none; }
+
     @media (max-width: 960px) { .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .controls { grid-template-columns: 1fr; } }
     @media (max-width: 640px) { .cards-grid { grid-template-columns: 1fr; } .header h1 { font-size: 1.6rem; } }
   </style>
@@ -112,23 +134,50 @@
           <label for="positionSelect">Position</label>
           <select id="positionSelect"></select>
         </div>
+        <div>
+          <label for="viewModeSelect">View Mode</label>
+          <select id="viewModeSelect">
+            <option value="simplified">Simplified (recommended)</option>
+            <option value="full">Full Detail</option>
+          </select>
+        </div>
       </div>
 
       <div id="status" class="status">Loading draft analytics...</div>
 
 
 
-      <section class="panel">
-        <h2>How to Read the Value Score</h2>
-        <p class="subtle">
-          <strong>Value Score = ln(positional draft slot ÷ end-of-year position finish).</strong>
-          Positive is good (outperformed draft cost), zero is neutral, and negative is bad (underperformed draft cost).
-          This log form is symmetric, so equal over/under performance has equal-and-opposite impact.
-          Examples: RB10 → RB5 gives ln(2) = +0.693, while RB5 → RB10 gives ln(0.5) = -0.693.
-        </p>
+      <section class="panel" data-detail-level="core">
+        <h2>Quick Start</h2>
+        <p class="subtle">Use three steps: filter first, read the key insights, then scan the manager leaderboard for who consistently beats cost.</p>
+        <ol class="insight-list">
+          <li><strong>Pick a manager/year/position</strong> to keep the sample focused.</li>
+          <li><strong>Read the highlights</strong> panel for plain-language takeaways.</li>
+          <li><strong>Open full detail mode</strong> only when you want year-by-year and auction specifics.</li>
+        </ol>
+        <details class="explainer">
+          <summary>Metric explainer</summary>
+          <p class="subtle">
+            <strong>Value Score = ln(positional draft slot ÷ end-of-year position finish).</strong>
+            Positive is good (outperformed draft cost), zero is neutral, and negative is bad (underperformed draft cost).
+            This log form is symmetric, so equal over/under performance has equal-and-opposite impact.
+            Examples: RB10 → RB5 gives ln(2) = +0.693, while RB5 → RB10 gives ln(0.5) = -0.693.
+          </p>
+          <p class="subtle"><strong>Beat Cost Rate:</strong> share of eligible picks that finished better than draft cost.</p>
+          <p class="subtle"><strong>Avg Percentile Δ:</strong> average movement versus positional draft percentile (higher = better value).</p>
+          <p class="subtle"><strong>Late-Round Hit Rate:</strong> success rate on rounds 8+ picks with rankable outcomes.</p>
+        </details>
       </section>
 
-      <section class="cards-grid">
+      <section class="panel" data-detail-level="core">
+        <h2>Highlights</h2>
+        <p class="subtle">Auto-generated summary for the active filters.</p>
+        <ul id="highlightsList" class="insight-list">
+          <li>Loading highlights...</li>
+        </ul>
+      </section>
+
+      <section class="cards-grid" data-detail-level="core">
         <article class="stat-card"><div class="stat-label">Favorite Draft Target</div><div id="favoritePlayer" class="stat-value">-</div><div id="favoritePlayerNote" class="stat-note"></div></article>
         <article class="stat-card"><div class="stat-label">Average Value Score</div><div id="avgScore" class="stat-value">-</div><div class="stat-note">ln(positional draft slot ÷ finish rank)</div></article>
         <article class="stat-card"><div class="stat-label">Strong Picks</div><div id="strongPickRate" class="stat-value">-</div><div class="stat-note">Share of picks with positive value score</div></article>
@@ -156,7 +205,7 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel" data-detail-level="advanced">
         <h2>Year Comparison</h2>
         <p class="subtle">Compare draft classes by value hits, busts, and positional trend strength.</p>
         <div class="table-wrap">
@@ -178,7 +227,7 @@
 
 
 
-      <section class="panel">
+      <section class="panel" data-detail-level="advanced">
         <h2>First-Round Risk Management</h2>
         <p class="subtle">How each manager protects their most important pick (round 1 only).</p>
         <div class="table-wrap">
@@ -217,7 +266,7 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel" data-detail-level="advanced">
         <h2>Auction Analysis (Preview)</h2>
         <p class="subtle">Early view of auction value using positional price order vs finish rank.</p>
         <div class="table-wrap">
@@ -250,6 +299,7 @@
       manager: 'All Managers',
       year: 'All Years',
       position: 'All Positions',
+      viewMode: 'simplified',
       maxYear: null,
       sorts: {
         managerLeaderboard: { key: 'beatCostRate', dir: 'desc' },
@@ -263,6 +313,7 @@
     const managerSelect = document.getElementById('managerSelect');
     const yearSelect = document.getElementById('yearSelect');
     const positionSelect = document.getElementById('positionSelect');
+    const viewModeSelect = document.getElementById('viewModeSelect');
     const statusEl = document.getElementById('status');
 
     function average(values) {
@@ -562,6 +613,47 @@
         `).join('');
     }
 
+    function renderHighlights(filtered) {
+      const list = document.getElementById('highlightsList');
+      const qualified = filtered.filter((r) => r.valueScore != null);
+      if (!qualified.length) {
+        list.innerHTML = '<li>No rank-qualified picks in this filter yet. Try widening the year/position scope.</li>';
+        return;
+      }
+
+      const strongRate = qualified.filter((r) => r.valueScore > 0).length / qualified.length;
+      const topManager = summarizeByManager(filtered)
+        .filter((m) => m.eligiblePicks >= 5)
+        .sort((a, b) => (b.beatCostRate ?? -1) - (a.beatCostRate ?? -1))[0];
+      const topPosition = [...qualified.reduce((map, row) => {
+        if (!map.has(row.position)) map.set(row.position, []);
+        map.get(row.position).push(row.valueScore);
+        return map;
+      }, new Map()).entries()]
+        .map(([position, scores]) => ({ position, avg: average(scores) }))
+        .sort((a, b) => (b.avg ?? -999) - (a.avg ?? -999))[0];
+
+      const strongLabel = strongRate >= 0.55 ? 'mostly positive' : strongRate >= 0.45 ? 'mixed' : 'mostly negative';
+      const managerLine = topManager
+        ? `${topManager.manager} leads this view at ${formatPct(topManager.beatCostRate)} beat-cost rate (${topManager.eligiblePicks} eligible picks).`
+        : 'No manager has at least 5 eligible picks in the current filter.';
+      const positionLine = topPosition
+        ? `${topPosition.position} is the strongest position in this slice (avg value score ${formatScore(topPosition.avg)}).`
+        : 'No position trend is available in this slice.';
+
+      list.innerHTML = `
+        <li>This filter is <strong>${strongLabel}</strong>: ${formatPct(strongRate)} of qualified picks produced positive value.</li>
+        <li>${managerLine}</li>
+        <li>${positionLine}</li>
+      `;
+    }
+
+    function applyViewMode() {
+      document.querySelectorAll('[data-detail-level="advanced"]').forEach((panel) => {
+        panel.classList.toggle('hidden-by-mode', state.viewMode === 'simplified');
+      });
+    }
+
     function renderAuctionBargains(filtered) {
       const tbody = document.getElementById('auctionBargainBody');
       let bargains = filtered
@@ -592,13 +684,15 @@
     function render() {
       const filtered = applyFilters(state.rows);
       renderCards(filtered);
+      renderHighlights(filtered);
       renderManagerLeaderboard(filtered);
       renderYearComparison(filtered);
       renderFirstRoundRisk(filtered);
       renderPositionBreakdown(filtered);
       renderAuctionBargains(filtered);
       refreshSortHeaderUi();
-      statusEl.textContent = `${filtered.length} picks shown • ${filtered.filter((r) => r.valueScore != null).length} with value scores`;
+      statusEl.textContent = `${filtered.length} picks shown • ${filtered.filter((r) => r.valueScore != null).length} with value scores • ${state.viewMode === 'simplified' ? 'Simplified view' : 'Full detail view'}`;
+      applyViewMode();
     }
 
     function wireSortableHeaders() {
@@ -654,6 +748,7 @@
         managerSelect.addEventListener('change', () => { state.manager = managerSelect.value; render(); });
         yearSelect.addEventListener('change', () => { state.year = yearSelect.value; render(); });
         positionSelect.addEventListener('change', () => { state.position = positionSelect.value; render(); });
+        viewModeSelect.addEventListener('change', () => { state.viewMode = viewModeSelect.value; render(); });
 
         render();
       } catch (error) {
