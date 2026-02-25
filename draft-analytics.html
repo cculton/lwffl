@@ -80,6 +80,29 @@
     th.sortable[data-sort-dir='asc']::after { content: ' ↑'; color: var(--accent); }
     th.sortable[data-sort-dir='desc']::after { content: ' ↓'; color: var(--accent); }
     tbody tr:hover { background: rgba(56,189,248,0.05); }
+
+    th[data-tooltip] { position: relative; }
+    th[data-tooltip]:hover::before,
+    th[data-tooltip]:focus-visible::before {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 0;
+      top: calc(100% + 8px);
+      z-index: 20;
+      width: min(320px, 78vw);
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(56,189,248,0.5);
+      background: rgba(2,6,23,0.96);
+      color: var(--text-main);
+      font-size: 0.73rem;
+      line-height: 1.35;
+      text-transform: none;
+      letter-spacing: normal;
+      white-space: normal;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+      pointer-events: none;
+    }
     .ratio-good { color: var(--positive); font-weight: 700; }
     .ratio-mid { color: var(--warning); font-weight: 700; }
     .ratio-bad { color: var(--negative); font-weight: 700; }
@@ -118,7 +141,7 @@
     <div class="container">
       <div class="header">
         <h1>Draft Analytics</h1>
-        <p>Manager tendencies, favorite targets, and draft value scores over time</p>
+        <p>Manager tendencies, value outcomes, and draft value scores over time</p>
       </div>
 
       <div class="controls">
@@ -145,40 +168,8 @@
 
       <div id="status" class="status">Loading draft analytics...</div>
 
-
-
-      <section class="panel" data-detail-level="core">
-        <h2>Quick Start</h2>
-        <p class="subtle">Use three steps: filter first, read the key insights, then scan the manager leaderboard for who consistently beats cost.</p>
-        <ol class="insight-list">
-          <li><strong>Pick a manager/year/position</strong> to keep the sample focused.</li>
-          <li><strong>Read the highlights</strong> panel for plain-language takeaways.</li>
-          <li><strong>Open full detail mode</strong> only when you want year-by-year and auction specifics.</li>
-        </ol>
-        <details class="explainer">
-          <summary>Metric explainer</summary>
-          <p class="subtle">
-            <strong>Value Score = ln(positional draft slot ÷ end-of-year position finish).</strong>
-            Positive is good (outperformed draft cost), zero is neutral, and negative is bad (underperformed draft cost).
-            This log form is symmetric, so equal over/under performance has equal-and-opposite impact.
-            Examples: RB10 → RB5 gives ln(2) = +0.693, while RB5 → RB10 gives ln(0.5) = -0.693.
-          </p>
-          <p class="subtle"><strong>Beat Cost Rate:</strong> share of eligible picks that finished better than draft cost.</p>
-          <p class="subtle"><strong>Avg Percentile Δ:</strong> average movement versus positional draft percentile (higher = better value).</p>
-          <p class="subtle"><strong>Late-Round Hit Rate:</strong> success rate on rounds 8+ picks with rankable outcomes.</p>
-        </details>
-      </section>
-
-      <section class="panel" data-detail-level="core">
-        <h2>Highlights</h2>
-        <p class="subtle">Auto-generated summary for the active filters.</p>
-        <ul id="highlightsList" class="insight-list">
-          <li>Loading highlights...</li>
-        </ul>
-      </section>
-
       <section class="cards-grid" data-detail-level="core">
-        <article class="stat-card"><div class="stat-label">Favorite Draft Target</div><div id="favoritePlayer" class="stat-value">-</div><div id="favoritePlayerNote" class="stat-note"></div></article>
+        <article class="stat-card"><div class="stat-label">Best Value Pick</div><div id="bestValuePick" class="stat-value">-</div><div id="bestValuePickNote" class="stat-note"></div></article>
         <article class="stat-card"><div class="stat-label">Average Value Score</div><div id="avgScore" class="stat-value">-</div><div class="stat-note">ln(positional draft slot ÷ finish rank)</div></article>
         <article class="stat-card"><div class="stat-label">Strong Picks</div><div id="strongPickRate" class="stat-value">-</div><div class="stat-note">Share of picks with positive value score</div></article>
         <article class="stat-card"><div class="stat-label">Qualified Picks</div><div id="qualifiedPicks" class="stat-value">-</div><div class="stat-note">Picks with a known finish rank</div></article>
@@ -267,8 +258,8 @@
       </section>
 
       <section class="panel" data-detail-level="advanced">
-        <h2>Auction Analysis (Preview)</h2>
-        <p class="subtle">Early view of auction value using positional price order vs finish rank.</p>
+        <h2>Best Value Picks in Current Filter</h2>
+        <p class="subtle">Top value picks by value score for the currently selected manager, year, and position filters.</p>
         <div class="table-wrap">
           <table data-sort-table="auctionBargains">
             <thead>
@@ -277,10 +268,10 @@
                 <th class="sortable" data-sort-key="name">Player</th>
                 <th class="sortable" data-sort-key="manager">Manager</th>
                 <th class="sortable" data-sort-key="position">Pos</th>
-                <th class="sortable" data-sort-key="auctionPrice">Price</th>
-                <th class="sortable" data-sort-key="posPriceOrder">Pos Price Order</th>
+                <th class="sortable" data-sort-key="draftType">Draft Type</th>
+                <th class="sortable" data-sort-key="acquisitionCost">Acquisition Cost</th>
                 <th class="sortable" data-sort-key="finishRank">Finish Rank</th>
-                <th class="sortable" data-sort-key="priceVsFinishDelta">Price vs Finish Δ</th>
+                <th class="sortable" data-sort-key="valueScore">Value Score</th>
               </tr>
             </thead>
             <tbody id="auctionBargainBody"></tbody>
@@ -300,13 +291,12 @@
       year: 'All Years',
       position: 'All Positions',
       viewMode: 'simplified',
-      maxYear: null,
       sorts: {
         managerLeaderboard: { key: 'beatCostRate', dir: 'desc' },
         yearComparison: { key: 'year', dir: 'asc' },
         firstRoundRisk: { key: 'hitRate', dir: 'desc' },
         positionBreakdown: { key: 'position', dir: 'asc' },
-        auctionBargains: { key: 'priceVsFinishDelta', dir: 'desc' }
+        auctionBargains: { key: 'valueScore', dir: 'desc' }
       }
     };
 
@@ -328,13 +318,6 @@
       return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
     }
 
-    function getFavoritePlayer(rows) {
-      const counts = new Map();
-      rows.forEach((r) => counts.set(r.name, (counts.get(r.name) || 0) + 1));
-      const entries = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-      if (!entries.length) return { name: '—', count: 0 };
-      return { name: entries[0][0], count: entries[0][1] };
-    }
 
     function scoreClass(score) {
       if (score == null) return '';
@@ -379,10 +362,6 @@
       });
     }
 
-    function shouldIncludeManager(summary, managerRows) {
-      const isActive = managerRows.some((r) => r.year === state.maxYear);
-      return isActive || summary.eligiblePicks >= 50;
-    }
 
     function applyFilters(rows) {
       return rows.filter((row) => {
@@ -416,12 +395,18 @@
 
     function renderCards(filtered) {
       const qualified = filtered.filter((r) => r.valueScore != null);
-      const favorite = getFavoritePlayer(filtered);
       const avgScore = average(qualified.map((r) => r.valueScore));
       const strongCount = qualified.filter((r) => r.valueScore > 0).length;
 
-      document.getElementById('favoritePlayer').textContent = favorite.name;
-      document.getElementById('favoritePlayerNote').textContent = favorite.count ? `${favorite.count} draft selections` : 'No picks in filter';
+      const bestPick = qualified.reduce((best, row) => {
+        if (!best || row.valueScore > best.valueScore) return row;
+        return best;
+      }, null);
+
+      document.getElementById('bestValuePick').textContent = bestPick ? bestPick.name : '—';
+      document.getElementById('bestValuePickNote').textContent = bestPick
+        ? `${bestPick.manager} • ${bestPick.year} ${bestPick.position} • ${formatScore(bestPick.valueScore)}`
+        : 'No qualified picks in filter';
       document.getElementById('avgScore').textContent = formatScore(avgScore);
       document.getElementById('strongPickRate').textContent = qualified.length ? `${((strongCount / qualified.length) * 100).toFixed(1)}%` : '—';
       document.getElementById('qualifiedPicks').textContent = String(qualified.length);
@@ -451,7 +436,7 @@
           bestPosition,
           bestScore
         };
-      }).filter((item) => shouldIncludeManager({ eligiblePicks: item.eligiblePicks }, grouped.get(item.manager) || []));
+      });
 
       leaderboard = sortRows(leaderboard, 'managerLeaderboard').map((item, idx) => ({ ...item, rank: idx + 1 }));
 
@@ -557,7 +542,7 @@
           avgPercentileDelta: average(eligible.map((r) => r.percentileDelta).filter((v) => v != null)),
           eligiblePicks: eligible.length
         };
-      }).filter((item) => shouldIncludeManager({ eligiblePicks: item.eligiblePicks }, grouped.get(item.manager) || []));
+      });
 
       rows = sortRows(rows, 'firstRoundRisk');
 
@@ -613,41 +598,6 @@
         `).join('');
     }
 
-    function renderHighlights(filtered) {
-      const list = document.getElementById('highlightsList');
-      const qualified = filtered.filter((r) => r.valueScore != null);
-      if (!qualified.length) {
-        list.innerHTML = '<li>No rank-qualified picks in this filter yet. Try widening the year/position scope.</li>';
-        return;
-      }
-
-      const strongRate = qualified.filter((r) => r.valueScore > 0).length / qualified.length;
-      const topManager = summarizeByManager(filtered)
-        .filter((m) => m.eligiblePicks >= 5)
-        .sort((a, b) => (b.beatCostRate ?? -1) - (a.beatCostRate ?? -1))[0];
-      const topPosition = [...qualified.reduce((map, row) => {
-        if (!map.has(row.position)) map.set(row.position, []);
-        map.get(row.position).push(row.valueScore);
-        return map;
-      }, new Map()).entries()]
-        .map(([position, scores]) => ({ position, avg: average(scores) }))
-        .sort((a, b) => (b.avg ?? -999) - (a.avg ?? -999))[0];
-
-      const strongLabel = strongRate >= 0.55 ? 'mostly positive' : strongRate >= 0.45 ? 'mixed' : 'mostly negative';
-      const managerLine = topManager
-        ? `${topManager.manager} leads this view at ${formatPct(topManager.beatCostRate)} beat-cost rate (${topManager.eligiblePicks} eligible picks).`
-        : 'No manager has at least 5 eligible picks in the current filter.';
-      const positionLine = topPosition
-        ? `${topPosition.position} is the strongest position in this slice (avg value score ${formatScore(topPosition.avg)}).`
-        : 'No position trend is available in this slice.';
-
-      list.innerHTML = `
-        <li>This filter is <strong>${strongLabel}</strong>: ${formatPct(strongRate)} of qualified picks produced positive value.</li>
-        <li>${managerLine}</li>
-        <li>${positionLine}</li>
-      `;
-    }
-
     function applyViewMode() {
       document.querySelectorAll('[data-detail-level="advanced"]').forEach((panel) => {
         panel.classList.toggle('hidden-by-mode', state.viewMode === 'simplified');
@@ -657,13 +607,19 @@
     function renderAuctionBargains(filtered) {
       const tbody = document.getElementById('auctionBargainBody');
       let bargains = filtered
-        .filter((row) => row.priceVsFinishDelta != null)
-        .map((row) => ({ ...row }));
+        .filter((row) => row.valueScore != null)
+        .map((row) => ({
+          ...row,
+          draftType: row.auctionPrice == null ? 'Snake' : 'Auction',
+          acquisitionCost: row.auctionPrice == null
+            ? `Round ${row.round ?? '—'}${row.overall != null ? ` (Pick ${row.overall})` : ''}`
+            : `$${row.auctionPrice}`
+        }));
 
-      bargains = sortRows(bargains, 'auctionBargains').slice(0, 15);
+      bargains = sortRows(bargains, 'auctionBargains').slice(0, 25);
 
       if (!bargains.length) {
-        tbody.innerHTML = '<tr><td colspan="8">No auction price data available for this filter.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8">No value-score data available for this filter.</td></tr>';
         return;
       }
 
@@ -673,10 +629,10 @@
           <td>${row.name}</td>
           <td>${row.manager}</td>
           <td>${row.position}</td>
-          <td>${row.auctionPrice == null ? '—' : `$${row.auctionPrice}`}</td>
-          <td>${row.posPriceOrder}</td>
+          <td>${row.draftType}</td>
+          <td>${row.acquisitionCost}</td>
           <td>${row.finishRank ?? '—'}</td>
-          <td class="${scoreClass(row.priceVsFinishDelta / 10)}">${formatScore(row.priceVsFinishDelta, 1)}</td>
+          <td class="${scoreClass(row.valueScore)}">${formatScore(row.valueScore, 3)}</td>
         </tr>
       `).join('');
     }
@@ -684,7 +640,6 @@
     function render() {
       const filtered = applyFilters(state.rows);
       renderCards(filtered);
-      renderHighlights(filtered);
       renderManagerLeaderboard(filtered);
       renderYearComparison(filtered);
       renderFirstRoundRisk(filtered);
@@ -693,6 +648,67 @@
       refreshSortHeaderUi();
       statusEl.textContent = `${filtered.length} picks shown • ${filtered.filter((r) => r.valueScore != null).length} with value scores • ${state.viewMode === 'simplified' ? 'Simplified view' : 'Full detail view'}`;
       applyViewMode();
+    }
+
+
+    const columnExplainers = {
+      managerLeaderboard: {
+        rank: 'Sort rank after applying current table sort settings.',
+        manager: 'Draft manager/owner for the selected slice.',
+        beatCostRate: 'Share of rank-eligible picks that beat draft cost. Equation: Beat Cost Rate = beatCost picks / eligible picks.',
+        avgPercentileDelta: 'Average movement versus draft percentile. Equation: Avg Percentile Δ = mean(finishPercentile − draftPercentile). Positive is better.',
+        bestPosition: "Manager's strongest core position (QB/RB/WR/TE) by average percentile delta.",
+        lateRoundHitRate: 'How often round 8+ picks beat cost. Equation: Late-Round Hit Rate = late-round beatCost picks / late-round eligible picks.',
+        eligiblePicks: 'Count of picks with a valid positional finish rank used in rate calculations.'
+      },
+      yearComparison: {
+        year: 'Draft season represented by the aggregated row.',
+        hits: 'Number of eligible picks that beat draft cost in that season.',
+        busts: 'Number of eligible picks that missed draft cost in that season.',
+        hitRate: 'Season success rate. Equation: Hit Rate = value hits / eligible picks.',
+        bustRate: 'Season miss rate. Equation: Bust Rate = busts / eligible picks.',
+        topPosScore: 'Position with the strongest average percentile trend for that year.'
+      },
+      firstRoundRisk: {
+        manager: 'Draft manager/owner for the selected slice.',
+        firstRoundPicks: 'Total number of round-1 selections in the filter.',
+        hitRate: 'Round-1 picks that met or beat cost. Equation: Hit Rate = (metCost + beatCost picks) / eligible round-1 picks.',
+        safetyRate: 'Round-1 picks that avoided a major bust (worse than −10 rank delta). Equation: Safety Rate = safe round-1 picks / eligible round-1 picks.',
+        bustRate: 'Major bust frequency for round-1 picks. Equation: Bust Rate = major bust round-1 picks / eligible round-1 picks.',
+        avgPercentileDelta: 'Average percentile movement for eligible round-1 picks (positive is better).'
+      },
+      positionBreakdown: {
+        position: 'Fantasy position bucket for the filtered picks.',
+        picks: 'Number of qualified picks at this position.',
+        avgScore: 'Mean value score. Equation: Avg Score = mean(ln(positional draft slot / finish rank)).',
+        medianScore: 'Median of value score values to reduce outlier influence.',
+        strongRate: 'Share of picks with positive value score. Equation: Strong Picks = positive-score picks / total picks.'
+      },
+      auctionBargains: {
+        year: 'Draft season for this pick.',
+        name: 'Player selected in either snake or auction format.',
+        manager: 'Manager who drafted the player.',
+        position: 'Player position bucket used in value calculations.',
+        draftType: 'Draft format for that pick (Snake or Auction).',
+        acquisitionCost: 'How the player was acquired: snake round/pick or auction dollar cost.',
+        finishRank: 'End-of-year positional finish rank.',
+        valueScore: 'Primary value metric. Equation: Value Score = ln(positional draft slot ÷ finish rank). Higher is better.'
+      }
+    };
+
+    function applyColumnExplainers() {
+      document.querySelectorAll('table[data-sort-table]').forEach((table) => {
+        const tableKey = table.dataset.sortTable;
+        const explainers = columnExplainers[tableKey] || {};
+        table.querySelectorAll('th[data-sort-key]').forEach((th) => {
+          const key = th.dataset.sortKey;
+          const text = explainers[key];
+          if (!text) return;
+          th.dataset.tooltip = text;
+          th.title = text;
+          th.tabIndex = 0;
+        });
+      });
     }
 
     function wireSortableHeaders() {
@@ -715,8 +731,10 @@
 
     function populateSelectors(rows) {
       const managers = [...new Set(rows.map((r) => r.manager))].sort();
-      const years = [...new Set(rows.map((r) => r.year))].sort((a, b) => a - b);
-      const positions = [...new Set(rows.map((r) => r.position))].sort();
+      const years = [...new Set(rows.map((r) => r.year))].sort((a, b) => b - a);
+      const orderedCorePositions = ['QB', 'RB', 'WR', 'TE'];
+      const seenPositions = new Set(rows.map((r) => r.position));
+      const positions = orderedCorePositions.filter((position) => seenPositions.has(position));
 
       managerSelect.innerHTML = `<option>All Managers</option>${managers.map((m) => `<option>${m}</option>`).join('')}`;
       yearSelect.innerHTML = `<option>All Years</option>${years.map((y) => `<option>${y}</option>`).join('')}`;
@@ -741,10 +759,10 @@
           };
         });
 
-        state.maxYear = Math.max(...state.rows.map((r) => Number(r.year)).filter((y) => Number.isFinite(y)));
 
         populateSelectors(state.rows);
         wireSortableHeaders();
+        applyColumnExplainers();
         managerSelect.addEventListener('change', () => { state.manager = managerSelect.value; render(); });
         yearSelect.addEventListener('change', () => { state.year = yearSelect.value; render(); });
         positionSelect.addEventListener('change', () => { state.position = positionSelect.value; render(); });
