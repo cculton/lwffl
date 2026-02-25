@@ -78,6 +78,27 @@
     .panel h2 { font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
     .subtle { color: var(--text-soft); font-size: 0.8rem; margin-bottom: 12px; }
     .table-wrap { width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid rgba(55,65,81,0.5); }
+    .table-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 10px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    .table-pagination button {
+      background: #0b1120;
+      color: var(--text-main);
+      border: 1px solid rgba(75,85,99,0.8);
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+    .table-pagination button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
     table { width: 100%; border-collapse: collapse; min-width: 900px; font-size: 0.86rem; }
     th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid rgba(55,65,81,0.3); }
     th { background: rgba(30,41,59,0.7); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.69rem; }
@@ -178,18 +199,18 @@
 
       <section class="panel">
         <h2>Manager Leaderboard</h2>
-        <p class="subtle">Managers ranked by beat-cost rate, avg percentile gain, and filtered risk control.</p>
+        <p class="subtle">Managers ranked by relative gain vs league average, beat-cost efficiency, and filtered risk control.</p>
         <div class="table-wrap">
           <table data-sort-table="managerLeaderboard">
             <thead>
               <tr>
                 <th class="sortable" data-sort-key="rank">Rank</th>
                 <th class="sortable" data-sort-key="manager">Manager</th>
+                <th class="sortable" data-sort-key="relativeGain">Relative Gain</th>
                 <th class="sortable" data-sort-key="beatCostRate">Beat Cost Rate</th>
-                <th class="sortable" data-sort-key="avgPercentileDelta">Avg Percentile Δ</th>
-                <th class="sortable" data-sort-key="bestPosition">Best Position</th>
                 <th class="sortable" data-sort-key="safetyRate">Safety Rate</th>
                 <th class="sortable" data-sort-key="bustRate">Bust Rate</th>
+                <th class="sortable" data-sort-key="bestPosition">Best Position</th>
                 <th class="sortable" data-sort-key="eligiblePicks">Eligible Picks</th>
               </tr>
             </thead>
@@ -257,6 +278,11 @@
             <tbody id="auctionBargainBody"></tbody>
           </table>
         </div>
+        <div class="table-pagination" id="auctionBargainsPagination">
+          <button id="auctionBargainsPrev" type="button">Previous</button>
+          <span id="auctionBargainsPageInfo">Page 1 of 1</span>
+          <button id="auctionBargainsNext" type="button">Next</button>
+        </div>
       </section>
     </div>
   </div>
@@ -272,17 +298,22 @@
       position: [],
       roundCost: [],
       sorts: {
-        managerLeaderboard: { key: 'beatCostRate', dir: 'desc' },
+        managerLeaderboard: { key: 'relativeGain', dir: 'desc' },
         yearComparison: { key: 'year', dir: 'desc' },
         positionBreakdown: { key: 'position', dir: 'asc' },
         auctionBargains: { key: 'valueScore', dir: 'desc' }
-      }
+      },
+      auctionBargainsPage: 1,
+      auctionBargainsPageSize: 25
     };
 
     const managerSelect = document.getElementById('managerSelect');
     const yearSelect = document.getElementById('yearSelect');
     const positionSelect = document.getElementById('positionSelect');
     const roundCostSelect = document.getElementById('roundCostSelect');
+    const auctionBargainsPrev = document.getElementById('auctionBargainsPrev');
+    const auctionBargainsNext = document.getElementById('auctionBargainsNext');
+    const auctionBargainsPageInfo = document.getElementById('auctionBargainsPageInfo');
     const statusEl = document.getElementById('status');
     const ALL_OPTION_VALUE = '__ALL__';
 
@@ -328,6 +359,10 @@
 
     function formatPct(value) {
       return value == null ? '—' : `${(value * 100).toFixed(1)}%`;
+    }
+
+    function formatDelta(value) {
+      return value == null ? '—' : `${value >= 0 ? '+' : ''}${value.toFixed(2)}`;
     }
 
     function compareValues(a, b) {
@@ -515,6 +550,17 @@
         };
       });
 
+      const leagueAverageMetric = average(filtered
+        .filter((row) => row.percentileDelta != null)
+        .map((row) => row.percentileDelta));
+
+      leaderboard = leaderboard.map((item) => ({
+        ...item,
+        relativeGain: item.avgPercentileDelta != null && leagueAverageMetric != null
+          ? item.avgPercentileDelta - leagueAverageMetric
+          : null
+      }));
+
       leaderboard = sortRows(leaderboard, 'managerLeaderboard').map((item, idx) => ({ ...item, rank: idx + 1 }));
 
       if (!leaderboard.length) {
@@ -522,17 +568,17 @@
         return;
       }
 
-      const percentileBounds = minMax(leaderboard.map((item) => item.avgPercentileDelta).filter((v) => v != null));
+      const relativeGainBounds = minMax(leaderboard.map((item) => item.relativeGain).filter((v) => v != null));
 
       tbody.innerHTML = leaderboard.map((item) => `
         <tr>
           <td>${item.rank}</td>
           <td>${item.manager}</td>
+          <td style="color: ${valueToHeatColor(item.relativeGain, relativeGainBounds.min, relativeGainBounds.max)}">${formatDelta(item.relativeGain)}</td>
           <td>${formatPct(item.beatCostRate)}</td>
-          <td style="color: ${valueToHeatColor(item.avgPercentileDelta, percentileBounds.min, percentileBounds.max)}">${formatScore(item.avgPercentileDelta)}</td>
-          <td>${item.bestPosition} (${formatScore(item.bestScore)})</td>
           <td>${formatPct(item.safetyRate)}</td>
           <td>${formatPct(item.bustRate)}</td>
+          <td>${item.bestPosition} (${formatScore(item.bestScore)})</td>
           <td>${item.eligiblePicks}</td>
         </tr>
       `).join('');
@@ -645,14 +691,23 @@
             : `$${row.auctionPrice}`
         }));
 
-      bargains = sortRows(bargains, 'auctionBargains').slice(0, 25);
+      bargains = sortRows(bargains, 'auctionBargains');
+
+      const totalPages = Math.max(1, Math.ceil(bargains.length / state.auctionBargainsPageSize));
+      state.auctionBargainsPage = Math.min(state.auctionBargainsPage, totalPages);
+      const startIdx = (state.auctionBargainsPage - 1) * state.auctionBargainsPageSize;
+      const pagedBargains = bargains.slice(startIdx, startIdx + state.auctionBargainsPageSize);
+
+      auctionBargainsPageInfo.textContent = `Page ${state.auctionBargainsPage} of ${totalPages}`;
+      auctionBargainsPrev.disabled = state.auctionBargainsPage <= 1;
+      auctionBargainsNext.disabled = state.auctionBargainsPage >= totalPages;
 
       if (!bargains.length) {
         tbody.innerHTML = '<tr><td colspan="8">No value-score data available for this filter.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = bargains.map((row) => `
+      tbody.innerHTML = pagedBargains.map((row) => `
         <tr>
           <td>${row.year}</td>
           <td>${row.name}</td>
@@ -660,7 +715,7 @@
           <td>${row.position}</td>
           <td>${row.draftType}</td>
           <td>${row.acquisitionCost}</td>
-          <td>${row.finishRank ?? '—'}</td>
+          <td>${row.finishRank ?? 'Unranked'}</td>
           <td class="${scoreClass(row.valueScore)}">${formatScore(row.valueScore, 3)}</td>
         </tr>
       `).join('');
@@ -682,12 +737,12 @@
       managerLeaderboard: {
         rank: 'Sort rank after applying current table sort settings.',
         manager: 'Draft manager/owner for the selected slice.',
+        relativeGain: 'Relative Draft Gain = manager avg percentile delta − league avg percentile delta for current filters. Positive means above league average.',
         beatCostRate: 'Share of rank-eligible picks that beat draft cost. Equation: Beat Cost Rate = beatCost picks / eligible picks.',
-        avgPercentileDelta: 'Average movement versus draft percentile. Equation: Avg Percentile Δ = mean(finishPercentile − draftPercentile). Positive is better.',
         bestPosition: "Manager's strongest core position (QB/RB/WR/TE) by average percentile delta.",
         safetyRate: 'How often filtered eligible picks avoided a major bust (worse than −10 rank delta). Equation: Safety Rate = safe eligible picks / eligible picks.',
         bustRate: 'Major bust frequency for filtered eligible picks. Equation: Bust Rate = major-bust eligible picks / eligible picks.',
-        eligiblePicks: 'Count of picks with a valid positional finish rank used in rate calculations.'
+        eligiblePicks: 'Count of rank-eligible picks used in rate calculations; unranked core-position finishes are treated as worst-case finishes.'
       },
       yearComparison: {
         year: 'Draft season represented by the aggregated row.',
@@ -743,6 +798,7 @@
             current.key = key;
             current.dir = key === 'manager' || key === 'position' || key === 'name' ? 'asc' : 'desc';
           }
+          if (tableKey === 'auctionBargains') state.auctionBargainsPage = 1;
           render();
         });
       });
@@ -796,10 +852,19 @@
         populateSelectors(state.rows);
         wireSortableHeaders();
         applyColumnExplainers();
-        managerSelect.addEventListener('change', () => { state.manager = normalizeSelection(getSelectedValues(managerSelect)); render(); });
-        yearSelect.addEventListener('change', () => { state.year = normalizeSelection(getSelectedValues(yearSelect)); render(); });
-        positionSelect.addEventListener('change', () => { state.position = normalizeSelection(getSelectedValues(positionSelect)); render(); });
-        roundCostSelect.addEventListener('change', () => { state.roundCost = normalizeSelection(getSelectedValues(roundCostSelect)); render(); });
+        managerSelect.addEventListener('change', () => { state.manager = normalizeSelection(getSelectedValues(managerSelect)); state.auctionBargainsPage = 1; render(); });
+        yearSelect.addEventListener('change', () => { state.year = normalizeSelection(getSelectedValues(yearSelect)); state.auctionBargainsPage = 1; render(); });
+        positionSelect.addEventListener('change', () => { state.position = normalizeSelection(getSelectedValues(positionSelect)); state.auctionBargainsPage = 1; render(); });
+        roundCostSelect.addEventListener('change', () => { state.roundCost = normalizeSelection(getSelectedValues(roundCostSelect)); state.auctionBargainsPage = 1; render(); });
+        auctionBargainsPrev.addEventListener('click', () => {
+          if (state.auctionBargainsPage <= 1) return;
+          state.auctionBargainsPage -= 1;
+          render();
+        });
+        auctionBargainsNext.addEventListener('click', () => {
+          state.auctionBargainsPage += 1;
+          render();
+        });
 
         render();
       } catch (error) {
