@@ -441,6 +441,11 @@
       });
     }
 
+    function getRoundCostBucket(row) {
+      if (row.auctionPrice == null) return row.round ?? null;
+      return row.posPriceOrder ?? null;
+    }
+
     function getBestCorePosition(rows) {
       const core = ['QB', 'RB', 'WR', 'TE'];
       const byPos = new Map();
@@ -749,6 +754,20 @@
       const orderedCorePositions = ['QB', 'RB', 'WR', 'TE'];
       const seenPositions = new Set(rows.map((r) => r.position));
       const positions = orderedCorePositions.filter((position) => seenPositions.has(position));
+      const roundCosts = [...new Set(rows.map((r) => getRoundCostBucket(r)).filter((v) => Number.isFinite(v) && v > 0))]
+        .sort((a, b) => a - b)
+        .map(String);
+
+      managerSelect.innerHTML = managers.map((m) => `<option value="${m}" selected>${m}</option>`).join('');
+      yearSelect.innerHTML = years.map((y) => `<option value="${y}" selected>${y}</option>`).join('');
+      positionSelect.innerHTML = positions.map((p) => `<option value="${p}" selected>${p}</option>`).join('');
+      roundCostSelect.innerHTML = roundCosts.map((rc) => `<option value="${rc}" selected>${rc}</option>`).join('');
+
+      state.manager = [...managers];
+      state.year = years.map(String);
+      state.position = [...positions];
+      state.roundCost = [...roundCosts];
+    }
 
       managerSelect.innerHTML = `<option value="${ALL_OPTION_VALUE}" selected>All Managers</option>${managers.map((m) => `<option value="${m}">${m}</option>`).join('')}`;
       yearSelect.innerHTML = `<option value="${ALL_OPTION_VALUE}" selected>All Years</option>${years.map((y) => `<option value="${y}">${y}</option>`).join('')}`;
