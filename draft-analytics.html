@@ -75,6 +75,10 @@
     table { width: 100%; border-collapse: collapse; min-width: 900px; font-size: 0.86rem; }
     th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid rgba(55,65,81,0.3); }
     th { background: rgba(30,41,59,0.7); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.69rem; }
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable::after { content: ' ↕'; color: var(--text-soft); font-size: 0.75em; }
+    th.sortable[data-sort-dir='asc']::after { content: ' ↑'; color: var(--accent); }
+    th.sortable[data-sort-dir='desc']::after { content: ' ↓'; color: var(--accent); }
     tbody tr:hover { background: rgba(56,189,248,0.05); }
     .ratio-good { color: var(--positive); font-weight: 700; }
     .ratio-mid { color: var(--warning); font-weight: 700; }
@@ -135,16 +139,16 @@
         <h2>Manager Leaderboard</h2>
         <p class="subtle">Managers ranked by beat-cost rate, avg percentile gain, and late-round success (round 8+).</p>
         <div class="table-wrap">
-          <table>
+          <table data-sort-table="managerLeaderboard">
             <thead>
               <tr>
-                <th>Rank</th>
-                <th>Manager</th>
-                <th>Beat Cost Rate</th>
-                <th>Avg Percentile Δ</th>
-                <th>Best Position</th>
-                <th>Late-Round Hit Rate</th>
-                <th>Eligible Picks</th>
+                <th class="sortable" data-sort-key="rank">Rank</th>
+                <th class="sortable" data-sort-key="manager">Manager</th>
+                <th class="sortable" data-sort-key="beatCostRate">Beat Cost Rate</th>
+                <th class="sortable" data-sort-key="avgPercentileDelta">Avg Percentile Δ</th>
+                <th class="sortable" data-sort-key="bestPosition">Best Position</th>
+                <th class="sortable" data-sort-key="lateRoundHitRate">Late-Round Hit Rate</th>
+                <th class="sortable" data-sort-key="eligiblePicks">Eligible Picks</th>
               </tr>
             </thead>
             <tbody id="managerLeaderboardBody"></tbody>
@@ -156,18 +160,40 @@
         <h2>Year Comparison</h2>
         <p class="subtle">Compare draft classes by value hits, busts, and positional trend strength.</p>
         <div class="table-wrap">
-          <table>
+          <table data-sort-table="yearComparison">
             <thead>
               <tr>
-                <th>Year</th>
-                <th>Value Hits</th>
-                <th>Busts</th>
-                <th>Hit Rate</th>
-                <th>Bust Rate</th>
-                <th>Top Position Trend</th>
+                <th class="sortable" data-sort-key="year">Year</th>
+                <th class="sortable" data-sort-key="hits">Value Hits</th>
+                <th class="sortable" data-sort-key="busts">Busts</th>
+                <th class="sortable" data-sort-key="hitRate">Hit Rate</th>
+                <th class="sortable" data-sort-key="bustRate">Bust Rate</th>
+                <th class="sortable" data-sort-key="topPosScore">Top Position Trend</th>
               </tr>
             </thead>
             <tbody id="yearComparisonBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+
+
+      <section class="panel">
+        <h2>First-Round Risk Management</h2>
+        <p class="subtle">How each manager protects their most important pick (round 1 only).</p>
+        <div class="table-wrap">
+          <table data-sort-table="firstRoundRisk">
+            <thead>
+              <tr>
+                <th class="sortable" data-sort-key="manager">Manager</th>
+                <th class="sortable" data-sort-key="firstRoundPicks">1st-Round Picks</th>
+                <th class="sortable" data-sort-key="hitRate">Hit Rate</th>
+                <th class="sortable" data-sort-key="safetyRate">Safety Rate</th>
+                <th class="sortable" data-sort-key="bustRate">Bust Rate</th>
+                <th class="sortable" data-sort-key="avgPercentileDelta">Avg Percentile Δ</th>
+              </tr>
+            </thead>
+            <tbody id="firstRoundRiskBody"></tbody>
           </table>
         </div>
       </section>
@@ -176,14 +202,14 @@
         <h2>Position Breakdown</h2>
         <p class="subtle">How efficiently each position was drafted in the filtered sample (higher score is better).</p>
         <div class="table-wrap">
-          <table>
+          <table data-sort-table="positionBreakdown">
             <thead>
               <tr>
-                <th>Position</th>
-                <th>Picks</th>
-                <th>Avg Score</th>
-                <th>Median Score</th>
-                <th>Strong Picks</th>
+                <th class="sortable" data-sort-key="position">Position</th>
+                <th class="sortable" data-sort-key="picks">Picks</th>
+                <th class="sortable" data-sort-key="avgScore">Avg Score</th>
+                <th class="sortable" data-sort-key="medianScore">Median Score</th>
+                <th class="sortable" data-sort-key="strongRate">Strong Picks</th>
               </tr>
             </thead>
             <tbody id="positionBreakdownBody"></tbody>
@@ -195,17 +221,17 @@
         <h2>Auction Analysis (Preview)</h2>
         <p class="subtle">Early view of auction value using positional price order vs finish rank.</p>
         <div class="table-wrap">
-          <table>
+          <table data-sort-table="auctionBargains">
             <thead>
               <tr>
-                <th>Year</th>
-                <th>Player</th>
-                <th>Manager</th>
-                <th>Pos</th>
-                <th>Price</th>
-                <th>Pos Price Order</th>
-                <th>Finish Rank</th>
-                <th>Price vs Finish Δ</th>
+                <th class="sortable" data-sort-key="year">Year</th>
+                <th class="sortable" data-sort-key="name">Player</th>
+                <th class="sortable" data-sort-key="manager">Manager</th>
+                <th class="sortable" data-sort-key="position">Pos</th>
+                <th class="sortable" data-sort-key="auctionPrice">Price</th>
+                <th class="sortable" data-sort-key="posPriceOrder">Pos Price Order</th>
+                <th class="sortable" data-sort-key="finishRank">Finish Rank</th>
+                <th class="sortable" data-sort-key="priceVsFinishDelta">Price vs Finish Δ</th>
               </tr>
             </thead>
             <tbody id="auctionBargainBody"></tbody>
@@ -219,7 +245,20 @@
   <script type="module">
     import { enrichDraftEntries, summarizeByManager, summarizeByYear } from './draft-metrics.mjs';
 
-    const state = { rows: [], manager: 'All Managers', year: 'All Years', position: 'All Positions' };
+    const state = {
+      rows: [],
+      manager: 'All Managers',
+      year: 'All Years',
+      position: 'All Positions',
+      maxYear: null,
+      sorts: {
+        managerLeaderboard: { key: 'beatCostRate', dir: 'desc' },
+        yearComparison: { key: 'year', dir: 'asc' },
+        firstRoundRisk: { key: 'hitRate', dir: 'desc' },
+        positionBreakdown: { key: 'position', dir: 'asc' },
+        auctionBargains: { key: 'priceVsFinishDelta', dir: 'desc' }
+      }
+    };
 
     const managerSelect = document.getElementById('managerSelect');
     const yearSelect = document.getElementById('yearSelect');
@@ -259,6 +298,39 @@
 
     function formatPct(value) {
       return value == null ? '—' : `${(value * 100).toFixed(1)}%`;
+    }
+
+    function compareValues(a, b) {
+      if (a == null && b == null) return 0;
+      if (a == null) return 1;
+      if (b == null) return -1;
+      if (typeof a === 'number' && typeof b === 'number') return a - b;
+      return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' });
+    }
+
+    function sortRows(rows, tableKey) {
+      const sort = state.sorts[tableKey];
+      if (!sort) return rows;
+      const direction = sort.dir === 'asc' ? 1 : -1;
+      return [...rows].sort((a, b) => {
+        const base = compareValues(a[sort.key], b[sort.key]);
+        if (base !== 0) return base * direction;
+        return compareValues(a.manager || a.name || a.position || a.year, b.manager || b.name || b.position || b.year);
+      });
+    }
+
+    function refreshSortHeaderUi() {
+      document.querySelectorAll('th.sortable').forEach((th) => {
+        const table = th.closest('table')?.dataset.sortTable;
+        const key = th.dataset.sortKey;
+        const active = table && state.sorts[table] && state.sorts[table].key === key;
+        th.dataset.sortDir = active ? state.sorts[table].dir : '';
+      });
+    }
+
+    function shouldIncludeManager(summary, managerRows) {
+      const isActive = managerRows.some((r) => r.year === state.maxYear);
+      return isActive || summary.eligiblePicks >= 50;
     }
 
     function applyFilters(rows) {
@@ -312,7 +384,7 @@
         grouped.get(row.manager).push(row);
       });
 
-      const leaderboard = summarizeByManager(filtered).map((summary) => {
+      let leaderboard = summarizeByManager(filtered).map((summary) => {
         const managerRows = grouped.get(summary.manager) || [];
         const lateRows = managerRows.filter((r) => r.round >= 8 && r.isRankEligible);
         const lateHits = lateRows.filter((r) => r.beatCost).length;
@@ -328,22 +400,18 @@
           bestPosition,
           bestScore
         };
-      }).sort((a, b) => {
-        const beatDiff = (b.beatCostRate ?? -1) - (a.beatCostRate ?? -1);
-        if (Math.abs(beatDiff) > 1e-9) return beatDiff;
-        const pctDiff = (b.avgPercentileDelta ?? -99) - (a.avgPercentileDelta ?? -99);
-        if (Math.abs(pctDiff) > 1e-9) return pctDiff;
-        return a.manager.localeCompare(b.manager);
-      });
+      }).filter((item) => shouldIncludeManager({ eligiblePicks: item.eligiblePicks }, grouped.get(item.manager) || []));
+
+      leaderboard = sortRows(leaderboard, 'managerLeaderboard').map((item, idx) => ({ ...item, rank: idx + 1 }));
 
       if (!leaderboard.length) {
         tbody.innerHTML = '<tr><td colspan="7">No manager data for this filter.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = leaderboard.map((item, idx) => `
+      tbody.innerHTML = leaderboard.map((item) => `
         <tr>
-          <td>${idx + 1}</td>
+          <td>${item.rank}</td>
           <td>${item.manager}</td>
           <td>${formatPct(item.beatCostRate)}</td>
           <td class="${scoreClass(item.avgPercentileDelta)}">${formatScore(item.avgPercentileDelta)}</td>
@@ -362,7 +430,7 @@
         byYearRows.get(row.year).push(row);
       });
 
-      const rows = summarizeByYear(filtered).map((summary) => {
+      let rows = summarizeByYear(filtered).map((summary) => {
         const yearRows = byYearRows.get(summary.year) || [];
         const eligible = yearRows.filter((r) => r.isRankEligible);
         const hits = eligible.filter((r) => r.beatCost).length;
@@ -393,7 +461,9 @@
           topPos,
           topPosScore
         };
-      }).sort((a, b) => Number(a.year) - Number(b.year));
+      });
+
+      rows = sortRows(rows, 'yearComparison');
 
       if (!rows.length) {
         tbody.innerHTML = '<tr><td colspan="6">No yearly data for this filter.</td></tr>';
@@ -412,6 +482,51 @@
       `).join('');
     }
 
+    function renderFirstRoundRisk(filtered) {
+      const tbody = document.getElementById('firstRoundRiskBody');
+      const grouped = new Map();
+      filtered.forEach((row) => {
+        if (row.round !== 1) return;
+        if (!grouped.has(row.manager)) grouped.set(row.manager, []);
+        grouped.get(row.manager).push(row);
+      });
+
+      let rows = [...grouped.entries()].map(([manager, managerRows]) => {
+        const eligible = managerRows.filter((r) => r.isRankEligible);
+        const metOrBeat = eligible.filter((r) => r.metCost || r.beatCost).length;
+        const majorBusts = eligible.filter((r) => r.posRankDelta != null && r.posRankDelta <= -10).length;
+        const safe = eligible.filter((r) => !(r.posRankDelta != null && r.posRankDelta <= -10)).length;
+
+        return {
+          manager,
+          firstRoundPicks: managerRows.length,
+          hitRate: eligible.length ? metOrBeat / eligible.length : null,
+          safetyRate: eligible.length ? safe / eligible.length : null,
+          bustRate: eligible.length ? majorBusts / eligible.length : null,
+          avgPercentileDelta: average(eligible.map((r) => r.percentileDelta).filter((v) => v != null)),
+          eligiblePicks: eligible.length
+        };
+      }).filter((item) => shouldIncludeManager({ eligiblePicks: item.eligiblePicks }, grouped.get(item.manager) || []));
+
+      rows = sortRows(rows, 'firstRoundRisk');
+
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="6">No first-round data for this filter.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = rows.map((item) => `
+        <tr>
+          <td>${item.manager}</td>
+          <td>${item.firstRoundPicks}</td>
+          <td>${formatPct(item.hitRate)}</td>
+          <td>${formatPct(item.safetyRate)}</td>
+          <td>${formatPct(item.bustRate)}</td>
+          <td class="${scoreClass(item.avgPercentileDelta)}">${formatScore(item.avgPercentileDelta)}</td>
+        </tr>
+      `).join('');
+    }
+
     function renderPositionBreakdown(filtered) {
       const tbody = document.getElementById('positionBreakdownBody');
       const grouped = new Map();
@@ -421,34 +536,39 @@
         grouped.get(row.position).push(row.valueScore);
       });
 
-      const rows = [...grouped.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+      let rows = [...grouped.entries()].map(([position, scores]) => {
+        const avgScore = average(scores);
+        const medianScore = median(scores);
+        const strong = scores.filter((r) => r > 0).length;
+        const strongRate = scores.length ? strong / scores.length : null;
+        return { position, picks: scores.length, avgScore, medianScore, strong, strongRate };
+      });
+
+      rows = sortRows(rows, 'positionBreakdown');
+
       if (!rows.length) {
         tbody.innerHTML = '<tr><td colspan="5">No qualified picks available for this filter.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = rows.map(([position, scores]) => {
-        const avgScore = average(scores);
-        const medianScore = median(scores);
-        const strong = scores.filter((r) => r > 0).length;
-        return `
+      tbody.innerHTML = rows.map((item) => `
           <tr>
-            <td>${position}</td>
-            <td>${scores.length}</td>
-            <td class="${scoreClass(avgScore)}">${formatScore(avgScore)}</td>
-            <td class="${scoreClass(medianScore)}">${formatScore(medianScore)}</td>
-            <td>${strong} (${((strong / scores.length) * 100).toFixed(1)}%)</td>
+            <td>${item.position}</td>
+            <td>${item.picks}</td>
+            <td class="${scoreClass(item.avgScore)}">${formatScore(item.avgScore)}</td>
+            <td class="${scoreClass(item.medianScore)}">${formatScore(item.medianScore)}</td>
+            <td>${item.strong} (${formatPct(item.strongRate)})</td>
           </tr>
-        `;
-      }).join('');
+        `).join('');
     }
 
     function renderAuctionBargains(filtered) {
       const tbody = document.getElementById('auctionBargainBody');
-      const bargains = filtered
+      let bargains = filtered
         .filter((row) => row.priceVsFinishDelta != null)
-        .sort((a, b) => b.priceVsFinishDelta - a.priceVsFinishDelta || a.name.localeCompare(b.name))
-        .slice(0, 15);
+        .map((row) => ({ ...row }));
+
+      bargains = sortRows(bargains, 'auctionBargains').slice(0, 15);
 
       if (!bargains.length) {
         tbody.innerHTML = '<tr><td colspan="8">No auction price data available for this filter.</td></tr>';
@@ -474,9 +594,29 @@
       renderCards(filtered);
       renderManagerLeaderboard(filtered);
       renderYearComparison(filtered);
+      renderFirstRoundRisk(filtered);
       renderPositionBreakdown(filtered);
       renderAuctionBargains(filtered);
+      refreshSortHeaderUi();
       statusEl.textContent = `${filtered.length} picks shown • ${filtered.filter((r) => r.valueScore != null).length} with value scores`;
+    }
+
+    function wireSortableHeaders() {
+      document.querySelectorAll('th.sortable').forEach((th) => {
+        th.addEventListener('click', () => {
+          const tableKey = th.closest('table')?.dataset.sortTable;
+          const key = th.dataset.sortKey;
+          if (!tableKey || !key) return;
+          const current = state.sorts[tableKey];
+          if (current.key === key) {
+            current.dir = current.dir === 'asc' ? 'desc' : 'asc';
+          } else {
+            current.key = key;
+            current.dir = key === 'manager' || key === 'position' || key === 'name' ? 'asc' : 'desc';
+          }
+          render();
+        });
+      });
     }
 
     function populateSelectors(rows) {
@@ -507,7 +647,10 @@
           };
         });
 
+        state.maxYear = Math.max(...state.rows.map((r) => Number(r.year)).filter((y) => Number.isFinite(y)));
+
         populateSelectors(state.rows);
+        wireSortableHeaders();
         managerSelect.addEventListener('change', () => { state.manager = managerSelect.value; render(); });
         yearSelect.addEventListener('change', () => { state.year = yearSelect.value; render(); });
         positionSelect.addEventListener('change', () => { state.position = positionSelect.value; render(); });
