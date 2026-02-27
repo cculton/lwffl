@@ -1,0 +1,16 @@
+{
+  "scoring": {
+    "passYardsPerPoint": 25,
+    "passTd": 4,
+    "passInt": -2,
+    "rushYardsPerPoint": 10,
+    "rushTd": 6,
+    "receptions": 1,
+    "recYardsPerPoint": 10,
+    "recTd": 6,
+    "fumblesLost": -2,
+    "twoPtMade": 2,
+    "twoPtPass": 2,
+    "nonPassTD": 6
+  }
+}
