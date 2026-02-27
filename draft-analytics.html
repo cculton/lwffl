@@ -130,9 +130,6 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.45);
       pointer-events: none;
     }
-    .ratio-good { color: var(--positive); font-weight: 700; }
-    .ratio-mid { color: var(--warning); font-weight: 700; }
-    .ratio-bad { color: var(--negative); font-weight: 700; }
     .status { color: var(--text-soft); margin-bottom: 12px; font-size: 0.86rem; }
 
     .insight-list { margin: 6px 0 0 18px; color: var(--text-main); }
@@ -166,8 +163,22 @@
     <div class="container">
       <div class="header">
         <h1>Draft Analytics</h1>
-        <p>Manager tendencies, value outcomes, and draft value scores over time</p>
+        <p>Manager leaderboard command center built from draft outcome efficiency metrics</p>
       </div>
+
+      <section class="panel">
+        <h2>Metric Glossary</h2>
+        <p class="subtle">All sections below use these same manager-focused definitions.</p>
+        <ul class="insight-list">
+          <li><strong>PSME-Points:</strong> Percentile Surplus vs Market Expectation using season points outcome percentile minus expected draft percentile, weighted by draft capital.</li>
+          <li><strong>Total VoB:</strong> Value over Baseline points. Player season points minus the starter-cutoff baseline for that position and year.</li>
+          <li><strong>Starts-VoB:</strong> Availability-adjusted VoB based on actual NFL games started/played: (player points per NFL start minus baseline points per NFL start) × NFL games started.</li>
+          <li><strong>Surplus$:</strong> Auction-only surplus by converting positive VoB to implied auction dollars and subtracting paid auction cost.</li>
+          <li><strong>Pick Surplus:</strong> Snake-only surplus comparing player VoB vs expected VoB for that overall draft slot.</li>
+          <li><strong>Starter-Tier Yield:</strong> Share of eligible picks that finished inside starter-tier positional cutoffs for that season.</li>
+          <li><strong>Player Value Index:</strong> Pick-level composite used in the player value chart. Formula: 0.50×PSME + 0.35×(VoB per NFL start) + 0.15×(cost-surplus signal).</li>
+        </ul>
+      </section>
 
       <div class="controls">
         <div>
@@ -221,68 +232,45 @@
       </section>
 
       <section class="panel">
-        <h2>Year Comparison</h2>
-        <p class="subtle">Compare draft classes by value hits, busts, and positional trend strength.</p>
+        <h2>Manager Seasons</h2>
+        <p class="subtle">Year-by-year view of leaderboard metrics so each manager's trend is aligned to the same scoring model.</p>
         <div class="table-wrap">
-          <table data-sort-table="yearComparison">
+          <table data-sort-table="managerSeasons">
             <thead>
               <tr>
-                <th class="sortable" data-sort-key="year">Year</th>
-                <th class="sortable" data-sort-key="hits">Value Hits</th>
-                <th class="sortable" data-sort-key="busts">Busts</th>
-                <th class="sortable" data-sort-key="hitRate">Hit Rate</th>
-                <th class="sortable" data-sort-key="bustRate">Bust Rate</th>
-                <th class="sortable" data-sort-key="topPosScore">Top Position Trend</th>
-              </tr>
-            </thead>
-            <tbody id="yearComparisonBody"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <section class="panel">
-        <h2>Position Breakdown</h2>
-        <p class="subtle">How efficiently each position was drafted in the filtered sample (higher score is better).</p>
-        <div class="table-wrap">
-          <table data-sort-table="positionBreakdown">
-            <thead>
-              <tr>
-                <th class="sortable" data-sort-key="position">Position</th>
-                <th class="sortable" data-sort-key="picks">Picks</th>
-                <th class="sortable" data-sort-key="avgScore">Avg Score</th>
-                <th class="sortable" data-sort-key="medianScore">Median Score</th>
-                <th class="sortable" data-sort-key="strongRate">Strong Picks</th>
-              </tr>
-            </thead>
-            <tbody id="positionBreakdownBody"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <section class="panel">
-        <h2>Best Value Picks in Current Filter</h2>
-        <p class="subtle">Top value picks by value score for the currently selected manager, year, and position filters.</p>
-        <div class="table-wrap">
-          <table data-sort-table="auctionBargains">
-            <thead>
-              <tr>
-                <th class="sortable" data-sort-key="year">Year</th>
-                <th class="sortable" data-sort-key="name">Player</th>
                 <th class="sortable" data-sort-key="manager">Manager</th>
-                <th class="sortable" data-sort-key="position">Pos</th>
-                <th class="sortable" data-sort-key="draftType">Draft Type</th>
-                <th class="sortable" data-sort-key="acquisitionCost">Acquisition Cost</th>
-                <th class="sortable" data-sort-key="finishRank">Finish Rank</th>
-                <th class="sortable" data-sort-key="valueScore">Value Score</th>
+                <th class="sortable" data-sort-key="year">Year</th>
+                <th class="sortable" data-sort-key="psmePoints">PSME-Points</th>
+                <th class="sortable" data-sort-key="totalVoB">Total VoB</th>
+                <th class="sortable" data-sort-key="starterTierRate">Starter-Tier Yield</th>
+                <th class="sortable" data-sort-key="eligiblePicks">Eligible Picks</th>
               </tr>
             </thead>
-            <tbody id="auctionBargainBody"></tbody>
+            <tbody id="managerSeasonsBody"></tbody>
           </table>
         </div>
-        <div class="table-pagination" id="auctionBargainsPagination">
-          <button id="auctionBargainsPrev" type="button">Previous</button>
-          <span id="auctionBargainsPageInfo">Page 1 of 1</span>
-          <button id="auctionBargainsNext" type="button">Next</button>
+      </section>
+
+      <section class="panel">
+        <h2>Player Value Chart</h2>
+        <p class="subtle">Player-level value view using the updated composite formula built from manager leaderboard components.</p>
+        <div class="table-wrap">
+          <table data-sort-table="managerPicks">
+            <thead>
+              <tr>
+                <th class="sortable" data-sort-key="year">Year</th>
+                <th class="sortable" data-sort-key="manager">Manager</th>
+                <th class="sortable" data-sort-key="name">Player</th>
+                <th class="sortable" data-sort-key="position">Pos</th>
+                <th class="sortable" data-sort-key="psme">PSME</th>
+                <th class="sortable" data-sort-key="voB">VoB</th>
+                <th class="sortable" data-sort-key="startsVoB">Starts-VoB</th>
+                <th class="sortable" data-sort-key="valueIndex">Player Value Index</th>
+                <th class="sortable" data-sort-key="acquisitionCost">Acquisition</th>
+              </tr>
+            </thead>
+            <tbody id="managerPicksBody"></tbody>
+          </table>
         </div>
       </section>
     </div>
@@ -290,7 +278,7 @@
 
   <script src="nav-loader.js"></script>
   <script type="module">
-    import { enrichDraftEntries, summarizeByYear } from './draft-metrics.js';
+    import { enrichDraftEntries } from './draft-metrics.js';
 
     const state = {
       rows: [],
@@ -300,12 +288,9 @@
       roundCost: [],
       sorts: {
         managerLeaderboard: { key: 'totalVoB', dir: 'desc' },
-        yearComparison: { key: 'year', dir: 'desc' },
-        positionBreakdown: { key: 'position', dir: 'asc' },
-        auctionBargains: { key: 'valueScore', dir: 'desc' }
+        managerSeasons: { key: 'year', dir: 'desc' },
+        managerPicks: { key: 'valueIndex', dir: 'desc' }
       },
-      auctionBargainsPage: 1,
-      auctionBargainsPageSize: 25,
       yearMeta: {}
     };
 
@@ -313,9 +298,6 @@
     const yearSelect = document.getElementById('yearSelect');
     const positionSelect = document.getElementById('positionSelect');
     const roundCostSelect = document.getElementById('roundCostSelect');
-    const auctionBargainsPrev = document.getElementById('auctionBargainsPrev');
-    const auctionBargainsNext = document.getElementById('auctionBargainsNext');
-    const auctionBargainsPageInfo = document.getElementById('auctionBargainsPageInfo');
     const statusEl = document.getElementById('status');
     const ALL_OPTION_VALUE = '__ALL__';
 
@@ -329,30 +311,6 @@
       const sorted = [...values].sort((a, b) => a - b);
       const mid = Math.floor(sorted.length / 2);
       return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-    }
-
-
-    function scoreClass(score) {
-      if (score == null) return '';
-      if (score > 0.15) return 'ratio-good';
-      if (score >= -0.15) return 'ratio-mid';
-      return 'ratio-bad';
-    }
-
-    function valueToHeatColor(value, min, max) {
-      if (value == null || min == null || max == null) return '';
-      if (max === min) return 'hsl(60 85% 52%)';
-      const ratio = Math.max(0, Math.min(1, (value - min) / (max - min)));
-      const hue = ratio * 120;
-      return `hsl(${hue} 85% 52%)`;
-    }
-
-    function minMax(values) {
-      if (!values.length) return { min: null, max: null };
-      return {
-        min: Math.min(...values),
-        max: Math.max(...values)
-      };
     }
 
     function formatScore(score, digits = 2) {
@@ -581,13 +539,10 @@
       return target.seasonPoints / games;
     }
 
-    function renderManagerLeaderboard(filtered) {
-      const tbody = document.getElementById('managerLeaderboardBody');
+    function buildManagerAnalyticsRows(filtered) {
       const eligibleRows = filtered.filter((row) => ['QB', 'RB', 'WR', 'TE'].includes(row.position) && Number.isFinite(row.seasonPoints));
-
       if (!eligibleRows.length) {
-        tbody.innerHTML = '<tr><td colspan="9">No manager data for this filter.</td></tr>';
-        return;
+        return { leaderboard: [], seasonRows: [], pickRows: [] };
       }
 
       const outcomeMeta = buildYearPositionOutcomeMeta(eligibleRows);
@@ -603,13 +558,71 @@
       });
       const expectedCurve = new Map([...expectedVoBByPick.entries()].map(([pick, values]) => [pick, average(values)]));
 
-      const byManager = new Map();
-      eligibleRows.forEach((row) => {
-        if (!byManager.has(row.manager)) byManager.set(row.manager, []);
-        byManager.get(row.manager).push(row);
+      const yearAuctionContext = new Map();
+      [...new Set(eligibleRows.map((row) => row.year))].forEach((year) => {
+        const yearRows = eligibleRows.filter((r) => r.year === year && r.auctionPrice != null);
+        const totalAuctionDollars = getSeasonSetting(year, 'auctionDollarsTotal', null)
+          ?? yearRows.reduce((sum, r) => sum + (toNumber(r.auctionPrice) ?? 0), 0);
+        const totalAboveBaseline = yearRows
+          .map((r) => Math.max(0, r.seasonPoints - getBaselinePoints(r.year, r.position, pointsTable)))
+          .reduce((sum, value) => sum + value, 0);
+        yearAuctionContext.set(year, {
+          dollarsPerPoint: totalAboveBaseline > 0 ? totalAuctionDollars / totalAboveBaseline : 0
+        });
       });
 
-      let leaderboard = [...byManager.entries()].map(([manager, managerRows]) => {
+      const pickRows = eligibleRows.map((row) => {
+        const outcome = outcomeMeta.get(row);
+        const expectedRank = row.auctionPrice != null ? row.posPriceOrder : row.posDraftOrder;
+        const expectedPool = row.auctionPrice != null ? row.posPriceCount : row.posDraftCount;
+        const expectedPercentile = percentileFromRank(expectedRank, expectedPool);
+        const psme = outcome?.percentile != null && expectedPercentile != null ? outcome.percentile - expectedPercentile : null;
+        const psmeWeight = row.auctionPrice != null
+          ? Math.max(1, row.auctionPrice)
+          : Math.max(1, ((row.posDraftCount || 1) - (row.posDraftOrder || 1) + 1));
+
+        const baselinePoints = getBaselinePoints(row.year, row.position, pointsTable);
+        const voB = row.seasonPoints - baselinePoints;
+
+        const gamesStarted = Math.max(1, toNumber(row.gamesStarted) ?? toNumber(row.games) ?? 1);
+        const playerPpg = row.seasonPoints / gamesStarted;
+        const baselinePpg = getBaselinePpg(row.year, row.position, pointsTable);
+        const startsVoB = (playerPpg - baselinePpg) * gamesStarted;
+
+        const auctionContext = yearAuctionContext.get(row.year) || { dollarsPerPoint: 0 };
+        const surplusDollars = row.auctionPrice != null
+          ? (Math.max(0, voB) * auctionContext.dollarsPerPoint) - (toNumber(row.auctionPrice) ?? 0)
+          : 0;
+
+        const pickSurplus = row.auctionPrice == null && Number.isFinite(row.overall)
+          ? voB - (expectedCurve.get(row.overall) ?? 0)
+          : 0;
+        const costSignal = row.auctionPrice != null
+          ? surplusDollars / Math.max(1, (toNumber(row.auctionPrice) ?? 1))
+          : pickSurplus / Math.max(1, Math.abs(expectedCurve.get(row.overall) ?? 0));
+        const voBPerStart = voB / gamesStarted;
+        const valueIndex = ((psme ?? 0) * 0.50) + (voBPerStart * 0.35) + (costSignal * 0.15);
+
+        const starterCutoff = getStarterCutoff(row.year, row.position);
+        const starterTierHit = outcome?.rank != null && starterCutoff != null && outcome.rank <= starterCutoff;
+
+        return {
+          ...row,
+          psme,
+          psmeWeight,
+          voB,
+          startsVoB,
+          surplusDollars,
+          pickSurplus,
+          valueIndex,
+          starterTierHit,
+          acquisitionCost: row.auctionPrice == null
+            ? `Round ${row.round ?? '—'}${row.overall != null ? ` (Pick ${row.overall})` : ''}`
+            : `$${row.auctionPrice}`
+        };
+      });
+
+      const summarizeManagerRows = (rows) => {
         let psmeWeightedTotal = 0;
         let psmeWeightTotal = 0;
         let totalVoB = 0;
@@ -618,76 +631,76 @@
         let totalPickSurplus = 0;
         let starterTierHits = 0;
 
-        managerRows.forEach((row) => {
-          const outcome = outcomeMeta.get(row);
-          const expectedRank = row.auctionPrice != null ? row.posPriceOrder : row.posDraftOrder;
-          const expectedPool = row.auctionPrice != null ? row.posPriceCount : row.posDraftCount;
-          const expectedPercentile = percentileFromRank(expectedRank, expectedPool);
-          const psme = outcome?.percentile != null && expectedPercentile != null ? outcome.percentile - expectedPercentile : null;
-          const psmeWeight = row.auctionPrice != null
-            ? Math.max(1, row.auctionPrice)
-            : Math.max(1, ((row.posDraftCount || 1) - (row.posDraftOrder || 1) + 1));
-          if (psme != null) {
-            psmeWeightedTotal += psme * psmeWeight;
-            psmeWeightTotal += psmeWeight;
+        rows.forEach((row) => {
+          if (row.psme != null) {
+            psmeWeightedTotal += row.psme * row.psmeWeight;
+            psmeWeightTotal += row.psmeWeight;
           }
-
-          const baselinePoints = getBaselinePoints(row.year, row.position, pointsTable);
-          const voB = row.seasonPoints - baselinePoints;
-          totalVoB += voB;
-
-          const gamesStarted = Math.max(1, toNumber(row.gamesStarted) ?? toNumber(row.games) ?? 1);
-          const playerPpg = row.seasonPoints / gamesStarted;
-          const baselinePpg = getBaselinePpg(row.year, row.position, pointsTable);
-          totalStartsVoB += (playerPpg - baselinePpg) * gamesStarted;
-
-          if (row.auctionPrice != null) {
-            const yearRows = eligibleRows.filter((r) => r.year === row.year && r.auctionPrice != null);
-            const totalAuctionDollars = getSeasonSetting(row.year, 'auctionDollarsTotal', null)
-              ?? yearRows.reduce((sum, r) => sum + (toNumber(r.auctionPrice) ?? 0), 0);
-            const totalAboveBaseline = yearRows
-              .map((r) => Math.max(0, r.seasonPoints - getBaselinePoints(r.year, r.position, pointsTable)))
-              .reduce((sum, value) => sum + value, 0);
-            const dollarsPerPoint = totalAboveBaseline > 0 ? totalAuctionDollars / totalAboveBaseline : 0;
-            const impliedValue = Math.max(0, voB) * dollarsPerPoint;
-            totalSurplusDollars += impliedValue - (toNumber(row.auctionPrice) ?? 0);
-          }
-
-          if (row.auctionPrice == null && Number.isFinite(row.overall)) {
-            const expectedVoB = expectedCurve.get(row.overall) ?? 0;
-            totalPickSurplus += voB - expectedVoB;
-          }
-
-          const starterCutoff = getStarterCutoff(row.year, row.position);
-          if (outcome?.rank != null && starterCutoff != null && outcome.rank <= starterCutoff) {
-            starterTierHits += 1;
-          }
+          totalVoB += row.voB;
+          totalStartsVoB += row.startsVoB;
+          totalSurplusDollars += row.surplusDollars;
+          totalPickSurplus += row.pickSurplus;
+          if (row.starterTierHit) starterTierHits += 1;
         });
 
         return {
-          manager,
           psmePoints: psmeWeightTotal ? psmeWeightedTotal / psmeWeightTotal : null,
           totalVoB,
           totalStartsVoB,
           totalSurplusDollars,
           totalPickSurplus,
           starterTierHits,
-          starterTierRate: managerRows.length ? starterTierHits / managerRows.length : null,
-          eligiblePicks: managerRows.length
+          starterTierRate: rows.length ? starterTierHits / rows.length : null,
+          eligiblePicks: rows.length
+        };
+      };
+
+      const byManager = new Map();
+      pickRows.forEach((row) => {
+        if (!byManager.has(row.manager)) byManager.set(row.manager, []);
+        byManager.get(row.manager).push(row);
+      });
+
+      const leaderboard = [...byManager.entries()].map(([manager, rows]) => ({
+        manager,
+        ...summarizeManagerRows(rows)
+      }));
+
+      const byManagerYear = new Map();
+      pickRows.forEach((row) => {
+        const key = `${row.manager}__${row.year}`;
+        if (!byManagerYear.has(key)) byManagerYear.set(key, []);
+        byManagerYear.get(key).push(row);
+      });
+      const seasonRows = [...byManagerYear.entries()].map(([key, rows]) => {
+        const [manager, year] = key.split('__');
+        return {
+          manager,
+          year: Number(year),
+          ...summarizeManagerRows(rows)
         };
       });
 
-      leaderboard = sortRows(leaderboard, 'managerLeaderboard').map((item, idx) => ({ ...item, rank: idx + 1 }));
+      return { leaderboard, seasonRows, pickRows };
+    }
 
-      const psmeBounds = minMax(leaderboard.map((item) => item.psmePoints).filter((v) => v != null));
-      const voBBounds = minMax(leaderboard.map((item) => item.totalVoB).filter((v) => v != null));
+    function renderManagerLeaderboard(filtered) {
+      const tbody = document.getElementById('managerLeaderboardBody');
+      const { leaderboard } = buildManagerAnalyticsRows(filtered);
 
-      tbody.innerHTML = leaderboard.map((item) => `
+      if (!leaderboard.length) {
+        tbody.innerHTML = '<tr><td colspan="9">No manager data for this filter.</td></tr>';
+        return;
+      }
+
+      const ranked = sortRows(leaderboard, 'managerLeaderboard').map((item, idx) => ({ ...item, rank: idx + 1 }));
+
+      tbody.innerHTML = ranked.map((item) => `
         <tr>
           <td>${item.rank}</td>
           <td>${item.manager}</td>
-          <td style="color: ${valueToHeatColor(item.psmePoints, psmeBounds.min, psmeBounds.max)}">${formatDelta(item.psmePoints)}</td>
-          <td style="color: ${valueToHeatColor(item.totalVoB, voBBounds.min, voBBounds.max)}">${formatDelta(item.totalVoB)}</td>
+          <td>${formatDelta(item.psmePoints)}</td>
+          <td>${formatDelta(item.totalVoB)}</td>
           <td>${formatDelta(item.totalStartsVoB)}</td>
           <td>${formatDelta(item.totalSurplusDollars)}</td>
           <td>${formatDelta(item.totalPickSurplus)}</td>
@@ -697,139 +710,49 @@
       `).join('');
     }
 
-    function renderYearComparison(filtered) {
-      const tbody = document.getElementById('yearComparisonBody');
-      const byYearRows = new Map();
-      filtered.forEach((row) => {
-        if (!byYearRows.has(row.year)) byYearRows.set(row.year, []);
-        byYearRows.get(row.year).push(row);
-      });
-
-      let rows = summarizeByYear(filtered).map((summary) => {
-        const yearRows = byYearRows.get(summary.year) || [];
-        const eligible = yearRows.filter((r) => r.isRankEligible);
-        const hits = eligible.filter((r) => r.beatCost).length;
-        const busts = eligible.filter((r) => r.missedCost).length;
-
-        const posMap = new Map();
-        eligible.forEach((r) => {
-          if (!posMap.has(r.position)) posMap.set(r.position, []);
-          if (r.percentileDelta != null) posMap.get(r.position).push(r.percentileDelta);
-        });
-
-        let topPos = '—';
-        let topPosScore = null;
-        posMap.forEach((values, pos) => {
-          const avg = average(values);
-          if (avg != null && (topPosScore == null || avg > topPosScore)) {
-            topPos = pos;
-            topPosScore = avg;
-          }
-        });
-
-        return {
-          year: summary.year,
-          hits,
-          busts,
-          hitRate: summary.beatCostRate,
-          bustRate: summary.eligiblePicks ? busts / summary.eligiblePicks : null,
-          topPos,
-          topPosScore
-        };
-      });
-
-      rows = sortRows(rows, 'yearComparison');
+    function renderManagerSeasons(filtered) {
+      const tbody = document.getElementById('managerSeasonsBody');
+      let rows = buildManagerAnalyticsRows(filtered).seasonRows;
+      rows = sortRows(rows, 'managerSeasons');
 
       if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="6">No yearly data for this filter.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6">No manager season data for this filter.</td></tr>';
         return;
       }
 
       tbody.innerHTML = rows.map((item) => `
         <tr>
+          <td>${item.manager}</td>
           <td>${item.year}</td>
-          <td>${item.hits}</td>
-          <td>${item.busts}</td>
-          <td>${formatPct(item.hitRate)}</td>
-          <td>${formatPct(item.bustRate)}</td>
-          <td>${item.topPos} (${formatScore(item.topPosScore)})</td>
+          <td>${formatDelta(item.psmePoints)}</td>
+          <td>${formatDelta(item.totalVoB)}</td>
+          <td>${item.starterTierHits}/${item.eligiblePicks} (${formatPct(item.starterTierRate)})</td>
+          <td>${item.eligiblePicks}</td>
         </tr>
       `).join('');
     }
 
-    function renderPositionBreakdown(filtered) {
-      const tbody = document.getElementById('positionBreakdownBody');
-      const grouped = new Map();
-      filtered.forEach((row) => {
-        if (row.valueScore == null) return;
-        if (!grouped.has(row.position)) grouped.set(row.position, []);
-        grouped.get(row.position).push(row.valueScore);
-      });
-
-      let rows = [...grouped.entries()].map(([position, scores]) => {
-        const avgScore = average(scores);
-        const medianScore = median(scores);
-        const strong = scores.filter((r) => r > 0).length;
-        const strongRate = scores.length ? strong / scores.length : null;
-        return { position, picks: scores.length, avgScore, medianScore, strong, strongRate };
-      });
-
-      rows = sortRows(rows, 'positionBreakdown');
+    function renderManagerPicks(filtered) {
+      const tbody = document.getElementById('managerPicksBody');
+      let rows = buildManagerAnalyticsRows(filtered).pickRows;
+      rows = sortRows(rows, 'managerPicks');
 
       if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="5">No qualified picks available for this filter.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9">No player rows for this filter.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = rows.map((item) => `
-          <tr>
-            <td>${item.position}</td>
-            <td>${item.picks}</td>
-            <td class="${scoreClass(item.avgScore)}">${formatScore(item.avgScore)}</td>
-            <td class="${scoreClass(item.medianScore)}">${formatScore(item.medianScore)}</td>
-            <td>${item.strong} (${formatPct(item.strongRate)})</td>
-          </tr>
-        `).join('');
-    }
-
-    function renderAuctionBargains(filtered) {
-      const tbody = document.getElementById('auctionBargainBody');
-      let bargains = filtered
-        .filter((row) => row.valueScore != null)
-        .map((row) => ({
-          ...row,
-          draftType: row.auctionPrice == null ? 'Snake' : 'Auction',
-          acquisitionCost: row.auctionPrice == null
-            ? `Round ${row.round ?? '—'}${row.overall != null ? ` (Pick ${row.overall})` : ''}`
-            : `$${row.auctionPrice}`
-        }));
-
-      bargains = sortRows(bargains, 'auctionBargains');
-
-      const totalPages = Math.max(1, Math.ceil(bargains.length / state.auctionBargainsPageSize));
-      state.auctionBargainsPage = Math.min(state.auctionBargainsPage, totalPages);
-      const startIdx = (state.auctionBargainsPage - 1) * state.auctionBargainsPageSize;
-      const pagedBargains = bargains.slice(startIdx, startIdx + state.auctionBargainsPageSize);
-
-      auctionBargainsPageInfo.textContent = `Page ${state.auctionBargainsPage} of ${totalPages}`;
-      auctionBargainsPrev.disabled = state.auctionBargainsPage <= 1;
-      auctionBargainsNext.disabled = state.auctionBargainsPage >= totalPages;
-
-      if (!bargains.length) {
-        tbody.innerHTML = '<tr><td colspan="8">No value-score data available for this filter.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = pagedBargains.map((row) => `
+      tbody.innerHTML = rows.map((row) => `
         <tr>
           <td>${row.year}</td>
-          <td>${row.name}</td>
           <td>${row.manager}</td>
+          <td>${row.name}</td>
           <td>${row.position}</td>
-          <td>${row.draftType}</td>
+          <td>${formatDelta(row.psme)}</td>
+          <td>${formatDelta(row.voB)}</td>
+          <td>${formatDelta(row.startsVoB)}</td>
+          <td>${formatScore(row.valueIndex, 3)}</td>
           <td>${row.acquisitionCost}</td>
-          <td>${row.finishRank ?? 'Unranked'}</td>
-          <td class="${scoreClass(row.valueScore)}">${formatScore(row.valueScore, 3)}</td>
         </tr>
       `).join('');
     }
@@ -863,11 +786,10 @@
       const filtered = applyFilters(state.rows);
       renderCards(filtered);
       renderManagerLeaderboard(filtered);
-      renderYearComparison(filtered);
-      renderPositionBreakdown(filtered);
-      renderAuctionBargains(filtered);
+      renderManagerSeasons(filtered);
+      renderManagerPicks(filtered);
       refreshSortHeaderUi();
-      statusEl.textContent = `${filtered.length} picks shown • ${filtered.filter((r) => r.valueScore != null).length} with value scores`;
+      statusEl.textContent = `${filtered.length} picks shown • ${filtered.filter((r) => ['QB', 'RB', 'WR', 'TE'].includes(r.position) && Number.isFinite(r.seasonPoints)).length} leaderboard-eligible`;
     }
 
 
@@ -877,36 +799,30 @@
         manager: 'Draft manager/owner for the selected slice.',
         psmePoints: 'Percentile Surplus vs Market Expectation (points-based outcome). Equation: outcome percentile − expected percentile, weighted by pick capital.',
         totalVoB: 'Total Value over Baseline points across drafted players. Equation: player season points − replacement baseline points at that position/year.',
-        totalStartsVoB: 'Availability-aware value over baseline using starts. Equation: (player points-per-start − baseline points-per-start) × games started.',
+        totalStartsVoB: 'Availability-aware value over baseline using actual NFL starts/played. Equation: (player points-per-NFL-start − baseline points-per-NFL-start) × NFL games started.',
         totalSurplusDollars: 'Auction Surplus Dollars from points. Converts positive VoB points into implied dollars and subtracts auction cost.',
         totalPickSurplus: 'Snake Pick Surplus vs slot curve. Equation: player VoB − expected VoB at that overall pick.',
         starterTierRate: 'Starter-Tier Yield: share of drafted players who finished within starter cutoffs by position (including flex allocation).',
         eligiblePicks: 'Count of eligible non-K/DST picks with season points in the current filter.'
       },
-      yearComparison: {
-        year: 'Draft season represented by the aggregated row.',
-        hits: 'Number of eligible picks that beat draft cost in that season.',
-        busts: 'Number of eligible picks that missed draft cost in that season.',
-        hitRate: 'Season success rate. Equation: Hit Rate = value hits / eligible picks.',
-        bustRate: 'Season miss rate. Equation: Bust Rate = busts / eligible picks.',
-        topPosScore: 'Position with the strongest average percentile trend for that year.'
+      managerSeasons: {
+        manager: 'Manager for this season-level split.',
+        year: 'Draft season for this manager row.',
+        psmePoints: 'Season-level PSME-Points for that manager and year.',
+        totalVoB: 'Season-level total Value over Baseline points.',
+        starterTierRate: 'Season-level starter-tier hit rate for eligible picks.',
+        eligiblePicks: 'Eligible picks drafted by this manager in this season.'
       },
-      positionBreakdown: {
-        position: 'Fantasy position bucket for the filtered picks.',
-        picks: 'Number of qualified picks at this position.',
-        avgScore: 'Mean value score. Equation: Avg Score = mean(ln(positional draft slot / finish rank)).',
-        medianScore: 'Median of value score values to reduce outlier influence.',
-        strongRate: 'Share of picks with positive value score. Equation: Strong Picks = positive-score picks / total picks.'
-      },
-      auctionBargains: {
-        year: 'Draft season for this pick.',
-        name: 'Player selected in either snake or auction format.',
-        manager: 'Manager who drafted the player.',
-        position: 'Player position bucket used in value calculations.',
-        draftType: 'Draft format for that pick (Snake or Auction).',
-        acquisitionCost: 'How the player was acquired: snake round/pick or auction dollar cost.',
-        finishRank: 'End-of-year positional finish rank.',
-        valueScore: 'Primary value metric. Equation: Value Score = ln(positional draft slot ÷ finish rank). Higher is better.'
+      managerPicks: {
+        year: 'Draft season for this specific pick.',
+        manager: 'Manager who made the draft pick.',
+        name: 'Player drafted.',
+        position: 'Player position bucket used for baselines.',
+        psme: 'Pick-level percentile surplus vs market expectation.',
+        voB: 'Pick-level Value over Baseline points.',
+        startsVoB: 'Pick-level starts-aware VoB using actual NFL games started/played.',
+        valueIndex: 'Composite value formula: 0.50×PSME + 0.35×(VoB per NFL start) + 0.15×cost-surplus signal (auction surplus efficiency or snake pick-surplus efficiency).',
+        acquisitionCost: 'Snake round/pick or auction dollars paid for this pick.'
       }
     };
 
@@ -937,7 +853,6 @@
             current.key = key;
             current.dir = key === 'manager' || key === 'position' || key === 'name' ? 'asc' : 'desc';
           }
-          if (tableKey === 'auctionBargains') state.auctionBargainsPage = 1;
           render();
         });
       });
@@ -1199,19 +1114,10 @@
         populateSelectors(state.rows);
         wireSortableHeaders();
         applyColumnExplainers();
-        managerSelect.addEventListener('change', () => { state.manager = normalizeSelection(getSelectedValues(managerSelect)); state.auctionBargainsPage = 1; render(); });
-        yearSelect.addEventListener('change', () => { state.year = normalizeSelection(getSelectedValues(yearSelect)); state.auctionBargainsPage = 1; render(); });
-        positionSelect.addEventListener('change', () => { state.position = normalizeSelection(getSelectedValues(positionSelect)); state.auctionBargainsPage = 1; render(); });
-        roundCostSelect.addEventListener('change', () => { state.roundCost = normalizeSelection(getSelectedValues(roundCostSelect)); state.auctionBargainsPage = 1; render(); });
-        auctionBargainsPrev.addEventListener('click', () => {
-          if (state.auctionBargainsPage <= 1) return;
-          state.auctionBargainsPage -= 1;
-          render();
-        });
-        auctionBargainsNext.addEventListener('click', () => {
-          state.auctionBargainsPage += 1;
-          render();
-        });
+        managerSelect.addEventListener('change', () => { state.manager = normalizeSelection(getSelectedValues(managerSelect)); render(); });
+        yearSelect.addEventListener('change', () => { state.year = normalizeSelection(getSelectedValues(yearSelect)); render(); });
+        positionSelect.addEventListener('change', () => { state.position = normalizeSelection(getSelectedValues(positionSelect)); render(); });
+        roundCostSelect.addEventListener('change', () => { state.roundCost = normalizeSelection(getSelectedValues(roundCostSelect)); render(); });
 
         render();
       } catch (error) {
