@@ -1,16 +1,5023 @@
 {
-  "scoring": {
-    "passYardsPerPoint": 25,
-    "passTd": 4,
-    "passInt": -2,
-    "rushYardsPerPoint": 10,
-    "rushTd": 6,
-    "receptions": 1,
-    "recYardsPerPoint": 10,
-    "recTd": 6,
-    "fumblesLost": -2,
-    "twoPtMade": 2,
-    "twoPtPass": 2,
-    "nonPassTD": 6
+  "leagueName": "Legion of Whom FFL",
+  "years": {
+    "2014": {
+      "basicSettings": {
+        "League Name": "Legion of Whom FFL",
+        "Number of Teams": 10,
+        "Scoring Type": "Head to Head Points, 0.2 Points Per Reception",
+        "Format": "League Manager",
+        "Make League Viewable to Public": false,
+        "Auto Reactivate": false,
+        "Lineup Protection Type": "None"
+      },
+      "draftSettings": {
+        "Draft Type": "Snake",
+        "Draft Date": "Sep 1, 2014 @ 3:00 PM EDT",
+        "Time Per Pick": "60 seconds",
+        "Draft Order": "Randomized One Hour Prior to Draft Time"
+      },
+      "playerRules": {
+        "Observe ESPN's Undroppable Players List": true,
+        "Player Universe": "NFL"
+      },
+      "acquisitionAndWaiverRules": {
+        "Lineup Changes": "Lock individually at Scheduled Gametime",
+        "Player Acquisition System": "Free Agent Budget (Continuous)",
+        "Season Acquisition Limit": "No Limit",
+        "Waiver Process Days and Time": "Monday, Wednesday, Thursday, Friday, Saturday, Sunday @ 12 PM ET",
+        "Player Acquisition Budget": 100,
+        "Minimum Offer": 0,
+        "Free Agent Budget Tiebreaker": "Reset Each Week to Inverse Order of Standings",
+        "Lock Transactions for Eliminated Teams During Playoffs": false
+      },
+      "tradeRules": {
+        "Trade Limit": "No Limit",
+        "Trade Deadline": "Nov 20, 2014 @ 4:00 AM EST",
+        "Trade Review Period": "2 Days",
+        "Votes Required to Veto Trade": 5
+      },
+      "keepersRules": {
+        "Use Keepers for 2014 Season": false,
+        "Use Keepers for 2015 Season": false
+      },
+      "regularSeasonSetup": {
+        "Start of Regular Season": "NFL Week 1 (Start of Season)",
+        "Weeks Per Matchup": 1,
+        "Regular Season Matchups": 13,
+        "Matchup Tie Breaker": "No tie breakers",
+        "Home Field Advantage": "None",
+        "Bonus Wins and Losses": false
+      },
+      "playoffBracketSetup": {
+        "Playoff Teams": 6,
+        "Weeks In Round 1 Playoff Matchup": 1,
+        "Weeks In Round 2 Playoff Matchup": 1,
+        "Weeks In Championship Round": 1,
+        "Playoff Seeding Tie Breaker": "Total Points For",
+        "Playoff Home Field Advantage": "None",
+        "Allow for Playoff Bracket Reseeding": "Off",
+        "Lock Transactions for Eliminated Teams During Playoffs": false,
+        "To edit, go to Settings > Transactions and Keepers": "Disable Consolation Ladder",
+        "No": "Fantasy Football Support",
+        "Username and Password Help": "Change Email Address",
+        "Issues Joining a League": "Login and Account Issues",
+        "Reset Draft": "Find Your Team",
+        "Fantasy Football Support": "Search the full library of topics."
+      },
+      "roster": {
+        "meta": {
+          "Roster Size": 15,
+          "Total Starters": 9,
+          "Total on Bench": "6 (1 IR)"
+        },
+        "positions": [
+          {
+            "position": "Quarterback (QB)",
+            "starters": 1,
+            "max": 4
+          },
+          {
+            "position": "Team Quarterback (TQB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Running Back (RB)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Running Back/Wide Receiver (RB/WR)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Wide Receiver (WR)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Wide Receiver/Tight End (WR/TE)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Tight End (TE)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Flex (FLEX)",
+            "starters": 1,
+            "max": null
+          },
+          {
+            "position": "Offensive Player Utility (OP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Tackle (DT)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive End (DE)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Linebacker (LB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Line (DL)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Cornerback (CB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Safety (S)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Back (DB)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Player Utility (DP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Team Defense/Special Teams (D/ST)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Place Kicker (K)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Punter (P)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Head Coach (HC)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Bench (BE)",
+            "starters": 6,
+            "max": null
+          },
+          {
+            "position": "Injured Reserve (IR)",
+            "starters": 1,
+            "max": null
+          }
+        ]
+      },
+      "scoring": {
+        "Passing": {
+          "PY": {
+            "name": "Passing Yards",
+            "points": 0.04
+          },
+          "PC": {
+            "name": "Each Pass Completed",
+            "points": 0.2
+          },
+          "INC": {
+            "name": "Each Incomplete Pass",
+            "points": -0.3
+          },
+          "PTD": {
+            "name": "TD Pass",
+            "points": 4.0
+          },
+          "INT": {
+            "name": "Interceptions Thrown",
+            "points": -2.0
+          },
+          "2PC": {
+            "name": "2pt Passing Conversion",
+            "points": 2.0
+          }
+        },
+        "Rushing": {
+          "RY": {
+            "name": "Rushing Yards",
+            "points": 0.1
+          },
+          "RTD": {
+            "name": "TD Rush",
+            "points": 6.0
+          },
+          "2PR": {
+            "name": "2pt Rushing Conversion",
+            "points": 2.0
+          }
+        },
+        "Receiving": {
+          "REY": {
+            "name": "Receiving Yards",
+            "points": 0.1
+          },
+          "REC": {
+            "name": "Each reception",
+            "points": 0.2
+          },
+          "RETD": {
+            "name": "TD Reception",
+            "points": 6.0
+          },
+          "2PRE": {
+            "name": "2pt Receiving Conversion",
+            "points": 2.0
+          }
+        },
+        "Kicking": {
+          "PAT": {
+            "name": "Each PAT Made",
+            "points": 0.5
+          },
+          "PATM": {
+            "name": "Each PAT Missed",
+            "points": -1.0
+          },
+          "FGM": {
+            "name": "Total FG Missed",
+            "points": -1.0
+          },
+          "FG0": {
+            "name": "FG Made (0-39 yards)",
+            "points": 1.0
+          },
+          "FG40": {
+            "name": "FG Made (40-49 yards)",
+            "points": 2.0
+          }
+        },
+        "Team Defense / Special Teams": {
+          "KR": {
+            "name": "Kickoff Return Yards",
+            "points": 0.02
+          },
+          "PR": {
+            "name": "Punt Return Yards",
+            "points": 0.04
+          },
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "INTTD": {
+            "name": "Interception Return TD",
+            "points": 6.0
+          },
+          "FRTD": {
+            "name": "Fumble Return TD",
+            "points": 6.0
+          },
+          "BLKKRTD": {
+            "name": "Blocked Punt or FG return for TD",
+            "points": 6.0
+          },
+          "SK": {
+            "name": "Each Sack",
+            "points": 1.0
+          },
+          "BLKK": {
+            "name": "Blocked Punt, PAT or FG",
+            "points": 2.0
+          },
+          "INT": {
+            "name": "Each Interception",
+            "points": 2.0
+          },
+          "FR": {
+            "name": "Each Fumble Recovered",
+            "points": 2.0
+          },
+          "SF": {
+            "name": "Each Safety",
+            "points": 4.0
+          },
+          "PA": {
+            "name": "Points Allowed",
+            "points": -0.5
+          },
+          "PA0": {
+            "name": "0 points allowed",
+            "points": 12.5
+          },
+          "PA1": {
+            "name": "1-6 points allowed",
+            "points": 12.5
+          },
+          "PA7": {
+            "name": "7-13 points allowed",
+            "points": 12.5
+          },
+          "PA14": {
+            "name": "14-17 points allowed",
+            "points": 12.5
+          },
+          "PA18": {
+            "name": "18-21 points allowed",
+            "points": 12.5
+          },
+          "PA22": {
+            "name": "22-27 points allowed",
+            "points": 12.5
+          },
+          "PA28": {
+            "name": "28-34 points allowed",
+            "points": 12.5
+          },
+          "PA35": {
+            "name": "35-45 points allowed",
+            "points": 12.5
+          },
+          "PA46": {
+            "name": "46+ points allowed",
+            "points": 12.5
+          }
+        },
+        "Miscellaneous": {
+          "KR": {
+            "name": "Kickoff Return Yards",
+            "points": 0.02
+          },
+          "PR": {
+            "name": "Punt Return Yards",
+            "points": 0.04
+          },
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "FTD": {
+            "name": "Fumble Recovered for TD",
+            "points": 6.0
+          },
+          "FUML": {
+            "name": "Total Fumbles Lost",
+            "points": -2.0
+          }
+        }
+      },
+      "teamsAndDivisions": {
+        "divisions": [
+          "UNDRAFTED FREE AGENTS",
+          "WASHED-UP VETERANS"
+        ],
+        "teamsListed": [
+          "King Charles' Men",
+          "No Luck Involved",
+          "FantasyFootball Is Gay",
+          "The Crosby Show",
+          "Team Williams",
+          "Keep Calm and Get Fired Up",
+          "The Tolbert Report",
+          "13 Degrees Kelvin",
+          "He HateMe",
+          "Overly Ambitious"
+        ]
+      },
+      "year": 2014
+    },
+    "2015": {
+      "basicSettings": {
+        "League Name": "Legion of Whom FFL",
+        "Number of Teams": 12,
+        "Scoring Type": "Head to Head Points, 0.2 Points Per Reception",
+        "Format": "League Manager",
+        "Make League Viewable to Public": false,
+        "Auto Reactivate": false,
+        "Lineup Protection Type": "None"
+      },
+      "draftSettings": {
+        "Draft Type": "Snake",
+        "Draft Date": "Sep 7, 2015 @ 2:00 PM EDT",
+        "Time Per Pick": "60 seconds",
+        "Draft Order": "Manually Set by League Manager",
+        "Allow Draft Pick Trading": true
+      },
+      "playerRules": {
+        "Observe ESPN's Undroppable Players List": true,
+        "Player Universe": "NFL"
+      },
+      "acquisitionAndWaiverRules": {
+        "Lineup Changes": "Lock individually at Scheduled Gametime",
+        "Player Acquisition System": "Free Agent Budget (Continuous)",
+        "Season Acquisition Limit": "No Limit",
+        "Waiver Process Days and Time": "Monday, Wednesday, Thursday, Friday, Saturday, Sunday @ 12 PM ET",
+        "Player Acquisition Budget": 100,
+        "Minimum Offer": 0,
+        "Free Agent Budget Tiebreaker": "Reset Each Week to Inverse Order of Standings",
+        "Lock Transactions for Eliminated Teams During Playoffs": false
+      },
+      "tradeRules": {
+        "Trade Limit": "No Limit",
+        "Trade Deadline": "Nov 19, 2015 @ 4:00 AM EST",
+        "Trade Review Period": "1 Day",
+        "Votes Required to Veto Trade": 6
+      },
+      "keepersRules": {
+        "Use Keepers for 2015 Season": false,
+        "Use Keepers for 2016 Season": false
+      },
+      "regularSeasonSetup": {
+        "Start of Regular Season": "NFL Week 1 (Start of Season)",
+        "Weeks Per Matchup": 1,
+        "Regular Season Matchups": 13,
+        "Matchup Tie Breaker": "No tie breakers",
+        "Home Field Advantage": "None",
+        "Bonus Wins and Losses": false
+      },
+      "playoffBracketSetup": {
+        "Playoff Teams": 6,
+        "Weeks In Round 1 Playoff Matchup": 1,
+        "Weeks In Round 2 Playoff Matchup": 1,
+        "Weeks In Championship Round": 1,
+        "Playoff Seeding Tie Breaker": "Total Points For",
+        "Playoff Home Field Advantage": "None",
+        "Allow for Playoff Bracket Reseeding": "Off",
+        "Lock Transactions for Eliminated Teams During Playoffs": false,
+        "To edit, go to Settings > Transactions and Keepers": "Disable Consolation Ladder",
+        "No": "Fantasy Football Support",
+        "Username and Password Help": "Change Email Address",
+        "Issues Joining a League": "Login and Account Issues",
+        "Reset Draft": "Find Your Team",
+        "Fantasy Football Support": "Search the full library of topics."
+      },
+      "roster": {
+        "meta": {
+          "Roster Size": 15,
+          "Total Starters": 9,
+          "Total on Bench": "6 (1 IR)"
+        },
+        "positions": [
+          {
+            "position": "Quarterback (QB)",
+            "starters": 1,
+            "max": 4
+          },
+          {
+            "position": "Team Quarterback (TQB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Running Back (RB)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Running Back/Wide Receiver (RB/WR)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Wide Receiver (WR)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Wide Receiver/Tight End (WR/TE)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Tight End (TE)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Flex (FLEX)",
+            "starters": 1,
+            "max": null
+          },
+          {
+            "position": "Offensive Player Utility (OP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Tackle (DT)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive End (DE)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Linebacker (LB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Line (DL)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Cornerback (CB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Safety (S)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Back (DB)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Player Utility (DP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Team Defense/Special Teams (D/ST)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Place Kicker (K)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Punter (P)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Head Coach (HC)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Bench (BE)",
+            "starters": 6,
+            "max": null
+          },
+          {
+            "position": "Injured Reserve (IR)",
+            "starters": 1,
+            "max": null
+          }
+        ]
+      },
+      "scoring": {
+        "Passing": {
+          "PY": {
+            "name": "Passing Yards",
+            "points": 0.04
+          },
+          "PC": {
+            "name": "Each Pass Completed",
+            "points": 0.2
+          },
+          "INC": {
+            "name": "Each Incomplete Pass",
+            "points": -0.3
+          },
+          "PTD": {
+            "name": "TD Pass",
+            "points": 4.0
+          },
+          "INT": {
+            "name": "Interceptions Thrown",
+            "points": -2.0
+          },
+          "2PC": {
+            "name": "2pt Passing Conversion",
+            "points": 2.0
+          }
+        },
+        "Rushing": {
+          "RY": {
+            "name": "Rushing Yards",
+            "points": 0.1
+          },
+          "RTD": {
+            "name": "TD Rush",
+            "points": 6.0
+          },
+          "2PR": {
+            "name": "2pt Rushing Conversion",
+            "points": 2.0
+          }
+        },
+        "Receiving": {
+          "REY": {
+            "name": "Receiving Yards",
+            "points": 0.1
+          },
+          "REC": {
+            "name": "Each reception",
+            "points": 0.2
+          },
+          "RETD": {
+            "name": "TD Reception",
+            "points": 6.0
+          },
+          "2PRE": {
+            "name": "2pt Receiving Conversion",
+            "points": 2.0
+          }
+        },
+        "Kicking": {
+          "PAT": {
+            "name": "Each PAT Made",
+            "points": 1.0
+          },
+          "PATM": {
+            "name": "Each PAT Missed",
+            "points": -1.0
+          },
+          "FGM": {
+            "name": "Total FG Missed",
+            "points": -1.0
+          },
+          "FG0": {
+            "name": "FG Made (0-39 yards)",
+            "points": 1.0
+          },
+          "FG40": {
+            "name": "FG Made (40-49 yards)",
+            "points": 2.5
+          }
+        },
+        "Team Defense / Special Teams": {
+          "KR": {
+            "name": "Kickoff Return Yards",
+            "points": 0.02
+          },
+          "PR": {
+            "name": "Punt Return Yards",
+            "points": 0.04
+          },
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "INTTD": {
+            "name": "Interception Return TD",
+            "points": 6.0
+          },
+          "FRTD": {
+            "name": "Fumble Return TD",
+            "points": 6.0
+          },
+          "BLKKRTD": {
+            "name": "Blocked Punt or FG return for TD",
+            "points": 6.0
+          },
+          "SK": {
+            "name": "Each Sack",
+            "points": 1.0
+          },
+          "BLKK": {
+            "name": "Blocked Punt, PAT or FG",
+            "points": 2.0
+          },
+          "INT": {
+            "name": "Each Interception",
+            "points": 2.0
+          },
+          "FR": {
+            "name": "Each Fumble Recovered",
+            "points": 2.0
+          },
+          "SF": {
+            "name": "Each Safety",
+            "points": 4.0
+          },
+          "PA": {
+            "name": "Points Allowed",
+            "points": -0.5
+          },
+          "PA0": {
+            "name": "0 points allowed",
+            "points": 12.5
+          },
+          "PA1": {
+            "name": "1-6 points allowed",
+            "points": 12.5
+          },
+          "PA7": {
+            "name": "7-13 points allowed",
+            "points": 12.5
+          },
+          "PA14": {
+            "name": "14-17 points allowed",
+            "points": 12.5
+          },
+          "PA18": {
+            "name": "18-21 points allowed",
+            "points": 12.5
+          },
+          "PA22": {
+            "name": "22-27 points allowed",
+            "points": 12.5
+          },
+          "PA28": {
+            "name": "28-34 points allowed",
+            "points": 12.5
+          },
+          "PA35": {
+            "name": "35-45 points allowed",
+            "points": 12.5
+          },
+          "PA46": {
+            "name": "46+ points allowed",
+            "points": 12.5
+          }
+        },
+        "Miscellaneous": {
+          "KR": {
+            "name": "Kickoff Return Yards",
+            "points": 0.02
+          },
+          "PR": {
+            "name": "Punt Return Yards",
+            "points": 0.04
+          },
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "FTD": {
+            "name": "Fumble Recovered for TD",
+            "points": 6.0
+          },
+          "FUML": {
+            "name": "Total Fumbles Lost",
+            "points": -2.0
+          }
+        }
+      },
+      "teamsAndDivisions": {
+        "divisions": [
+          "FIRST-ROUND BUSTS",
+          "TRAINING CAMP BODIES",
+          "UNDRAFTED FREE AGENTS",
+          "WASHED-UP VETERANS"
+        ],
+        "teamsListed": [
+          "The Tolbert Report",
+          "He HateMe",
+          "Tears Of Lys",
+          "Duke Sucks Johnson",
+          "Password is Taco",
+          "Devonta Free my Man Demarco",
+          "The Blue Geese",
+          "Multiple Goregasms",
+          "The CaMVPs",
+          "Mama Said Knock You Out",
+          "Every day I'm Russell'n",
+          "Hunky Gore-y"
+        ]
+      },
+      "year": 2015
+    },
+    "2016": {
+      "basicSettings": {
+        "League Name": "Legion of Whom FFL",
+        "Number of Teams": 12,
+        "Scoring Type": "Head to Head Points, 0.2 Points Per Reception",
+        "Format": "League Manager",
+        "Make League Viewable to Public": false,
+        "Auto Reactivate": false,
+        "Lineup Protection Type": "None"
+      },
+      "draftSettings": {
+        "Draft Type": "Snake",
+        "Draft Date": "Sep 5, 2016 @ 2:30 PM EDT",
+        "Time Per Pick": "60 seconds",
+        "Draft Order": "Manually Set by League Manager",
+        "Allow Draft Pick Trading": true
+      },
+      "playerRules": {
+        "Observe ESPN's Undroppable Players List": true,
+        "Player Universe": "NFL"
+      },
+      "acquisitionAndWaiverRules": {
+        "Lineup Changes": "Lock individually at Scheduled Gametime",
+        "Player Acquisition System": "Free Agent Budget (Continuous)",
+        "Season Acquisition Limit": "No Limit",
+        "Waiver Process Days and Time": "Monday, Wednesday, Thursday, Friday, Saturday, Sunday @ 12 PM ET",
+        "Player Acquisition Budget": 100,
+        "Minimum Offer": 0,
+        "Free Agent Budget Tiebreaker": "Reset Each Week to Inverse Order of Standings",
+        "Lock Transactions for Eliminated Teams During Playoffs": false
+      },
+      "tradeRules": {
+        "Trade Limit": "No Limit",
+        "Trade Deadline": "Nov 17, 2016 @ 4:00 AM EST",
+        "Trade Review Period": "1 Day",
+        "Votes Required to Veto Trade": 6
+      },
+      "keepersRules": {
+        "Use Keepers for 2016 Season": false,
+        "Use Keepers for 2017 Season": false
+      },
+      "regularSeasonSetup": {
+        "Start of Regular Season": "NFL Week 1 (Start of Season)",
+        "Weeks Per Matchup": 1,
+        "Regular Season Matchups": 13,
+        "Matchup Tie Breaker": "No tie breakers",
+        "Home Field Advantage": "None",
+        "Bonus Wins and Losses": false
+      },
+      "playoffBracketSetup": {
+        "Playoff Teams": 6,
+        "Weeks In Round 1 Playoff Matchup": 1,
+        "Weeks In Round 2 Playoff Matchup": 1,
+        "Weeks In Championship Round": 1,
+        "Playoff Seeding Tie Breaker": "Total Points For",
+        "Playoff Home Field Advantage": "None",
+        "Allow for Playoff Bracket Reseeding": "Off",
+        "Lock Transactions for Eliminated Teams During Playoffs": false,
+        "To edit, go to Settings > Transactions and Keepers": "Disable Consolation Ladder",
+        "No": "Fantasy Football Support",
+        "Username and Password Help": "Change Email Address",
+        "Issues Joining a League": "Login and Account Issues",
+        "Reset Draft": "Find Your Team",
+        "Fantasy Football Support": "Search the full library of topics."
+      },
+      "roster": {
+        "meta": {
+          "Roster Size": 15,
+          "Total Starters": 9,
+          "Total on Bench": "6 (1 IR)"
+        },
+        "positions": [
+          {
+            "position": "Quarterback (QB)",
+            "starters": 1,
+            "max": 4
+          },
+          {
+            "position": "Team Quarterback (TQB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Running Back (RB)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Running Back/Wide Receiver (RB/WR)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Wide Receiver (WR)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Wide Receiver/Tight End (WR/TE)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Tight End (TE)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Flex (FLEX)",
+            "starters": 1,
+            "max": null
+          },
+          {
+            "position": "Offensive Player Utility (OP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Tackle (DT)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive End (DE)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Linebacker (LB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Line (DL)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Cornerback (CB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Safety (S)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Back (DB)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Player Utility (DP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Team Defense/Special Teams (D/ST)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Place Kicker (K)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Punter (P)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Head Coach (HC)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Bench (BE)",
+            "starters": 6,
+            "max": null
+          },
+          {
+            "position": "Injured Reserve (IR)",
+            "starters": 1,
+            "max": null
+          }
+        ]
+      },
+      "scoring": {
+        "Passing": {
+          "PY": {
+            "name": "Passing Yards",
+            "points": 0.04
+          },
+          "PC": {
+            "name": "Each Pass Completed",
+            "points": 0.2
+          },
+          "INC": {
+            "name": "Each Incomplete Pass",
+            "points": -0.3
+          },
+          "PTD": {
+            "name": "TD Pass",
+            "points": 4.0
+          },
+          "INT": {
+            "name": "Interceptions Thrown",
+            "points": -2.0
+          },
+          "2PC": {
+            "name": "2pt Passing Conversion",
+            "points": 2.0
+          }
+        },
+        "Rushing": {
+          "RY": {
+            "name": "Rushing Yards",
+            "points": 0.1
+          },
+          "RTD": {
+            "name": "TD Rush",
+            "points": 6.0
+          },
+          "2PR": {
+            "name": "2pt Rushing Conversion",
+            "points": 2.0
+          }
+        },
+        "Receiving": {
+          "REY": {
+            "name": "Receiving Yards",
+            "points": 0.1
+          },
+          "REC": {
+            "name": "Each reception",
+            "points": 0.2
+          },
+          "RETD": {
+            "name": "TD Reception",
+            "points": 6.0
+          },
+          "2PRE": {
+            "name": "2pt Receiving Conversion",
+            "points": 2.0
+          }
+        },
+        "Kicking": {
+          "PAT": {
+            "name": "Each PAT Made",
+            "points": 1.0
+          },
+          "PATM": {
+            "name": "Each PAT Missed",
+            "points": -1.0
+          },
+          "FGM": {
+            "name": "Total FG Missed",
+            "points": -1.0
+          },
+          "FG0": {
+            "name": "FG Made (0-39 yards)",
+            "points": 1.0
+          },
+          "FG40": {
+            "name": "FG Made (40-49 yards)",
+            "points": 2.5
+          }
+        },
+        "Team Defense / Special Teams": {
+          "KR": {
+            "name": "Kickoff Return Yards",
+            "points": 0.02
+          },
+          "PR": {
+            "name": "Punt Return Yards",
+            "points": 0.04
+          },
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "INTTD": {
+            "name": "Interception Return TD",
+            "points": 6.0
+          },
+          "FRTD": {
+            "name": "Fumble Return TD",
+            "points": 6.0
+          },
+          "BLKKRTD": {
+            "name": "Blocked Punt or FG return for TD",
+            "points": 6.0
+          },
+          "SK": {
+            "name": "Each Sack",
+            "points": 1.0
+          },
+          "BLKK": {
+            "name": "Blocked Punt, PAT or FG",
+            "points": 2.0
+          },
+          "INT": {
+            "name": "Each Interception",
+            "points": 2.0
+          },
+          "FR": {
+            "name": "Each Fumble Recovered",
+            "points": 2.0
+          },
+          "SF": {
+            "name": "Each Safety",
+            "points": 4.0
+          },
+          "PA": {
+            "name": "Points Allowed",
+            "points": -0.5
+          },
+          "PA0": {
+            "name": "0 points allowed",
+            "points": 12.5
+          },
+          "PA1": {
+            "name": "1-6 points allowed",
+            "points": 12.5
+          },
+          "PA7": {
+            "name": "7-13 points allowed",
+            "points": 12.5
+          },
+          "PA14": {
+            "name": "14-17 points allowed",
+            "points": 12.5
+          },
+          "PA18": {
+            "name": "18-21 points allowed",
+            "points": 12.5
+          },
+          "PA22": {
+            "name": "22-27 points allowed",
+            "points": 12.5
+          },
+          "PA28": {
+            "name": "28-34 points allowed",
+            "points": 12.5
+          },
+          "PA35": {
+            "name": "35-45 points allowed",
+            "points": 12.5
+          },
+          "PA46": {
+            "name": "46+ points allowed",
+            "points": 12.5
+          }
+        },
+        "Miscellaneous": {
+          "KR": {
+            "name": "Kickoff Return Yards",
+            "points": 0.02
+          },
+          "PR": {
+            "name": "Punt Return Yards",
+            "points": 0.04
+          },
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "FTD": {
+            "name": "Fumble Recovered for TD",
+            "points": 6.0
+          },
+          "FUML": {
+            "name": "Total Fumbles Lost",
+            "points": -2.0
+          }
+        }
+      },
+      "teamsAndDivisions": {
+        "divisions": [
+          "FIRST-ROUND BUSTS",
+          "TRAINING CAMP BODIES",
+          "UNDRAFTED FREE AGENTS",
+          "WASHED-UP VETERANS"
+        ],
+        "teamsListed": [
+          "The Blue Geese",
+          "He Hate Me",
+          "Tears Of Lys",
+          "Easy Brees-y",
+          "Password is Taco",
+          "A Team Has No Name",
+          "Luke Kuechly's Bicep",
+          "Cam Newton's Missing Tie",
+          "Tits Out For Harambe",
+          "Team C.R.E.A.M.",
+          "Every day I'm Russell'n",
+          "Life's Been Good"
+        ]
+      },
+      "year": 2016
+    },
+    "2017": {
+      "basicSettings": {
+        "League Name": "Legion of Whom FFL",
+        "Number of Teams": 12,
+        "Scoring Type": "Head to Head Points, 0.2 Points Per Reception",
+        "Format": "League Manager",
+        "Make League Viewable to Public": false,
+        "Auto Reactivate": false,
+        "Lineup Protection Type": "None"
+      },
+      "draftSettings": {
+        "Draft Type": "Snake",
+        "Draft Date": "Sep 6, 2017 @ 3:00 PM EDT",
+        "Time Per Pick": "60 seconds",
+        "Draft Order": "Manually Set by League Manager",
+        "Allow Draft Pick Trading": true
+      },
+      "playerRules": {
+        "Observe ESPN's Undroppable Players List": true,
+        "Player Universe": "NFL"
+      },
+      "acquisitionAndWaiverRules": {
+        "Lineup Changes": "Lock individually at Scheduled Gametime",
+        "Player Acquisition System": "Free Agent Budget (Continuous)",
+        "Season Acquisition Limit": "No Limit",
+        "Waiver Process Days and Time": "Monday, Wednesday, Thursday, Friday, Saturday, Sunday @ 12 PM ET",
+        "Player Acquisition Budget": 100,
+        "Minimum Offer": 0,
+        "Free Agent Budget Tiebreaker": "Reset Each Week to Inverse Order of Standings",
+        "Lock Transactions for Eliminated Teams During Playoffs": false
+      },
+      "tradeRules": {
+        "Trade Limit": "No Limit",
+        "Trade Deadline": "Nov 16, 2017 @ 4:00 AM EST",
+        "Trade Review Period": "1 Day",
+        "Votes Required to Veto Trade": 6
+      },
+      "keepersRules": {
+        "Use Keepers for 2017 Season": false,
+        "Use Keepers for 2018 Season": false
+      },
+      "regularSeasonSetup": {
+        "Start of Regular Season": "NFL Week 1 (Start of Season)",
+        "Weeks Per Matchup": 1,
+        "Regular Season Matchups": 13,
+        "Matchup Tie Breaker": "No tie breakers",
+        "Home Field Advantage": "None",
+        "Bonus Wins and Losses": false
+      },
+      "playoffBracketSetup": {
+        "Playoff Teams": 6,
+        "Weeks In Round 1 Playoff Matchup": 1,
+        "Weeks In Round 2 Playoff Matchup": 1,
+        "Weeks In Championship Round": 1,
+        "Playoff Seeding Tie Breaker": "Total Points For",
+        "Playoff Home Field Advantage": "None",
+        "Allow for Playoff Bracket Reseeding": "Off",
+        "Lock Transactions for Eliminated Teams During Playoffs": false,
+        "To edit, go to Settings > Transactions and Keepers": "Disable Consolation Ladder",
+        "No": "Fantasy Football Support",
+        "Username and Password Help": "Change Email Address",
+        "Issues Joining a League": "Login and Account Issues",
+        "Reset Draft": "Find Your Team",
+        "Fantasy Football Support": "Search the full library of topics."
+      },
+      "roster": {
+        "meta": {
+          "Roster Size": 15,
+          "Total Starters": 9,
+          "Total on Bench": "6 (1 IR)"
+        },
+        "positions": [
+          {
+            "position": "Quarterback (QB)",
+            "starters": 1,
+            "max": 4
+          },
+          {
+            "position": "Team Quarterback (TQB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Running Back (RB)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Running Back/Wide Receiver (RB/WR)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Wide Receiver (WR)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Wide Receiver/Tight End (WR/TE)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Tight End (TE)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Flex (FLEX)",
+            "starters": 1,
+            "max": null
+          },
+          {
+            "position": "Offensive Player Utility (OP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Tackle (DT)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive End (DE)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Linebacker (LB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Line (DL)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Cornerback (CB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Safety (S)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Back (DB)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Player Utility (DP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Team Defense/Special Teams (D/ST)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Place Kicker (K)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Punter (P)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Head Coach (HC)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Bench (BE)",
+            "starters": 6,
+            "max": null
+          },
+          {
+            "position": "Injured Reserve (IR)",
+            "starters": 1,
+            "max": null
+          }
+        ]
+      },
+      "scoring": {
+        "Passing": {
+          "PY": {
+            "name": "Passing Yards",
+            "points": 0.04
+          },
+          "PC": {
+            "name": "Each Pass Completed",
+            "points": 0.2
+          },
+          "INC": {
+            "name": "Each Incomplete Pass",
+            "points": -0.3
+          },
+          "PTD": {
+            "name": "TD Pass",
+            "points": 4.0
+          },
+          "INT": {
+            "name": "Interceptions Thrown",
+            "points": -2.0
+          },
+          "2PC": {
+            "name": "2pt Passing Conversion",
+            "points": 2.0
+          }
+        },
+        "Rushing": {
+          "RY": {
+            "name": "Rushing Yards",
+            "points": 0.1
+          },
+          "RTD": {
+            "name": "TD Rush",
+            "points": 6.0
+          },
+          "2PR": {
+            "name": "2pt Rushing Conversion",
+            "points": 2.0
+          }
+        },
+        "Receiving": {
+          "REY": {
+            "name": "Receiving Yards",
+            "points": 0.1
+          },
+          "REC": {
+            "name": "Each reception",
+            "points": 0.2
+          },
+          "RETD": {
+            "name": "TD Reception",
+            "points": 6.0
+          },
+          "2PRE": {
+            "name": "2pt Receiving Conversion",
+            "points": 2.0
+          }
+        },
+        "Kicking": {
+          "PAT": {
+            "name": "Each PAT Made",
+            "points": 1.0
+          },
+          "PATM": {
+            "name": "Each PAT Missed",
+            "points": -1.0
+          },
+          "FGM": {
+            "name": "Total FG Missed",
+            "points": -1.0
+          },
+          "FG0": {
+            "name": "FG Made (0-39 yards)",
+            "points": 1.0
+          },
+          "FG40": {
+            "name": "FG Made (40-49 yards)",
+            "points": 2.5
+          }
+        },
+        "Team Defense / Special Teams": {
+          "KR": {
+            "name": "Kickoff Return Yards",
+            "points": 0.02
+          },
+          "PR": {
+            "name": "Punt Return Yards",
+            "points": 0.04
+          },
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "INTTD": {
+            "name": "Interception Return TD",
+            "points": 6.0
+          },
+          "FRTD": {
+            "name": "Fumble Return TD",
+            "points": 6.0
+          },
+          "BLKKRTD": {
+            "name": "Blocked Punt or FG return for TD",
+            "points": 6.0
+          },
+          "2PTRET": {
+            "name": "2pt Return",
+            "points": 2.0
+          },
+          "1PSF": {
+            "name": "1pt Safety",
+            "points": 1.0
+          },
+          "SK": {
+            "name": "Each Sack",
+            "points": 1.0
+          },
+          "BLKK": {
+            "name": "Blocked Punt, PAT or FG",
+            "points": 2.0
+          },
+          "INT": {
+            "name": "Each Interception",
+            "points": 2.0
+          },
+          "FR": {
+            "name": "Each Fumble Recovered",
+            "points": 2.0
+          },
+          "SF": {
+            "name": "Each Safety",
+            "points": 4.0
+          },
+          "PA": {
+            "name": "Points Allowed",
+            "points": -0.5
+          },
+          "PA0": {
+            "name": "0 points allowed",
+            "points": 11.5
+          },
+          "PA1": {
+            "name": "1-6 points allowed",
+            "points": 11.5
+          },
+          "PA7": {
+            "name": "7-13 points allowed",
+            "points": 11.5
+          },
+          "PA14": {
+            "name": "14-17 points allowed",
+            "points": 11.5
+          },
+          "PA18": {
+            "name": "18-21 points allowed",
+            "points": 11.5
+          },
+          "PA22": {
+            "name": "22-27 points allowed",
+            "points": 11.5
+          },
+          "PA28": {
+            "name": "28-34 points allowed",
+            "points": 11.5
+          },
+          "PA35": {
+            "name": "35-45 points allowed",
+            "points": 11.5
+          },
+          "PA46": {
+            "name": "46+ points allowed",
+            "points": 11.5
+          }
+        },
+        "Miscellaneous": {
+          "KR": {
+            "name": "Kickoff Return Yards",
+            "points": 0.02
+          },
+          "PR": {
+            "name": "Punt Return Yards",
+            "points": 0.04
+          },
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "FTD": {
+            "name": "Fumble Recovered for TD",
+            "points": 6.0
+          },
+          "FUML": {
+            "name": "Total Fumbles Lost",
+            "points": -2.0
+          }
+        }
+      },
+      "teamsAndDivisions": {
+        "divisions": [
+          "FIRST-ROUND BUSTS",
+          "TRAINING CAMP BODIES",
+          "UNDRAFTED FREE AGENTS",
+          "WASHED-UP VETERANS"
+        ],
+        "teamsListed": [
+          "tUCK fRUMP",
+          "He Hate Me",
+          "Younghoe Un",
+          "The Lizard Kings",
+          "Whale Watch",
+          "Password is Taco",
+          "Luke Kuechly's Bicep",
+          "M as in Mancy",
+          "Atlanta Blew a 25 point lead",
+          "Team C.R.E.A.M.",
+          "Every day I'm Russell'n",
+          "Kenan And Kelley"
+        ]
+      },
+      "year": 2017
+    },
+    "2018": {
+      "basicSettings": {
+        "League Name": "Legion of Whom FFL",
+        "Number of Teams": 12,
+        "Scoring Type": "Head to Head Points, 0.2 Points Per Reception",
+        "Format": "League Manager",
+        "Make League Viewable to Public": false,
+        "Auto Reactivate": false,
+        "Lineup Protection Type": "None"
+      },
+      "draftSettings": {
+        "Draft Type": "Snake",
+        "Draft Date": "Sep 4, 2018 @ 2:00 PM EDT",
+        "Time Per Pick": "60 seconds",
+        "Draft Order": "Manually Set by League Manager",
+        "Allow Draft Pick Trading": true
+      },
+      "playerRules": {
+        "Observe ESPN's Undroppable Players List": true,
+        "Player Universe": "NFL"
+      },
+      "acquisitionAndWaiverRules": {
+        "Lineup Changes": "Lock individually at Scheduled Gametime",
+        "Player Acquisition System": "Free Agent Budget (Continuous)",
+        "Season Acquisition Limit": "No Limit",
+        "Waiver Process Days and Time": "Monday, Wednesday, Thursday, Friday, Saturday, Sunday @ 12 PM ET",
+        "Player Acquisition Budget": 100,
+        "Minimum Offer": 0,
+        "Free Agent Budget Tiebreaker": "Reset Each Week to Inverse Order of Standings",
+        "Lock Transactions for Eliminated Teams During Playoffs": false
+      },
+      "tradeRules": {
+        "Trade Limit": "No Limit",
+        "Trade Deadline": "Nov 14, 2018 @ 4:00 AM EST",
+        "Trade Review Period": "1 Day",
+        "Votes Required to Veto Trade": 6
+      },
+      "keepersRules": {
+        "Use Keepers for 2018 Season": false,
+        "Use Keepers for 2019 Season": false
+      },
+      "regularSeasonSetup": {
+        "Start of Regular Season": "NFL Week 1 (Start of Season)",
+        "Weeks Per Matchup": 1,
+        "Regular Season Matchups": 13,
+        "Matchup Tie Breaker": "No tie breakers",
+        "Home Field Advantage": "None",
+        "Bonus Wins and Losses": false
+      },
+      "playoffBracketSetup": {
+        "Playoff Teams": 6,
+        "Weeks In Round 1 Playoff Matchup": 1,
+        "Weeks In Round 2 Playoff Matchup": 1,
+        "Weeks In Championship Round": 1,
+        "Playoff Seeding Tie Breaker": "Total Points For",
+        "Playoff Home Field Advantage": "None",
+        "Allow for Playoff Bracket Reseeding": "Off",
+        "Lock Transactions for Eliminated Teams During Playoffs": false,
+        "To edit, go to Settings > Transactions and Keepers": "Disable Consolation Ladder",
+        "No": "Fantasy Football Support",
+        "Username and Password Help": "Change Email Address",
+        "Issues Joining a League": "Login and Account Issues",
+        "Reset Draft": "Find Your Team",
+        "Fantasy Football Support": "Search the full library of topics."
+      },
+      "roster": {
+        "meta": {
+          "Roster Size": 15,
+          "Total Starters": 9,
+          "Total on Bench": "6 (1 IR)"
+        },
+        "positions": [
+          {
+            "position": "Quarterback (QB)",
+            "starters": 1,
+            "max": 4
+          },
+          {
+            "position": "Team Quarterback (TQB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Running Back (RB)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Running Back/Wide Receiver (RB/WR)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Wide Receiver (WR)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Wide Receiver/Tight End (WR/TE)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Tight End (TE)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Flex (FLEX)",
+            "starters": 1,
+            "max": null
+          },
+          {
+            "position": "Offensive Player Utility (OP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Tackle (DT)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive End (DE)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Linebacker (LB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Line (DL)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Cornerback (CB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Safety (S)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Back (DB)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Player Utility (DP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Team Defense/Special Teams (D/ST)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Place Kicker (K)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Punter (P)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Head Coach (HC)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Bench (BE)",
+            "starters": 6,
+            "max": null
+          },
+          {
+            "position": "Injured Reserve (IR)",
+            "starters": 1,
+            "max": null
+          }
+        ]
+      },
+      "scoring": {
+        "Passing": {
+          "PY": {
+            "name": "Passing Yards",
+            "points": 0.04
+          },
+          "PC": {
+            "name": "Each Pass Completed",
+            "points": 0.2
+          },
+          "INC": {
+            "name": "Each Incomplete Pass",
+            "points": -0.3
+          },
+          "PTD": {
+            "name": "TD Pass",
+            "points": 4.0
+          },
+          "INT": {
+            "name": "Interceptions Thrown",
+            "points": -2.0
+          },
+          "2PC": {
+            "name": "2pt Passing Conversion",
+            "points": 2.0
+          }
+        },
+        "Rushing": {
+          "RY": {
+            "name": "Rushing Yards",
+            "points": 0.1
+          },
+          "RTD": {
+            "name": "TD Rush",
+            "points": 6.0
+          },
+          "2PR": {
+            "name": "2pt Rushing Conversion",
+            "points": 2.0
+          }
+        },
+        "Receiving": {
+          "REY": {
+            "name": "Receiving Yards",
+            "points": 0.1
+          },
+          "REC": {
+            "name": "Each reception",
+            "points": 0.2
+          },
+          "RETD": {
+            "name": "TD Reception",
+            "points": 6.0
+          },
+          "2PRE": {
+            "name": "2pt Receiving Conversion",
+            "points": 2.0
+          }
+        },
+        "Kicking": {
+          "PAT": {
+            "name": "Each PAT Made",
+            "points": 1.0
+          },
+          "PATM": {
+            "name": "Each PAT Missed",
+            "points": -1.0
+          },
+          "FGM": {
+            "name": "Total FG Missed",
+            "points": -1.0
+          },
+          "FG0": {
+            "name": "FG Made (0-39 yards)",
+            "points": 1.0
+          },
+          "FG40": {
+            "name": "FG Made (40-49 yards)",
+            "points": 2.5
+          }
+        },
+        "Team Defense / Special Teams": {
+          "KR": {
+            "name": "Kickoff Return Yards",
+            "points": 0.02
+          },
+          "PR": {
+            "name": "Punt Return Yards",
+            "points": 0.04
+          },
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "INTTD": {
+            "name": "Interception Return TD",
+            "points": 6.0
+          },
+          "FRTD": {
+            "name": "Fumble Return TD",
+            "points": 6.0
+          },
+          "BLKKRTD": {
+            "name": "Blocked Punt or FG return for TD",
+            "points": 6.0
+          },
+          "2PTRET": {
+            "name": "2pt Return",
+            "points": 2.0
+          },
+          "1PSF": {
+            "name": "1pt Safety",
+            "points": 1.0
+          },
+          "SK": {
+            "name": "Each Sack",
+            "points": 1.0
+          },
+          "BLKK": {
+            "name": "Blocked Punt, PAT or FG",
+            "points": 2.0
+          },
+          "INT": {
+            "name": "Each Interception",
+            "points": 2.0
+          },
+          "FR": {
+            "name": "Each Fumble Recovered",
+            "points": 2.0
+          },
+          "SF": {
+            "name": "Each Safety",
+            "points": 4.0
+          },
+          "PA": {
+            "name": "Points Allowed",
+            "points": -0.5
+          },
+          "PA0": {
+            "name": "0 points allowed",
+            "points": 11.5
+          },
+          "PA1": {
+            "name": "1-6 points allowed",
+            "points": 11.5
+          },
+          "PA7": {
+            "name": "7-13 points allowed",
+            "points": 11.5
+          },
+          "PA14": {
+            "name": "14-17 points allowed",
+            "points": 11.5
+          },
+          "PA18": {
+            "name": "18-21 points allowed",
+            "points": 11.5
+          },
+          "PA22": {
+            "name": "22-27 points allowed",
+            "points": 11.5
+          },
+          "PA28": {
+            "name": "28-34 points allowed",
+            "points": 11.5
+          },
+          "PA35": {
+            "name": "35-45 points allowed",
+            "points": 11.5
+          },
+          "PA46": {
+            "name": "46+ points allowed",
+            "points": 11.5
+          }
+        },
+        "Miscellaneous": {
+          "KR": {
+            "name": "Kickoff Return Yards",
+            "points": 0.02
+          },
+          "PR": {
+            "name": "Punt Return Yards",
+            "points": 0.04
+          },
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "FTD": {
+            "name": "Fumble Recovered for TD",
+            "points": 6.0
+          },
+          "FUML": {
+            "name": "Total Fumbles Lost",
+            "points": -2.0
+          }
+        }
+      },
+      "teamsAndDivisions": {
+        "divisions": [
+          "FIRST-ROUND BUSTS",
+          "TRAINING CAMP BODIES",
+          "UNDRAFTED FREE AGENTS",
+          "WASHED-UP VETERANS"
+        ],
+        "teamsListed": [
+          "The Hands Team",
+          "He Hate Me",
+          "Coitus Interruptus",
+          "Whale Watch",
+          "Password is Taco",
+          "Vacant Team",
+          "Luke Kuechly's Bicep",
+          "M as in Mancy",
+          "JuJu and Crew",
+          "I Ain't No Fortunette Son",
+          "Every day I'm Russell'n",
+          "I'm Thielen Good"
+        ]
+      },
+      "year": 2018
+    },
+    "2019": {
+      "basicSettings": {
+        "League Name": "Legion of Whom FFL",
+        "Number of Teams": 12,
+        "Scoring Type": "Head to Head Points, 0.2 Points Per Reception",
+        "Format": "League Manager",
+        "Make League Viewable to Public": false,
+        "Auto Reactivate": false,
+        "Lineup Protection Type": "None"
+      },
+      "draftSettings": {
+        "Draft Type": "Snake",
+        "Draft Date": "Sep 4, 2019 @ 9:00 PM EDT",
+        "Time Per Pick": "60 seconds",
+        "Draft Order": "Manually Set by League Manager",
+        "Allow Draft Pick Trading": true
+      },
+      "playerRules": {
+        "Observe ESPN's Undroppable Players List": true,
+        "Player Universe": "NFL"
+      },
+      "acquisitionAndWaiverRules": {
+        "Lineup Changes": "Lock individually at Scheduled Gametime",
+        "Player Acquisition System": "Free Agent Budget (Continuous)",
+        "Season Acquisition Limit": "No Limit",
+        "Waiver Process Days and Time": "Monday, Wednesday, Thursday, Friday, Saturday, Sunday @ 12 PM ET",
+        "Player Acquisition Budget": 100,
+        "Minimum Offer": 0,
+        "Free Agent Budget Tiebreaker": "Reset Each Week to Inverse Order of Standings",
+        "Lock Transactions for Eliminated Teams During Playoffs": false
+      },
+      "tradeRules": {
+        "Trade Limit": "No Limit",
+        "Trade Deadline": "Nov 13, 2019 @ 12:00 PM EST",
+        "Trade Review Period": "1 Day",
+        "Votes Required to Veto Trade": 6
+      },
+      "keepersRules": {
+        "Use Keepers for 2019 Season": false,
+        "Use Keepers for 2020 Season": false
+      },
+      "regularSeasonSetup": {
+        "Start of Regular Season": "NFL Week 1 (Start of Season)",
+        "Weeks Per Matchup": 1,
+        "Regular Season Matchups": 13,
+        "Matchup Tie Breaker": "No tie breakers",
+        "Home Field Advantage": "None",
+        "Bonus Wins and Losses": false
+      },
+      "playoffBracketSetup": {
+        "Playoff Teams": 6,
+        "Weeks In Round 1 Playoff Matchup": 1,
+        "Weeks In Round 2 Playoff Matchup": 1,
+        "Weeks In Championship Round": 1,
+        "Playoff Seeding Tie Breaker": "Total Points For",
+        "Playoff Home Field Advantage": "None",
+        "Allow for Playoff Bracket Reseeding": "Off",
+        "Lock Transactions for Eliminated Teams During Playoffs": false,
+        "To edit, go to Settings > Transactions and Keepers": "Disable Consolation Ladder",
+        "No": "Fantasy Football Support",
+        "Username and Password Help": "Change Email Address",
+        "Issues Joining a League": "Login and Account Issues",
+        "Reset Draft": "Find Your Team",
+        "Fantasy Football Support": "Search the full library of topics."
+      },
+      "roster": {
+        "meta": {
+          "Roster Size": 15,
+          "Total Starters": 9,
+          "Total on Bench": "6 (1 IR)"
+        },
+        "positions": [
+          {
+            "position": "Quarterback (QB)",
+            "starters": 1,
+            "max": 4
+          },
+          {
+            "position": "Team Quarterback (TQB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Running Back (RB)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Running Back/Wide Receiver (RB/WR)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Wide Receiver (WR)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Wide Receiver/Tight End (WR/TE)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Tight End (TE)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Flex (FLEX)",
+            "starters": 1,
+            "max": null
+          },
+          {
+            "position": "Offensive Player Utility (OP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Tackle (DT)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive End (DE)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Linebacker (LB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Line (DL)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Cornerback (CB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Safety (S)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Back (DB)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Player Utility (DP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Team Defense/Special Teams (D/ST)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Place Kicker (K)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Punter (P)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Head Coach (HC)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Bench (BE)",
+            "starters": 6,
+            "max": null
+          },
+          {
+            "position": "Injured Reserve (IR)",
+            "starters": 1,
+            "max": null
+          }
+        ]
+      },
+      "scoring": {
+        "Passing": {
+          "PY": {
+            "name": "Passing Yards",
+            "points": 0.04
+          },
+          "PC": {
+            "name": "Each Pass Completed",
+            "points": 0.2
+          },
+          "INC": {
+            "name": "Each Incomplete Pass",
+            "points": -0.3
+          },
+          "PTD": {
+            "name": "TD Pass",
+            "points": 4.0
+          },
+          "INT": {
+            "name": "Interceptions Thrown",
+            "points": -2.0
+          },
+          "2PC": {
+            "name": "2pt Passing Conversion",
+            "points": 2.0
+          }
+        },
+        "Rushing": {
+          "RY": {
+            "name": "Rushing Yards",
+            "points": 0.1
+          },
+          "RTD": {
+            "name": "TD Rush",
+            "points": 6.0
+          },
+          "2PR": {
+            "name": "2pt Rushing Conversion",
+            "points": 2.0
+          }
+        },
+        "Receiving": {
+          "REY": {
+            "name": "Receiving Yards",
+            "points": 0.1
+          },
+          "REC": {
+            "name": "Each reception",
+            "points": 0.2
+          },
+          "RETD": {
+            "name": "TD Reception",
+            "points": 6.0
+          },
+          "2PRE": {
+            "name": "2pt Receiving Conversion",
+            "points": 2.0
+          }
+        },
+        "Kicking": {
+          "PAT": {
+            "name": "Each PAT Made",
+            "points": 1.0
+          },
+          "PATM": {
+            "name": "Each PAT Missed",
+            "points": -1.0
+          },
+          "FGM": {
+            "name": "Total FG Missed",
+            "points": -1.0
+          },
+          "FG0": {
+            "name": "FG Made (0-39 yards)",
+            "points": 1.0
+          },
+          "FG40": {
+            "name": "FG Made (40-49 yards)",
+            "points": 2.5
+          }
+        },
+        "Team Defense / Special Teams": {
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "INTTD": {
+            "name": "Interception Return TD",
+            "points": 6.0
+          },
+          "FRTD": {
+            "name": "Fumble Return TD",
+            "points": 6.0
+          },
+          "BLKKRTD": {
+            "name": "Blocked Punt or FG return for TD",
+            "points": 6.0
+          },
+          "2PTRET": {
+            "name": "2pt Return",
+            "points": 2.0
+          },
+          "1PSF": {
+            "name": "1pt Safety",
+            "points": 1.0
+          },
+          "SK": {
+            "name": "Each Sack",
+            "points": 1.0
+          },
+          "BLKK": {
+            "name": "Blocked Punt, PAT or FG",
+            "points": 2.0
+          },
+          "INT": {
+            "name": "Each Interception",
+            "points": 2.0
+          },
+          "FR": {
+            "name": "Each Fumble Recovered",
+            "points": 2.0
+          },
+          "SF": {
+            "name": "Each Safety",
+            "points": 4.0
+          },
+          "PA": {
+            "name": "Points Allowed",
+            "points": -0.5
+          },
+          "PA0": {
+            "name": "0 points allowed",
+            "points": 11.5
+          },
+          "PA1": {
+            "name": "1-6 points allowed",
+            "points": 11.5
+          },
+          "PA7": {
+            "name": "7-13 points allowed",
+            "points": 11.5
+          },
+          "PA14": {
+            "name": "14-17 points allowed",
+            "points": 11.5
+          },
+          "PA18": {
+            "name": "18-21 points allowed",
+            "points": 11.5
+          },
+          "PA22": {
+            "name": "22-27 points allowed",
+            "points": 11.5
+          },
+          "PA28": {
+            "name": "28-34 points allowed",
+            "points": 11.5
+          },
+          "PA35": {
+            "name": "35-45 points allowed",
+            "points": 11.5
+          },
+          "PA46": {
+            "name": "46+ points allowed",
+            "points": 11.5
+          }
+        },
+        "Miscellaneous": {
+          "KR": {
+            "name": "Kickoff Return Yards",
+            "points": 0.02
+          },
+          "PR": {
+            "name": "Punt Return Yards",
+            "points": 0.04
+          },
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "FTD": {
+            "name": "Fumble Recovered for TD",
+            "points": 6.0
+          },
+          "FUML": {
+            "name": "Total Fumbles Lost",
+            "points": -2.0
+          }
+        }
+      },
+      "teamsAndDivisions": {
+        "divisions": [
+          "FIRST-ROUND BUSTS",
+          "TRAINING CAMP BODIES",
+          "UNDRAFTED FREE AGENTS",
+          "WASHED-UP VETERANS"
+        ],
+        "teamsListed": [
+          "The Van Buren Boys",
+          "Ace Boogie\u2019s Boys",
+          "Coitus Interruptus",
+          "Whale Watch",
+          "Password is Taco",
+          "All Barkely, No Bite",
+          "THE 919 Spilly Phecial",
+          "M as in Mancy",
+          "Tobey was the Best Spiderman",
+          "Too Many Cooks",
+          "Every day I'm Russell'n",
+          "Meow Mixon Tender Sanders"
+        ]
+      },
+      "year": 2019
+    },
+    "2020": {
+      "basicSettings": {
+        "League Name": "Legion of Whom FFL",
+        "Number of Teams": 12,
+        "Scoring Type": "Head to Head Points, 0.2 Points Per Reception",
+        "Format": "League Manager",
+        "Make League Viewable to Public": false,
+        "Auto Reactivate": false,
+        "Lineup Protection Type": "None"
+      },
+      "draftSettings": {
+        "Draft Type": "Snake",
+        "Draft Date": "Sep 7, 2020 @ 9:00 PM EDT",
+        "Time Per Pick": "60 seconds",
+        "Draft Order": "Manually Set by League Manager",
+        "Allow Draft Pick Trading": true
+      },
+      "playerRules": {
+        "Observe ESPN's Undroppable Players List": true,
+        "Player Universe": "NFL"
+      },
+      "acquisitionAndWaiverRules": {
+        "Lineup Changes": "Lock individually at Scheduled Gametime",
+        "Player Acquisition System": "Free Agent Budget (Continuous)",
+        "Season Acquisition Limit": "No Limit",
+        "Waiver Process Days and Time": "Monday, Wednesday, Thursday, Friday, Saturday, Sunday @ 12 PM ET",
+        "Player Acquisition Budget": 100,
+        "Minimum Offer": 0,
+        "Free Agent Budget Tiebreaker": "Reset Each Week to Inverse Order of Standings",
+        "Lock Transactions for Eliminated Teams During Playoffs": false
+      },
+      "tradeRules": {
+        "Trade Limit": "No Limit",
+        "Trade Deadline": "Nov 18, 2020 @ 12:00 PM EST",
+        "Trade Review Period": "1 Day",
+        "Votes Required to Veto Trade": 6
+      },
+      "keepersRules": {
+        "Use Keepers for 2020 Season": false,
+        "Use Keepers for 2021 Season": false
+      },
+      "regularSeasonSetup": {
+        "Start of Regular Season": "NFL Week 1 (Start of Season)",
+        "Weeks Per Matchup": 1,
+        "Regular Season Matchups": 13,
+        "Matchup Tie Breaker": "No tie breakers",
+        "Home Field Advantage": "None",
+        "Bonus Wins and Losses": false
+      },
+      "playoffBracketSetup": {
+        "Playoff Teams": 6,
+        "Weeks In Round 1 Playoff Matchup": 1,
+        "Weeks In Round 2 Playoff Matchup": 1,
+        "Weeks In Championship Round": 1,
+        "Playoff Seeding Tie Breaker": "Total Points For",
+        "Playoff Home Field Advantage": "None",
+        "Allow for Playoff Bracket Reseeding": "Off",
+        "Lock Transactions for Eliminated Teams During Playoffs": false,
+        "To edit, go to Settings > Transactions and Keepers": "Disable Consolation Ladder",
+        "No": "Fantasy Football Support",
+        "Username and Password Help": "Change Email Address",
+        "Issues Joining a League": "Login and Account Issues",
+        "Reset Draft": "Find Your Team",
+        "Fantasy Football Support": "Search the full library of topics."
+      },
+      "roster": {
+        "meta": {
+          "Roster Size": 15,
+          "Total Starters": 9,
+          "Total on Bench": "6 (2 IR)"
+        },
+        "positions": [
+          {
+            "position": "Quarterback (QB)",
+            "starters": 1,
+            "max": 4
+          },
+          {
+            "position": "Team Quarterback (TQB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Running Back (RB)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Running Back/Wide Receiver (RB/WR)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Wide Receiver (WR)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Wide Receiver/Tight End (WR/TE)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Tight End (TE)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Flex (FLEX)",
+            "starters": 1,
+            "max": null
+          },
+          {
+            "position": "Offensive Player Utility (OP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Tackle (DT)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive End (DE)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Linebacker (LB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Line (DL)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Cornerback (CB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Safety (S)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Back (DB)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Player Utility (DP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Team Defense/Special Teams (D/ST)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Place Kicker (K)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Punter (P)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Head Coach (HC)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Bench (BE)",
+            "starters": 6,
+            "max": null
+          },
+          {
+            "position": "Injured Reserve (IR)",
+            "starters": 2,
+            "max": null
+          }
+        ]
+      },
+      "scoring": {
+        "Passing": {
+          "PY": {
+            "name": "Passing Yards",
+            "points": 0.04
+          },
+          "PC": {
+            "name": "Each Pass Completed",
+            "points": 0.2
+          },
+          "INC": {
+            "name": "Each Incomplete Pass",
+            "points": -0.3
+          },
+          "PTD": {
+            "name": "TD Pass",
+            "points": 4.0
+          },
+          "INT": {
+            "name": "Interceptions Thrown",
+            "points": -2.0
+          },
+          "2PC": {
+            "name": "2pt Passing Conversion",
+            "points": 2.0
+          }
+        },
+        "Rushing": {
+          "RY": {
+            "name": "Rushing Yards",
+            "points": 0.1
+          },
+          "RTD": {
+            "name": "TD Rush",
+            "points": 6.0
+          },
+          "2PR": {
+            "name": "2pt Rushing Conversion",
+            "points": 2.0
+          }
+        },
+        "Receiving": {
+          "REY": {
+            "name": "Receiving Yards",
+            "points": 0.1
+          },
+          "REC": {
+            "name": "Each reception",
+            "points": 0.2
+          },
+          "RETD": {
+            "name": "TD Reception",
+            "points": 6.0
+          },
+          "2PRE": {
+            "name": "2pt Receiving Conversion",
+            "points": 2.0
+          }
+        },
+        "Kicking": {
+          "PAT": {
+            "name": "Each PAT Made",
+            "points": 1.0
+          },
+          "PATM": {
+            "name": "Each PAT Missed",
+            "points": -1.0
+          },
+          "FGM": {
+            "name": "Total FG Missed",
+            "points": -1.0
+          },
+          "FG0": {
+            "name": "FG Made (0-39 yards)",
+            "points": 1.0
+          },
+          "FG40": {
+            "name": "FG Made (40-49 yards)",
+            "points": 2.5
+          },
+          "FG50": {
+            "name": "FG Made (50-59 yards)",
+            "points": 4.0
+          },
+          "FG60": {
+            "name": "FG Made (60+ yards)",
+            "points": 4.0
+          }
+        },
+        "Team Defense / Special Teams": {
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "INTTD": {
+            "name": "Interception Return TD",
+            "points": 6.0
+          },
+          "FRTD": {
+            "name": "Fumble Return TD",
+            "points": 6.0
+          },
+          "BLKKRTD": {
+            "name": "Blocked Punt or FG return for TD",
+            "points": 6.0
+          },
+          "2PTRET": {
+            "name": "2pt Return",
+            "points": 2.0
+          },
+          "1PSF": {
+            "name": "1pt Safety",
+            "points": 1.0
+          },
+          "SK": {
+            "name": "Each Sack",
+            "points": 1.0
+          },
+          "BLKK": {
+            "name": "Blocked Punt, PAT or FG",
+            "points": 2.0
+          },
+          "INT": {
+            "name": "Each Interception",
+            "points": 2.0
+          },
+          "FR": {
+            "name": "Each Fumble Recovered",
+            "points": 2.0
+          },
+          "SF": {
+            "name": "Each Safety",
+            "points": 4.0
+          },
+          "PA": {
+            "name": "Points Allowed",
+            "points": -0.5
+          },
+          "PA0": {
+            "name": "0 points allowed",
+            "points": 11.5
+          },
+          "PA1": {
+            "name": "1-6 points allowed",
+            "points": 11.5
+          },
+          "PA7": {
+            "name": "7-13 points allowed",
+            "points": 11.5
+          },
+          "PA14": {
+            "name": "14-17 points allowed",
+            "points": 11.5
+          },
+          "PA18": {
+            "name": "18-21 points allowed",
+            "points": 11.5
+          },
+          "PA22": {
+            "name": "22-27 points allowed",
+            "points": 11.5
+          },
+          "PA28": {
+            "name": "28-34 points allowed",
+            "points": 11.5
+          },
+          "PA35": {
+            "name": "35-45 points allowed",
+            "points": 11.5
+          },
+          "PA46": {
+            "name": "46+ points allowed",
+            "points": 11.5
+          }
+        },
+        "Miscellaneous": {
+          "KR": {
+            "name": "Kickoff Return Yards",
+            "points": 0.02
+          },
+          "PR": {
+            "name": "Punt Return Yards",
+            "points": 0.04
+          },
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "FTD": {
+            "name": "Fumble Recovered for TD",
+            "points": 6.0
+          },
+          "FUML": {
+            "name": "Total Fumbles Lost",
+            "points": -2.0
+          }
+        }
+      },
+      "teamsAndDivisions": {
+        "divisions": [
+          "FIRST-ROUND BUSTS",
+          "TRAINING CAMP BODIES",
+          "UNDRAFTED FREE AGENTS",
+          "WASHED-UP VETERANS"
+        ],
+        "teamsListed": [
+          "The Pain Train",
+          "Montgomery Flea Market",
+          "Full Chubb",
+          "Whale Watch",
+          "Password is Taco",
+          "Bye Week",
+          "It Hurts You Wentz",
+          "M as in Mancy",
+          "JoshJacobJingle Heimerschmidt",
+          "Number One Boys",
+          "Gurleys Gone Wild",
+          "Howard Johnson Hotels"
+        ]
+      },
+      "year": 2020
+    },
+    "2021": {
+      "basicSettings": {
+        "League Name": "Legion of Whom FFL",
+        "Number of Teams": 12,
+        "Scoring Type": "Head to Head Points, 0.2 Points Per Reception",
+        "Format": "League Manager",
+        "Make League Viewable to Public": false,
+        "Auto Reactivate": false,
+        "Lineup Protection Type": "None"
+      },
+      "draftSettings": {
+        "Draft Type": "Snake",
+        "Draft Date": "Sep 7, 2021 @ 9:00 PM EDT",
+        "Time Per Pick": "60 seconds",
+        "Draft Order": "Manually Set by League Manager",
+        "Allow Draft Pick Trading": true
+      },
+      "playerRules": {
+        "Observe ESPN's Undroppable Players List": true,
+        "Player Universe": "NFL"
+      },
+      "acquisitionAndWaiverRules": {
+        "Lineup Changes": "Lock individually at Scheduled Gametime",
+        "Player Acquisition System": "Free Agent Budget",
+        "Season Acquisition Limit": "No Limit",
+        "Waiver Period": "1 Day",
+        "Player Acquisition Budget": 100,
+        "Minimum Offer": 0,
+        "Free Agent Budget Tiebreaker": "Reset Each Week to Inverse Order of Standings",
+        "Lock Transactions for Eliminated Teams During Playoffs": false
+      },
+      "tradeRules": {
+        "Trade Limit": "No Limit",
+        "Trade Deadline": "Nov 24, 2021 @ 12:00 PM EST",
+        "Trade Review Period": "No Trade Review"
+      },
+      "keepersRules": {
+        "Use Keepers for 2021 Season": false,
+        "Use Keepers for 2022 Season": false
+      },
+      "regularSeasonSetup": {
+        "Start of Regular Season": "NFL Week 1 (Start of Season)",
+        "Weeks Per Matchup": 1,
+        "Regular Season Matchups": 14,
+        "Matchup Tie Breaker": "No tie breakers",
+        "Home Field Advantage": "None",
+        "Bonus Wins and Losses": false
+      },
+      "playoffBracketSetup": {
+        "Playoff Teams": 6,
+        "Weeks In Round 1 Playoff Matchup": 1,
+        "Weeks In Round 2 Playoff Matchup": 1,
+        "Weeks In Championship Round": 1,
+        "Playoff Seeding Tie Breaker": "Total Points For",
+        "Playoff Home Field Advantage": "None",
+        "Allow for Playoff Bracket Reseeding": "Off",
+        "Lock Transactions for Eliminated Teams During Playoffs": false,
+        "To edit, go to Settings > Transactions and Keepers": "Disable Consolation Ladder",
+        "No": "Fantasy Football Support",
+        "Username and Password Help": "Change Email Address",
+        "Issues Joining a League": "Login and Account Issues",
+        "Reset Draft": "Find Your Team",
+        "Fantasy Football Support": "Search the full library of topics."
+      },
+      "roster": {
+        "meta": {
+          "Roster Size": 15,
+          "Total Starters": 9,
+          "Total on Bench": "6 (2 IR)"
+        },
+        "positions": [
+          {
+            "position": "Quarterback (QB)",
+            "starters": 1,
+            "max": 4
+          },
+          {
+            "position": "Team Quarterback (TQB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Running Back (RB)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Running Back/Wide Receiver (RB/WR)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Wide Receiver (WR)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Wide Receiver/Tight End (WR/TE)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Tight End (TE)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Flex (FLEX)",
+            "starters": 1,
+            "max": null
+          },
+          {
+            "position": "Offensive Player Utility (OP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Tackle (DT)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive End (DE)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Linebacker (LB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Line (DL)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Cornerback (CB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Safety (S)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Back (DB)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Player Utility (DP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Team Defense/Special Teams (D/ST)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Place Kicker (K)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Punter (P)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Head Coach (HC)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Bench (BE)",
+            "starters": 6,
+            "max": null
+          },
+          {
+            "position": "Injured Reserve (IR)",
+            "starters": 2,
+            "max": null
+          }
+        ]
+      },
+      "scoring": {
+        "Passing": {
+          "PY": {
+            "name": "Passing Yards",
+            "points": 0.04
+          },
+          "PC": {
+            "name": "Each Pass Completed",
+            "points": 0.2
+          },
+          "INC": {
+            "name": "Each Incomplete Pass",
+            "points": -0.3
+          },
+          "PTD": {
+            "name": "TD Pass",
+            "points": 4.0
+          },
+          "INT": {
+            "name": "Interceptions Thrown",
+            "points": -2.0
+          },
+          "2PC": {
+            "name": "2pt Passing Conversion",
+            "points": 2.0
+          }
+        },
+        "Rushing": {
+          "RY": {
+            "name": "Rushing Yards",
+            "points": 0.1
+          },
+          "RTD": {
+            "name": "TD Rush",
+            "points": 6.0
+          },
+          "2PR": {
+            "name": "2pt Rushing Conversion",
+            "points": 2.0
+          }
+        },
+        "Receiving": {
+          "REY": {
+            "name": "Receiving Yards",
+            "points": 0.1
+          },
+          "REC": {
+            "name": "Each reception",
+            "points": 0.2
+          },
+          "RETD": {
+            "name": "TD Reception",
+            "points": 6.0
+          },
+          "2PRE": {
+            "name": "2pt Receiving Conversion",
+            "points": 2.0
+          }
+        },
+        "Kicking": {
+          "PAT": {
+            "name": "Each PAT Made",
+            "points": 1.0
+          },
+          "PATM": {
+            "name": "Each PAT Missed",
+            "points": -1.5
+          },
+          "FG0": {
+            "name": "FG Made (0-39 yards)",
+            "points": 1.5
+          },
+          "FG40": {
+            "name": "FG Made (40-49 yards)",
+            "points": 2.5
+          },
+          "FGM0": {
+            "name": "FG Missed (0-39 yards)",
+            "points": -1.5
+          },
+          "FGM40": {
+            "name": "FG Missed (40-49 yards)",
+            "points": -1.0
+          },
+          "FGM50": {
+            "name": "FG Missed (50-59 yards)",
+            "points": -0.5
+          },
+          "FG50": {
+            "name": "FG Made (50-59 yards)",
+            "points": 3.5
+          },
+          "FG60": {
+            "name": "FG Made (60+ yards)",
+            "points": 4.5
+          }
+        },
+        "Team Defense / Special Teams": {
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "INTTD": {
+            "name": "Interception Return TD",
+            "points": 6.0
+          },
+          "FRTD": {
+            "name": "Fumble Return TD",
+            "points": 6.0
+          },
+          "BLKKRTD": {
+            "name": "Blocked Punt or FG return for TD",
+            "points": 6.0
+          },
+          "2PTRET": {
+            "name": "2pt Return",
+            "points": 2.0
+          },
+          "1PSF": {
+            "name": "1pt Safety",
+            "points": 1.0
+          },
+          "SK": {
+            "name": "Each Sack",
+            "points": 1.0
+          },
+          "BLKK": {
+            "name": "Blocked Punt, PAT or FG",
+            "points": 2.0
+          },
+          "INT": {
+            "name": "Each Interception",
+            "points": 2.0
+          },
+          "FR": {
+            "name": "Each Fumble Recovered",
+            "points": 2.0
+          },
+          "SF": {
+            "name": "Each Safety",
+            "points": 4.0
+          },
+          "PA": {
+            "name": "Points Allowed",
+            "points": -0.5
+          },
+          "PA0": {
+            "name": "0 points allowed",
+            "points": 11.5
+          },
+          "PA1": {
+            "name": "1-6 points allowed",
+            "points": 11.5
+          },
+          "PA7": {
+            "name": "7-13 points allowed",
+            "points": 11.5
+          },
+          "PA14": {
+            "name": "14-17 points allowed",
+            "points": 11.5
+          },
+          "PA18": {
+            "name": "18-21 points allowed",
+            "points": 11.5
+          },
+          "PA22": {
+            "name": "22-27 points allowed",
+            "points": 11.5
+          },
+          "PA28": {
+            "name": "28-34 points allowed",
+            "points": 11.5
+          },
+          "PA35": {
+            "name": "35-45 points allowed",
+            "points": 11.5
+          },
+          "PA46": {
+            "name": "46+ points allowed",
+            "points": 11.5
+          }
+        },
+        "Miscellaneous": {
+          "KR": {
+            "name": "Kickoff Return Yards",
+            "points": 0.02
+          },
+          "PR": {
+            "name": "Punt Return Yards",
+            "points": 0.04
+          },
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "FTD": {
+            "name": "Fumble Recovered for TD",
+            "points": 6.0
+          },
+          "FUML": {
+            "name": "Total Fumbles Lost",
+            "points": -2.0
+          }
+        }
+      },
+      "teamsAndDivisions": {
+        "divisions": [
+          "FIRST-ROUND BUSTS",
+          "UNDRAFTED FREE AGENTS",
+          "WASHED-UP VETERANS"
+        ],
+        "teamsListed": [
+          "The Pain Train",
+          "2 Girls 1 Kupp",
+          "Number One Boys",
+          "Reek -A- Leek",
+          "PhilaDenvia 36ers",
+          "M as in Mancy",
+          "Slaw Bunnies",
+          "Dueling DJ's",
+          "Whale Watch",
+          "Password is Taco",
+          "No Game Scheduled",
+          "Golladay In Cambodia"
+        ]
+      },
+      "year": 2021
+    },
+    "2022": {
+      "basicSettings": {
+        "League Name": "Legion of Whom FFL",
+        "Number of Teams": 12,
+        "Scoring Type": "Head to Head Points, 0.2 Points Per Reception",
+        "Format": "League Manager",
+        "Make League Viewable to Public": false,
+        "Auto Reactivate": false,
+        "Lineup Protection Type": "None"
+      },
+      "draftSettings": {
+        "Draft Type": "Snake",
+        "Draft Date": "Aug 29, 2022 @ 9:00 PM EDT",
+        "Time Per Pick": "60 seconds",
+        "Draft Order": "Manually Set by League Manager",
+        "Allow Draft Pick Trading": true
+      },
+      "playerRules": {
+        "Observe ESPN's Undroppable Players List": true,
+        "Player Universe": "NFL"
+      },
+      "acquisitionAndWaiverRules": {
+        "Lineup Changes": "Lock individually at Scheduled Gametime",
+        "Player Acquisition System": "Free Agent Budget",
+        "Season Acquisition Limit": "No Limit",
+        "Waiver Period": "1 Day",
+        "Player Acquisition Budget": 100,
+        "Minimum Offer": 0,
+        "Free Agent Budget Tiebreaker": "Reset Each Week to Inverse Order of Standings",
+        "Lock Transactions for Eliminated Teams During Playoffs": false
+      },
+      "tradeRules": {
+        "Trade Limit": "No Limit",
+        "Trade Deadline": "Nov 23, 2022 @ 12:00 PM EST",
+        "Trade Review Period": "No Trade Review"
+      },
+      "keepersRules": {
+        "Use Keepers for 2022 Season": false,
+        "Use Keepers for 2023 Season": false
+      },
+      "regularSeasonSetup": {
+        "Start of Regular Season": "NFL Week 1 (Start of Season)",
+        "Weeks Per Matchup": 1,
+        "Regular Season Matchups": 14,
+        "Matchup Tie Breaker": "No tie breakers",
+        "Home Field Advantage": "None",
+        "Bonus Wins and Losses": false
+      },
+      "playoffBracketSetup": {
+        "Playoff Teams": 6,
+        "Weeks In Round 1 Playoff Matchup": 1,
+        "Weeks In Round 2 Playoff Matchup": 1,
+        "Weeks In Championship Round": 1,
+        "Playoff Seeding Tie Breaker": "Total Points For",
+        "Playoff Home Field Advantage": "None",
+        "Allow for Playoff Bracket Reseeding": "Off",
+        "Lock Transactions for Eliminated Teams During Playoffs": false,
+        "To edit, go to Settings > Transactions and Keepers": "Disable Consolation Ladder",
+        "No": "Fantasy Football Support",
+        "Username and Password Help": "Change Email Address",
+        "Issues Joining a League": "Login and Account Issues",
+        "Reset Draft": "Find Your Team",
+        "Fantasy Football Support": "Search the full library of topics."
+      },
+      "roster": {
+        "meta": {
+          "Roster Size": 15,
+          "Total Starters": 9,
+          "Total on Bench": "6 (2 IR)"
+        },
+        "positions": [
+          {
+            "position": "Quarterback (QB)",
+            "starters": 1,
+            "max": 4
+          },
+          {
+            "position": "Team Quarterback (TQB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Running Back (RB)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Running Back/Wide Receiver (RB/WR)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Wide Receiver (WR)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Wide Receiver/Tight End (WR/TE)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Tight End (TE)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Flex (FLEX)",
+            "starters": 1,
+            "max": null
+          },
+          {
+            "position": "Offensive Player Utility (OP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Tackle (DT)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive End (DE)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Linebacker (LB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Line (DL)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Cornerback (CB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Safety (S)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Back (DB)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Player Utility (DP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Team Defense/Special Teams (D/ST)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Place Kicker (K)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Punter (P)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Head Coach (HC)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Bench (BE)",
+            "starters": 6,
+            "max": null
+          },
+          {
+            "position": "Injured Reserve (IR)",
+            "starters": 2,
+            "max": null
+          }
+        ]
+      },
+      "scoring": {
+        "Passing": {
+          "PY": {
+            "name": "Passing Yards",
+            "points": 0.04
+          },
+          "PC": {
+            "name": "Each Pass Completed",
+            "points": 0.2
+          },
+          "INC": {
+            "name": "Each Incomplete Pass",
+            "points": -0.3
+          },
+          "PTD": {
+            "name": "TD Pass",
+            "points": 4.0
+          },
+          "INT": {
+            "name": "Interceptions Thrown",
+            "points": -2.0
+          },
+          "2PC": {
+            "name": "2pt Passing Conversion",
+            "points": 2.0
+          }
+        },
+        "Rushing": {
+          "RY": {
+            "name": "Rushing Yards",
+            "points": 0.1
+          },
+          "RTD": {
+            "name": "TD Rush",
+            "points": 6.0
+          },
+          "2PR": {
+            "name": "2pt Rushing Conversion",
+            "points": 2.0
+          }
+        },
+        "Receiving": {
+          "REY": {
+            "name": "Receiving Yards",
+            "points": 0.1
+          },
+          "REC": {
+            "name": "Each reception",
+            "points": 0.2
+          },
+          "RETD": {
+            "name": "TD Reception",
+            "points": 6.0
+          },
+          "2PRE": {
+            "name": "2pt Receiving Conversion",
+            "points": 2.0
+          }
+        },
+        "Kicking": {
+          "PAT": {
+            "name": "Each PAT Made",
+            "points": 1.0
+          },
+          "PATM": {
+            "name": "Each PAT Missed",
+            "points": -1.5
+          },
+          "FG0": {
+            "name": "FG Made (0-39 yards)",
+            "points": 1.5
+          },
+          "FG40": {
+            "name": "FG Made (40-49 yards)",
+            "points": 2.5
+          },
+          "FGM0": {
+            "name": "FG Missed (0-39 yards)",
+            "points": -1.5
+          },
+          "FGM40": {
+            "name": "FG Missed (40-49 yards)",
+            "points": -1.0
+          },
+          "FGM50": {
+            "name": "FG Missed (50-59 yards)",
+            "points": -0.5
+          },
+          "FG50": {
+            "name": "FG Made (50-59 yards)",
+            "points": 3.5
+          },
+          "FG60": {
+            "name": "FG Made (60+ yards)",
+            "points": 4.5
+          }
+        },
+        "Team Defense / Special Teams": {
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "INTTD": {
+            "name": "Interception Return TD",
+            "points": 6.0
+          },
+          "FRTD": {
+            "name": "Fumble Return TD",
+            "points": 6.0
+          },
+          "BLKKRTD": {
+            "name": "Blocked Punt or FG return for TD",
+            "points": 6.0
+          },
+          "2PTRET": {
+            "name": "2pt Return",
+            "points": 2.0
+          },
+          "1PSF": {
+            "name": "1pt Safety",
+            "points": 1.0
+          },
+          "SK": {
+            "name": "Each Sack",
+            "points": 1.0
+          },
+          "BLKK": {
+            "name": "Blocked Punt, PAT or FG",
+            "points": 2.0
+          },
+          "INT": {
+            "name": "Each Interception",
+            "points": 2.0
+          },
+          "FR": {
+            "name": "Each Fumble Recovered",
+            "points": 2.0
+          },
+          "SF": {
+            "name": "Each Safety",
+            "points": 4.0
+          },
+          "PA": {
+            "name": "Points Allowed",
+            "points": -0.5
+          },
+          "PA0": {
+            "name": "0 points allowed",
+            "points": 11.5
+          },
+          "PA1": {
+            "name": "1-6 points allowed",
+            "points": 11.5
+          },
+          "PA7": {
+            "name": "7-13 points allowed",
+            "points": 11.5
+          },
+          "PA14": {
+            "name": "14-17 points allowed",
+            "points": 11.5
+          },
+          "PA18": {
+            "name": "18-21 points allowed",
+            "points": 11.5
+          },
+          "PA22": {
+            "name": "22-27 points allowed",
+            "points": 11.5
+          },
+          "PA28": {
+            "name": "28-34 points allowed",
+            "points": 11.5
+          },
+          "PA35": {
+            "name": "35-45 points allowed",
+            "points": 11.5
+          },
+          "PA46": {
+            "name": "46+ points allowed",
+            "points": 11.5
+          }
+        },
+        "Miscellaneous": {
+          "KR": {
+            "name": "Kickoff Return Yards",
+            "points": 0.02
+          },
+          "PR": {
+            "name": "Punt Return Yards",
+            "points": 0.04
+          },
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "FTD": {
+            "name": "Fumble Recovered for TD",
+            "points": 6.0
+          },
+          "FUML": {
+            "name": "Total Fumbles Lost",
+            "points": -2.0
+          }
+        }
+      },
+      "teamsAndDivisions": {
+        "divisions": [
+          "FIRST-ROUND BUSTS",
+          "UNDRAFTED FREE AGENTS",
+          "WASHED-UP VETERANS"
+        ],
+        "teamsListed": [
+          "The Pain Train",
+          "2 Girls 1 Kupp",
+          "Number One Boys",
+          "Diddle Stix",
+          "PhilaDenvia 36ers",
+          "M as in Mancy",
+          "Slaw Bunnies",
+          "The Brady Bunch TBB",
+          "Whale Watch",
+          "Password is Taco",
+          "No Game Scheduled",
+          "Golladay In Cambodia"
+        ]
+      },
+      "year": 2022
+    },
+    "2023": {
+      "basicSettings": {
+        "League Name": "Legion of Whom FFL",
+        "Number of Teams": 12,
+        "Scoring Type": "Head to Head Points, 0.2 Points Per Reception",
+        "Format": "League Manager",
+        "Make League Viewable to Public": false,
+        "Auto Reactivate": false,
+        "Lineup Protection Type": "None"
+      },
+      "draftSettings": {
+        "Draft Type": "Snake",
+        "Draft Date": "Aug 29, 2023 @ 9:30 PM EDT",
+        "Time Per Pick": "60 seconds",
+        "Draft Order": "Manually Set by League Manager",
+        "Allow Draft Pick Trading": false
+      },
+      "playerRules": {
+        "Observe ESPN's Undroppable Players List": true,
+        "Player Universe": "NFL"
+      },
+      "acquisitionAndWaiverRules": {
+        "Lineup Changes": "Lock individually at Scheduled Gametime",
+        "Player Acquisition System": "Free Agent Budget",
+        "Season Acquisition Limit": "No Limit",
+        "Waiver Period": "1 Day",
+        "Player Acquisition Budget": 100,
+        "Minimum Offer": 0,
+        "Free Agent Budget Tiebreaker": "Reset Each Week to Inverse Order of Standings",
+        "Lock Transactions for Eliminated Teams During Playoffs": false
+      },
+      "tradeRules": {
+        "Trade Limit": "No Limit",
+        "Trade Deadline": "Nov 22, 2023 @ 12:00 PM EST",
+        "Trade Review Period": "No Trade Review"
+      },
+      "keepersRules": {
+        "Use Keepers for 2023 Season": false,
+        "Use Keepers for 2024 Season": false
+      },
+      "regularSeasonSetup": {
+        "Start of Regular Season": "NFL Week 1 (Start of Season)",
+        "Weeks Per Matchup": 1,
+        "Regular Season Matchups": 14,
+        "Matchup Tie Breaker": "No tie breakers",
+        "Home Field Advantage": "None",
+        "Bonus Wins and Losses": false
+      },
+      "playoffBracketSetup": {
+        "Playoff Teams": 6,
+        "Weeks In Round 1 Playoff Matchup": 1,
+        "Weeks In Round 2 Playoff Matchup": 1,
+        "Weeks In Championship Round": 1,
+        "Playoff Seeding Tie Breaker": "Total Points For",
+        "Playoff Home Field Advantage": "None",
+        "Allow for Playoff Bracket Reseeding": "Off",
+        "Lock Transactions for Eliminated Teams During Playoffs": false,
+        "To edit, go to Settings > Transactions and Keepers": "Disable Consolation Ladder",
+        "No": "Fantasy Football Support",
+        "Username and Password Help": "Change Email Address",
+        "Issues Joining a League": "Login and Account Issues",
+        "Reset Draft": "Find Your Team",
+        "Fantasy Football Support": "Search the full library of topics."
+      },
+      "roster": {
+        "meta": {
+          "Roster Size": 15,
+          "Total Starters": 9,
+          "Total on Bench": "6 (2 IR)"
+        },
+        "positions": [
+          {
+            "position": "Quarterback (QB)",
+            "starters": 1,
+            "max": 4
+          },
+          {
+            "position": "Team Quarterback (TQB)",
+            "starters": 0,
+            "max": "No Limit"
+          },
+          {
+            "position": "Running Back (RB)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Running Back/Wide Receiver (RB/WR)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Wide Receiver (WR)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Wide Receiver/Tight End (WR/TE)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Tight End (TE)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Flex (FLEX)",
+            "starters": 1,
+            "max": null
+          },
+          {
+            "position": "Offensive Player Utility (OP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Tackle (DT)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive End (DE)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Linebacker (LB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Line (DL)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Cornerback (CB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Safety (S)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Back (DB)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Player Utility (DP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Team Defense/Special Teams (D/ST)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Place Kicker (K)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Punter (P)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Head Coach (HC)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Bench (BE)",
+            "starters": 6,
+            "max": null
+          },
+          {
+            "position": "Injured Reserve (IR)",
+            "starters": 2,
+            "max": null
+          }
+        ]
+      },
+      "scoring": {
+        "Passing": {
+          "PY": {
+            "name": "Passing Yards",
+            "points": 0.04
+          },
+          "PC": {
+            "name": "Each Pass Completed",
+            "points": 0.2
+          },
+          "INC": {
+            "name": "Each Incomplete Pass",
+            "points": -0.3
+          },
+          "PTD": {
+            "name": "TD Pass",
+            "points": 4.0
+          },
+          "INT": {
+            "name": "Interceptions Thrown",
+            "points": -2.0
+          },
+          "2PC": {
+            "name": "2pt Passing Conversion",
+            "points": 2.0
+          }
+        },
+        "Rushing": {
+          "RY": {
+            "name": "Rushing Yards",
+            "points": 0.1
+          },
+          "RTD": {
+            "name": "TD Rush",
+            "points": 6.0
+          },
+          "2PR": {
+            "name": "2pt Rushing Conversion",
+            "points": 2.0
+          }
+        },
+        "Receiving": {
+          "REY": {
+            "name": "Receiving Yards",
+            "points": 0.1
+          },
+          "REC": {
+            "name": "Each reception",
+            "points": 0.2
+          },
+          "RETD": {
+            "name": "TD Reception",
+            "points": 6.0
+          },
+          "2PRE": {
+            "name": "2pt Receiving Conversion",
+            "points": 2.0
+          }
+        },
+        "Kicking": {
+          "PAT": {
+            "name": "Each PAT Made",
+            "points": 1.0
+          },
+          "PATM": {
+            "name": "Each PAT Missed",
+            "points": -1.5
+          },
+          "FG0": {
+            "name": "FG Made (0-39 yards)",
+            "points": 1.5
+          },
+          "FG40": {
+            "name": "FG Made (40-49 yards)",
+            "points": 2.5
+          },
+          "FGM0": {
+            "name": "FG Missed (0-39 yards)",
+            "points": -1.5
+          },
+          "FGM40": {
+            "name": "FG Missed (40-49 yards)",
+            "points": -1.0
+          },
+          "FGM50": {
+            "name": "FG Missed (50-59 yards)",
+            "points": -0.5
+          },
+          "FG50": {
+            "name": "FG Made (50-59 yards)",
+            "points": 3.5
+          },
+          "FG60": {
+            "name": "FG Made (60+ yards)",
+            "points": 4.5
+          }
+        },
+        "Team Defense / Special Teams": {
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "INTTD": {
+            "name": "Interception Return TD",
+            "points": 6.0
+          },
+          "FRTD": {
+            "name": "Fumble Return TD",
+            "points": 6.0
+          },
+          "BLKKRTD": {
+            "name": "Blocked Punt or FG return for TD",
+            "points": 6.0
+          },
+          "2PTRET": {
+            "name": "2pt Return",
+            "points": 2.0
+          },
+          "1PSF": {
+            "name": "1pt Safety",
+            "points": 1.0
+          },
+          "SK": {
+            "name": "Each Sack",
+            "points": 1.0
+          },
+          "BLKK": {
+            "name": "Blocked Punt, PAT or FG",
+            "points": 2.0
+          },
+          "INT": {
+            "name": "Each Interception",
+            "points": 2.0
+          },
+          "FR": {
+            "name": "Each Fumble Recovered",
+            "points": 2.0
+          },
+          "SF": {
+            "name": "Each Safety",
+            "points": 4.0
+          },
+          "PA": {
+            "name": "Points Allowed",
+            "points": -0.5
+          },
+          "PA0": {
+            "name": "0 points allowed",
+            "points": 11.5
+          },
+          "PA1": {
+            "name": "1-6 points allowed",
+            "points": 11.5
+          },
+          "PA7": {
+            "name": "7-13 points allowed",
+            "points": 11.5
+          },
+          "PA14": {
+            "name": "14-17 points allowed",
+            "points": 11.5
+          },
+          "PA18": {
+            "name": "18-21 points allowed",
+            "points": 11.5
+          },
+          "PA22": {
+            "name": "22-27 points allowed",
+            "points": 11.5
+          },
+          "PA28": {
+            "name": "28-34 points allowed",
+            "points": 11.5
+          },
+          "PA35": {
+            "name": "35-45 points allowed",
+            "points": 11.5
+          },
+          "PA46": {
+            "name": "46+ points allowed",
+            "points": 11.5
+          }
+        },
+        "Miscellaneous": {
+          "KR": {
+            "name": "Kickoff Return Yards",
+            "points": 0.02
+          },
+          "PR": {
+            "name": "Punt Return Yards",
+            "points": 0.04
+          },
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "FTD": {
+            "name": "Fumble Recovered for TD",
+            "points": 6.0
+          },
+          "FUML": {
+            "name": "Total Fumbles Lost",
+            "points": -2.0
+          }
+        }
+      },
+      "teamsAndDivisions": {
+        "divisions": [
+          "FIRST-ROUND BUSTS",
+          "UNDRAFTED FREE AGENTS",
+          "WASHED-UP VETERANS"
+        ],
+        "teamsListed": [
+          "The Pain Train",
+          "I have Patrick Mahomes",
+          "Number One Boys",
+          "The Trash Men",
+          "Piket Up Pikens",
+          "M as in Mancy",
+          "Being Young Hurts",
+          "Howell Do You Do?",
+          "Whale Watch",
+          "Password is Taco",
+          "The Pain Airplane",
+          ".Caulkfighters"
+        ]
+      },
+      "year": 2023
+    },
+    "2024": {
+      "basicSettings": {
+        "League Name": "Legion of Whom FFL",
+        "Number of Teams": 12,
+        "Scoring Type": "Head to Head Points, 0.2 Points Per Reception",
+        "Format": "League Manager",
+        "Make League Viewable to Public": false,
+        "Auto Reactivate": false,
+        "Lineup Protection Type": "None"
+      },
+      "draftSettings": {
+        "Draft Type": "Salary Cap",
+        "Draft Date": "Aug 26, 2024 @ 8:00 PM EDT",
+        "Salary Cap": 200
+      },
+      "playerRules": {
+        "Observe ESPN's Undroppable Players List": true,
+        "Player Universe": "NFL"
+      },
+      "acquisitionAndWaiverRules": {
+        "Lineup Changes": "Lock individually at Scheduled Gametime",
+        "Player Acquisition System": "Free Agent Budget",
+        "Season Acquisition Limit": "No Limit",
+        "Waiver Period": "1 Day",
+        "Player Acquisition Budget": 100,
+        "Minimum Offer": 0,
+        "Free Agent Budget Tiebreaker": "Reset Each Week to Inverse Order of Standings",
+        "Lock Transactions for Eliminated Teams During Playoffs": false
+      },
+      "tradeRules": {
+        "Trade Limit": "No Limit",
+        "Trade Deadline": "Nov 20, 2024 @ 12:00 PM EST",
+        "Trade Review Period": "No Trade Review"
+      },
+      "keepersRules": {
+        "Use Keepers for 2024 Season": false,
+        "Use Keepers for 2025 Season": false
+      },
+      "regularSeasonSetup": {
+        "Start of Regular Season": "NFL Week 1 (Start of Season)",
+        "Weeks Per Matchup": 1,
+        "Regular Season Matchups": 14,
+        "Matchup Tie Breaker": "No tie breakers",
+        "Home Field Advantage": "None",
+        "Bonus Wins and Losses": false
+      },
+      "playoffBracketSetup": {
+        "Playoff Teams": 6,
+        "Weeks In Round 1 Playoff Matchup": 1,
+        "Weeks In Round 2 Playoff Matchup": 1,
+        "Weeks In Championship Round": 1,
+        "Playoff Seeding Tie Breaker": "Total Points For",
+        "Playoff Home Field Advantage": "None",
+        "Allow for Playoff Bracket Reseeding": "Off",
+        "Lock Transactions for Eliminated Teams During Playoffs": false,
+        "To edit, go to Settings > Transactions and Keepers": "Disable Consolation Ladder",
+        "No": "Fantasy Football Support",
+        "Username and Password Help": "Change Email Address",
+        "Issues Joining a League": "Login and Account Issues",
+        "Reset Draft": "Find Your Team",
+        "Fantasy Football Support": "Search the full library of topics."
+      },
+      "roster": {
+        "meta": {
+          "Roster Size": 15,
+          "Total Starters": 9,
+          "Total on Bench": "6 (2 IR)"
+        },
+        "positions": [
+          {
+            "position": "Quarterback (QB)",
+            "starters": 1,
+            "max": 4
+          },
+          {
+            "position": "Team Quarterback (TQB)",
+            "starters": 0,
+            "max": "No Limit"
+          },
+          {
+            "position": "Running Back (RB)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Running Back/Wide Receiver (RB/WR)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Wide Receiver (WR)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Wide Receiver/Tight End (WR/TE)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Tight End (TE)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Flex (FLEX)",
+            "starters": 1,
+            "max": null
+          },
+          {
+            "position": "Offensive Player Utility (OP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Tackle (DT)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive End (DE)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Linebacker (LB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Line (DL)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Cornerback (CB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Safety (S)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Back (DB)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Player Utility (DP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Team Defense/Special Teams (D/ST)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Place Kicker (K)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Punter (P)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Head Coach (HC)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Bench (BE)",
+            "starters": 6,
+            "max": null
+          },
+          {
+            "position": "Injured Reserve (IR)",
+            "starters": 2,
+            "max": null
+          }
+        ]
+      },
+      "scoring": {
+        "Passing": {
+          "PY": {
+            "name": "Passing Yards",
+            "points": 0.04
+          },
+          "PC": {
+            "name": "Each Pass Completed",
+            "points": 0.2
+          },
+          "INC": {
+            "name": "Each Incomplete Pass",
+            "points": -0.3
+          },
+          "PTD": {
+            "name": "TD Pass",
+            "points": 4.0
+          },
+          "INT": {
+            "name": "Interceptions Thrown",
+            "points": -2.0
+          },
+          "2PC": {
+            "name": "2pt Passing Conversion",
+            "points": 2.0
+          }
+        },
+        "Rushing": {
+          "RY": {
+            "name": "Rushing Yards",
+            "points": 0.1
+          },
+          "RTD": {
+            "name": "TD Rush",
+            "points": 6.0
+          },
+          "2PR": {
+            "name": "2pt Rushing Conversion",
+            "points": 2.0
+          }
+        },
+        "Receiving": {
+          "REY": {
+            "name": "Receiving Yards",
+            "points": 0.1
+          },
+          "REC": {
+            "name": "Each reception",
+            "points": 0.2
+          },
+          "RETD": {
+            "name": "TD Reception",
+            "points": 6.0
+          },
+          "2PRE": {
+            "name": "2pt Receiving Conversion",
+            "points": 2.0
+          }
+        },
+        "Kicking": {
+          "PAT": {
+            "name": "Each PAT Made",
+            "points": 1.0
+          },
+          "PATM": {
+            "name": "Each PAT Missed",
+            "points": -1.5
+          },
+          "FG0": {
+            "name": "FG Made (0-39 yards)",
+            "points": 1.5
+          },
+          "FG40": {
+            "name": "FG Made (40-49 yards)",
+            "points": 2.5
+          },
+          "FGM0": {
+            "name": "FG Missed (0-39 yards)",
+            "points": -1.5
+          },
+          "FGM40": {
+            "name": "FG Missed (40-49 yards)",
+            "points": -1.0
+          },
+          "FGM50": {
+            "name": "FG Missed (50-59 yards)",
+            "points": -0.5
+          },
+          "FG50": {
+            "name": "FG Made (50-59 yards)",
+            "points": 3.5
+          },
+          "FG60": {
+            "name": "FG Made (60+ yards)",
+            "points": 4.5
+          }
+        },
+        "Team Defense / Special Teams": {
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "INTTD": {
+            "name": "Interception Return TD",
+            "points": 6.0
+          },
+          "FRTD": {
+            "name": "Fumble Return TD",
+            "points": 6.0
+          },
+          "BLKKRTD": {
+            "name": "Blocked Punt or FG return for TD",
+            "points": 6.0
+          },
+          "2PTRET": {
+            "name": "2pt Return",
+            "points": 2.0
+          },
+          "1PSF": {
+            "name": "1pt Safety",
+            "points": 1.0
+          },
+          "SK": {
+            "name": "Each Sack",
+            "points": 1.0
+          },
+          "BLKK": {
+            "name": "Blocked Punt, PAT or FG",
+            "points": 2.0
+          },
+          "INT": {
+            "name": "Each Interception",
+            "points": 2.0
+          },
+          "FR": {
+            "name": "Each Fumble Recovered",
+            "points": 2.0
+          },
+          "SF": {
+            "name": "Each Safety",
+            "points": 4.0
+          },
+          "PA": {
+            "name": "Points Allowed",
+            "points": -0.5
+          },
+          "PA0": {
+            "name": "0 points allowed",
+            "points": 11.5
+          },
+          "PA1": {
+            "name": "1-6 points allowed",
+            "points": 11.5
+          },
+          "PA7": {
+            "name": "7-13 points allowed",
+            "points": 11.5
+          },
+          "PA14": {
+            "name": "14-17 points allowed",
+            "points": 11.5
+          },
+          "PA18": {
+            "name": "18-21 points allowed",
+            "points": 11.5
+          },
+          "PA22": {
+            "name": "22-27 points allowed",
+            "points": 11.5
+          },
+          "PA28": {
+            "name": "28-34 points allowed",
+            "points": 11.5
+          },
+          "PA35": {
+            "name": "35-45 points allowed",
+            "points": 11.5
+          },
+          "PA46": {
+            "name": "46+ points allowed",
+            "points": 11.5
+          }
+        },
+        "Miscellaneous": {
+          "KR": {
+            "name": "Kickoff Return Yards",
+            "points": 0.02
+          },
+          "PR": {
+            "name": "Punt Return Yards",
+            "points": 0.04
+          },
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "FTD": {
+            "name": "Fumble Recovered for TD",
+            "points": 6.0
+          },
+          "FUML": {
+            "name": "Total Fumbles Lost",
+            "points": -2.0
+          }
+        }
+      },
+      "teamsAndDivisions": {
+        "divisions": [
+          "FIRST-ROUND BUSTS",
+          "UNDRAFTED FREE AGENTS",
+          "WASHED-UP VETERANS"
+        ],
+        "teamsListed": [
+          "Tepper's Turf",
+          "Number One Boys",
+          "Pink Pony Chubb",
+          "Kicker's Kingdom",
+          "M as in Mancy",
+          "Finally Paid Dues",
+          "Kamarinara",
+          ".Caulkfighters",
+          "The Pain Train",
+          "Whale Watch",
+          "Password is Taco",
+          "Tortured Players Dept"
+        ]
+      },
+      "year": 2024
+    },
+    "2025": {
+      "basicSettings": {
+        "League Name": "Legion of Whom FFL",
+        "Number of Teams": 12,
+        "Scoring Type": "Head to Head Points, 0.2 Points Per Reception",
+        "Format": "League Manager",
+        "Make League Viewable to Public": false,
+        "Auto Reactivate": false,
+        "Lineup Protection Type": "None"
+      },
+      "draftSettings": {
+        "Draft Type": "Salary Cap",
+        "Draft Date": "Aug 25, 2025 @ 8:00 PM EDT",
+        "Salary Cap": 200
+      },
+      "playerRules": {
+        "Observe ESPN's Undroppable Players List": true,
+        "Player Universe": "NFL"
+      },
+      "acquisitionAndWaiverRules": {
+        "Lineup Changes": "Lock individually at Scheduled Gametime",
+        "Player Acquisition System": "Free Agent Budget",
+        "Season Acquisition Limit": "No Limit",
+        "Waiver Period": "1 Day",
+        "Player Acquisition Budget": 100,
+        "Minimum Offer": 0,
+        "Free Agent Budget Tiebreaker": "Reset Each Week to Inverse Order of Standings",
+        "Lock Transactions for Eliminated Teams During Playoffs": false
+      },
+      "tradeRules": {
+        "Trade Limit": "No Limit",
+        "Trade Deadline": "Nov 19, 2025 @ 12:00 PM EST",
+        "Trade Review Period": "No Trade Review"
+      },
+      "keepersRules": {
+        "Use Keepers for 2025 Season": false,
+        "Use Keepers for 2026 Season": false
+      },
+      "regularSeasonSetup": {
+        "Start of Regular Season": "NFL Week 1 (Start of Season)",
+        "Weeks Per Matchup": 1,
+        "Regular Season Matchups": 14,
+        "Matchup Tie Breaker": "No tie breakers",
+        "Home Field Advantage": "None",
+        "Bonus Wins and Losses": false
+      },
+      "playoffBracketSetup": {
+        "Playoff Teams": 6,
+        "Weeks In Round 1 Playoff Matchup": 1,
+        "Weeks In Round 2 Playoff Matchup": 1,
+        "Weeks In Championship Round": 1,
+        "Playoff Seeding Tie Breaker": "Total Points For",
+        "Playoff Home Field Advantage": "None",
+        "Allow for Playoff Bracket Reseeding": "Off",
+        "Lock Transactions for Eliminated Teams During Playoffs": false,
+        "To edit, go to Settings > Transactions and Keepers": "Disable Consolation Ladder",
+        "No": "Fantasy Football Support",
+        "Username and Password Help": "Change Email Address",
+        "Issues Joining a League": "Login and Account Issues",
+        "Reset Draft": "Find Your Team",
+        "Fantasy Football Support": "Search the full library of topics."
+      },
+      "roster": {
+        "meta": {
+          "Roster Size": 15,
+          "Total Starters": 9,
+          "Total on Bench": "6 (2 IR)"
+        },
+        "positions": [
+          {
+            "position": "Quarterback (QB)",
+            "starters": 1,
+            "max": 4
+          },
+          {
+            "position": "Team Quarterback (TQB)",
+            "starters": 0,
+            "max": "No Limit"
+          },
+          {
+            "position": "Running Back (RB)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Running Back/Wide Receiver (RB/WR)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Wide Receiver (WR)",
+            "starters": 2,
+            "max": 8
+          },
+          {
+            "position": "Wide Receiver/Tight End (WR/TE)",
+            "starters": 1,
+            "max": null
+          },
+          {
+            "position": "Tight End (TE)",
+            "starters": 0,
+            "max": 3
+          },
+          {
+            "position": "Flex (FLEX)",
+            "starters": 1,
+            "max": null
+          },
+          {
+            "position": "Offensive Player Utility (OP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Tackle (DT)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive End (DE)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Linebacker (LB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Line (DL)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Cornerback (CB)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Safety (S)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Defensive Back (DB)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Defensive Player Utility (DP)",
+            "starters": 0,
+            "max": null
+          },
+          {
+            "position": "Team Defense/Special Teams (D/ST)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Place Kicker (K)",
+            "starters": 1,
+            "max": 3
+          },
+          {
+            "position": "Punter (P)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Head Coach (HC)",
+            "starters": 0,
+            "max": 0
+          },
+          {
+            "position": "Bench (BE)",
+            "starters": 6,
+            "max": null
+          },
+          {
+            "position": "Injured Reserve (IR)",
+            "starters": 2,
+            "max": null
+          }
+        ]
+      },
+      "scoring": {
+        "Passing": {
+          "PY": {
+            "name": "Passing Yards",
+            "points": 0.04
+          },
+          "PC": {
+            "name": "Each Pass Completed",
+            "points": 0.2
+          },
+          "INC": {
+            "name": "Each Incomplete Pass",
+            "points": -0.3
+          },
+          "PTD": {
+            "name": "TD Pass",
+            "points": 4.0
+          },
+          "INT": {
+            "name": "Interceptions Thrown",
+            "points": -2.0
+          },
+          "2PC": {
+            "name": "2pt Passing Conversion",
+            "points": 2.0
+          }
+        },
+        "Rushing": {
+          "RY": {
+            "name": "Rushing Yards",
+            "points": 0.1
+          },
+          "RTD": {
+            "name": "TD Rush",
+            "points": 6.0
+          },
+          "2PR": {
+            "name": "2pt Rushing Conversion",
+            "points": 2.0
+          }
+        },
+        "Receiving": {
+          "REY": {
+            "name": "Receiving Yards",
+            "points": 0.1
+          },
+          "REC": {
+            "name": "Each reception",
+            "points": 0.2
+          },
+          "RETD": {
+            "name": "TD Reception",
+            "points": 6.0
+          },
+          "2PRE": {
+            "name": "2pt Receiving Conversion",
+            "points": 2.0
+          }
+        },
+        "Kicking": {
+          "PAT": {
+            "name": "Each PAT Made",
+            "points": 1.0
+          },
+          "PATM": {
+            "name": "Each PAT Missed",
+            "points": -1.5
+          },
+          "FG0": {
+            "name": "FG Made (0-39 yards)",
+            "points": 1.5
+          },
+          "FG40": {
+            "name": "FG Made (40-49 yards)",
+            "points": 2.5
+          },
+          "FGM0": {
+            "name": "FG Missed (0-39 yards)",
+            "points": -1.5
+          },
+          "FGM40": {
+            "name": "FG Missed (40-49 yards)",
+            "points": -1.0
+          },
+          "FGM50": {
+            "name": "FG Missed (50-59 yards)",
+            "points": -0.5
+          },
+          "FG50": {
+            "name": "FG Made (50-59 yards)",
+            "points": 3.5
+          },
+          "FG60": {
+            "name": "FG Made (60+ yards)",
+            "points": 4.5
+          }
+        },
+        "Team Defense / Special Teams": {
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "INTTD": {
+            "name": "Interception Return TD",
+            "points": 6.0
+          },
+          "FRTD": {
+            "name": "Fumble Return TD",
+            "points": 6.0
+          },
+          "BLKKRTD": {
+            "name": "Blocked Punt or FG return for TD",
+            "points": 6.0
+          },
+          "2PTRET": {
+            "name": "2pt Return",
+            "points": 2.0
+          },
+          "1PSF": {
+            "name": "1pt Safety",
+            "points": 1.0
+          },
+          "SK": {
+            "name": "Each Sack",
+            "points": 1.0
+          },
+          "BLKK": {
+            "name": "Blocked Punt, PAT or FG",
+            "points": 2.0
+          },
+          "INT": {
+            "name": "Each Interception",
+            "points": 2.0
+          },
+          "FR": {
+            "name": "Each Fumble Recovered",
+            "points": 2.0
+          },
+          "SF": {
+            "name": "Each Safety",
+            "points": 4.0
+          },
+          "PA": {
+            "name": "Points Allowed",
+            "points": -0.5
+          },
+          "PA0": {
+            "name": "0 points allowed",
+            "points": 11.5
+          },
+          "PA1": {
+            "name": "1-6 points allowed",
+            "points": 11.5
+          },
+          "PA7": {
+            "name": "7-13 points allowed",
+            "points": 11.5
+          },
+          "PA14": {
+            "name": "14-17 points allowed",
+            "points": 11.5
+          },
+          "PA18": {
+            "name": "18-21 points allowed",
+            "points": 11.5
+          },
+          "PA22": {
+            "name": "22-27 points allowed",
+            "points": 11.5
+          },
+          "PA28": {
+            "name": "28-34 points allowed",
+            "points": 11.5
+          },
+          "PA35": {
+            "name": "35-45 points allowed",
+            "points": 11.5
+          },
+          "PA46": {
+            "name": "46+ points allowed",
+            "points": 11.5
+          }
+        },
+        "Miscellaneous": {
+          "KR": {
+            "name": "Kickoff Return Yards",
+            "points": 0.02
+          },
+          "PR": {
+            "name": "Punt Return Yards",
+            "points": 0.04
+          },
+          "KRTD": {
+            "name": "Kickoff Return TD",
+            "points": 6.0
+          },
+          "PRTD": {
+            "name": "Punt Return TD",
+            "points": 6.0
+          },
+          "FTD": {
+            "name": "Fumble Recovered for TD",
+            "points": 6.0
+          },
+          "FUML": {
+            "name": "Total Fumbles Lost",
+            "points": -2.0
+          }
+        }
+      },
+      "teamsAndDivisions": {
+        "divisions": [
+          "FIRST-ROUND BUSTS",
+          "UNDRAFTED FREE AGENTS",
+          "WASHED-UP VETERANS"
+        ],
+        "teamsListed": [
+          "EDIT",
+          "ArrozCon Pollo",
+          "Number One Boys",
+          "Jahmyr Jamarr Javarison Lamar",
+          "Kicker's Kingdom",
+          "M as in Mancy",
+          "Finally Paid Dues",
+          "Gabagooligans",
+          ".Caulkfighters",
+          "The Pain Train",
+          "Whale Watch",
+          "Password is Taco",
+          "Hotel Motel Hampton Inn"
+        ]
+      },
+      "year": 2025
+    }
   }
 }
