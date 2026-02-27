@@ -11,6 +11,7 @@
     "age": 26,
     "games": 16,
     "gamesStarted": 16,
+    "gamesFieldNote": "games and gamesStarted are actual NFL games played and games started, not fantasy starts",
     "passCmp": 0,
     "passAtt": 0,
     "passYds": 0,
