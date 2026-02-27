@@ -834,6 +834,31 @@
       `).join('');
     }
 
+    function renderCards(filtered) {
+      const qualifiedRows = filtered.filter((row) => row.valueScore != null);
+      const best = [...qualifiedRows].sort((a, b) => {
+        const scoreDiff = (b.valueScore ?? -Infinity) - (a.valueScore ?? -Infinity);
+        if (scoreDiff !== 0) return scoreDiff;
+        return compareValues(a.name, b.name);
+      })[0] || null;
+      const avgScore = average(qualifiedRows.map((row) => row.valueScore));
+      const strongCount = qualifiedRows.filter((row) => row.valueScore > 0).length;
+      const strongRate = qualifiedRows.length ? strongCount / qualifiedRows.length : null;
+
+      document.getElementById('bestValuePick').textContent = best
+        ? `${best.name} (${best.year} ${best.position})`
+        : '—';
+      document.getElementById('bestValuePickNote').textContent = best
+        ? `${best.manager} • ${best.auctionPrice == null ? `Round ${best.round ?? '—'}` : `$${best.auctionPrice}`} • Score ${formatScore(best.valueScore, 3)}`
+        : 'No value-score data for this filter.';
+
+      document.getElementById('avgScore').textContent = formatScore(avgScore, 3);
+      document.getElementById('strongPickRate').textContent = strongRate == null
+        ? '—'
+        : `${strongCount} (${formatPct(strongRate)})`;
+      document.getElementById('qualifiedPicks').textContent = String(qualifiedRows.length);
+    }
+
     function render() {
       const filtered = applyFilters(state.rows);
       renderCards(filtered);
