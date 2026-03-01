@@ -1,1132 +1,202 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="stylesheet" href="style.css">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Draft Analytics – LWFFL</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg-main: #020617;
-      --card-bg: #020617;
+      --bg: #020617;
+      --panel: #0b1120;
+      --line: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
       --accent: #38bdf8;
-      --border-subtle: #1f2937;
-      --text-main: #e5e7eb;
-      --text-muted: #9ca3af;
-      --text-soft: #6b7280;
-      --positive: #22c55e;
-      --warning: #f59e0b;
-      --negative: #ef4444;
+      --good: #22c55e;
+      --warn: #f59e0b;
     }
+    * { box-sizing: border-box; }
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #020617 0%, #020617 35%, #020617 100%);
-      color: var(--text-main);
-      min-height: 100vh;
-      padding: 24px 16px;
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+      background: radial-gradient(circle at top, #0f172a 0%, #020617 45%, #020617 100%);
+      color: var(--text);
+      padding: 24px 16px 40px;
     }
-    .shell { max-width: 1240px; margin: 24px auto; }
+    .shell { max-width: 1320px; margin: 24px auto; }
     .container {
-      background: radial-gradient(circle at top left, rgba(56,189,248,0.12), transparent 55%), radial-gradient(circle at bottom right, rgba(59,130,246,0.18), transparent 55%), var(--card-bg);
+      background: linear-gradient(160deg, rgba(56,189,248,0.07), transparent 35%), var(--bg);
+      border: 1px solid rgba(148, 163, 184, 0.28);
       border-radius: 18px;
-      border: 1px solid rgba(148,163,184,0.3);
-      box-shadow: 0 40px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(15,23,42,0.9);
-      padding: 28px 22px;
-      backdrop-filter: blur(14px);
+      padding: 26px;
+      box-shadow: 0 32px 72px rgba(0, 0, 0, 0.45);
     }
-    .header { text-align: center; margin-bottom: 20px; }
-    .header h1 { font-size: 1.9rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
-    .header p { color: var(--text-soft); font-size: 0.86rem; letter-spacing: 0.08em; text-transform: uppercase; }
-
-    .controls {
+    .hero h1 { margin: 0; letter-spacing: 0.06em; text-transform: uppercase; }
+    .hero p { margin: 8px 0 0; color: var(--muted); }
+    .grid {
+      margin-top: 18px;
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 12px;
-      margin-bottom: 18px;
-      background: rgba(30,41,59,0.4);
-      padding: 14px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
       border-radius: 12px;
-      border: 1px solid rgba(55,65,81,0.5);
+      padding: 12px;
     }
-    label { display: block; margin-bottom: 6px; color: var(--text-muted); font-weight: 600; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; }
-    select {
-      width: 100%; padding: 9px 11px; background-color: #0b1120; border: 1px solid rgba(75,85,99,0.8);
-      border-radius: 8px; color: #f9fafb; font-size: 0.92rem; appearance: none; cursor: pointer;
-      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-      background-repeat: no-repeat; background-position: right 0.8rem center; background-size: 0.9em;
+    .card .k { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .card .v { margin-top: 6px; font-size: 1.5rem; font-weight: 700; }
+    .card .n { color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
+    .panel {
+      margin-top: 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
     }
-    select[multiple] {
-      appearance: auto;
-      background-image: none;
-      min-height: 108px;
-      padding: 8px;
-    }
-
-    .cards-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
-    .stat-card {
-      border: 1px solid rgba(55,65,81,0.6); border-radius: 12px; padding: 12px;
-      background: linear-gradient(160deg, rgba(56,189,248,0.12), rgba(15,23,42,0.92));
-      min-height: 96px;
-    }
-    .stat-label { color: var(--text-muted); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; }
-    .stat-value { margin-top: 6px; font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
-    .stat-note { margin-top: 6px; font-size: 0.75rem; color: var(--text-soft); }
-
-    .panel { background: radial-gradient(circle at top, rgba(15,23,42,0.9), rgba(2,6,23,0.95)); border: 1px solid rgba(55,65,81,0.6); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
-    .panel h2 { font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
-    .subtle { color: var(--text-soft); font-size: 0.8rem; margin-bottom: 12px; }
-    .table-wrap { width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid rgba(55,65,81,0.5); }
-    .table-pagination {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 10px;
-      color: var(--text-muted);
-      font-size: 0.8rem;
-    }
-    .table-pagination button {
-      background: #0b1120;
-      color: var(--text-main);
-      border: 1px solid rgba(75,85,99,0.8);
-      border-radius: 8px;
-      padding: 6px 10px;
-      cursor: pointer;
-    }
-    .table-pagination button:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-    table { width: 100%; border-collapse: collapse; min-width: 900px; font-size: 0.86rem; }
-    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid rgba(55,65,81,0.3); }
-    th { background: rgba(30,41,59,0.7); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.69rem; }
-    th.sortable { cursor: pointer; user-select: none; }
-    th.sortable::after { content: ' ↕'; color: var(--text-soft); font-size: 0.75em; }
-    th.sortable[data-sort-dir='asc']::after { content: ' ↑'; color: var(--accent); }
-    th.sortable[data-sort-dir='desc']::after { content: ' ↓'; color: var(--accent); }
-    tbody tr:hover { background: rgba(56,189,248,0.05); }
-
-    th[data-tooltip] { position: relative; }
-    th[data-tooltip]:hover::before,
-    th[data-tooltip]:focus-visible::before {
-      content: attr(data-tooltip);
-      position: absolute;
-      left: 0;
-      top: calc(100% + 8px);
-      z-index: 20;
-      width: min(320px, 78vw);
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid rgba(56,189,248,0.5);
-      background: rgba(2,6,23,0.96);
-      color: var(--text-main);
-      font-size: 0.73rem;
-      line-height: 1.35;
-      text-transform: none;
-      letter-spacing: normal;
-      white-space: normal;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
-      pointer-events: none;
-    }
-    .status { color: var(--text-soft); margin-bottom: 12px; font-size: 0.86rem; }
-
-    .insight-list { margin: 6px 0 0 18px; color: var(--text-main); }
-    .insight-list li { margin-bottom: 8px; line-height: 1.4; }
-    .insight-list li:last-child { margin-bottom: 0; }
-    details.explainer {
-      border: 1px solid rgba(56,189,248,0.35);
-      background: rgba(15,23,42,0.55);
-      border-radius: 10px;
-      padding: 10px 12px;
-      margin-top: 10px;
-    }
-    details.explainer summary {
-      cursor: pointer;
-      color: var(--accent);
-      font-size: 0.8rem;
-      letter-spacing: 0.06em;
+    h2 {
+      margin: 0 0 10px;
       text-transform: uppercase;
-      font-weight: 700;
-      margin-bottom: 8px;
+      letter-spacing: 0.08em;
+      font-size: 0.95rem;
+      color: var(--accent);
     }
-    details.explainer[open] summary { margin-bottom: 10px; }
-    @media (max-width: 960px) { .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .controls { grid-template-columns: 1fr; } }
-    @media (max-width: 640px) { .cards-grid { grid-template-columns: 1fr; } .header h1 { font-size: 1.6rem; } }
+    h3 { margin: 14px 0 8px; font-size: 0.95rem; }
+    p, li { color: #d1d5db; line-height: 1.45; }
+    ul { margin: 8px 0 0 18px; }
+    .tag { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 0.75rem; color: var(--muted); margin-right: 6px; }
+    .good { color: var(--good); }
+    .warn { color: var(--warn); }
+    .table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 10px; }
+    table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    th, td { padding: 9px 10px; text-align: left; border-bottom: 1px solid rgba(148, 163, 184, 0.14); }
+    th { background: rgba(15, 23, 42, 0.75); color: var(--muted); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    .small { color: var(--muted); font-size: 0.82rem; margin-top: 8px; }
+    @media (max-width: 980px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } .container { padding: 16px; } }
   </style>
 </head>
 <body>
   <div id="nav-placeholder"></div>
 
-  <div class="shell">
+  <main class="shell">
     <div class="container">
-      <div class="header">
-        <h1>Draft Analytics</h1>
-        <p>Manager leaderboard command center built from draft outcome efficiency metrics</p>
-      </div>
+      <header class="hero">
+        <h1>Draft Analytics Report Hub</h1>
+        <p>Revamped around the 2014–2025 league report: cost-normalized value, baseline value, and opportunity-cost diagnostics across snake + auction eras.</p>
+      </header>
+
+      <section class="grid" aria-label="Key report findings">
+        <article class="card">
+          <div class="k">Top established manager (≥10 seasons)</div>
+          <div class="v">M10</div>
+          <div class="n">Composite percentile: 61.9</div>
+        </article>
+        <article class="card">
+          <div class="k">Draft format split</div>
+          <div class="v">Snake → Auction</div>
+          <div class="n">Snake through 2023; salary-cap in 2024–2025</div>
+        </article>
+        <article class="card">
+          <div class="k">Scoring robustness</div>
+          <div class="v">ρ ≈ 0.99</div>
+          <div class="n">Manager composites stable under 0.2 PPR vs 0 PPR</div>
+        </article>
+        <article class="card">
+          <div class="k">Baseline robustness</div>
+          <div class="v">ρ ≈ 0.99</div>
+          <div class="n">Flex-adjusted vs no-flex baseline has minimal rank movement</div>
+        </article>
+      </section>
 
       <section class="panel">
-        <h2>Metric Glossary</h2>
-        <p class="subtle">All sections below use these same manager-focused definitions.</p>
-        <ul class="insight-list">
-          <li><strong>PSME-Points:</strong> Percentile Surplus vs Market Expectation using season points outcome percentile minus expected draft percentile, weighted by draft capital.</li>
-          <li><strong>Total VoB:</strong> Value over Baseline points. Player season points minus the starter-cutoff baseline for that position and year.</li>
-          <li><strong>Starts-VoB:</strong> Availability-adjusted VoB based on actual NFL games started/played: (player points per NFL start minus baseline points per NFL start) × NFL games started.</li>
-          <li><strong>Surplus$:</strong> Auction-only surplus by converting positive VoB to implied auction dollars and subtracting paid auction cost.</li>
-          <li><strong>Pick Surplus:</strong> Snake-only surplus comparing player VoB vs expected VoB for that overall draft slot.</li>
-          <li><strong>Starter-Tier Yield:</strong> Share of eligible picks that finished inside starter-tier positional cutoffs for that season.</li>
-          <li><strong>Player Value Index:</strong> Pick-level composite used in the player value chart. Formula: 0.50×PSME + 0.35×(VoB per NFL start) + 0.15×(cost-surplus signal).</li>
+        <h2>Universal metric framework</h2>
+        <p><span class="tag">Universal</span><strong>Surplus over expected at cost</strong>: points minus expected points in the same cost decile (snake: pick slot cost; auction: dollar cost).</p>
+        <p><span class="tag">Universal</span><strong>PAB / VOLS-style</strong>: points above starter baseline by position-year, flex-adjusted from league lineup settings.</p>
+        <p><span class="tag">Universal</span><strong>Opportunity-cost regret</strong>: missed-value proxy (snake next-window regret or auction/bin regret).</p>
+        <p class="small">These three metrics are the backbone of the season and multi-year composite with Hit Rate and inverse Regret.</p>
+      </section>
+
+      <section class="panel">
+        <h2>League context used for calculations</h2>
+        <ul>
+          <li>Scoring lens: league-default scoring (including 0.2 PPR, completion/incompletion scoring, and return-yard components).</li>
+          <li>Outcome metrics are focused on drafted <strong>QB/RB/WR/TE</strong> picks because K and D/ST stat fields are incomplete in the source draft-stat file.</li>
+          <li>Core lineup context for baseline logic: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX, 1 D/ST, 1 K.</li>
         </ul>
       </section>
 
-      <div class="controls">
-        <div>
-          <label for="managerSelect">Manager</label>
-          <select id="managerSelect" multiple></select>
-        </div>
-        <div>
-          <label for="yearSelect">Year</label>
-          <select id="yearSelect" multiple></select>
-        </div>
-        <div>
-          <label for="positionSelect">Position</label>
-          <select id="positionSelect" multiple></select>
-        </div>
-        <div>
-          <label for="roundCostSelect">Round / Cost (Draft-Context Round Equivalent)</label>
-          <select id="roundCostSelect" multiple></select>
-        </div>
-      </div>
-
-      <div id="status" class="status">Loading draft analytics...</div>
-
-      <section class="cards-grid" data-detail-level="core">
-        <article class="stat-card"><div class="stat-label">Best Value Pick</div><div id="bestValuePick" class="stat-value">-</div><div id="bestValuePickNote" class="stat-note"></div></article>
-        <article class="stat-card"><div class="stat-label">Average Value Score</div><div id="avgScore" class="stat-value">-</div><div class="stat-note">ln(positional draft slot ÷ finish rank)</div></article>
-        <article class="stat-card"><div class="stat-label">Strong Picks</div><div id="strongPickRate" class="stat-value">-</div><div class="stat-note">Share of picks with positive value score</div></article>
-        <article class="stat-card"><div class="stat-label">Qualified Picks</div><div id="qualifiedPicks" class="stat-value">-</div><div class="stat-note">Picks with a known finish rank</div></article>
-      </section>
-
       <section class="panel">
-        <h2>Manager Leaderboard</h2>
-        <p class="subtle">Managers ranked by relative gain vs league average, beat-cost efficiency, and filtered risk control.</p>
+        <h2>Top managers by multi-year composite (established only)</h2>
         <div class="table-wrap">
-          <table data-sort-table="managerLeaderboard">
+          <table>
             <thead>
-              <tr>
-                <th class="sortable" data-sort-key="rank">Rank</th>
-                <th class="sortable" data-sort-key="manager">Manager</th>
-                <th class="sortable" data-sort-key="psmePoints">PSME-Points</th>
-                <th class="sortable" data-sort-key="totalVoB">Total VoB</th>
-                <th class="sortable" data-sort-key="totalStartsVoB">Starts-VoB</th>
-                <th class="sortable" data-sort-key="totalSurplusDollars">Surplus$</th>
-                <th class="sortable" data-sort-key="totalPickSurplus">Pick Surplus</th>
-                <th class="sortable" data-sort-key="starterTierRate">Starter-Tier Yield</th>
-                <th class="sortable" data-sort-key="eligiblePicks">Eligible Picks</th>
-              </tr>
+              <tr><th>Rank</th><th>Manager</th><th>Seasons</th><th>Composite %</th><th>Surplus %</th><th>PAB %</th><th>Hit Rate %</th><th>Regret Bin %</th></tr>
             </thead>
-            <tbody id="managerLeaderboardBody"></tbody>
+            <tbody>
+              <tr><td>1</td><td>M10</td><td>12</td><td>61.9</td><td>0.618</td><td>0.681</td><td>0.644</td><td>0.533</td></tr>
+              <tr><td>2</td><td>M02</td><td>12</td><td>60.9</td><td>0.660</td><td>0.581</td><td>0.674</td><td>0.519</td></tr>
+              <tr><td>3</td><td>M04</td><td>12</td><td>59.1</td><td>0.619</td><td>0.690</td><td>0.581</td><td>0.474</td></tr>
+              <tr><td>4</td><td>M12</td><td>10</td><td>56.4</td><td>0.608</td><td>0.592</td><td>0.554</td><td>0.500</td></tr>
+              <tr><td>5</td><td>M13</td><td>11</td><td>51.3</td><td>0.536</td><td>0.512</td><td>0.577</td><td>0.427</td></tr>
+            </tbody>
           </table>
         </div>
       </section>
 
       <section class="panel">
-        <h2>Manager Seasons</h2>
-        <p class="subtle">Year-by-year view of leaderboard metrics so each manager's trend is aligned to the same scoring model.</p>
+        <h2>Cross-format spotlight seasons (2023–2025)</h2>
         <div class="table-wrap">
-          <table data-sort-table="managerSeasons">
+          <table>
             <thead>
-              <tr>
-                <th class="sortable" data-sort-key="manager">Manager</th>
-                <th class="sortable" data-sort-key="year">Year</th>
-                <th class="sortable" data-sort-key="psmePoints">PSME-Points</th>
-                <th class="sortable" data-sort-key="totalVoB">Total VoB</th>
-                <th class="sortable" data-sort-key="starterTierRate">Starter-Tier Yield</th>
-                <th class="sortable" data-sort-key="eligiblePicks">Eligible Picks</th>
-              </tr>
+              <tr><th>Year</th><th>Manager</th><th>Comp %</th><th>Points</th><th>Surplus</th><th>PAB</th><th>Hit Rate</th><th>Bust Rate</th><th>Regret Bin</th></tr>
             </thead>
-            <tbody id="managerSeasonsBody"></tbody>
+            <tbody>
+              <tr><td>2025</td><td>M14</td><td class="good">97.9</td><td>2103.8</td><td>499.1</td><td>575.7</td><td>0.692</td><td>0.077</td><td>1494.0</td></tr>
+              <tr><td>2025</td><td>M04</td><td>68.8</td><td>1865.7</td><td>90.4</td><td>304.3</td><td>0.538</td><td>0.154</td><td>2090.7</td></tr>
+              <tr><td>2024</td><td>M13</td><td class="good">91.7</td><td>2517.2</td><td>549.6</td><td>501.2</td><td>0.538</td><td>0.154</td><td>2016.5</td></tr>
+              <tr><td>2024</td><td>M10</td><td>79.2</td><td>2268.0</td><td>396.6</td><td>369.7</td><td>0.538</td><td>0.308</td><td>2443.0</td></tr>
+              <tr><td>2023</td><td>M10</td><td class="good">95.8</td><td>2152.2</td><td>318.3</td><td>331.4</td><td>0.692</td><td>0.231</td><td>1804.2</td></tr>
+              <tr><td>2023</td><td>M05</td><td>88.5</td><td>1955.0</td><td>204.3</td><td>19.6</td><td>0.615</td><td>0.154</td><td>1824.3</td></tr>
+            </tbody>
           </table>
         </div>
+        <p class="small">Points/Surplus/PAB totals are computed over drafted QB/RB/WR/TE picks only.</p>
       </section>
 
       <section class="panel">
-        <h2>Player Value Chart</h2>
-        <p class="subtle">Player-level value view using the updated composite formula built from manager leaderboard components.</p>
-        <div class="table-wrap">
-          <table data-sort-table="managerPicks">
-            <thead>
-              <tr>
-                <th class="sortable" data-sort-key="year">Year</th>
-                <th class="sortable" data-sort-key="manager">Manager</th>
-                <th class="sortable" data-sort-key="name">Player</th>
-                <th class="sortable" data-sort-key="position">Pos</th>
-                <th class="sortable" data-sort-key="psme">PSME</th>
-                <th class="sortable" data-sort-key="voB">VoB</th>
-                <th class="sortable" data-sort-key="startsVoB">Starts-VoB</th>
-                <th class="sortable" data-sort-key="valueIndex">Player Value Index</th>
-                <th class="sortable" data-sort-key="acquisitionCost">Acquisition</th>
-              </tr>
-            </thead>
-            <tbody id="managerPicksBody"></tbody>
-          </table>
-        </div>
+        <h2>Steals and busts by surplus</h2>
+        <h3>Top steals</h3>
+        <ul>
+          <li>2019 M04 Lamar Jackson (R9 / #102): <strong>+306.58</strong> surplus, 171.16 PAB.</li>
+          <li>2018 M03 Patrick Mahomes (R12 / #142): <strong>+300.86</strong> surplus.</li>
+          <li>2024 M03 Jayden Daniels ($1): <strong>+293.79</strong> surplus.</li>
+          <li>2024 M10 Joe Burrow ($8): <strong>+280.96</strong> surplus, 50.90 points/$.</li>
+        </ul>
+        <h3>Largest busts</h3>
+        <ul>
+          <li>2014 M08 Adrian Peterson (R1 / #2): <strong>-210.34</strong> surplus.</li>
+          <li>2025 M16 Brian Thomas Jr. ($51): <strong>-198.59</strong> surplus.</li>
+          <li>2024 M15 Christian McCaffrey ($76): <strong>-168.82</strong> surplus.</li>
+        </ul>
+        <p class="small warn">Observed pattern: biggest positive surplus picks are often late-cost QBs, which may represent both manager edge and league-wide QB market mispricing.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Actionable interpretation</h2>
+        <ul>
+          <li>Use <strong>position-agnostic surplus</strong> if the goal is to reward market exploitation.</li>
+          <li>Use <strong>position-conditioned surplus</strong> if the goal is to isolate within-position selection skill.</li>
+          <li>In auction years, pair composite scoring with <strong>points per dollar</strong> and <strong>spend-share vs points-share deltas</strong> to evaluate budget discipline.</li>
+          <li>In snake years, add <strong>turn performance</strong> and <strong>next-window regret</strong> to capture order-driven opportunity cost.</li>
+        </ul>
       </section>
     </div>
-  </div>
+  </main>
 
   <script src="nav-loader.js"></script>
-  <script type="module">
-    import { enrichDraftEntries } from './draft-metrics.js';
-
-    const state = {
-      rows: [],
-      manager: [],
-      year: [],
-      position: [],
-      roundCost: [],
-      sorts: {
-        managerLeaderboard: { key: 'totalVoB', dir: 'desc' },
-        managerSeasons: { key: 'year', dir: 'desc' },
-        managerPicks: { key: 'valueIndex', dir: 'desc' }
-      },
-      yearMeta: {}
-    };
-
-    const managerSelect = document.getElementById('managerSelect');
-    const yearSelect = document.getElementById('yearSelect');
-    const positionSelect = document.getElementById('positionSelect');
-    const roundCostSelect = document.getElementById('roundCostSelect');
-    const statusEl = document.getElementById('status');
-    const ALL_OPTION_VALUE = '__ALL__';
-
-    function average(values) {
-      if (!values.length) return null;
-      return values.reduce((a, b) => a + b, 0) / values.length;
-    }
-
-    function median(values) {
-      if (!values.length) return null;
-      const sorted = [...values].sort((a, b) => a - b);
-      const mid = Math.floor(sorted.length / 2);
-      return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-    }
-
-    function formatScore(score, digits = 2) {
-      return score == null ? '—' : score.toFixed(digits);
-    }
-
-    function formatPct(value) {
-      return value == null ? '—' : `${(value * 100).toFixed(1)}%`;
-    }
-
-    function formatDelta(value) {
-      return value == null ? '—' : `${value >= 0 ? '+' : ''}${value.toFixed(2)}`;
-    }
-
-    function compareValues(a, b) {
-      if (a == null && b == null) return 0;
-      if (a == null) return 1;
-      if (b == null) return -1;
-      if (typeof a === 'number' && typeof b === 'number') return a - b;
-      return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' });
-    }
-
-    function sortRows(rows, tableKey) {
-      const sort = state.sorts[tableKey];
-      if (!sort) return rows;
-      const direction = sort.dir === 'asc' ? 1 : -1;
-      return [...rows].sort((a, b) => {
-        const base = compareValues(a[sort.key], b[sort.key]);
-        if (base !== 0) return base * direction;
-        return compareValues(a.manager || a.name || a.position || a.year, b.manager || b.name || b.position || b.year);
-      });
-    }
-
-    function refreshSortHeaderUi() {
-      document.querySelectorAll('th.sortable').forEach((th) => {
-        const table = th.closest('table')?.dataset.sortTable;
-        const key = th.dataset.sortKey;
-        const active = table && state.sorts[table] && state.sorts[table].key === key;
-        th.dataset.sortDir = active ? state.sorts[table].dir : '';
-      });
-    }
-
-
-    function includesAll(values) {
-      return values.includes(ALL_OPTION_VALUE);
-    }
-
-    function normalizeSelection(selectedValues) {
-      if (!selectedValues.length || selectedValues.includes(ALL_OPTION_VALUE)) return [ALL_OPTION_VALUE];
-      return selectedValues;
-    }
-
-    function filterByManagerYearPosition(rows) {
-      return rows.filter((row) => {
-        if (!includesAll(state.manager) && !state.manager.includes(row.manager)) return false;
-        if (!includesAll(state.year) && !state.year.includes(String(row.year))) return false;
-        if (!includesAll(state.position) && !state.position.includes(row.position)) return false;
-        return true;
-      });
-    }
-
-    function buildRoundCostResolver(scopeRows) {
-      const auctionRoundByRow = new Map();
-      const byYear = new Map();
-
-      scopeRows.forEach((row) => {
-        if (row.auctionPrice == null) return;
-        if (!byYear.has(row.year)) byYear.set(row.year, []);
-        byYear.get(row.year).push(row);
-      });
-
-      byYear.forEach((rows) => {
-        const managersInYear = new Set(rows.map((row) => row.manager)).size || 1;
-        const sorted = [...rows].sort((a, b) => {
-          if (a.auctionPrice !== b.auctionPrice) return b.auctionPrice - a.auctionPrice;
-          return compareValues(a.overall, b.overall);
-        });
-
-        // Tie handling: players with equal auction prices share the same round-equivalent.
-        // The shared round is based on the first rank where that price appears.
-        for (let idx = 0; idx < sorted.length;) {
-          const price = sorted[idx].auctionPrice;
-          const startRank = idx + 1;
-          const roundEquivalent = Math.ceil(startRank / managersInYear);
-
-          let j = idx;
-          while (j < sorted.length && sorted[j].auctionPrice === price) {
-            auctionRoundByRow.set(sorted[j], roundEquivalent);
-            j += 1;
-          }
-          idx = j;
-        }
-      });
-
-      return (row) => {
-        if (row.auctionPrice == null) return row.round ?? null;
-        return auctionRoundByRow.get(row) ?? null;
-      };
-    }
-
-
-    function syncRoundCostOptions(scopeRows, resolveRoundCostBucket) {
-      const roundCosts = [...new Set(scopeRows.map((row) => resolveRoundCostBucket(row)).filter((v) => Number.isFinite(v) && v > 0))]
-        .sort((a, b) => a - b)
-        .map(String);
-
-      const selected = state.roundCost.filter((value) => value === ALL_OPTION_VALUE || roundCosts.includes(value));
-      state.roundCost = normalizeSelection(selected);
-
-      roundCostSelect.innerHTML = `<option value="${ALL_OPTION_VALUE}"${includesAll(state.roundCost) ? ' selected' : ''}>All Round/Cost Tiers</option>${roundCosts
-        .map((rc) => `<option value="${rc}"${state.roundCost.includes(rc) ? ' selected' : ''}>${rc}</option>`)
-        .join('')}`;
-    }
-
-    function applyFilters(rows) {
-      const scopeRows = filterByManagerYearPosition(rows);
-      const resolveRoundCostBucket = buildRoundCostResolver(scopeRows);
-      syncRoundCostOptions(scopeRows, resolveRoundCostBucket);
-
-      return scopeRows.filter((row) => {
-        if (!includesAll(state.roundCost) && !state.roundCost.includes(String(resolveRoundCostBucket(row)))) return false;
-        return true;
-      });
-    }
-
-    function getRoundCostBucket(row) {
-      if (row.auctionPrice == null) return row.round ?? null;
-      return row.posPriceOrder ?? null;
-    }
-
-    function percentileFromRank(rank, count) {
-      if (!Number.isFinite(rank) || !Number.isFinite(count) || count <= 1) return count === 1 ? 1 : null;
-      return (count - rank) / (count - 1);
-    }
-
-    function buildYearPositionOutcomeMeta(rows) {
-      const byYearPos = new Map();
-      rows.forEach((row) => {
-        if (!Number.isFinite(row.seasonPoints)) return;
-        const key = `${row.year}__${row.position}`;
-        if (!byYearPos.has(key)) byYearPos.set(key, []);
-        byYearPos.get(key).push(row);
-      });
-
-      const meta = new Map();
-      byYearPos.forEach((groupRows) => {
-        groupRows.sort((a, b) => {
-          if (b.seasonPoints !== a.seasonPoints) return b.seasonPoints - a.seasonPoints;
-          return compareValues(a.name, b.name);
-        });
-
-        let currentRank = 0;
-        let previousPoints = null;
-        groupRows.forEach((row, index) => {
-          if (previousPoints == null || row.seasonPoints !== previousPoints) {
-            currentRank = index + 1;
-            previousPoints = row.seasonPoints;
-          }
-
-          meta.set(row, {
-            rank: currentRank,
-            percentile: percentileFromRank(currentRank, groupRows.length),
-            count: groupRows.length
-          });
-        });
-      });
-
-      return meta;
-    }
-
-    function buildYearPositionPointsTable(rows) {
-      const byYearPos = new Map();
-      rows.forEach((row) => {
-        if (!Number.isFinite(row.seasonPoints)) return;
-        const key = `${row.year}__${row.position}`;
-        if (!byYearPos.has(key)) byYearPos.set(key, []);
-        byYearPos.get(key).push(row);
-      });
-
-      const table = new Map();
-      byYearPos.forEach((groupRows, key) => {
-        const byPoints = [...groupRows].sort((a, b) => b.seasonPoints - a.seasonPoints);
-        const byPpg = [...groupRows].sort((a, b) => {
-          const aGames = Math.max(1, toNumber(a.gamesStarted) ?? toNumber(a.games) ?? 1);
-          const bGames = Math.max(1, toNumber(b.gamesStarted) ?? toNumber(b.games) ?? 1);
-          const aPpg = a.seasonPoints / aGames;
-          const bPpg = b.seasonPoints / bGames;
-          if (bPpg !== aPpg) return bPpg - aPpg;
-          return compareValues(a.name, b.name);
-        });
-        table.set(key, { byPoints, byPpg });
-      });
-
-      return table;
-    }
-
-    function getSeasonSetting(year, key, fallback = null) {
-      const yearMeta = state.yearMeta[String(year)] || {};
-      if (Number.isFinite(yearMeta[key])) return yearMeta[key];
-      return fallback;
-    }
-
-    function getStarterCutoff(year, position) {
-      const yearMeta = state.yearMeta[String(year)] || {};
-      const cutoffs = yearMeta.starterCutoffs || {};
-      return Number.isFinite(cutoffs[position]) ? cutoffs[position] : null;
-    }
-
-    function getBaselinePoints(year, position, pointsTable) {
-      const cutoff = getStarterCutoff(year, position);
-      if (!Number.isFinite(cutoff) || cutoff <= 0) return 0;
-      const rows = pointsTable.get(`${year}__${position}`)?.byPoints || [];
-      if (!rows.length) return 0;
-      const idx = Math.max(0, Math.min(rows.length - 1, cutoff - 1));
-      return rows[idx].seasonPoints;
-    }
-
-    function getBaselinePpg(year, position, pointsTable) {
-      const cutoff = getStarterCutoff(year, position);
-      if (!Number.isFinite(cutoff) || cutoff <= 0) return 0;
-      const rows = pointsTable.get(`${year}__${position}`)?.byPpg || [];
-      if (!rows.length) return 0;
-      const idx = Math.max(0, Math.min(rows.length - 1, cutoff - 1));
-      const target = rows[idx];
-      const games = Math.max(1, toNumber(target.gamesStarted) ?? toNumber(target.games) ?? 1);
-      return target.seasonPoints / games;
-    }
-
-    function buildManagerAnalyticsRows(filtered) {
-      const eligibleRows = filtered.filter((row) => ['QB', 'RB', 'WR', 'TE'].includes(row.position) && Number.isFinite(row.seasonPoints));
-      if (!eligibleRows.length) {
-        return { leaderboard: [], seasonRows: [], pickRows: [] };
-      }
-
-      const outcomeMeta = buildYearPositionOutcomeMeta(eligibleRows);
-      const pointsTable = buildYearPositionPointsTable(eligibleRows);
-
-      const expectedVoBByPick = new Map();
-      const snakeRows = eligibleRows.filter((row) => row.auctionPrice == null && Number.isFinite(row.overall));
-      snakeRows.forEach((row) => {
-        const baseline = getBaselinePoints(row.year, row.position, pointsTable);
-        const voB = row.seasonPoints - baseline;
-        if (!expectedVoBByPick.has(row.overall)) expectedVoBByPick.set(row.overall, []);
-        expectedVoBByPick.get(row.overall).push(voB);
-      });
-      const expectedCurve = new Map([...expectedVoBByPick.entries()].map(([pick, values]) => [pick, average(values)]));
-
-      const yearAuctionContext = new Map();
-      [...new Set(eligibleRows.map((row) => row.year))].forEach((year) => {
-        const yearRows = eligibleRows.filter((r) => r.year === year && r.auctionPrice != null);
-        const totalAuctionDollars = getSeasonSetting(year, 'auctionDollarsTotal', null)
-          ?? yearRows.reduce((sum, r) => sum + (toNumber(r.auctionPrice) ?? 0), 0);
-        const totalAboveBaseline = yearRows
-          .map((r) => Math.max(0, r.seasonPoints - getBaselinePoints(r.year, r.position, pointsTable)))
-          .reduce((sum, value) => sum + value, 0);
-        yearAuctionContext.set(year, {
-          dollarsPerPoint: totalAboveBaseline > 0 ? totalAuctionDollars / totalAboveBaseline : 0
-        });
-      });
-
-      const pickRows = eligibleRows.map((row) => {
-        const outcome = outcomeMeta.get(row);
-        const expectedRank = row.auctionPrice != null ? row.posPriceOrder : row.posDraftOrder;
-        const expectedPool = row.auctionPrice != null ? row.posPriceCount : row.posDraftCount;
-        const expectedPercentile = percentileFromRank(expectedRank, expectedPool);
-        const psme = outcome?.percentile != null && expectedPercentile != null ? outcome.percentile - expectedPercentile : null;
-        const psmeWeight = row.auctionPrice != null
-          ? Math.max(1, row.auctionPrice)
-          : Math.max(1, ((row.posDraftCount || 1) - (row.posDraftOrder || 1) + 1));
-
-        const baselinePoints = getBaselinePoints(row.year, row.position, pointsTable);
-        const voB = row.seasonPoints - baselinePoints;
-
-        const gamesStarted = Math.max(1, toNumber(row.gamesStarted) ?? toNumber(row.games) ?? 1);
-        const playerPpg = row.seasonPoints / gamesStarted;
-        const baselinePpg = getBaselinePpg(row.year, row.position, pointsTable);
-        const startsVoB = (playerPpg - baselinePpg) * gamesStarted;
-
-        const auctionContext = yearAuctionContext.get(row.year) || { dollarsPerPoint: 0 };
-        const surplusDollars = row.auctionPrice != null
-          ? (Math.max(0, voB) * auctionContext.dollarsPerPoint) - (toNumber(row.auctionPrice) ?? 0)
-          : 0;
-
-        const pickSurplus = row.auctionPrice == null && Number.isFinite(row.overall)
-          ? voB - (expectedCurve.get(row.overall) ?? 0)
-          : 0;
-        const costSignal = row.auctionPrice != null
-          ? surplusDollars / Math.max(1, (toNumber(row.auctionPrice) ?? 1))
-          : pickSurplus / Math.max(1, Math.abs(expectedCurve.get(row.overall) ?? 0));
-        const voBPerStart = voB / gamesStarted;
-        const valueIndex = ((psme ?? 0) * 0.50) + (voBPerStart * 0.35) + (costSignal * 0.15);
-
-        const starterCutoff = getStarterCutoff(row.year, row.position);
-        const starterTierHit = outcome?.rank != null && starterCutoff != null && outcome.rank <= starterCutoff;
-
-        return {
-          ...row,
-          psme,
-          psmeWeight,
-          voB,
-          startsVoB,
-          surplusDollars,
-          pickSurplus,
-          valueIndex,
-          starterTierHit,
-          acquisitionCost: row.auctionPrice == null
-            ? `Round ${row.round ?? '—'}${row.overall != null ? ` (Pick ${row.overall})` : ''}`
-            : `$${row.auctionPrice}`
-        };
-      });
-
-      const summarizeManagerRows = (rows) => {
-        let psmeWeightedTotal = 0;
-        let psmeWeightTotal = 0;
-        let totalVoB = 0;
-        let totalStartsVoB = 0;
-        let totalSurplusDollars = 0;
-        let totalPickSurplus = 0;
-        let starterTierHits = 0;
-
-        rows.forEach((row) => {
-          if (row.psme != null) {
-            psmeWeightedTotal += row.psme * row.psmeWeight;
-            psmeWeightTotal += row.psmeWeight;
-          }
-          totalVoB += row.voB;
-          totalStartsVoB += row.startsVoB;
-          totalSurplusDollars += row.surplusDollars;
-          totalPickSurplus += row.pickSurplus;
-          if (row.starterTierHit) starterTierHits += 1;
-        });
-
-        return {
-          psmePoints: psmeWeightTotal ? psmeWeightedTotal / psmeWeightTotal : null,
-          totalVoB,
-          totalStartsVoB,
-          totalSurplusDollars,
-          totalPickSurplus,
-          starterTierHits,
-          starterTierRate: rows.length ? starterTierHits / rows.length : null,
-          eligiblePicks: rows.length
-        };
-      };
-
-      const byManager = new Map();
-      pickRows.forEach((row) => {
-        if (!byManager.has(row.manager)) byManager.set(row.manager, []);
-        byManager.get(row.manager).push(row);
-      });
-
-      const leaderboard = [...byManager.entries()].map(([manager, rows]) => ({
-        manager,
-        ...summarizeManagerRows(rows)
-      }));
-
-      const byManagerYear = new Map();
-      pickRows.forEach((row) => {
-        const key = `${row.manager}__${row.year}`;
-        if (!byManagerYear.has(key)) byManagerYear.set(key, []);
-        byManagerYear.get(key).push(row);
-      });
-      const seasonRows = [...byManagerYear.entries()].map(([key, rows]) => {
-        const [manager, year] = key.split('__');
-        return {
-          manager,
-          year: Number(year),
-          ...summarizeManagerRows(rows)
-        };
-      });
-
-      return { leaderboard, seasonRows, pickRows };
-    }
-
-    function renderManagerLeaderboard(filtered) {
-      const tbody = document.getElementById('managerLeaderboardBody');
-      const { leaderboard } = buildManagerAnalyticsRows(filtered);
-
-      if (!leaderboard.length) {
-        tbody.innerHTML = '<tr><td colspan="9">No manager data for this filter.</td></tr>';
-        return;
-      }
-
-      const ranked = sortRows(leaderboard, 'managerLeaderboard').map((item, idx) => ({ ...item, rank: idx + 1 }));
-
-      tbody.innerHTML = ranked.map((item) => `
-        <tr>
-          <td>${item.rank}</td>
-          <td>${item.manager}</td>
-          <td>${formatDelta(item.psmePoints)}</td>
-          <td>${formatDelta(item.totalVoB)}</td>
-          <td>${formatDelta(item.totalStartsVoB)}</td>
-          <td>${formatDelta(item.totalSurplusDollars)}</td>
-          <td>${formatDelta(item.totalPickSurplus)}</td>
-          <td>${item.starterTierHits}/${item.eligiblePicks} (${formatPct(item.starterTierRate)})</td>
-          <td>${item.eligiblePicks}</td>
-        </tr>
-      `).join('');
-    }
-
-    function renderManagerSeasons(filtered) {
-      const tbody = document.getElementById('managerSeasonsBody');
-      let rows = buildManagerAnalyticsRows(filtered).seasonRows;
-      rows = sortRows(rows, 'managerSeasons');
-
-      if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="6">No manager season data for this filter.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = rows.map((item) => `
-        <tr>
-          <td>${item.manager}</td>
-          <td>${item.year}</td>
-          <td>${formatDelta(item.psmePoints)}</td>
-          <td>${formatDelta(item.totalVoB)}</td>
-          <td>${item.starterTierHits}/${item.eligiblePicks} (${formatPct(item.starterTierRate)})</td>
-          <td>${item.eligiblePicks}</td>
-        </tr>
-      `).join('');
-    }
-
-    function renderManagerPicks(filtered) {
-      const tbody = document.getElementById('managerPicksBody');
-      let rows = buildManagerAnalyticsRows(filtered).pickRows;
-      rows = sortRows(rows, 'managerPicks');
-
-      if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="9">No player rows for this filter.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = rows.map((row) => `
-        <tr>
-          <td>${row.year}</td>
-          <td>${row.manager}</td>
-          <td>${row.name}</td>
-          <td>${row.position}</td>
-          <td>${formatDelta(row.psme)}</td>
-          <td>${formatDelta(row.voB)}</td>
-          <td>${formatDelta(row.startsVoB)}</td>
-          <td>${formatScore(row.valueIndex, 3)}</td>
-          <td>${row.acquisitionCost}</td>
-        </tr>
-      `).join('');
-    }
-
-    function renderCards(filtered) {
-      const qualifiedRows = filtered.filter((row) => row.valueScore != null);
-      const best = [...qualifiedRows].sort((a, b) => {
-        const scoreDiff = (b.valueScore ?? -Infinity) - (a.valueScore ?? -Infinity);
-        if (scoreDiff !== 0) return scoreDiff;
-        return compareValues(a.name, b.name);
-      })[0] || null;
-      const avgScore = average(qualifiedRows.map((row) => row.valueScore));
-      const strongCount = qualifiedRows.filter((row) => row.valueScore > 0).length;
-      const strongRate = qualifiedRows.length ? strongCount / qualifiedRows.length : null;
-
-      document.getElementById('bestValuePick').textContent = best
-        ? `${best.name} (${best.year} ${best.position})`
-        : '—';
-      document.getElementById('bestValuePickNote').textContent = best
-        ? `${best.manager} • ${best.auctionPrice == null ? `Round ${best.round ?? '—'}` : `$${best.auctionPrice}`} • Score ${formatScore(best.valueScore, 3)}`
-        : 'No value-score data for this filter.';
-
-      document.getElementById('avgScore').textContent = formatScore(avgScore, 3);
-      document.getElementById('strongPickRate').textContent = strongRate == null
-        ? '—'
-        : `${strongCount} (${formatPct(strongRate)})`;
-      document.getElementById('qualifiedPicks').textContent = String(qualifiedRows.length);
-    }
-
-    function render() {
-      const filtered = applyFilters(state.rows);
-      renderCards(filtered);
-      renderManagerLeaderboard(filtered);
-      renderManagerSeasons(filtered);
-      renderManagerPicks(filtered);
-      refreshSortHeaderUi();
-      statusEl.textContent = `${filtered.length} picks shown • ${filtered.filter((r) => ['QB', 'RB', 'WR', 'TE'].includes(r.position) && Number.isFinite(r.seasonPoints)).length} leaderboard-eligible`;
-    }
-
-
-    const columnExplainers = {
-      managerLeaderboard: {
-        rank: 'Sort rank after applying current table sort settings.',
-        manager: 'Draft manager/owner for the selected slice.',
-        psmePoints: 'Percentile Surplus vs Market Expectation (points-based outcome). Equation: outcome percentile − expected percentile, weighted by pick capital.',
-        totalVoB: 'Total Value over Baseline points across drafted players. Equation: player season points − replacement baseline points at that position/year.',
-        totalStartsVoB: 'Availability-aware value over baseline using actual NFL starts/played. Equation: (player points-per-NFL-start − baseline points-per-NFL-start) × NFL games started.',
-        totalSurplusDollars: 'Auction Surplus Dollars from points. Converts positive VoB points into implied dollars and subtracts auction cost.',
-        totalPickSurplus: 'Snake Pick Surplus vs slot curve. Equation: player VoB − expected VoB at that overall pick.',
-        starterTierRate: 'Starter-Tier Yield: share of drafted players who finished within starter cutoffs by position (including flex allocation).',
-        eligiblePicks: 'Count of eligible non-K/DST picks with season points in the current filter.'
-      },
-      managerSeasons: {
-        manager: 'Manager for this season-level split.',
-        year: 'Draft season for this manager row.',
-        psmePoints: 'Season-level PSME-Points for that manager and year.',
-        totalVoB: 'Season-level total Value over Baseline points.',
-        starterTierRate: 'Season-level starter-tier hit rate for eligible picks.',
-        eligiblePicks: 'Eligible picks drafted by this manager in this season.'
-      },
-      managerPicks: {
-        year: 'Draft season for this specific pick.',
-        manager: 'Manager who made the draft pick.',
-        name: 'Player drafted.',
-        position: 'Player position bucket used for baselines.',
-        psme: 'Pick-level percentile surplus vs market expectation.',
-        voB: 'Pick-level Value over Baseline points.',
-        startsVoB: 'Pick-level starts-aware VoB using actual NFL games started/played.',
-        valueIndex: 'Composite value formula: 0.50×PSME + 0.35×(VoB per NFL start) + 0.15×cost-surplus signal (auction surplus efficiency or snake pick-surplus efficiency).',
-        acquisitionCost: 'Snake round/pick or auction dollars paid for this pick.'
-      }
-    };
-
-    function applyColumnExplainers() {
-      document.querySelectorAll('table[data-sort-table]').forEach((table) => {
-        const tableKey = table.dataset.sortTable;
-        const explainers = columnExplainers[tableKey] || {};
-        table.querySelectorAll('th[data-sort-key]').forEach((th) => {
-          const key = th.dataset.sortKey;
-          const text = explainers[key];
-          if (!text) return;
-          th.dataset.tooltip = text;
-          th.tabIndex = 0;
-        });
-      });
-    }
-
-    function wireSortableHeaders() {
-      document.querySelectorAll('th.sortable').forEach((th) => {
-        th.addEventListener('click', () => {
-          const tableKey = th.closest('table')?.dataset.sortTable;
-          const key = th.dataset.sortKey;
-          if (!tableKey || !key) return;
-          const current = state.sorts[tableKey];
-          if (current.key === key) {
-            current.dir = current.dir === 'asc' ? 'desc' : 'asc';
-          } else {
-            current.key = key;
-            current.dir = key === 'manager' || key === 'position' || key === 'name' ? 'asc' : 'desc';
-          }
-          render();
-        });
-      });
-    }
-
-    function populateSelectors(rows) {
-      const managers = [...new Set(rows.map((r) => r.manager))].sort();
-      const years = [...new Set(rows.map((r) => r.year))].sort((a, b) => b - a);
-      const orderedCorePositions = ['QB', 'RB', 'WR', 'TE'];
-      const seenPositions = new Set(rows.map((r) => r.position));
-      const positions = orderedCorePositions.filter((position) => seenPositions.has(position));
-      const resolveRoundCostBucket = buildRoundCostResolver(rows);
-      const roundCosts = [...new Set(rows.map((r) => resolveRoundCostBucket(r)).filter((v) => Number.isFinite(v) && v > 0))]
-        .sort((a, b) => a - b)
-        .map(String);
-
-      managerSelect.innerHTML = `<option value="${ALL_OPTION_VALUE}" selected>All Managers</option>${managers.map((m) => `<option value="${m}">${m}</option>`).join('')}`;
-      yearSelect.innerHTML = `<option value="${ALL_OPTION_VALUE}" selected>All Years</option>${years.map((y) => `<option value="${y}">${y}</option>`).join('')}`;
-      positionSelect.innerHTML = `<option value="${ALL_OPTION_VALUE}" selected>All Positions</option>${positions.map((p) => `<option value="${p}">${p}</option>`).join('')}`;
-      roundCostSelect.innerHTML = `<option value="${ALL_OPTION_VALUE}" selected>All Round/Cost Tiers</option>${roundCosts.map((rc) => `<option value="${rc}">${rc}</option>`).join('')}`;
-
-      state.manager = [ALL_OPTION_VALUE];
-      state.year = [ALL_OPTION_VALUE];
-      state.position = [ALL_OPTION_VALUE];
-      state.roundCost = [ALL_OPTION_VALUE];
-    }
-
-    function getSelectedValues(selectEl) {
-      return [...selectEl.selectedOptions].map((option) => option.value);
-    }
-
-    function toNumber(value) {
-      const parsed = Number(value);
-      return Number.isFinite(parsed) ? parsed : null;
-    }
-
-    function fromConfig(obj, keys) {
-      return keys.reduce((value, key) => (value == null ? null : value[key]), obj);
-    }
-
-    function firstConfigValue(config, paths, fallback) {
-      for (const path of paths) {
-        const value = fromConfig(config, path);
-        const parsed = toNumber(value);
-        if (parsed != null) return parsed;
-      }
-      return fallback;
-    }
-
-    function resolveYardMultiplier(config, pointsPerUnitPaths, unitsPerPointPaths, fallback) {
-      const pointsPerUnit = firstConfigValue(config, pointsPerUnitPaths, null);
-      if (pointsPerUnit != null) return pointsPerUnit;
-      const unitsPerPoint = firstConfigValue(config, unitsPerPointPaths, null);
-      if (unitsPerPoint != null && unitsPerPoint !== 0) return 1 / unitsPerPoint;
-      return fallback;
-    }
-
-    function buildScoringRules(leagueConfig) {
-      const scoped = leagueConfig?.scoring || leagueConfig?.league?.scoring || leagueConfig?.settings?.scoring || leagueConfig || {};
-
-      return {
-        passYds: resolveYardMultiplier(scoped, [['passYdPointValue'], ['passingYdPointValue'], ['pass_yd_point_value']], [['passYardsPerPoint'], ['passingYardsPerPoint'], ['pass_yds_per_point']], 1 / 25),
-        passTd: firstConfigValue(scoped, [['passTd'], ['passingTd'], ['pass_td']], 4),
-        passInt: firstConfigValue(scoped, [['passInt'], ['interception'], ['pass_int']], -2),
-        rushYds: resolveYardMultiplier(scoped, [['rushYdPointValue'], ['rushingYdPointValue'], ['rush_yd_point_value']], [['rushYardsPerPoint'], ['rushingYardsPerPoint'], ['rush_yds_per_point']], 1 / 10),
-        rushTd: firstConfigValue(scoped, [['rushTd'], ['rushingTd'], ['rush_td']], 6),
-        receptions: firstConfigValue(scoped, [['reception'], ['receptions'], ['ppr']], 1),
-        recYds: resolveYardMultiplier(scoped, [['recYdPointValue'], ['receivingYdPointValue'], ['rec_yd_point_value']], [['recYardsPerPoint'], ['receivingYardsPerPoint'], ['rec_yds_per_point']], 1 / 10),
-        recTd: firstConfigValue(scoped, [['recTd'], ['receivingTd'], ['rec_td']], 6),
-        fumblesLost: firstConfigValue(scoped, [['fumbleLost'], ['fumblesLost'], ['fumbles_lost']], -2),
-        twoPtMade: firstConfigValue(scoped, [['twoPtMade'], ['twoPointConversion'], ['two_point_conversion']], 2),
-        twoPtPass: firstConfigValue(scoped, [['twoPtPass'], ['twoPointPass'], ['two_point_pass']], 2),
-        nonPassTD: firstConfigValue(scoped, [['nonPassTD'], ['nonPassingTd'], ['non_pass_td']], 6)
-      };
-    }
-
-
-    function resolveSeasonConfig(leagueConfig, year) {
-      const yearKey = String(year);
-      return leagueConfig?.seasons?.[yearKey] || leagueConfig?.years?.[yearKey] || leagueConfig || {};
-    }
-
-    function intSetting(source, keys, fallback) {
-      for (const key of keys) {
-        const parsed = toNumber(source?.[key]);
-        if (parsed != null) return Math.max(0, Math.round(parsed));
-      }
-      return fallback;
-    }
-
-    function buildYearMeta(rows, leagueConfig) {
-      const byYear = new Map();
-      rows.forEach((row) => {
-        if (!byYear.has(row.year)) byYear.set(row.year, []);
-        byYear.get(row.year).push(row);
-      });
-
-      const result = {};
-      byYear.forEach((yearRows, year) => {
-        const seasonConfig = resolveSeasonConfig(leagueConfig, year);
-        const lineup = seasonConfig?.lineup || seasonConfig?.roster || {};
-        const teams = intSetting(seasonConfig, ['teams', 'teamCount', 'leagueTeams'], new Set(yearRows.map((row) => row.manager)).size || 12);
-        const weeks = intSetting(seasonConfig, ['weeks', 'regularSeasonWeeks'], 14);
-        const auctionBudgetPerTeam = intSetting(seasonConfig, ['auctionBudgetPerTeam', 'auctionBudget'], 200);
-
-        const starterSlots = {
-          QB: intSetting(lineup, ['QB', 'qb'], 1),
-          RB: intSetting(lineup, ['RB', 'rb'], 2),
-          WR: intSetting(lineup, ['WR', 'wr'], 2),
-          TE: intSetting(lineup, ['TE', 'te'], 1),
-          FLEX: intSetting(lineup, ['FLEX', 'flex'], 1)
-        };
-
-        const cutoffs = {
-          QB: teams * starterSlots.QB,
-          RB: teams * starterSlots.RB,
-          WR: teams * starterSlots.WR,
-          TE: teams * starterSlots.TE
-        };
-
-        const flexPoolTotal = teams * starterSlots.FLEX;
-        if (flexPoolTotal > 0) {
-          const flexPositions = ['RB', 'WR', 'TE'];
-          const counts = flexPositions.map((position) => yearRows.filter((row) => row.position === position).length);
-          const totalCount = counts.reduce((sum, n) => sum + n, 0) || 1;
-          const rawAlloc = counts.map((n) => (n / totalCount) * flexPoolTotal);
-          const floorAlloc = rawAlloc.map((n) => Math.floor(n));
-          let remainder = flexPoolTotal - floorAlloc.reduce((sum, n) => sum + n, 0);
-          const order = rawAlloc
-            .map((n, idx) => ({ idx, frac: n - Math.floor(n) }))
-            .sort((a, b) => b.frac - a.frac);
-          for (let i = 0; i < remainder; i += 1) {
-            floorAlloc[order[i % order.length].idx] += 1;
-          }
-          flexPositions.forEach((position, idx) => {
-            cutoffs[position] += floorAlloc[idx];
-          });
-        }
-
-        result[String(year)] = {
-          teams,
-          weeks,
-          auctionBudgetPerTeam,
-          auctionDollarsTotal: teams * auctionBudgetPerTeam,
-          starterSlots,
-          starterCutoffs: cutoffs
-        };
-      });
-
-      return result;
-    }
-
-    function getFantasyPoints(row, scoringRules) {
-      return (
-        (toNumber(row.passYds) ?? 0) * scoringRules.passYds +
-        (toNumber(row.passTd) ?? 0) * scoringRules.passTd +
-        (toNumber(row.passInt) ?? 0) * scoringRules.passInt +
-        (toNumber(row.rushYds) ?? 0) * scoringRules.rushYds +
-        (toNumber(row.rushTd) ?? 0) * scoringRules.rushTd +
-        (toNumber(row.receptions) ?? 0) * scoringRules.receptions +
-        (toNumber(row.recYds) ?? 0) * scoringRules.recYds +
-        (toNumber(row.recTd) ?? 0) * scoringRules.recTd +
-        (toNumber(row.fumblesLost) ?? 0) * scoringRules.fumblesLost +
-        (toNumber(row.twoPtMade) ?? 0) * scoringRules.twoPtMade +
-        (toNumber(row.twoPtPass) ?? 0) * scoringRules.twoPtPass +
-        (toNumber(row.nonPassTD) ?? 0) * scoringRules.nonPassTD
-      );
-    }
-
-    function withComputedPositionRanks(rawRows) {
-      const byYearAndPosition = new Map();
-
-      rawRows.forEach((row, index) => {
-        const key = `${row.year}__${String(row.position).toUpperCase()}`;
-        if (!byYearAndPosition.has(key)) byYearAndPosition.set(key, []);
-        byYearAndPosition.get(key).push({ row, index });
-      });
-
-      const output = [...rawRows];
-
-      byYearAndPosition.forEach((groupedRows) => {
-        groupedRows.sort((a, b) => {
-          if (b.row.__fantasyPoints !== a.row.__fantasyPoints) return b.row.__fantasyPoints - a.row.__fantasyPoints;
-          const byGames = (toNumber(b.row.games) ?? 0) - (toNumber(a.row.games) ?? 0);
-          if (byGames !== 0) return byGames;
-          return compareValues(a.row.player, b.row.player);
-        });
-
-        let previousPoints = null;
-        let rank = 0;
-
-        groupedRows.forEach((entry, idx) => {
-          if (previousPoints === null || entry.row.__fantasyPoints !== previousPoints) {
-            rank = idx + 1;
-            previousPoints = entry.row.__fantasyPoints;
-          }
-
-          output[entry.index] = {
-            ...entry.row,
-            positionrank: rank
-          };
-        });
-      });
-
-      return output;
-    }
-
-    async function init() {
-      try {
-        const [scoringResponse, configResponse] = await Promise.all([
-          fetch('draft-scoring-data.json'),
-          fetch('league-config.json')
-        ]);
-        if (!scoringResponse.ok) throw new Error(`Failed to load draft-scoring-data.json (${scoringResponse.status})`);
-
-        const raw = await scoringResponse.json();
-        let leagueConfig = {};
-        if (configResponse.ok) {
-          leagueConfig = await configResponse.json();
-        } else {
-          console.warn(`Failed to load league-config.json (${configResponse.status}); using default scoring weights.`);
-        }
-        const scoringRulesByYear = new Map();
-        const withFantasyPoints = raw
-          .filter((row) => !['K', 'D/ST', 'DST'].includes(String(row.position).toUpperCase()))
-          .map((row) => {
-            if (!scoringRulesByYear.has(row.year)) {
-              scoringRulesByYear.set(row.year, buildScoringRules(resolveSeasonConfig(leagueConfig, row.year)));
-            }
-            const scoringRules = scoringRulesByYear.get(row.year);
-            return {
-              ...row,
-              name: row.player,
-              price: row.price ?? '',
-              __fantasyPoints: getFantasyPoints(row, scoringRules)
-            };
-          });
-
-        state.yearMeta = buildYearMeta(withFantasyPoints, leagueConfig);
-
-        const withPositionRanks = withComputedPositionRanks(withFantasyPoints)
-          .map(({ __fantasyPoints, ...row }) => ({
-            ...row,
-            seasonPoints: __fantasyPoints
-          }));
-        const enrichedRows = enrichDraftEntries(withPositionRanks);
-
-        state.rows = enrichedRows.map((row) => {
-          const valueScore = row.valueRatio != null ? Math.log(row.valueRatio) : null;
-          return {
-            ...row,
-            manager: row.managerValue || row.manager || 'Unknown Manager',
-            position: row.normalizedPosition,
-            valueScore
-          };
-        });
-
-
-        populateSelectors(state.rows);
-        wireSortableHeaders();
-        applyColumnExplainers();
-        managerSelect.addEventListener('change', () => { state.manager = normalizeSelection(getSelectedValues(managerSelect)); render(); });
-        yearSelect.addEventListener('change', () => { state.year = normalizeSelection(getSelectedValues(yearSelect)); render(); });
-        positionSelect.addEventListener('change', () => { state.position = normalizeSelection(getSelectedValues(positionSelect)); render(); });
-        roundCostSelect.addEventListener('change', () => { state.roundCost = normalizeSelection(getSelectedValues(roundCostSelect)); render(); });
-
-        render();
-      } catch (error) {
-        console.error(error);
-        statusEl.textContent = 'Unable to load draft analytics data.';
-      }
-    }
-
-    init();
-  </script>
 </body>
 </html>
