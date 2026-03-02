@@ -170,13 +170,13 @@
         <h2>Metric Glossary</h2>
         <p class="subtle">All sections below use these same manager-focused definitions.</p>
         <ul class="insight-list">
-          <li><strong>PSME-Points:</strong> Percentile Surplus vs Market Expectation using season points outcome percentile minus expected draft percentile, weighted by draft capital.</li>
-          <li><strong>Total VoB:</strong> Value over Baseline points. Player season points minus the starter-cutoff baseline for that position and year.</li>
-          <li><strong>Starts-VoB:</strong> Availability-adjusted VoB based on actual NFL games started/played: (player points per NFL start minus baseline points per NFL start) × NFL games started.</li>
-          <li><strong>Surplus$:</strong> Auction-only surplus by converting positive VoB to implied auction dollars and subtracting paid auction cost.</li>
-          <li><strong>Pick Surplus:</strong> Snake-only surplus comparing player VoB vs expected VoB for that overall draft slot.</li>
-          <li><strong>Starter-Tier Yield:</strong> Share of eligible picks that finished inside starter-tier positional cutoffs for that season.</li>
-          <li><strong>Player Value Index:</strong> Pick-level composite used in the player value chart. Formula: 0.50×PSME + 0.35×(VoB per NFL start) + 0.15×(cost-surplus signal).</li>
+          <li><strong>Surplus (Cost-Normalized):</strong> Player season points minus expected points at the same year + cost decile (snake pick cost or auction dollars).</li>
+          <li><strong>PAB:</strong> Points Above Baseline (VOLS-style): player points minus position baseline from starter cutoffs.</li>
+          <li><strong>Hit Rate / Bust Rate:</strong> Hit = surplus above 0. Bust = surplus below year+cost-decile 25th percentile.</li>
+          <li><strong>Regret Bin:</strong> Opportunity-cost proxy: best points in player’s year+cost decile minus player points (floored at zero).</li>
+          <li><strong>Points per Pick:</strong> Average season points produced by drafted QB/RB/WR/TE picks.</li>
+          <li><strong>Points per Dollar:</strong> Auction-only efficiency (season points / auction dollars spent) for skill picks.</li>
+          <li><strong>Composite %:</strong> Season percentile blend using Surplus, PAB, Hit Rate, and inverse Regret Bin.</li>
         </ul>
       </section>
 
@@ -202,10 +202,10 @@
       <div id="status" class="status">Loading draft analytics...</div>
 
       <section class="cards-grid" data-detail-level="core">
-        <article class="stat-card"><div class="stat-label">Best Value Pick</div><div id="bestValuePick" class="stat-value">-</div><div id="bestValuePickNote" class="stat-note"></div></article>
-        <article class="stat-card"><div class="stat-label">Average Value Score</div><div id="avgScore" class="stat-value">-</div><div class="stat-note">ln(positional draft slot ÷ finish rank)</div></article>
-        <article class="stat-card"><div class="stat-label">Strong Picks</div><div id="strongPickRate" class="stat-value">-</div><div class="stat-note">Share of picks with positive value score</div></article>
-        <article class="stat-card"><div class="stat-label">Qualified Picks</div><div id="qualifiedPicks" class="stat-value">-</div><div class="stat-note">Picks with a known finish rank</div></article>
+        <article class="stat-card"><div class="stat-label">Best Surplus Pick</div><div id="bestValuePick" class="stat-value">-</div><div id="bestValuePickNote" class="stat-note"></div></article>
+        <article class="stat-card"><div class="stat-label">Average Surplus</div><div id="avgScore" class="stat-value">-</div><div class="stat-note">Cost-decile normalized points gain</div></article>
+        <article class="stat-card"><div class="stat-label">Hit Rate</div><div id="strongPickRate" class="stat-value">-</div><div class="stat-note">Share of picks with surplus &gt; 0</div></article>
+        <article class="stat-card"><div class="stat-label">Eligible Skill Picks</div><div id="qualifiedPicks" class="stat-value">-</div><div class="stat-note">QB/RB/WR/TE with season points</div></article>
       </section>
 
       <section class="panel">
@@ -217,12 +217,12 @@
               <tr>
                 <th class="sortable" data-sort-key="rank">Rank</th>
                 <th class="sortable" data-sort-key="manager">Manager</th>
-                <th class="sortable" data-sort-key="psmePoints">PSME-Points</th>
-                <th class="sortable" data-sort-key="totalVoB">Total VoB</th>
-                <th class="sortable" data-sort-key="totalStartsVoB">Starts-VoB</th>
-                <th class="sortable" data-sort-key="totalSurplusDollars">Surplus$</th>
-                <th class="sortable" data-sort-key="totalPickSurplus">Pick Surplus</th>
-                <th class="sortable" data-sort-key="starterTierRate">Starter-Tier Yield</th>
+                <th class="sortable" data-sort-key="compositePct">Composite %</th>
+                <th class="sortable" data-sort-key="totalSurplus">Surplus</th>
+                <th class="sortable" data-sort-key="totalPab">PAB</th>
+                <th class="sortable" data-sort-key="hitRate">Hit Rate</th>
+                <th class="sortable" data-sort-key="bustRate">Bust Rate</th>
+                <th class="sortable" data-sort-key="regretBin">Regret Bin</th>
                 <th class="sortable" data-sort-key="eligiblePicks">Eligible Picks</th>
               </tr>
             </thead>
@@ -240,9 +240,10 @@
               <tr>
                 <th class="sortable" data-sort-key="manager">Manager</th>
                 <th class="sortable" data-sort-key="year">Year</th>
-                <th class="sortable" data-sort-key="psmePoints">PSME-Points</th>
-                <th class="sortable" data-sort-key="totalVoB">Total VoB</th>
-                <th class="sortable" data-sort-key="starterTierRate">Starter-Tier Yield</th>
+                <th class="sortable" data-sort-key="compositePct">Composite %</th>
+                <th class="sortable" data-sort-key="totalSurplus">Surplus</th>
+                <th class="sortable" data-sort-key="totalPab">PAB</th>
+                <th class="sortable" data-sort-key="hitRate">Hit Rate</th>
                 <th class="sortable" data-sort-key="eligiblePicks">Eligible Picks</th>
               </tr>
             </thead>
@@ -262,10 +263,10 @@
                 <th class="sortable" data-sort-key="manager">Manager</th>
                 <th class="sortable" data-sort-key="name">Player</th>
                 <th class="sortable" data-sort-key="position">Pos</th>
-                <th class="sortable" data-sort-key="psme">PSME</th>
-                <th class="sortable" data-sort-key="voB">VoB</th>
-                <th class="sortable" data-sort-key="startsVoB">Starts-VoB</th>
-                <th class="sortable" data-sort-key="valueIndex">Player Value Index</th>
+                <th class="sortable" data-sort-key="surplus">Surplus</th>
+                <th class="sortable" data-sort-key="pab">PAB</th>
+                <th class="sortable" data-sort-key="hit">Hit</th>
+                <th class="sortable" data-sort-key="regretBin">Regret Bin</th>
                 <th class="sortable" data-sort-key="acquisitionCost">Acquisition</th>
               </tr>
             </thead>
@@ -287,9 +288,9 @@
       position: [],
       roundCost: [],
       sorts: {
-        managerLeaderboard: { key: 'totalVoB', dir: 'desc' },
+        managerLeaderboard: { key: 'compositePct', dir: 'desc' },
         managerSeasons: { key: 'year', dir: 'desc' },
-        managerPicks: { key: 'valueIndex', dir: 'desc' }
+        managerPicks: { key: 'surplus', dir: 'desc' }
       },
       yearMeta: {}
     };
@@ -545,77 +546,65 @@
         return { leaderboard: [], seasonRows: [], pickRows: [] };
       }
 
-      const outcomeMeta = buildYearPositionOutcomeMeta(eligibleRows);
       const pointsTable = buildYearPositionPointsTable(eligibleRows);
 
-      const expectedVoBByPick = new Map();
-      const snakeRows = eligibleRows.filter((row) => row.auctionPrice == null && Number.isFinite(row.overall));
-      snakeRows.forEach((row) => {
-        const baseline = getBaselinePoints(row.year, row.position, pointsTable);
-        const voB = row.seasonPoints - baseline;
-        if (!expectedVoBByPick.has(row.overall)) expectedVoBByPick.set(row.overall, []);
-        expectedVoBByPick.get(row.overall).push(voB);
+      const yearCostGroups = new Map();
+      eligibleRows.forEach((row) => {
+        if (!yearCostGroups.has(row.year)) yearCostGroups.set(row.year, []);
+        yearCostGroups.get(row.year).push(row);
       });
-      const expectedCurve = new Map([...expectedVoBByPick.entries()].map(([pick, values]) => [pick, average(values)]));
 
-      const yearAuctionContext = new Map();
-      [...new Set(eligibleRows.map((row) => row.year))].forEach((year) => {
-        const yearRows = eligibleRows.filter((r) => r.year === year && r.auctionPrice != null);
-        const totalAuctionDollars = getSeasonSetting(year, 'auctionDollarsTotal', null)
-          ?? yearRows.reduce((sum, r) => sum + (toNumber(r.auctionPrice) ?? 0), 0);
-        const totalAboveBaseline = yearRows
-          .map((r) => Math.max(0, r.seasonPoints - getBaselinePoints(r.year, r.position, pointsTable)))
-          .reduce((sum, value) => sum + value, 0);
-        yearAuctionContext.set(year, {
-          dollarsPerPoint: totalAboveBaseline > 0 ? totalAuctionDollars / totalAboveBaseline : 0
+      const yearDecileStats = new Map();
+      yearCostGroups.forEach((rows, year) => {
+        const sorted = [...rows].sort((a, b) => {
+          if (a.auctionPrice != null || b.auctionPrice != null) {
+            const ap = toNumber(a.auctionPrice) ?? -1;
+            const bp = toNumber(b.auctionPrice) ?? -1;
+            if (bp !== ap) return bp - ap;
+            return compareValues(a.overall, b.overall);
+          }
+          return (a.overall ?? Infinity) - (b.overall ?? Infinity);
         });
+
+        sorted.forEach((row, index) => {
+          row.__costDecile = Math.min(10, Math.floor((index / Math.max(1, sorted.length)) * 10) + 1);
+        });
+
+        const byDecile = new Map();
+        sorted.forEach((row) => {
+          const key = row.__costDecile;
+          if (!byDecile.has(key)) byDecile.set(key, []);
+          byDecile.get(key).push(row.seasonPoints);
+        });
+
+        const stats = new Map();
+        byDecile.forEach((values, decile) => {
+          const sortedVals = [...values].sort((a, b) => a - b);
+          const q1 = sortedVals[Math.floor((sortedVals.length - 1) * 0.25)] ?? 0;
+          const avg = average(values) ?? 0;
+          const max = sortedVals[sortedVals.length - 1] ?? 0;
+          stats.set(decile, { avg, q1, max });
+        });
+
+        yearDecileStats.set(year, stats);
       });
 
       const pickRows = eligibleRows.map((row) => {
-        const outcome = outcomeMeta.get(row);
-        const expectedRank = row.auctionPrice != null ? row.posPriceOrder : row.posDraftOrder;
-        const expectedPool = row.auctionPrice != null ? row.posPriceCount : row.posDraftCount;
-        const expectedPercentile = percentileFromRank(expectedRank, expectedPool);
-        const psme = outcome?.percentile != null && expectedPercentile != null ? outcome.percentile - expectedPercentile : null;
-        const psmeWeight = row.auctionPrice != null
-          ? Math.max(1, row.auctionPrice)
-          : Math.max(1, ((row.posDraftCount || 1) - (row.posDraftOrder || 1) + 1));
-
         const baselinePoints = getBaselinePoints(row.year, row.position, pointsTable);
-        const voB = row.seasonPoints - baselinePoints;
-
-        const gamesStarted = Math.max(1, toNumber(row.gamesStarted) ?? toNumber(row.games) ?? 1);
-        const playerPpg = row.seasonPoints / gamesStarted;
-        const baselinePpg = getBaselinePpg(row.year, row.position, pointsTable);
-        const startsVoB = (playerPpg - baselinePpg) * gamesStarted;
-
-        const auctionContext = yearAuctionContext.get(row.year) || { dollarsPerPoint: 0 };
-        const surplusDollars = row.auctionPrice != null
-          ? (Math.max(0, voB) * auctionContext.dollarsPerPoint) - (toNumber(row.auctionPrice) ?? 0)
-          : 0;
-
-        const pickSurplus = row.auctionPrice == null && Number.isFinite(row.overall)
-          ? voB - (expectedCurve.get(row.overall) ?? 0)
-          : 0;
-        const costSignal = row.auctionPrice != null
-          ? surplusDollars / Math.max(1, (toNumber(row.auctionPrice) ?? 1))
-          : pickSurplus / Math.max(1, Math.abs(expectedCurve.get(row.overall) ?? 0));
-        const voBPerStart = voB / gamesStarted;
-        const valueIndex = ((psme ?? 0) * 0.50) + (voBPerStart * 0.35) + (costSignal * 0.15);
-
-        const starterCutoff = getStarterCutoff(row.year, row.position);
-        const starterTierHit = outcome?.rank != null && starterCutoff != null && outcome.rank <= starterCutoff;
+        const pab = row.seasonPoints - baselinePoints;
+        const stats = yearDecileStats.get(row.year)?.get(row.__costDecile) || { avg: row.seasonPoints, q1: row.seasonPoints, max: row.seasonPoints };
+        const surplus = row.seasonPoints - stats.avg;
+        const regretBin = Math.max(0, stats.max - row.seasonPoints);
+        const hit = surplus > 0;
+        const bust = surplus <= stats.q1;
 
         return {
           ...row,
-          psme,
-          psmeWeight,
-          voB,
-          startsVoB,
-          surplusDollars,
-          pickSurplus,
-          valueIndex,
-          starterTierHit,
+          pab,
+          surplus,
+          regretBin,
+          hit,
+          bust,
           acquisitionCost: row.auctionPrice == null
             ? `Round ${row.round ?? '—'}${row.overall != null ? ` (Pick ${row.overall})` : ''}`
             : `$${row.auctionPrice}`
@@ -623,34 +612,34 @@
       });
 
       const summarizeManagerRows = (rows) => {
-        let psmeWeightedTotal = 0;
-        let psmeWeightTotal = 0;
-        let totalVoB = 0;
-        let totalStartsVoB = 0;
-        let totalSurplusDollars = 0;
-        let totalPickSurplus = 0;
-        let starterTierHits = 0;
+        let totalSurplus = 0;
+        let totalPab = 0;
+        let hitCount = 0;
+        let bustCount = 0;
+        let regretBin = 0;
+        let points = 0;
+        let auctionSpend = 0;
 
         rows.forEach((row) => {
-          if (row.psme != null) {
-            psmeWeightedTotal += row.psme * row.psmeWeight;
-            psmeWeightTotal += row.psmeWeight;
-          }
-          totalVoB += row.voB;
-          totalStartsVoB += row.startsVoB;
-          totalSurplusDollars += row.surplusDollars;
-          totalPickSurplus += row.pickSurplus;
-          if (row.starterTierHit) starterTierHits += 1;
+          totalSurplus += row.surplus;
+          totalPab += row.pab;
+          points += row.seasonPoints;
+          regretBin += row.regretBin;
+          if (row.hit) hitCount += 1;
+          if (row.bust) bustCount += 1;
+          if (row.auctionPrice != null) auctionSpend += (toNumber(row.auctionPrice) ?? 0);
         });
 
         return {
-          psmePoints: psmeWeightTotal ? psmeWeightedTotal / psmeWeightTotal : null,
-          totalVoB,
-          totalStartsVoB,
-          totalSurplusDollars,
-          totalPickSurplus,
-          starterTierHits,
-          starterTierRate: rows.length ? starterTierHits / rows.length : null,
+          totalSurplus,
+          totalPab,
+          hitCount,
+          bustCount,
+          hitRate: rows.length ? hitCount / rows.length : null,
+          bustRate: rows.length ? bustCount / rows.length : null,
+          regretBin,
+          pointsPerPick: rows.length ? points / rows.length : null,
+          pointsPerDollar: auctionSpend > 0 ? points / auctionSpend : null,
           eligiblePicks: rows.length
         };
       };
@@ -660,11 +649,7 @@
         if (!byManager.has(row.manager)) byManager.set(row.manager, []);
         byManager.get(row.manager).push(row);
       });
-
-      const leaderboard = [...byManager.entries()].map(([manager, rows]) => ({
-        manager,
-        ...summarizeManagerRows(rows)
-      }));
+      const leaderboard = [...byManager.entries()].map(([manager, rows]) => ({ manager, ...summarizeManagerRows(rows) }));
 
       const byManagerYear = new Map();
       pickRows.forEach((row) => {
@@ -674,11 +659,32 @@
       });
       const seasonRows = [...byManagerYear.entries()].map(([key, rows]) => {
         const [manager, year] = key.split('__');
-        return {
-          manager,
-          year: Number(year),
-          ...summarizeManagerRows(rows)
-        };
+        return { manager, year: Number(year), ...summarizeManagerRows(rows) };
+      });
+
+      const metricPercentile = (rows, key, inverse = false) => {
+        const sorted = [...rows].sort((a, b) => inverse ? (a[key] - b[key]) : (b[key] - a[key]));
+        const n = sorted.length;
+        sorted.forEach((item, idx) => {
+          item[`${key}Pct`] = n <= 1 ? 1 : (n - idx - 1) / (n - 1);
+        });
+      };
+
+      metricPercentile(seasonRows, 'totalSurplus');
+      metricPercentile(seasonRows, 'totalPab');
+      metricPercentile(seasonRows, 'hitRate');
+      metricPercentile(seasonRows, 'regretBin', true);
+      seasonRows.forEach((row) => {
+        row.compositePct = average([row.totalSurplusPct, row.totalPabPct, row.hitRatePct, row.regretBinPct]);
+      });
+
+      const byManagerComposite = new Map();
+      seasonRows.forEach((row) => {
+        if (!byManagerComposite.has(row.manager)) byManagerComposite.set(row.manager, []);
+        byManagerComposite.get(row.manager).push(row.compositePct);
+      });
+      leaderboard.forEach((row) => {
+        row.compositePct = average(byManagerComposite.get(row.manager) || []);
       });
 
       return { leaderboard, seasonRows, pickRows };
@@ -699,12 +705,12 @@
         <tr>
           <td>${item.rank}</td>
           <td>${item.manager}</td>
-          <td>${formatDelta(item.psmePoints)}</td>
-          <td>${formatDelta(item.totalVoB)}</td>
-          <td>${formatDelta(item.totalStartsVoB)}</td>
-          <td>${formatDelta(item.totalSurplusDollars)}</td>
-          <td>${formatDelta(item.totalPickSurplus)}</td>
-          <td>${item.starterTierHits}/${item.eligiblePicks} (${formatPct(item.starterTierRate)})</td>
+          <td>${formatPct(item.compositePct)}</td>
+          <td>${formatDelta(item.totalSurplus)}</td>
+          <td>${formatDelta(item.totalPab)}</td>
+          <td>${formatPct(item.hitRate)}</td>
+          <td>${formatPct(item.bustRate)}</td>
+          <td>${formatScore(item.regretBin, 1)}</td>
           <td>${item.eligiblePicks}</td>
         </tr>
       `).join('');
@@ -716,7 +722,7 @@
       rows = sortRows(rows, 'managerSeasons');
 
       if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="6">No manager season data for this filter.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7">No manager season data for this filter.</td></tr>';
         return;
       }
 
@@ -724,9 +730,10 @@
         <tr>
           <td>${item.manager}</td>
           <td>${item.year}</td>
-          <td>${formatDelta(item.psmePoints)}</td>
-          <td>${formatDelta(item.totalVoB)}</td>
-          <td>${item.starterTierHits}/${item.eligiblePicks} (${formatPct(item.starterTierRate)})</td>
+          <td>${formatPct(item.compositePct)}</td>
+          <td>${formatDelta(item.totalSurplus)}</td>
+          <td>${formatDelta(item.totalPab)}</td>
+          <td>${formatPct(item.hitRate)}</td>
           <td>${item.eligiblePicks}</td>
         </tr>
       `).join('');
@@ -748,34 +755,34 @@
           <td>${row.manager}</td>
           <td>${row.name}</td>
           <td>${row.position}</td>
-          <td>${formatDelta(row.psme)}</td>
-          <td>${formatDelta(row.voB)}</td>
-          <td>${formatDelta(row.startsVoB)}</td>
-          <td>${formatScore(row.valueIndex, 3)}</td>
+          <td>${formatDelta(row.surplus)}</td>
+          <td>${formatDelta(row.pab)}</td>
+          <td>${row.hit ? 'Yes' : 'No'}</td>
+          <td>${formatScore(row.regretBin, 1)}</td>
           <td>${row.acquisitionCost}</td>
         </tr>
       `).join('');
     }
 
     function renderCards(filtered) {
-      const qualifiedRows = filtered.filter((row) => row.valueScore != null);
+      const qualifiedRows = buildManagerAnalyticsRows(filtered).pickRows;
       const best = [...qualifiedRows].sort((a, b) => {
-        const scoreDiff = (b.valueScore ?? -Infinity) - (a.valueScore ?? -Infinity);
-        if (scoreDiff !== 0) return scoreDiff;
+        const diff = (b.surplus ?? -Infinity) - (a.surplus ?? -Infinity);
+        if (diff !== 0) return diff;
         return compareValues(a.name, b.name);
       })[0] || null;
-      const avgScore = average(qualifiedRows.map((row) => row.valueScore));
-      const strongCount = qualifiedRows.filter((row) => row.valueScore > 0).length;
+      const avgScore = average(qualifiedRows.map((row) => row.surplus));
+      const strongCount = qualifiedRows.filter((row) => row.hit).length;
       const strongRate = qualifiedRows.length ? strongCount / qualifiedRows.length : null;
 
       document.getElementById('bestValuePick').textContent = best
         ? `${best.name} (${best.year} ${best.position})`
         : '—';
       document.getElementById('bestValuePickNote').textContent = best
-        ? `${best.manager} • ${best.auctionPrice == null ? `Round ${best.round ?? '—'}` : `$${best.auctionPrice}`} • Score ${formatScore(best.valueScore, 3)}`
-        : 'No value-score data for this filter.';
+        ? `${best.manager} • ${best.auctionPrice == null ? `Round ${best.round ?? '—'}` : `$${best.auctionPrice}`} • Surplus ${formatScore(best.surplus, 1)}`
+        : 'No eligible picks for this filter.';
 
-      document.getElementById('avgScore').textContent = formatScore(avgScore, 3);
+      document.getElementById('avgScore').textContent = formatScore(avgScore, 2);
       document.getElementById('strongPickRate').textContent = strongRate == null
         ? '—'
         : `${strongCount} (${formatPct(strongRate)})`;
@@ -797,20 +804,21 @@
       managerLeaderboard: {
         rank: 'Sort rank after applying current table sort settings.',
         manager: 'Draft manager/owner for the selected slice.',
-        psmePoints: 'Percentile Surplus vs Market Expectation (points-based outcome). Equation: outcome percentile − expected percentile, weighted by pick capital.',
-        totalVoB: 'Total Value over Baseline points across drafted players. Equation: player season points − replacement baseline points at that position/year.',
-        totalStartsVoB: 'Availability-aware value over baseline using actual NFL starts/played. Equation: (player points-per-NFL-start − baseline points-per-NFL-start) × NFL games started.',
-        totalSurplusDollars: 'Auction Surplus Dollars from points. Converts positive VoB points into implied dollars and subtracts auction cost.',
-        totalPickSurplus: 'Snake Pick Surplus vs slot curve. Equation: player VoB − expected VoB at that overall pick.',
-        starterTierRate: 'Starter-Tier Yield: share of drafted players who finished within starter cutoffs by position (including flex allocation).',
-        eligiblePicks: 'Count of eligible non-K/DST picks with season points in the current filter.'
+        compositePct: 'Average season percentile across total Surplus, total PAB, Hit Rate, and inverse Regret Bin.',
+        totalSurplus: 'Total cost-normalized surplus points (player points minus expected points for that year/cost decile).',
+        totalPab: 'Total Points Above Baseline (VOLS-style) using starter cutoffs by position-year.',
+        hitRate: 'Share of picks where surplus > 0.',
+        bustRate: 'Share of picks where surplus is at/below the 25th percentile within year+cost-decile peers.',
+        regretBin: 'Sum of opportunity-cost regret by bin: best points in year+cost decile minus player points.',
+        eligiblePicks: 'Count of eligible QB/RB/WR/TE picks with season points in the current filter.'
       },
       managerSeasons: {
         manager: 'Manager for this season-level split.',
         year: 'Draft season for this manager row.',
-        psmePoints: 'Season-level PSME-Points for that manager and year.',
-        totalVoB: 'Season-level total Value over Baseline points.',
-        starterTierRate: 'Season-level starter-tier hit rate for eligible picks.',
+        compositePct: 'Season composite percentile across the four core report metrics.',
+        totalSurplus: 'Season total surplus points.',
+        totalPab: 'Season total points above baseline.',
+        hitRate: 'Season hit rate.',
         eligiblePicks: 'Eligible picks drafted by this manager in this season.'
       },
       managerPicks: {
@@ -818,10 +826,10 @@
         manager: 'Manager who made the draft pick.',
         name: 'Player drafted.',
         position: 'Player position bucket used for baselines.',
-        psme: 'Pick-level percentile surplus vs market expectation.',
-        voB: 'Pick-level Value over Baseline points.',
-        startsVoB: 'Pick-level starts-aware VoB using actual NFL games started/played.',
-        valueIndex: 'Composite value formula: 0.50×PSME + 0.35×(VoB per NFL start) + 0.15×cost-surplus signal (auction surplus efficiency or snake pick-surplus efficiency).',
+        surplus: 'Pick-level cost-normalized surplus points.',
+        pab: 'Pick-level points above baseline.',
+        hit: 'Whether pick surplus is positive.',
+        regretBin: 'Pick-level opportunity-cost regret versus the best player in the same year+cost decile.',
         acquisitionCost: 'Snake round/pick or auction dollars paid for this pick.'
       }
     };
