@@ -276,7 +276,11 @@
     function populateFilters() {
       const managers = [...new Set(picks.map((pick) => pick.manager).filter(Boolean))].sort();
       const years = [...new Set(picks.map((pick) => Number(pick.year)).filter(Number.isFinite))].sort((a, b) => b - a);
-      const rounds = [...new Set(picks.map((pick) => Number(pick.round)).filter(Number.isFinite))].sort((a, b) => a - b);
+      const rounds = [...new Set(picks.map((pick) => Number(pick.round)).filter((round) => Number.isFinite(round) && round > 0))].sort((a, b) => a - b);
+      const priceRanges = Array.from({ length: 9 }, (_, idx) => {
+        const min = idx * 10;
+        return { min, max: min + 9 };
+      });
 
       managerSelect.innerHTML = managers.map((m) => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
 
@@ -285,7 +289,7 @@
 
       const roundOptions = ['<option value="">All Rounds / Prices</option>']
         .concat(rounds.map((round) => `<option value="round:${round}">Round ${round}</option>`))
-        .concat(['<option value="top:3">Top 3 Overall / Price</option>', '<option value="top:6">Top 6 Overall / Price</option>', '<option value="top:12">Top 12 Overall / Price</option>']);
+        .concat(priceRanges.map(({ min, max }) => `<option value="price:${min}-${max}">$${min}-$${max}</option>`));
       roundSelect.dataset.options = roundOptions.join('');
       roundSelect.innerHTML = '';
 
@@ -326,9 +330,15 @@
         if (roundFilter.startsWith('round:')) {
           const round = Number(roundFilter.split(':')[1]);
           managerRows = managerRows.filter((pick) => Number(pick.round) === round);
-        } else if (roundFilter.startsWith('top:')) {
-          const maxOverall = Number(roundFilter.split(':')[1]);
-          managerRows = managerRows.filter((pick) => Number(pick.overall) <= maxOverall);
+        } else if (roundFilter.startsWith('price:')) {
+          const [minPrice, maxPrice] = roundFilter
+            .split(':')[1]
+            .split('-')
+            .map((value) => Number(value));
+          managerRows = managerRows.filter((pick) => {
+            const price = getNumericPrice(pick.price);
+            return Number.isFinite(price) && price >= minPrice && price <= maxPrice;
+          });
         }
       }
 
@@ -338,7 +348,7 @@
       if (managerView === 'round' && roundFilter) {
         const roundLabel = roundFilter.startsWith('round:')
           ? `Round ${roundFilter.split(':')[1]}`
-          : `Top ${roundFilter.split(':')[1]} Overall / Price`;
+          : `$${roundFilter.split(':')[1].replace('-', '-$')}`;
         managerPanelTitle.textContent += ` • ${roundLabel}`;
       }
 
@@ -473,8 +483,15 @@
       return '';
     }
 
+    function getNumericPrice(price) {
+      if (typeof price === 'number') return price;
+      if (typeof price !== 'string') return NaN;
+      const normalized = price.replace(/[^0-9.\-]/g, '');
+      return Number(normalized);
+    }
+
     function escapeHtml(value) {
-      return value
+      return String(value)
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;')
