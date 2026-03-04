@@ -100,6 +100,14 @@
       position: sticky;
       top: 0;
     }
+    th.sorted-column {
+      background: rgba(56,189,248,0.17);
+      color: #dbeafe;
+      box-shadow: inset 0 -1px 0 rgba(56,189,248,0.35);
+    }
+    tbody tr:not(.year-separator) td.sorted-column {
+      background: rgba(56,189,248,0.06);
+    }
     tbody tr:hover { background: rgba(56,189,248,0.05); }
     .empty-row td { text-align: center; color: var(--text-soft); font-style: italic; padding: 18px 12px; }
 
@@ -184,7 +192,7 @@
           <table>
             <thead>
               <tr>
-                <th>Year</th>
+                <th class="sorted-column">Year</th>
                 <th>Manager</th>
                 <th>Round</th>
                 <th>Overall</th>
@@ -210,7 +218,7 @@
           <table>
             <thead>
               <tr>
-                <th>Year</th>
+                <th class="sorted-column">Year</th>
                 <th>Manager</th>
                 <th>Round</th>
                 <th>Overall</th>
@@ -378,11 +386,11 @@
 
       rows.forEach((row) => {
         if (showYearSeparators && row.year !== lastYear) {
-          bodyRows.push(`<tr class="year-separator"><td colspan="8">Draft Year ${escapeHtml(String(row.year ?? '-'))}</td></tr>`);
+          bodyRows.push(`<tr class="year-separator"><td colspan="8">${escapeHtml(String(row.year ?? '-'))} Draft</td></tr>`);
           lastYear = row.year;
         }
         bodyRows.push(`<tr>
-          <td>${escapeHtml(String(row.year ?? '-'))}</td>
+          <td class="sorted-column">${escapeHtml(String(row.year ?? '-'))}</td>
           <td>${escapeHtml(String(row.manager ?? '-'))}</td>
           <td>${escapeHtml(String(row.round ?? '-'))}</td>
           <td>${escapeHtml(String(row.overall ?? '-'))}</td>
@@ -402,7 +410,7 @@
         return;
       }
       tbody.innerHTML = rows.map((row) => {
-        const cells = columns.map((column) => `<td>${escapeHtml(String(row[column] ?? '-'))}</td>`).join('');
+        const cells = columns.map((column, index) => `<td${index === 0 ? ' class="sorted-column"' : ''}>${escapeHtml(String(row[column] ?? '-'))}</td>`).join('');
         return `<tr>${cells}</tr>`;
       }).join('');
     }
