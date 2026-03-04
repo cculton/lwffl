@@ -349,10 +349,10 @@
       roundSelect.innerHTML = roundOptions.join('');
       setAllSelected(roundSelect);
 
-      managerSelect.addEventListener('change', () => { managerPage = 1; renderTables(); });
-      yearSelect.addEventListener('change', () => { managerPage = 1; renderTables(); });
-      positionSelect.addEventListener('change', () => { managerPage = 1; renderTables(); });
-      roundSelect.addEventListener('change', () => { managerPage = 1; renderTables(); });
+      setupMultiSelectBehavior(managerSelect, '__all_managers');
+      setupMultiSelectBehavior(yearSelect, '__all_years');
+      setupMultiSelectBehavior(positionSelect, '__all_positions');
+      setupMultiSelectBehavior(roundSelect, '__all_round_prices');
       managerPrevPageBtn.addEventListener('click', () => updateManagerPage(managerPage - 1));
       managerNextPageBtn.addEventListener('click', () => updateManagerPage(managerPage + 1));
       tableViewBtn.addEventListener('click', () => setYearView('table'));
@@ -364,15 +364,50 @@
       Array.from(selectEl.options).forEach((opt) => { opt.selected = true; });
     }
 
+    function clearAllSelected(selectEl) {
+      Array.from(selectEl.options).forEach((opt) => { opt.selected = false; });
+    }
+
     function getSelectedValues(selectEl) {
       return Array.from(selectEl.selectedOptions).map((opt) => opt.value).filter(Boolean);
     }
 
+    function setupMultiSelectBehavior(selectEl, allValue) {
+      selectEl.dataset.previousSelection = JSON.stringify(getSelectedValues(selectEl));
+      selectEl.addEventListener('change', () => {
+        const previousValues = new Set(JSON.parse(selectEl.dataset.previousSelection || '[]'));
+        const selectedValues = new Set(getSelectedValues(selectEl));
+        const hadAllSelected = previousValues.has(allValue);
+        const hasAllSelected = selectedValues.has(allValue);
+        const nonAllOptionCount = Math.max(0, selectEl.options.length - 1);
+        const selectedNonAllCount = [...selectedValues].filter((value) => value !== allValue).length;
+
+        if (hasAllSelected && (!hadAllSelected || selectedNonAllCount === 0)) {
+          setAllSelected(selectEl);
+        } else if (!hasAllSelected && hadAllSelected) {
+          clearAllSelected(selectEl);
+        } else {
+          const allOption = Array.from(selectEl.options).find((opt) => opt.value === allValue);
+          if (allOption) {
+            allOption.selected = selectedNonAllCount > 0 && selectedNonAllCount === nonAllOptionCount;
+          }
+        }
+
+        selectEl.dataset.previousSelection = JSON.stringify(getSelectedValues(selectEl));
+        managerPage = 1;
+        renderTables();
+      });
+    }
+
     function getNormalizedSelections(selectEl, allValue) {
       const selectedValues = getSelectedValues(selectEl);
-      if (!selectedValues.length || selectedValues.includes(allValue)) {
-        setAllSelected(selectEl);
-        return getSelectedValues(selectEl).filter((value) => value !== allValue);
+      if (!selectedValues.length) {
+        return [];
+      }
+      if (selectedValues.includes(allValue)) {
+        return Array.from(selectEl.options)
+          .map((opt) => opt.value)
+          .filter((value) => value && value !== allValue);
       }
       return selectedValues.filter((value) => value !== allValue);
     }
@@ -423,8 +458,7 @@
 
     function getSelectedYears() {
       const selected = getNormalizedSelections(yearSelect, '__all_years');
-      const vals = selected.map((value) => Number(value)).filter(Number.isFinite);
-      return vals.length ? vals : [...new Set(picks.map((pick) => Number(pick.year)).filter(Number.isFinite))];
+      return selected.map((value) => Number(value)).filter(Number.isFinite);
     }
 
     function renderTables() {
@@ -434,8 +468,8 @@
       const selectedRoundFilters = getNormalizedSelections(roundSelect, '__all_round_prices');
 
       const yearSet = new Set(selectedYears);
-      const managerSet = new Set(selectedManagers.length ? selectedManagers : [...new Set(picks.map((pick) => pick.manager).filter(Boolean))]);
-      const positionSet = new Set(selectedPositions.length ? selectedPositions : [...new Set(picks.map((pick) => normalizePositionValue(pick.position)))]);
+      const managerSet = new Set(selectedManagers);
+      const positionSet = new Set(selectedPositions);
 
       const baseRows = picks.filter((pick) => {
         const inYear = yearSet.has(Number(pick.year));
