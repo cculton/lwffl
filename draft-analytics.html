@@ -183,10 +183,11 @@
         <ul class="insight-list">
           <li><strong>PSME-Points:</strong> Percentile Surplus vs Market Expectation using season points outcome percentile minus expected draft percentile, weighted by draft capital.</li>
           <li><strong>Total VoB:</strong> Value over Baseline points. Player season points minus the starter-cutoff baseline for that position and year.</li>
-          <li><strong>Starts-VoB:</strong> Availability-adjusted VoB based on actual NFL games started/played: (player points per NFL start minus baseline points per NFL start) × NFL games started.</li>
+          <li><strong>Starter Yield (Starter Hits):</strong> Share of eligible picks that finished inside the starter cutoff by position for that year's lineup rules.</li>
+          <li><strong>Elite Yield (Star Hits):</strong> Share of eligible picks that finished in the elite tier. <em>How to read:</em> higher means more true difference-makers. <em>Example:</em> 3 elite hits on 10 picks = 30%.</li>
+          <li><strong>ROI:</strong> Auction return on investment. <em>How to read:</em> positive is value gained vs dollars spent. <em>Example:</em> $220 implied value on $200 spend = +10% ROI.</li>
           <li><strong>Surplus$:</strong> Auction-only surplus by converting positive VoB to implied auction dollars and subtracting paid auction cost.</li>
-          <li><strong>Pick Surplus:</strong> Snake-only surplus comparing player VoB vs expected VoB for that overall draft slot.</li>
-          <li><strong>Starter-Tier Yield:</strong> Share of eligible picks that finished inside starter-tier positional cutoffs for that season.</li>
+          <li><strong>Pick Surplus (Beat the Pick):</strong> Snake-only surplus comparing player VoB vs a smoothed, leave-one-season-out expected VoB curve for that overall draft slot.</li>
         </ul>
       </section>
 
@@ -224,10 +225,11 @@
                 <th class="sortable" data-sort-key="manager">Manager</th>
                 <th class="sortable" data-sort-key="psmePoints">PSME-Points</th>
                 <th class="sortable" data-sort-key="totalVoB">Total VoB</th>
-                <th class="sortable" data-sort-key="totalStartsVoB">Starts-VoB</th>
                 <th class="sortable" data-sort-key="totalSurplusDollars">Surplus$</th>
+                <th class="sortable" data-sort-key="roiRate">ROI</th>
                 <th class="sortable" data-sort-key="totalPickSurplus">Pick Surplus</th>
-                <th class="sortable" data-sort-key="starterTierRate">Starter-Tier Yield</th>
+                <th class="sortable" data-sort-key="starterTierRate">Starter Yield</th>
+                <th class="sortable" data-sort-key="eliteTierRate">Elite Yield</th>
                 <th class="sortable" data-sort-key="eligiblePicks">Eligible Picks</th>
               </tr>
             </thead>
@@ -249,10 +251,11 @@
                 <th class="sortable" data-sort-key="year">Year</th>
                 <th class="sortable" data-sort-key="psmePoints">PSME-Points</th>
                 <th class="sortable" data-sort-key="totalVoB">Total VoB</th>
-                <th class="sortable" data-sort-key="totalStartsVoB">Starts-VoB</th>
                 <th class="sortable" data-sort-key="totalSurplusDollars">Surplus$</th>
+                <th class="sortable" data-sort-key="roiRate">ROI</th>
                 <th class="sortable" data-sort-key="totalPickSurplus">Pick Surplus</th>
-                <th class="sortable" data-sort-key="starterTierRate">Starter-Tier Yield</th>
+                <th class="sortable" data-sort-key="starterTierRate">Starter Yield</th>
+                <th class="sortable" data-sort-key="eliteTierRate">Elite Yield</th>
                 <th class="sortable" data-sort-key="eligiblePicks">Eligible Picks</th>
               </tr>
             </thead>
@@ -276,7 +279,7 @@
                 <th class="sortable" data-sort-key="nflTeam">NFL</th>
                 <th class="sortable" data-sort-key="psme">PSME</th>
                 <th class="sortable" data-sort-key="voB">VoB</th>
-                <th class="sortable" data-sort-key="startsVoB">Starts-VoB</th>
+                <th class="sortable" data-sort-key="roi">ROI</th>
                 <th class="sortable" data-sort-key="acquisitionCost">Acquisition</th>
                 <th class="sortable" data-sort-key="finalPositionRank">Final Pos Rank</th>
               </tr>
@@ -378,7 +381,15 @@
       if (!sort) return rows;
       const direction = sort.dir === 'asc' ? 1 : -1;
       return [...rows].sort((a, b) => {
-        const base = compareValues(a[sort.key], b[sort.key]);
+        const aValue = a[sort.key];
+        const bValue = b[sort.key];
+        const aMissing = aValue == null;
+        const bMissing = bValue == null;
+
+        if (aMissing && !bMissing) return 1;
+        if (!aMissing && bMissing) return -1;
+
+        const base = compareValues(aValue, bValue);
         if (base !== 0) return base * direction;
         return compareValues(a.manager || a.name || a.position || a.year, b.manager || b.name || b.position || b.year);
       });
@@ -578,6 +589,12 @@
       return Number.isFinite(cutoffs[position]) ? cutoffs[position] : null;
     }
 
+    function getEliteCutoff(year, position) {
+      const yearMeta = state.yearMeta[String(year)] || {};
+      const cutoffs = yearMeta.eliteCutoffs || {};
+      return Number.isFinite(cutoffs[position]) ? cutoffs[position] : null;
+    }
+
     function getBaselinePoints(year, position, pointsTable) {
       const cutoff = getStarterCutoff(year, position);
       if (!Number.isFinite(cutoff) || cutoff <= 0) return 0;
@@ -598,6 +615,27 @@
       return target.seasonPoints / games;
     }
 
+    function smoothCurveValue(curveMap, pick, radius = 2) {
+      const weighted = [];
+      for (let offset = -radius; offset <= radius; offset += 1) {
+        const value = curveMap.get(pick + offset);
+        if (value == null) continue;
+        const weight = radius + 1 - Math.abs(offset);
+        weighted.push({ value, weight });
+      }
+      if (weighted.length) {
+        const totalWeight = weighted.reduce((sum, item) => sum + item.weight, 0);
+        return weighted.reduce((sum, item) => sum + (item.value * item.weight), 0) / totalWeight;
+      }
+      const bucketSize = 12;
+      const bucketStart = Math.floor((pick - 1) / bucketSize) * bucketSize + 1;
+      const bucketValues = [];
+      for (let i = bucketStart; i < bucketStart + bucketSize; i += 1) {
+        if (curveMap.get(i) != null) bucketValues.push(curveMap.get(i));
+      }
+      return bucketValues.length ? average(bucketValues) : null;
+    }
+
     function buildManagerAnalyticsRows(filtered) {
       const eligibleRows = filtered.filter((row) => ['QB', 'RB', 'WR', 'TE'].includes(row.position) && Number.isFinite(row.seasonPoints));
       if (!eligibleRows.length) {
@@ -607,69 +645,108 @@
       const outcomeMeta = buildYearPositionOutcomeMeta(eligibleRows);
       const pointsTable = buildYearPositionPointsTable(eligibleRows);
 
-      const expectedVoBByPick = new Map();
-      const snakeRows = eligibleRows.filter((row) => row.auctionPrice == null && Number.isFinite(row.overall));
-      snakeRows.forEach((row) => {
-        const baseline = getBaselinePoints(row.year, row.position, pointsTable);
-        const voB = row.seasonPoints - baseline;
-        if (!expectedVoBByPick.has(row.overall)) expectedVoBByPick.set(row.overall, []);
-        expectedVoBByPick.get(row.overall).push(voB);
-      });
-      const expectedCurve = new Map([...expectedVoBByPick.entries()].map(([pick, values]) => [pick, average(values)]));
-
-      const yearAuctionContext = new Map();
-      [...new Set(eligibleRows.map((row) => row.year))].forEach((year) => {
-        const yearRows = eligibleRows.filter((r) => r.year === year && r.auctionPrice != null);
-        const totalAuctionDollars = getSeasonSetting(year, 'auctionDollarsTotal', null)
-          ?? yearRows.reduce((sum, r) => sum + (toNumber(r.auctionPrice) ?? 0), 0);
-        const totalAboveBaseline = yearRows
-          .map((r) => Math.max(0, r.seasonPoints - getBaselinePoints(r.year, r.position, pointsTable)))
-          .reduce((sum, value) => sum + value, 0);
-        yearAuctionContext.set(year, {
-          dollarsPerPoint: totalAboveBaseline > 0 ? totalAuctionDollars / totalAboveBaseline : 0
-        });
-      });
-
-      const pickRows = eligibleRows.map((row) => {
+      const tempRows = eligibleRows.map((row) => {
         const outcome = outcomeMeta.get(row);
+        const baselinePoints = getBaselinePoints(row.year, row.position, pointsTable);
+        return {
+          row,
+          outcome,
+          voB: row.seasonPoints - baselinePoints,
+          outcomePercentile: outcome?.percentile ?? null
+        };
+      });
+
+      const snakeRows = tempRows.filter((entry) => entry.row.auctionPrice == null && Number.isFinite(entry.row.overall));
+      const snakeCurveByYear = new Map();
+      const leagueSnakeCurve = new Map();
+      const snakeKeys = ['voB', 'outcomePercentile'];
+
+      const buildCurve = (rows, key) => {
+        const grouped = new Map();
+        rows.forEach((entry) => {
+          if (!grouped.has(entry.row.overall)) grouped.set(entry.row.overall, []);
+          const value = entry[key];
+          if (value != null) grouped.get(entry.row.overall).push(value);
+        });
+        return new Map([...grouped.entries()].map(([pick, values]) => [pick, average(values)]));
+      };
+
+      const allYears = [...new Set(eligibleRows.map((row) => row.year))];
+      allYears.forEach((year) => {
+        const trainRows = snakeRows.filter((entry) => entry.row.year !== year);
+        snakeCurveByYear.set(year, Object.fromEntries(snakeKeys.map((key) => [key, buildCurve(trainRows, key)])));
+      });
+      snakeKeys.forEach((key) => {
+        leagueSnakeCurve.set(key, buildCurve(snakeRows, key));
+      });
+
+      const pricedRows = tempRows.filter((entry) => entry.row.auctionPrice != null && entry.voB != null);
+      const leagueVoBToDollar = (() => {
+        const positives = pricedRows.filter((entry) => entry.voB > 0 && toNumber(entry.row.auctionPrice) != null);
+        const totalVoB = positives.reduce((sum, entry) => sum + entry.voB, 0);
+        const totalSpend = positives.reduce((sum, entry) => sum + (toNumber(entry.row.auctionPrice) ?? 0), 0);
+        return totalVoB > 0 ? totalSpend / totalVoB : 0;
+      })();
+
+      const yearVoBToDollar = new Map();
+      allYears.forEach((year) => {
+        const yearPriced = pricedRows.filter((entry) => entry.row.year === year && entry.voB > 0);
+        const totalVoB = yearPriced.reduce((sum, entry) => sum + entry.voB, 0);
+        const totalSpend = yearPriced.reduce((sum, entry) => sum + (toNumber(entry.row.auctionPrice) ?? 0), 0);
+        const enoughSeasonData = yearPriced.length >= 24;
+        yearVoBToDollar.set(year, enoughSeasonData && totalVoB > 0 ? totalSpend / totalVoB : leagueVoBToDollar);
+      });
+
+      const pickRows = tempRows.map(({ row, outcome, voB, outcomePercentile }) => {
         const expectedRank = row.auctionPrice != null ? row.posPriceOrder : row.posDraftOrder;
         const expectedPool = row.auctionPrice != null ? row.posPriceCount : row.posDraftCount;
-        const expectedPercentile = percentileFromRank(expectedRank, expectedPool);
-        const psme = outcome?.percentile != null && expectedPercentile != null ? outcome.percentile - expectedPercentile : null;
+
+        const leaveOutCurves = snakeCurveByYear.get(row.year) || {};
+        const expectedOutcomePercentile = row.auctionPrice == null && Number.isFinite(row.overall)
+          ? smoothCurveValue(leaveOutCurves.outcomePercentile || new Map(), row.overall) ?? smoothCurveValue(leagueSnakeCurve.get('outcomePercentile') || new Map(), row.overall)
+          : null;
+        const expectedPercentile = expectedOutcomePercentile ?? percentileFromRank(expectedRank, expectedPool);
+
+        const psme = outcomePercentile != null && expectedPercentile != null ? outcomePercentile - expectedPercentile : null;
         const psmeWeight = row.auctionPrice != null
           ? Math.max(1, row.auctionPrice)
           : Math.max(1, ((row.posDraftCount || 1) - (row.posDraftOrder || 1) + 1));
 
-        const baselinePoints = getBaselinePoints(row.year, row.position, pointsTable);
-        const voB = row.seasonPoints - baselinePoints;
-
-        const gamesStarted = Math.max(1, toNumber(row.gamesStarted) ?? toNumber(row.games) ?? 1);
-        const playerPpg = row.seasonPoints / gamesStarted;
-        const baselinePpg = getBaselinePpg(row.year, row.position, pointsTable);
-        const startsVoB = (playerPpg - baselinePpg) * gamesStarted;
-
-        const auctionContext = yearAuctionContext.get(row.year) || { dollarsPerPoint: 0 };
-        const surplusDollars = row.auctionPrice != null
-          ? (Math.max(0, voB) * auctionContext.dollarsPerPoint) - (toNumber(row.auctionPrice) ?? 0)
+        const impliedAuctionValue = row.auctionPrice != null
+          ? Math.max(0, voB) * (yearVoBToDollar.get(row.year) || 0)
           : null;
 
+        const surplusDollars = row.auctionPrice != null
+          ? impliedAuctionValue - (toNumber(row.auctionPrice) ?? 0)
+          : null;
+
+        const expectedVoB = row.auctionPrice == null && Number.isFinite(row.overall)
+          ? smoothCurveValue(leaveOutCurves.voB || new Map(), row.overall) ?? smoothCurveValue(leagueSnakeCurve.get('voB') || new Map(), row.overall) ?? 0
+          : null;
         const pickSurplus = row.auctionPrice == null && Number.isFinite(row.overall)
-          ? voB - (expectedCurve.get(row.overall) ?? 0)
+          ? voB - (expectedVoB ?? 0)
           : null;
 
         const starterCutoff = getStarterCutoff(row.year, row.position);
+        const eliteCutoff = getEliteCutoff(row.year, row.position);
         const starterTierHit = outcome?.rank != null && starterCutoff != null && outcome.rank <= starterCutoff;
+        const eliteTierHit = outcome?.rank != null && eliteCutoff != null && outcome.rank <= eliteCutoff;
+        const roi = row.auctionPrice != null && (toNumber(row.auctionPrice) ?? 0) > 0
+          ? (impliedAuctionValue / (toNumber(row.auctionPrice) ?? 1)) - 1
+          : null;
 
         return {
           ...row,
           psme,
           psmeWeight,
           voB,
-          startsVoB,
+          roi,
+          impliedAuctionValue,
           finalPositionRank: outcome?.rank ?? null,
           surplusDollars,
           pickSurplus,
           starterTierHit,
+          eliteTierHit,
           acquisitionCost: row.auctionPrice == null
             ? `Round ${row.round ?? '—'}${row.overall != null ? ` (Pick ${row.overall})` : ''}`
             : `$${row.auctionPrice}`
@@ -680,12 +757,14 @@
         let psmeWeightedTotal = 0;
         let psmeWeightTotal = 0;
         let totalVoB = 0;
-        let totalStartsVoB = 0;
         let totalSurplusDollars = 0;
         let totalPickSurplus = 0;
+        let totalImpliedValue = 0;
+        let totalAuctionSpend = 0;
         let hasSurplusDollars = false;
         let hasPickSurplus = false;
         let starterTierHits = 0;
+        let eliteTierHits = 0;
 
         rows.forEach((row) => {
           if (row.psme != null) {
@@ -693,7 +772,6 @@
             psmeWeightTotal += row.psmeWeight;
           }
           totalVoB += row.voB;
-          totalStartsVoB += row.startsVoB;
           if (row.surplusDollars != null) {
             totalSurplusDollars += row.surplusDollars;
             hasSurplusDollars = true;
@@ -702,17 +780,24 @@
             totalPickSurplus += row.pickSurplus;
             hasPickSurplus = true;
           }
+          if (row.impliedAuctionValue != null && row.auctionPrice != null) {
+            totalImpliedValue += row.impliedAuctionValue;
+            totalAuctionSpend += toNumber(row.auctionPrice) ?? 0;
+          }
           if (row.starterTierHit) starterTierHits += 1;
+          if (row.eliteTierHit) eliteTierHits += 1;
         });
 
         return {
           psmePoints: psmeWeightTotal ? psmeWeightedTotal / psmeWeightTotal : null,
           totalVoB,
-          totalStartsVoB,
           totalSurplusDollars: hasSurplusDollars ? totalSurplusDollars : null,
+          roiRate: totalAuctionSpend > 0 ? (totalImpliedValue / totalAuctionSpend) - 1 : null,
           totalPickSurplus: hasPickSurplus ? totalPickSurplus : null,
           starterTierHits,
+          eliteTierHits,
           starterTierRate: rows.length ? starterTierHits / rows.length : null,
+          eliteTierRate: rows.length ? eliteTierHits / rows.length : null,
           eligiblePicks: rows.length
         };
       };
@@ -751,7 +836,7 @@
       const { leaderboard } = buildManagerAnalyticsRows(filtered);
 
       if (!leaderboard.length) {
-        tbody.innerHTML = '<tr><td colspan="9">No manager data for this filter.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10">No manager data for this filter.</td></tr>';
         renderPagination('managerLeaderboard', { totalRows: 0 });
         return;
       }
@@ -765,10 +850,11 @@
           <td>${item.manager}</td>
           <td>${formatDelta(item.psmePoints)}</td>
           <td>${formatDelta(item.totalVoB)}</td>
-          <td>${formatDelta(item.totalStartsVoB)}</td>
           <td>${formatDelta(item.totalSurplusDollars)}</td>
+          <td>${formatPct(item.roiRate)}</td>
           <td>${formatDelta(item.totalPickSurplus)}</td>
           <td>${item.starterTierHits}/${item.eligiblePicks} (${formatPct(item.starterTierRate)})</td>
+          <td>${item.eliteTierHits}/${item.eligiblePicks} (${formatPct(item.eliteTierRate)})</td>
           <td>${item.eligiblePicks}</td>
         </tr>
       `).join('');
@@ -781,7 +867,7 @@
       rows = sortRows(rows, 'managerSeasons');
 
       if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="10">No manager season data for this filter.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11">No manager season data for this filter.</td></tr>';
         renderPagination('managerSeasons', { totalRows: 0 });
         return;
       }
@@ -799,10 +885,11 @@
           <td>${item.year}</td>
           <td>${formatDelta(item.psmePoints)}</td>
           <td>${formatDelta(item.totalVoB)}</td>
-          <td>${formatDelta(item.totalStartsVoB)}</td>
           <td>${formatDelta(item.totalSurplusDollars)}</td>
+          <td>${formatPct(item.roiRate)}</td>
           <td>${formatDelta(item.totalPickSurplus)}</td>
           <td>${item.starterTierHits}/${item.eligiblePicks} (${formatPct(item.starterTierRate)})</td>
+          <td>${item.eliteTierHits}/${item.eligiblePicks} (${formatPct(item.eliteTierRate)})</td>
           <td>${item.eligiblePicks}</td>
         </tr>
       `).join('');
@@ -830,7 +917,7 @@
           <td>${String(row.nflTeam || row.nfl || "—").toUpperCase()}</td>
           <td>${formatDelta(row.psme)}</td>
           <td>${formatDelta(row.voB)}</td>
-          <td>${formatDelta(row.startsVoB)}</td>
+          <td>${formatPct(row.roi)}</td>
           <td>${row.acquisitionCost}</td>
           <td>${row.finalPositionRank ?? "—"}</td>
         </tr>
@@ -855,10 +942,11 @@
         manager: 'Draft manager/owner for the selected slice.',
         psmePoints: 'Percentile Surplus vs Market Expectation (points-based outcome). Equation: outcome percentile − expected percentile, weighted by pick capital.',
         totalVoB: 'Total Value over Baseline points across drafted players. Equation: player season points − replacement baseline points at that position/year.',
-        totalStartsVoB: 'Availability-aware value over baseline using actual NFL starts/played. Equation: (player points-per-NFL-start − baseline points-per-NFL-start) × NFL games started.',
-        totalSurplusDollars: 'Auction Surplus Dollars from points. Converts positive VoB points into implied dollars and subtracts auction cost.',
-        totalPickSurplus: 'Snake Pick Surplus vs slot curve. Equation: player VoB − expected VoB at that overall pick.',
-        starterTierRate: 'Starter-Tier Yield: share of eligible non-kicker drafted players who finished within starter cutoffs by position (including flex allocation).',
+        totalSurplusDollars: 'Auction Surplus Dollars. Converts positive VoB to implied auction value and subtracts paid cost.',
+        roiRate: 'Auction ROI. Equation: total implied auction value ÷ total auction spend − 1. Only shown when priced picks exist.',
+        totalPickSurplus: 'Beat-the-Pick surplus for snake drafts. Uses smoothed leave-one-season-out expected VoB by overall pick.',
+        starterTierRate: 'Starter Yield (Starter Hits): share of eligible picks that finished inside that season\'s rules-aware starter tier.',
+        eliteTierRate: 'Elite Yield (Star Hits): share of eligible picks finishing in an elite cutoff that scales with team count.',
         eligiblePicks: 'Count of eligible non-K/DST picks with season points in the current filter.'
       },
       managerSeasons: {
@@ -867,10 +955,11 @@
         year: 'Draft season for this manager row.',
         psmePoints: 'Season-level PSME-Points for that manager and year.',
         totalVoB: 'Season-level total Value over Baseline points.',
-        totalStartsVoB: 'Season-level starts-aware Value over Baseline.',
-        totalSurplusDollars: 'Season-level auction surplus dollars from points.',
-        totalPickSurplus: 'Season-level snake pick surplus versus slot expectation.',
-        starterTierRate: 'Season-level starter-tier hit rate for eligible non-kicker picks.',
+        totalSurplusDollars: 'Season-level auction surplus dollars from implied value minus spend.',
+        roiRate: 'Season-level auction ROI where prices exist.',
+        totalPickSurplus: 'Season-level snake pick surplus versus smoothed expected slot outcomes.',
+        starterTierRate: 'Season-level starter-yield hit rate for eligible picks.',
+        eliteTierRate: 'Season-level elite-yield hit rate for eligible picks.',
         eligiblePicks: 'Eligible picks drafted by this manager in this season.'
       },
       managerPicks: {
@@ -881,7 +970,7 @@
         nflTeam: 'NFL team for the drafted player in that season.',
         psme: 'Pick-level percentile surplus vs market expectation. Primary value indicator for this table.',
         voB: 'Pick-level Value over Baseline points.',
-        startsVoB: 'Pick-level starts-aware VoB using actual NFL games started/played.',
+        roi: 'Pick-level auction ROI: implied auction value ÷ paid price − 1. Displays — for non-auction picks.',
         finalPositionRank: 'Final position rank among drafted players only for that year and position, based on season points outcome.',
         acquisitionCost: 'Snake round/pick or auction dollars paid for this pick.'
       }
@@ -1006,21 +1095,31 @@
       return fallback;
     }
 
+    function getEspnScoringValue(scoringConfig, code) {
+      for (const section of Object.values(scoringConfig || {})) {
+        const points = toNumber(section?.[code]?.points);
+        if (points != null) return points;
+      }
+      return null;
+    }
+
     function buildScoringRules(leagueConfig) {
       const scoped = leagueConfig?.scoring || leagueConfig?.league?.scoring || leagueConfig?.settings?.scoring || leagueConfig || {};
 
       return {
-        passYds: resolveYardMultiplier(scoped, [['passYdPointValue'], ['passingYdPointValue'], ['pass_yd_point_value']], [['passYardsPerPoint'], ['passingYardsPerPoint'], ['pass_yds_per_point']], 1 / 25),
-        passTd: firstConfigValue(scoped, [['passTd'], ['passingTd'], ['pass_td']], 4),
-        passInt: firstConfigValue(scoped, [['passInt'], ['interception'], ['pass_int']], -2),
-        rushYds: resolveYardMultiplier(scoped, [['rushYdPointValue'], ['rushingYdPointValue'], ['rush_yd_point_value']], [['rushYardsPerPoint'], ['rushingYardsPerPoint'], ['rush_yds_per_point']], 1 / 10),
-        rushTd: firstConfigValue(scoped, [['rushTd'], ['rushingTd'], ['rush_td']], 6),
-        receptions: firstConfigValue(scoped, [['reception'], ['receptions'], ['ppr']], 1),
-        recYds: resolveYardMultiplier(scoped, [['recYdPointValue'], ['receivingYdPointValue'], ['rec_yd_point_value']], [['recYardsPerPoint'], ['receivingYardsPerPoint'], ['rec_yds_per_point']], 1 / 10),
-        recTd: firstConfigValue(scoped, [['recTd'], ['receivingTd'], ['rec_td']], 6),
-        fumblesLost: firstConfigValue(scoped, [['fumbleLost'], ['fumblesLost'], ['fumbles_lost']], -2),
-        twoPtMade: firstConfigValue(scoped, [['twoPtMade'], ['twoPointConversion'], ['two_point_conversion']], 2),
-        twoPtPass: firstConfigValue(scoped, [['twoPtPass'], ['twoPointPass'], ['two_point_pass']], 2),
+        passYds: getEspnScoringValue(scoped, 'PY') ?? resolveYardMultiplier(scoped, [['passYdPointValue'], ['passingYdPointValue'], ['pass_yd_point_value']], [['passYardsPerPoint'], ['passingYardsPerPoint'], ['pass_yds_per_point']], 1 / 25),
+        passCmp: getEspnScoringValue(scoped, 'PC') ?? firstConfigValue(scoped, [['passCmp'], ['passingCmp'], ['pass_cmp']], 0),
+        passInc: getEspnScoringValue(scoped, 'INC') ?? firstConfigValue(scoped, [['passInc'], ['passingInc'], ['pass_inc']], 0),
+        passTd: getEspnScoringValue(scoped, 'PTD') ?? firstConfigValue(scoped, [['passTd'], ['passingTd'], ['pass_td']], 4),
+        passInt: getEspnScoringValue(scoped, 'INT') ?? firstConfigValue(scoped, [['passInt'], ['interception'], ['pass_int']], -2),
+        rushYds: getEspnScoringValue(scoped, 'RY') ?? resolveYardMultiplier(scoped, [['rushYdPointValue'], ['rushingYdPointValue'], ['rush_yd_point_value']], [['rushYardsPerPoint'], ['rushingYardsPerPoint'], ['rush_yds_per_point']], 1 / 10),
+        rushTd: getEspnScoringValue(scoped, 'RTD') ?? firstConfigValue(scoped, [['rushTd'], ['rushingTd'], ['rush_td']], 6),
+        receptions: getEspnScoringValue(scoped, 'REC') ?? firstConfigValue(scoped, [['reception'], ['receptions'], ['ppr']], 1),
+        recYds: getEspnScoringValue(scoped, 'REY') ?? resolveYardMultiplier(scoped, [['recYdPointValue'], ['receivingYdPointValue'], ['rec_yd_point_value']], [['recYardsPerPoint'], ['receivingYardsPerPoint'], ['rec_yds_per_point']], 1 / 10),
+        recTd: getEspnScoringValue(scoped, 'RETD') ?? firstConfigValue(scoped, [['recTd'], ['receivingTd'], ['rec_td']], 6),
+        fumblesLost: getEspnScoringValue(scoped, 'FUML') ?? firstConfigValue(scoped, [['fumbleLost'], ['fumblesLost'], ['fumbles_lost']], -2),
+        twoPtMade: getEspnScoringValue(scoped, '2PC') ?? firstConfigValue(scoped, [['twoPtMade'], ['twoPointConversion'], ['two_point_conversion']], 2),
+        twoPtPass: getEspnScoringValue(scoped, '2PP') ?? firstConfigValue(scoped, [['twoPtPass'], ['twoPointPass'], ['two_point_pass']], 2),
         nonPassTD: firstConfigValue(scoped, [['nonPassTD'], ['nonPassingTd'], ['non_pass_td']], 6)
       };
     }
@@ -1039,6 +1138,39 @@
       return fallback;
     }
 
+    function parseSlotEligiblePositions(label) {
+      const text = String(label || '').toUpperCase();
+      const eligible = new Set();
+      if (text.includes('QB')) eligible.add('QB');
+      if (text.includes('RB') || text.includes('RUNNING BACK')) eligible.add('RB');
+      if (text.includes('WR') || text.includes('WIDE RECEIVER')) eligible.add('WR');
+      if (text.includes('TE') || text.includes('TIGHT END')) eligible.add('TE');
+      if (text.includes('FLEX') && !eligible.size) {
+        ['RB', 'WR', 'TE'].forEach((pos) => eligible.add(pos));
+      }
+      if (text.includes('OP') || text.includes('OFFENSIVE PLAYER')) {
+        ['QB', 'RB', 'WR', 'TE'].forEach((pos) => eligible.add(pos));
+      }
+      return [...eligible];
+    }
+
+    function distributeSharedSlots(totalSlots, positions, draftedCounts) {
+      if (!totalSlots || !positions.length) return {};
+      const counts = positions.map((position) => draftedCounts[position] || 0);
+      const totalCount = counts.reduce((sum, value) => sum + value, 0) || positions.length;
+      const raw = positions.map((position, idx) => ({
+        position,
+        raw: (counts[idx] / totalCount) * totalSlots
+      }));
+      const alloc = Object.fromEntries(raw.map((item) => [item.position, Math.floor(item.raw)]));
+      let remainder = totalSlots - Object.values(alloc).reduce((sum, value) => sum + value, 0);
+      raw.sort((a, b) => (b.raw - Math.floor(b.raw)) - (a.raw - Math.floor(a.raw)));
+      for (let i = 0; i < remainder; i += 1) {
+        alloc[raw[i % raw.length].position] += 1;
+      }
+      return alloc;
+    }
+
     function buildYearMeta(rows, leagueConfig) {
       const byYear = new Map();
       rows.forEach((row) => {
@@ -1049,52 +1181,61 @@
       const result = {};
       byYear.forEach((yearRows, year) => {
         const seasonConfig = resolveSeasonConfig(leagueConfig, year);
-        const lineup = seasonConfig?.lineup || seasonConfig?.roster || {};
-        const teams = intSetting(seasonConfig, ['teams', 'teamCount', 'leagueTeams'], new Set(yearRows.map((row) => row.manager)).size || 12);
-        const weeks = intSetting(seasonConfig, ['weeks', 'regularSeasonWeeks'], 14);
+        const lineup = seasonConfig?.lineup || {};
+        const rosterSlots = seasonConfig?.roster?.positions || [];
+        const teams = intSetting(seasonConfig, ['teams', 'teamCount', 'leagueTeams'], intSetting(seasonConfig?.basicSettings, ['Number of Teams'], new Set(yearRows.map((row) => row.manager)).size || 12));
+        const weeks = intSetting(seasonConfig, ['weeks', 'regularSeasonWeeks'], intSetting(seasonConfig?.regularSeasonSetup, ['Regular Season Matchups'], 14));
         const auctionBudgetPerTeam = intSetting(seasonConfig, ['auctionBudgetPerTeam', 'auctionBudget'], 200);
 
-        const starterSlots = {
-          QB: intSetting(lineup, ['QB', 'qb'], 1),
-          RB: intSetting(lineup, ['RB', 'rb'], 2),
-          WR: intSetting(lineup, ['WR', 'wr'], 2),
-          TE: intSetting(lineup, ['TE', 'te'], 1),
-          FLEX: intSetting(lineup, ['FLEX', 'flex'], 1)
+        const draftedCounts = {
+          QB: yearRows.filter((row) => row.position === 'QB').length,
+          RB: yearRows.filter((row) => row.position === 'RB').length,
+          WR: yearRows.filter((row) => row.position === 'WR').length,
+          TE: yearRows.filter((row) => row.position === 'TE').length
         };
 
-        const cutoffs = {
-          QB: teams * starterSlots.QB,
-          RB: teams * starterSlots.RB,
-          WR: teams * starterSlots.WR,
-          TE: teams * starterSlots.TE
-        };
+        const starterCutoffs = { QB: 0, RB: 0, WR: 0, TE: 0 };
+        const slotDefs = [];
 
-        const flexPoolTotal = teams * starterSlots.FLEX;
-        if (flexPoolTotal > 0) {
-          const flexPositions = ['RB', 'WR', 'TE'];
-          const counts = flexPositions.map((position) => yearRows.filter((row) => row.position === position).length);
-          const totalCount = counts.reduce((sum, n) => sum + n, 0) || 1;
-          const rawAlloc = counts.map((n) => (n / totalCount) * flexPoolTotal);
-          const floorAlloc = rawAlloc.map((n) => Math.floor(n));
-          let remainder = flexPoolTotal - floorAlloc.reduce((sum, n) => sum + n, 0);
-          const order = rawAlloc
-            .map((n, idx) => ({ idx, frac: n - Math.floor(n) }))
-            .sort((a, b) => b.frac - a.frac);
-          for (let i = 0; i < remainder; i += 1) {
-            floorAlloc[order[i % order.length].idx] += 1;
-          }
-          flexPositions.forEach((position, idx) => {
-            cutoffs[position] += floorAlloc[idx];
-          });
+        rosterSlots.forEach((slot) => {
+          const starters = intSetting(slot, ['starters'], 0);
+          if (!starters) return;
+          const eligible = parseSlotEligiblePositions(slot.position);
+          if (!eligible.length) return;
+          slotDefs.push({ eligible, starters: starters * teams });
+        });
+
+        if (!slotDefs.length) {
+          slotDefs.push(
+            { eligible: ['QB'], starters: intSetting(lineup, ['QB', 'qb'], 1) * teams },
+            { eligible: ['RB'], starters: intSetting(lineup, ['RB', 'rb'], 2) * teams },
+            { eligible: ['WR'], starters: intSetting(lineup, ['WR', 'wr'], 2) * teams },
+            { eligible: ['TE'], starters: intSetting(lineup, ['TE', 'te'], 1) * teams },
+            { eligible: ['RB', 'WR', 'TE'], starters: intSetting(lineup, ['FLEX', 'flex'], 1) * teams }
+          );
         }
+
+        slotDefs.forEach((slot) => {
+          if (slot.eligible.length === 1) {
+            starterCutoffs[slot.eligible[0]] += slot.starters;
+          } else {
+            const allocated = distributeSharedSlots(slot.starters, slot.eligible, draftedCounts);
+            Object.entries(allocated).forEach(([position, count]) => {
+              starterCutoffs[position] += count;
+            });
+          }
+        });
+
+        const eliteScale = teams <= 10 ? 0.4 : teams <= 12 ? 0.35 : 0.3;
+        const eliteCutoffs = Object.fromEntries(Object.entries(starterCutoffs).map(([position, cutoff]) => [position, cutoff > 0 ? Math.max(1, Math.round(cutoff * eliteScale)) : 0]));
 
         result[String(year)] = {
           teams,
           weeks,
           auctionBudgetPerTeam,
           auctionDollarsTotal: teams * auctionBudgetPerTeam,
-          starterSlots,
-          starterCutoffs: cutoffs
+          starterCutoffs,
+          eliteCutoffs
         };
       });
 
@@ -1104,6 +1245,8 @@
     function getFantasyPoints(row, scoringRules) {
       return (
         (toNumber(row.passYds) ?? 0) * scoringRules.passYds +
+        (toNumber(row.passCmp) ?? 0) * scoringRules.passCmp +
+        ((toNumber(row.passAtt) ?? 0) - (toNumber(row.passCmp) ?? 0)) * scoringRules.passInc +
         (toNumber(row.passTd) ?? 0) * scoringRules.passTd +
         (toNumber(row.passInt) ?? 0) * scoringRules.passInt +
         (toNumber(row.rushYds) ?? 0) * scoringRules.rushYds +
