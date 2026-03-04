@@ -79,6 +79,7 @@
     }
 
     .status { color: var(--text-soft); margin-bottom: 12px; font-size: 0.86rem; }
+    .helper-text { color: var(--text-soft); font-size: 0.72rem; margin-top: 5px; }
     .panel {
       background: radial-gradient(circle at top, rgba(15,23,42,0.9), rgba(2,6,23,0.95));
       border: 1px solid rgba(55,65,81,0.6);
@@ -112,6 +113,26 @@
     }
     tbody tr:hover { background: rgba(56,189,248,0.05); }
     .empty-row td { text-align: center; color: var(--text-soft); font-style: italic; padding: 18px 12px; }
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .pagination-info { color: var(--text-muted); font-size: 0.8rem; }
+    .pagination-actions { display: inline-flex; align-items: center; gap: 8px; }
+    .page-btn {
+      border: 1px solid rgba(56,189,248,0.35);
+      border-radius: 8px;
+      padding: 6px 10px;
+      background: rgba(15,23,42,0.9);
+      color: #f8fafc;
+      cursor: pointer;
+      font-size: 0.78rem;
+    }
+    .page-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
     .view-toggle { display: inline-flex; border: 1px solid rgba(56,189,248,0.3); border-radius: 999px; overflow: hidden; margin-bottom: 10px; }
     .view-btn { border: 0; background: rgba(15,23,42,0.9); color: var(--text-muted); padding: 7px 13px; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
@@ -152,28 +173,27 @@
     <div class="container">
       <div class="header">
         <h1>Draft History</h1>
-        <p>Filter by manager, years, and round / price</p>
+        <p>Filter by managers, years, round / price, and position</p>
       </div>
 
       <div class="controls">
         <div>
-          <label for="managerSelect">Manager</label>
-          <select id="managerSelect"></select>
+          <label for="managerSelect">Managers (Multi-Select)</label>
+          <select id="managerSelect" multiple></select>
+          <div class="helper-text">All Mangers appears at the top.</div>
         </div>
         <div>
           <label for="yearSelect">Draft Year (Multi-Select)</label>
           <select id="yearSelect" multiple></select>
+          <div class="helper-text">All Years appears at the top.</div>
         </div>
         <div>
-          <label for="managerViewSelect">Manager View</label>
-          <select id="managerViewSelect">
-            <option value="year">By Draft Year</option>
-            <option value="round">By Round / Price</option>
-          </select>
+          <label for="roundSelect">Round / Price Filter (Multi-Select)</label>
+          <select id="roundSelect" multiple></select>
         </div>
-        <div class="round-filter-control">
-          <label for="roundSelect">Round / Price Filter</label>
-          <select id="roundSelect"></select>
+        <div>
+          <label for="positionSelect">Position (Multi-Select)</label>
+          <select id="positionSelect" multiple></select>
         </div>
       </div>
 
@@ -197,6 +217,13 @@
             </thead>
             <tbody id="managerLogBody"></tbody>
           </table>
+        </div>
+        <div class="pagination">
+          <div id="managerPaginationInfo" class="pagination-info"></div>
+          <div class="pagination-actions">
+            <button id="managerPrevPageBtn" class="page-btn" type="button">Previous</button>
+            <button id="managerNextPageBtn" class="page-btn" type="button">Next</button>
+          </div>
         </div>
       </section>
 
@@ -234,8 +261,8 @@
   <script>
     const managerSelect = document.getElementById('managerSelect');
     const yearSelect = document.getElementById('yearSelect');
-    const managerViewSelect = document.getElementById('managerViewSelect');
     const roundSelect = document.getElementById('roundSelect');
+    const positionSelect = document.getElementById('positionSelect');
     const statusEl = document.getElementById('status');
     const managerLogBody = document.getElementById('managerLogBody');
     const yearBoardBody = document.getElementById('yearBoardBody');
@@ -246,13 +273,17 @@
     const vizViewBtn = document.getElementById('vizViewBtn');
     const yearTableWrap = document.getElementById('yearTableWrap');
     const yearVizWrap = document.getElementById('yearVizWrap');
-    const roundFilterControl = document.querySelector('.round-filter-control');
+    const managerPaginationInfo = document.getElementById('managerPaginationInfo');
+    const managerPrevPageBtn = document.getElementById('managerPrevPageBtn');
+    const managerNextPageBtn = document.getElementById('managerNextPageBtn');
+    const MANAGER_TABLE_PAGE_SIZE = 200;
     const sortState = {
       managerTable: { column: 'year', direction: 'desc' },
       yearTable: { column: 'year', direction: 'desc' }
     };
 
     let picks = [];
+    let managerPage = 1;
 
     document.addEventListener('DOMContentLoaded', loadDraftData);
 
@@ -282,29 +313,68 @@
       const managers = [...new Set(picks.map((pick) => pick.manager).filter(Boolean))].sort();
       const years = [...new Set(picks.map((pick) => Number(pick.year)).filter(Number.isFinite))].sort((a, b) => b - a);
       const rounds = [...new Set(picks.map((pick) => Number(pick.round)).filter((round) => Number.isFinite(round) && round > 0))].sort((a, b) => a - b);
+      const positions = [...new Set(picks.map((pick) => normalizeDisplayValue(pick.position).toUpperCase()).filter((position) => position !== '-'))].sort();
       const priceRanges = Array.from({ length: 9 }, (_, idx) => {
         const min = idx * 10;
         return { min, max: min + 9 };
       });
 
-      managerSelect.innerHTML = managers.map((m) => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
+      managerSelect.innerHTML = ['<option value="__all_managers">All Mangers</option>']
+        .concat(managers.map((m) => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`))
+        .join('');
+      setAllSelected(managerSelect);
 
-      yearSelect.innerHTML = years.map((year) => `<option value="${year}">${year}</option>`).join('');
-      Array.from(yearSelect.options).forEach((opt) => { opt.selected = true; });
+      yearSelect.innerHTML = ['<option value="__all_years">All Years</option>']
+        .concat(years.map((year) => `<option value="${year}">${year}</option>`))
+        .join('');
+      setAllSelected(yearSelect);
 
-      const roundOptions = ['<option value="">All Rounds / Prices</option>']
+      const orderedPositions = ['QB', 'RB', 'WR', 'TE', 'D/ST', 'K'];
+      const normalizedToCanonical = new Map([
+        ['QB', 'QB'], ['RB', 'RB'], ['WR', 'WR'], ['TE', 'TE'], ['D/ST', 'D/ST'], ['DST', 'D/ST'], ['DEF', 'D/ST'], ['K', 'K']
+      ]);
+      const canonicalPositions = new Set(positions.map((position) => normalizedToCanonical.get(position) || position));
+      const orderedPresent = orderedPositions.filter((position) => canonicalPositions.has(position));
+      const remainingPositions = [...canonicalPositions].filter((position) => !orderedPositions.includes(position)).sort();
+      const displayPositions = [...orderedPresent, ...remainingPositions];
+
+      positionSelect.innerHTML = ['<option value="__all_positions">All Positions</option>']
+        .concat(displayPositions.map((position) => `<option value="${escapeHtml(position)}">${escapeHtml(position)}</option>`))
+        .join('');
+      setAllSelected(positionSelect);
+
+      const roundOptions = ['<option value="__all_round_prices">All Rounds / Prices</option>']
         .concat(rounds.map((round) => `<option value="round:${round}">Round ${round}</option>`))
         .concat(priceRanges.map(({ min, max }) => `<option value="price:${min}-${max}">$${min}-$${max}</option>`));
-      roundSelect.dataset.options = roundOptions.join('');
-      roundSelect.innerHTML = '';
+      roundSelect.innerHTML = roundOptions.join('');
+      setAllSelected(roundSelect);
 
-      managerSelect.addEventListener('change', renderTables);
-      yearSelect.addEventListener('change', renderTables);
-      managerViewSelect.addEventListener('change', renderTables);
-      roundSelect.addEventListener('change', renderTables);
+      managerSelect.addEventListener('change', () => { managerPage = 1; renderTables(); });
+      yearSelect.addEventListener('change', () => { managerPage = 1; renderTables(); });
+      positionSelect.addEventListener('change', () => { managerPage = 1; renderTables(); });
+      roundSelect.addEventListener('change', () => { managerPage = 1; renderTables(); });
+      managerPrevPageBtn.addEventListener('click', () => updateManagerPage(managerPage - 1));
+      managerNextPageBtn.addEventListener('click', () => updateManagerPage(managerPage + 1));
       tableViewBtn.addEventListener('click', () => setYearView('table'));
       vizViewBtn.addEventListener('click', () => setYearView('viz'));
       initializeSorting();
+    }
+
+    function setAllSelected(selectEl) {
+      Array.from(selectEl.options).forEach((opt) => { opt.selected = true; });
+    }
+
+    function getSelectedValues(selectEl) {
+      return Array.from(selectEl.selectedOptions).map((opt) => opt.value).filter(Boolean);
+    }
+
+    function getNormalizedSelections(selectEl, allValue) {
+      const selectedValues = getSelectedValues(selectEl);
+      if (!selectedValues.length || selectedValues.includes(allValue)) {
+        setAllSelected(selectEl);
+        return getSelectedValues(selectEl).filter((value) => value !== allValue);
+      }
+      return selectedValues.filter((value) => value !== allValue);
     }
 
     function initializeSorting() {
@@ -328,6 +398,7 @@
             state.direction = 'asc';
           }
           applySortHeaderStyles();
+          managerPage = 1;
           renderTables();
         });
       });
@@ -351,56 +422,51 @@
     }
 
     function getSelectedYears() {
-      const vals = Array.from(yearSelect.selectedOptions).map((opt) => Number(opt.value)).filter(Number.isFinite);
+      const selected = getNormalizedSelections(yearSelect, '__all_years');
+      const vals = selected.map((value) => Number(value)).filter(Number.isFinite);
       return vals.length ? vals : [...new Set(picks.map((pick) => Number(pick.year)).filter(Number.isFinite))];
     }
 
     function renderTables() {
-      const selectedManager = managerSelect.value;
+      const selectedManagers = getNormalizedSelections(managerSelect, '__all_managers');
       const selectedYears = getSelectedYears();
-      const managerView = managerViewSelect.value;
-      const roundFilter = roundSelect.value;
+      const selectedPositions = getNormalizedSelections(positionSelect, '__all_positions');
+      const selectedRoundFilters = getNormalizedSelections(roundSelect, '__all_round_prices');
 
       const yearSet = new Set(selectedYears);
-      const baseRows = picks.filter((pick) => yearSet.has(Number(pick.year)));
+      const managerSet = new Set(selectedManagers.length ? selectedManagers : [...new Set(picks.map((pick) => pick.manager).filter(Boolean))]);
+      const positionSet = new Set(selectedPositions.length ? selectedPositions : [...new Set(picks.map((pick) => normalizePositionValue(pick.position)))]);
 
-      const isRoundView = managerView === 'round';
-      roundFilterControl.classList.toggle('hidden', !isRoundView);
-      roundSelect.disabled = !isRoundView;
-      if (isRoundView && !roundSelect.innerHTML) {
-        roundSelect.innerHTML = roundSelect.dataset.options || '';
-      }
-      if (!isRoundView) {
-        roundSelect.innerHTML = '';
-      }
+      const baseRows = picks.filter((pick) => {
+        const inYear = yearSet.has(Number(pick.year));
+        const inManager = managerSet.has(pick.manager);
+        const normalizedPosition = normalizePositionValue(pick.position);
+        const inPosition = positionSet.has(normalizedPosition);
+        return inYear && inManager && inPosition;
+      });
 
-      let managerRows = baseRows.filter((pick) => pick.manager === selectedManager);
-      if (managerView === 'round' && roundFilter) {
-        if (roundFilter.startsWith('round:')) {
-          const round = Number(roundFilter.split(':')[1]);
-          managerRows = managerRows.filter((pick) => Number(pick.round) === round);
-        } else if (roundFilter.startsWith('price:')) {
-          const [minPrice, maxPrice] = roundFilter
-            .split(':')[1]
-            .split('-')
-            .map((value) => Number(value));
-          managerRows = managerRows.filter((pick) => {
+      let managerRows = baseRows.slice();
+      if (selectedRoundFilters.length) {
+        managerRows = managerRows.filter((pick) => selectedRoundFilters.some((roundFilter) => {
+          if (roundFilter.startsWith('round:')) {
+            const round = Number(roundFilter.split(':')[1]);
+            return Number(pick.round) === round;
+          }
+          if (roundFilter.startsWith('price:')) {
+            const [minPrice, maxPrice] = roundFilter
+              .split(':')[1]
+              .split('-')
+              .map((value) => Number(value));
             const price = getNumericPrice(pick.price);
             return Number.isFinite(price) && price >= minPrice && price <= maxPrice;
-          });
-        }
+          }
+          return false;
+        }));
       }
 
       sortRows(managerRows, sortState.managerTable);
 
-      managerPanelTitle.textContent = `${selectedManager} Draft Log`;
-      if (managerView === 'round' && roundFilter) {
-        const roundLabel = roundFilter.startsWith('round:')
-          ? `Round ${roundFilter.split(':')[1]}`
-          : `$${roundFilter.split(':')[1].replace('-', '-$')}`;
-        managerPanelTitle.textContent += ` • ${roundLabel}`;
-      }
-
+      managerPanelTitle.textContent = 'Manager Draft Log';
       fillManagerTable(managerLogBody, managerRows, 'No draft picks found for current filters.');
 
       const showAllManagerBoard = false;
@@ -417,15 +483,20 @@
     }
 
     function fillManagerTable(tbody, rows, emptyMessage) {
-      if (!rows.length) {
+      const totalRows = rows.length;
+      const totalPages = Math.max(1, Math.ceil(totalRows / MANAGER_TABLE_PAGE_SIZE));
+      managerPage = Math.min(Math.max(managerPage, 1), totalPages);
+      const pageStart = (managerPage - 1) * MANAGER_TABLE_PAGE_SIZE;
+      const pagedRows = rows.slice(pageStart, pageStart + MANAGER_TABLE_PAGE_SIZE);
+
+      if (!totalRows) {
         tbody.innerHTML = '<tr class="empty-row"><td colspan="8">' + emptyMessage + '</td></tr>';
+        updateManagerPagination(0, 0, 0);
         applySortedColumnToBody();
         return;
       }
-      const bodyRows = [];
 
-      rows.forEach((row) => {
-        bodyRows.push(`<tr>
+      const bodyRows = pagedRows.map((row) => `<tr>
           <td>${escapeHtml(formatCellValue(row, 'year'))}</td>
           <td>${escapeHtml(formatCellValue(row, 'manager'))}</td>
           <td>${escapeHtml(formatCellValue(row, 'round'))}</td>
@@ -435,10 +506,29 @@
           <td>${escapeHtml(formatCellValue(row, 'position'))}</td>
           <td>${escapeHtml(formatCellValue(row, 'nflTeam'))}</td>
         </tr>`);
-      });
 
       tbody.innerHTML = bodyRows.join('');
+      updateManagerPagination(totalRows, totalPages, pageStart + 1);
       applySortedColumnToBody();
+    }
+
+    function updateManagerPagination(totalRows, totalPages, startRow) {
+      if (!totalRows) {
+        managerPaginationInfo.textContent = '0 results';
+        managerPrevPageBtn.disabled = true;
+        managerNextPageBtn.disabled = true;
+        return;
+      }
+      const endRow = Math.min(startRow + MANAGER_TABLE_PAGE_SIZE - 1, totalRows);
+      managerPaginationInfo.textContent = `Showing ${startRow}-${endRow} of ${totalRows} (Page ${managerPage} of ${totalPages})`;
+      managerPrevPageBtn.disabled = managerPage <= 1;
+      managerNextPageBtn.disabled = managerPage >= totalPages;
+    }
+
+    function updateManagerPage(nextPage) {
+      if (nextPage < 1) return;
+      managerPage = nextPage;
+      renderTables();
     }
 
     function fillTable(tbody, rows, columns, emptyMessage) {
@@ -586,6 +676,13 @@
       if (position.includes('K')) return 'pos-k';
       if (position.includes('DST') || position.includes('DEF')) return 'pos-dst';
       return '';
+    }
+
+
+    function normalizePositionValue(position) {
+      const normalized = normalizeDisplayValue(position).toUpperCase();
+      if (normalized === 'DST' || normalized === 'DEF') return 'D/ST';
+      return normalized;
     }
 
     function getNumericPrice(price) {
