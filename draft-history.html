@@ -99,13 +99,15 @@
       font-size: 0.69rem;
       position: sticky;
       top: 0;
+      cursor: pointer;
+      user-select: none;
     }
     th.sorted-column {
       background: rgba(56,189,248,0.17);
       color: #dbeafe;
       box-shadow: inset 0 -1px 0 rgba(56,189,248,0.35);
     }
-    tbody tr:not(.year-separator) td.sorted-column {
+    tbody tr td.sorted-column {
       background: rgba(56,189,248,0.06);
     }
     tbody tr:hover { background: rgba(56,189,248,0.05); }
@@ -115,17 +117,8 @@
     .view-btn { border: 0; background: rgba(15,23,42,0.9); color: var(--text-muted); padding: 7px 13px; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
     .view-btn.active { background: rgba(56,189,248,0.18); color: #f8fbff; }
     .hidden { display: none; }
-    .year-separator td {
-      background: rgba(56,189,248,0.1);
-      color: #dbeafe;
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      font-weight: 700;
-      border-top: 1px solid rgba(56,189,248,0.4);
-      border-bottom: 1px solid rgba(56,189,248,0.4);
-      padding: 8px 12px;
-    }
+    th .sort-indicator { margin-left: 6px; opacity: 0.45; font-size: 0.75em; }
+    th.sorted-column .sort-indicator { opacity: 1; color: #dbeafe; }
 
     .board-wrap { border: 1px solid rgba(55,65,81,0.5); border-radius: 8px; padding: 10px; overflow: auto; background: rgba(2,6,23,0.45); }
     .board-grid { display: grid; gap: 8px; min-width: 920px; }
@@ -192,14 +185,14 @@
           <table>
             <thead>
               <tr>
-                <th class="sorted-column">Year</th>
-                <th>Manager</th>
-                <th>Round</th>
-                <th>Overall</th>
-                <th>Price</th>
-                <th>Name</th>
-                <th>Position</th>
-                <th>NFL</th>
+                <th data-column="year">Year <span class="sort-indicator">▼</span></th>
+                <th data-column="manager">Manager <span class="sort-indicator">↕</span></th>
+                <th data-column="round">Round <span class="sort-indicator">↕</span></th>
+                <th data-column="overall">Overall <span class="sort-indicator">↕</span></th>
+                <th data-column="price">Price <span class="sort-indicator">↕</span></th>
+                <th data-column="name">Name <span class="sort-indicator">↕</span></th>
+                <th data-column="position">Position <span class="sort-indicator">↕</span></th>
+                <th data-column="nflTeam">NFL <span class="sort-indicator">↕</span></th>
               </tr>
             </thead>
             <tbody id="managerLogBody"></tbody>
@@ -218,14 +211,14 @@
           <table>
             <thead>
               <tr>
-                <th class="sorted-column">Year</th>
-                <th>Manager</th>
-                <th>Round</th>
-                <th>Overall</th>
-                <th>Price</th>
-                <th>Name</th>
-                <th>Position</th>
-                <th>NFL</th>
+                <th data-column="year">Year <span class="sort-indicator">▼</span></th>
+                <th data-column="manager">Manager <span class="sort-indicator">↕</span></th>
+                <th data-column="round">Round <span class="sort-indicator">↕</span></th>
+                <th data-column="overall">Overall <span class="sort-indicator">↕</span></th>
+                <th data-column="price">Price <span class="sort-indicator">↕</span></th>
+                <th data-column="name">Name <span class="sort-indicator">↕</span></th>
+                <th data-column="position">Position <span class="sort-indicator">↕</span></th>
+                <th data-column="nflTeam">NFL <span class="sort-indicator">↕</span></th>
               </tr>
             </thead>
             <tbody id="yearBoardBody"></tbody>
@@ -254,6 +247,10 @@
     const yearTableWrap = document.getElementById('yearTableWrap');
     const yearVizWrap = document.getElementById('yearVizWrap');
     const roundFilterControl = document.querySelector('.round-filter-control');
+    const sortState = {
+      managerTable: { column: 'year', direction: 'desc' },
+      yearTable: { column: 'year', direction: 'desc' }
+    };
 
     let picks = [];
 
@@ -307,6 +304,50 @@
       roundSelect.addEventListener('change', renderTables);
       tableViewBtn.addEventListener('click', () => setYearView('table'));
       vizViewBtn.addEventListener('click', () => setYearView('viz'));
+      initializeSorting();
+    }
+
+    function initializeSorting() {
+      const managerHeaders = managerLogBody.closest('table')?.querySelectorAll('th[data-column]') || [];
+      const yearHeaders = yearBoardBody.closest('table')?.querySelectorAll('th[data-column]') || [];
+
+      bindSortHeaders(managerHeaders, 'managerTable');
+      bindSortHeaders(yearHeaders, 'yearTable');
+      applySortHeaderStyles();
+    }
+
+    function bindSortHeaders(headers, tableKey) {
+      headers.forEach((header) => {
+        header.addEventListener('click', () => {
+          const column = header.dataset.column;
+          const state = sortState[tableKey];
+          if (state.column === column) {
+            state.direction = state.direction === 'asc' ? 'desc' : 'asc';
+          } else {
+            state.column = column;
+            state.direction = 'asc';
+          }
+          applySortHeaderStyles();
+          renderTables();
+        });
+      });
+    }
+
+    function applySortHeaderStyles() {
+      applyStylesForTable(managerLogBody.closest('table'), sortState.managerTable);
+      applyStylesForTable(yearBoardBody.closest('table'), sortState.yearTable);
+    }
+
+    function applyStylesForTable(table, state) {
+      if (!table) return;
+      table.querySelectorAll('th[data-column]').forEach((th) => {
+        const isSorted = th.dataset.column === state.column;
+        const indicator = th.querySelector('.sort-indicator');
+        th.classList.toggle('sorted-column', isSorted);
+        if (indicator) {
+          indicator.textContent = isSorted ? (state.direction === 'asc' ? '▲' : '▼') : '↕';
+        }
+      });
     }
 
     function getSelectedYears() {
@@ -350,7 +391,7 @@
         }
       }
 
-      managerRows.sort((a, b) => Number(b.year) - Number(a.year) || a.manager.localeCompare(b.manager) || Number(a.overall) - Number(b.overall));
+      sortRows(managerRows, sortState.managerTable);
 
       managerPanelTitle.textContent = `${selectedManager} Draft Log`;
       if (managerView === 'round' && roundFilter) {
@@ -360,13 +401,14 @@
         managerPanelTitle.textContent += ` • ${roundLabel}`;
       }
 
-      fillManagerTable(managerLogBody, managerRows, selectedYears, 'No draft picks found for current filters.');
+      fillManagerTable(managerLogBody, managerRows, 'No draft picks found for current filters.');
 
       const showAllManagerBoard = false;
       allManagersBoardSection.classList.toggle('hidden', !showAllManagerBoard);
       if (!showAllManagerBoard) return;
 
-      const boardRows = baseRows.slice().sort((a, b) => Number(b.year) - Number(a.year) || Number(a.round) - Number(b.round) || Number(a.overall) - Number(b.overall));
+      const boardRows = baseRows.slice();
+      sortRows(boardRows, sortState.yearTable);
       const yearLabel = selectedYears.length === 1 ? String(selectedYears[0]) : `${selectedYears.length} Years Selected`;
       yearPanelTitle.textContent = `${yearLabel} Comprehensive Draft Board`;
 
@@ -374,34 +416,29 @@
       renderManagerColumnBoard(boardRows, selectedYears);
     }
 
-    function fillManagerTable(tbody, rows, selectedYears, emptyMessage) {
+    function fillManagerTable(tbody, rows, emptyMessage) {
       if (!rows.length) {
         tbody.innerHTML = '<tr class="empty-row"><td colspan="8">' + emptyMessage + '</td></tr>';
+        applySortedColumnToBody();
         return;
       }
-
-      const showYearSeparators = selectedYears.length > 1;
-      let lastYear = null;
       const bodyRows = [];
 
       rows.forEach((row) => {
-        if (showYearSeparators && row.year !== lastYear) {
-          bodyRows.push(`<tr class="year-separator"><td colspan="8">${escapeHtml(String(row.year ?? '-'))} Draft</td></tr>`);
-          lastYear = row.year;
-        }
         bodyRows.push(`<tr>
-          <td class="sorted-column">${escapeHtml(String(row.year ?? '-'))}</td>
-          <td>${escapeHtml(String(row.manager ?? '-'))}</td>
-          <td>${escapeHtml(String(row.round ?? '-'))}</td>
-          <td>${escapeHtml(String(row.overall ?? '-'))}</td>
-          <td>${escapeHtml(String(row.price ?? '-'))}</td>
-          <td>${escapeHtml(String(row.name ?? '-'))}</td>
-          <td>${escapeHtml(String(row.position ?? '-'))}</td>
-          <td>${escapeHtml(String(row.nflTeam ?? '-'))}</td>
+          <td>${escapeHtml(formatCellValue(row, 'year'))}</td>
+          <td>${escapeHtml(formatCellValue(row, 'manager'))}</td>
+          <td>${escapeHtml(formatCellValue(row, 'round'))}</td>
+          <td>${escapeHtml(formatCellValue(row, 'overall'))}</td>
+          <td>${escapeHtml(formatCellValue(row, 'price'))}</td>
+          <td>${escapeHtml(formatCellValue(row, 'name'))}</td>
+          <td>${escapeHtml(formatCellValue(row, 'position'))}</td>
+          <td>${escapeHtml(formatCellValue(row, 'nflTeam'))}</td>
         </tr>`);
       });
 
       tbody.innerHTML = bodyRows.join('');
+      applySortedColumnToBody();
     }
 
     function fillTable(tbody, rows, columns, emptyMessage) {
@@ -410,9 +447,69 @@
         return;
       }
       tbody.innerHTML = rows.map((row) => {
-        const cells = columns.map((column, index) => `<td${index === 0 ? ' class="sorted-column"' : ''}>${escapeHtml(String(row[column] ?? '-'))}</td>`).join('');
+        const cells = columns.map((column) => `<td>${escapeHtml(formatCellValue(row, column))}</td>`).join('');
         return `<tr>${cells}</tr>`;
       }).join('');
+      applySortedColumnToBody();
+    }
+
+    function applySortedColumnToBody() {
+      markSortedCells(managerLogBody, sortState.managerTable.column);
+      markSortedCells(yearBoardBody, sortState.yearTable.column);
+    }
+
+    function markSortedCells(tbody, sortedColumn) {
+      if (!tbody) return;
+      const table = tbody.closest('table');
+      if (!table) return;
+      const columns = Array.from(table.querySelectorAll('th[data-column]')).map((th) => th.dataset.column);
+      const sortedIndex = columns.indexOf(sortedColumn);
+      Array.from(tbody.rows).forEach((row) => {
+        Array.from(row.cells).forEach((cell, index) => {
+          cell.classList.toggle('sorted-column', index === sortedIndex);
+        });
+      });
+    }
+
+    function sortRows(rows, state) {
+      const direction = state.direction === 'asc' ? 1 : -1;
+      rows.sort((a, b) => {
+        const left = getSortValue(a, state.column);
+        const right = getSortValue(b, state.column);
+        if (left < right) return -1 * direction;
+        if (left > right) return 1 * direction;
+        return (Number(a.overall) || 0) - (Number(b.overall) || 0);
+      });
+    }
+
+    function getSortValue(row, column) {
+      if (column === 'price') {
+        const price = getNumericPrice(row.price);
+        return Number.isFinite(price) ? price : Number.NEGATIVE_INFINITY;
+      }
+      if (column === 'year' || column === 'round' || column === 'overall') {
+        const value = Number(row[column]);
+        return Number.isFinite(value) ? value : Number.NEGATIVE_INFINITY;
+      }
+      return normalizeDisplayValue(row[column]).toLowerCase();
+    }
+
+    function formatCellValue(row, column) {
+      if (column === 'price') return formatPriceValue(row.price);
+      if (column === 'round') return normalizeDisplayValue(row.round);
+      return normalizeDisplayValue(row[column]);
+    }
+
+    function normalizeDisplayValue(value) {
+      if (value === null || value === undefined) return '-';
+      const normalized = String(value).trim();
+      return normalized ? normalized : '-';
+    }
+
+    function formatPriceValue(value) {
+      const normalized = normalizeDisplayValue(value);
+      if (normalized === '-') return '-';
+      return normalized.startsWith('$') ? normalized : `$${normalized}`;
     }
 
     function setYearView(mode) {
