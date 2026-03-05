@@ -182,12 +182,12 @@
         <p class="subtle">All sections below use these same manager-focused definitions.</p>
         <ul class="insight-list">
           <li><strong>PSME-Points:</strong> Percentile Surplus vs Market Expectation using season points outcome percentile minus expected draft percentile, weighted by draft capital.</li>
-          <li><strong>Total VoB:</strong> Value over Baseline points. Player season points minus the starter-cutoff baseline for that position and year.</li>
+          <li><strong>Avg VoB:</strong> Average Value over Baseline points per eligible pick. Equation: total VoB ÷ eligible picks.</li>
           <li><strong>Starter Yield (Starter Hits):</strong> Share of eligible picks that finished inside the starter cutoff by position for that year's lineup rules.</li>
           <li><strong>Elite Yield (Star Hits):</strong> Share of eligible picks that finished in the elite tier. <em>How to read:</em> higher means more true difference-makers. <em>Example:</em> 3 elite hits on 10 picks = 30%.</li>
-          <li><strong>ROI:</strong> Auction return on investment. <em>How to read:</em> positive is value gained vs dollars spent. <em>Example:</em> $220 implied value on $200 spend = +10% ROI.</li>
-          <li><strong>Surplus$:</strong> Auction-only surplus by converting positive VoB to implied auction dollars and subtracting paid auction cost.</li>
-          <li><strong>Pick Surplus (Beat the Pick):</strong> Snake-only surplus comparing player VoB vs a smoothed, leave-one-season-out expected VoB curve for that overall draft slot.</li>
+          <li><strong>ROI:</strong> Value per dollar spent (based on estimated value).</li>
+          <li><strong>Avg Surplus $:</strong> Average estimated value minus auction cost across priced auction picks.</li>
+          <li><strong>Avg Pick Surplus:</strong> Average snake pick surplus vs expected VoB for draft slot.</li>
         </ul>
       </section>
 
@@ -224,10 +224,10 @@
                 <th class="sortable" data-sort-key="rank">Rank</th>
                 <th class="sortable" data-sort-key="manager">Manager</th>
                 <th class="sortable" data-sort-key="psmePoints">PSME-Points</th>
-                <th class="sortable" data-sort-key="totalVoB">Total VoB</th>
-                <th class="sortable" data-sort-key="totalSurplusDollars">Surplus$</th>
+                <th class="sortable" data-sort-key="avgVoB">Avg VoB</th>
+                <th class="sortable" data-sort-key="avgSurplusDollars">Avg Surplus $</th>
                 <th class="sortable" data-sort-key="roiRate">ROI</th>
-                <th class="sortable" data-sort-key="totalPickSurplus">Pick Surplus</th>
+                <th class="sortable" data-sort-key="avgPickSurplus">Avg Pick Surplus</th>
                 <th class="sortable" data-sort-key="starterTierRate">Starter Yield</th>
                 <th class="sortable" data-sort-key="eliteTierRate">Elite Yield</th>
                 <th class="sortable" data-sort-key="eligiblePicks">Eligible Picks</th>
@@ -250,10 +250,10 @@
                 <th class="sortable" data-sort-key="manager">Manager</th>
                 <th class="sortable" data-sort-key="year">Year</th>
                 <th class="sortable" data-sort-key="psmePoints">PSME-Points</th>
-                <th class="sortable" data-sort-key="totalVoB">Total VoB</th>
-                <th class="sortable" data-sort-key="totalSurplusDollars">Surplus$</th>
+                <th class="sortable" data-sort-key="avgVoB">Avg VoB</th>
+                <th class="sortable" data-sort-key="avgSurplusDollars">Avg Surplus $</th>
                 <th class="sortable" data-sort-key="roiRate">ROI</th>
-                <th class="sortable" data-sort-key="totalPickSurplus">Pick Surplus</th>
+                <th class="sortable" data-sort-key="avgPickSurplus">Avg Pick Surplus</th>
                 <th class="sortable" data-sort-key="starterTierRate">Starter Yield</th>
                 <th class="sortable" data-sort-key="eliteTierRate">Elite Yield</th>
                 <th class="sortable" data-sort-key="eligiblePicks">Eligible Picks</th>
@@ -362,6 +362,10 @@
     }
     function formatPct(value) {
       return value == null ? '—' : `${(value * 100).toFixed(1)}%`;
+    }
+
+    function formatSignedPct(value) {
+      return value == null ? '—' : `${value >= 0 ? '+' : ''}${(value * 100).toFixed(1)}%`;
     }
 
     function formatDelta(value) {
@@ -680,21 +684,22 @@
         leagueSnakeCurve.set(key, buildCurve(snakeRows, key));
       });
 
-      const pricedRows = tempRows.filter((entry) => entry.row.auctionPrice != null && entry.voB != null);
+      const pricedRows = tempRows.filter((entry) => {
+        const price = toNumber(entry.row.auctionPrice);
+        return price != null && price > 0 && entry.voB != null;
+      });
       const leagueVoBToDollar = (() => {
-        const positives = pricedRows.filter((entry) => entry.voB > 0 && toNumber(entry.row.auctionPrice) != null);
-        const totalVoB = positives.reduce((sum, entry) => sum + entry.voB, 0);
-        const totalSpend = positives.reduce((sum, entry) => sum + (toNumber(entry.row.auctionPrice) ?? 0), 0);
+        const totalVoB = pricedRows.reduce((sum, entry) => sum + Math.max(0, entry.voB), 0);
+        const totalSpend = pricedRows.reduce((sum, entry) => sum + (toNumber(entry.row.auctionPrice) ?? 0), 0);
         return totalVoB > 0 ? totalSpend / totalVoB : 0;
       })();
 
       const yearVoBToDollar = new Map();
       allYears.forEach((year) => {
-        const yearPriced = pricedRows.filter((entry) => entry.row.year === year && entry.voB > 0);
-        const totalVoB = yearPriced.reduce((sum, entry) => sum + entry.voB, 0);
+        const yearPriced = pricedRows.filter((entry) => entry.row.year === year);
+        const totalVoB = yearPriced.reduce((sum, entry) => sum + Math.max(0, entry.voB), 0);
         const totalSpend = yearPriced.reduce((sum, entry) => sum + (toNumber(entry.row.auctionPrice) ?? 0), 0);
-        const enoughSeasonData = yearPriced.length >= 24;
-        yearVoBToDollar.set(year, enoughSeasonData && totalVoB > 0 ? totalSpend / totalVoB : leagueVoBToDollar);
+        yearVoBToDollar.set(year, totalVoB > 0 ? totalSpend / totalVoB : leagueVoBToDollar);
       });
 
       const pickRows = tempRows.map(({ row, outcome, voB, outcomePercentile }) => {
@@ -712,12 +717,14 @@
           ? Math.max(1, row.auctionPrice)
           : Math.max(1, ((row.posDraftCount || 1) - (row.posDraftOrder || 1) + 1));
 
-        const impliedAuctionValue = row.auctionPrice != null
+        const pickAuctionPrice = toNumber(row.auctionPrice);
+
+        const impliedAuctionValue = pickAuctionPrice != null && pickAuctionPrice > 0
           ? Math.max(0, voB) * (yearVoBToDollar.get(row.year) || 0)
           : null;
 
-        const surplusDollars = row.auctionPrice != null
-          ? impliedAuctionValue - (toNumber(row.auctionPrice) ?? 0)
+        const surplusDollars = pickAuctionPrice != null && pickAuctionPrice > 0
+          ? impliedAuctionValue - pickAuctionPrice
           : null;
 
         const expectedVoB = row.auctionPrice == null && Number.isFinite(row.overall)
@@ -731,8 +738,8 @@
         const eliteCutoff = getEliteCutoff(row.year, row.position);
         const starterTierHit = outcome?.rank != null && starterCutoff != null && outcome.rank <= starterCutoff;
         const eliteTierHit = outcome?.rank != null && eliteCutoff != null && outcome.rank <= eliteCutoff;
-        const roi = row.auctionPrice != null && (toNumber(row.auctionPrice) ?? 0) > 0
-          ? (impliedAuctionValue / (toNumber(row.auctionPrice) ?? 1)) - 1
+        const roi = pickAuctionPrice != null && pickAuctionPrice > 0
+          ? (impliedAuctionValue / pickAuctionPrice) - 1
           : null;
 
         return {
@@ -763,6 +770,8 @@
         let totalAuctionSpend = 0;
         let hasSurplusDollars = false;
         let hasPickSurplus = false;
+        let surplusPickCount = 0;
+        let pickSurplusCount = 0;
         let starterTierHits = 0;
         let eliteTierHits = 0;
 
@@ -775,25 +784,36 @@
           if (row.surplusDollars != null) {
             totalSurplusDollars += row.surplusDollars;
             hasSurplusDollars = true;
+            surplusPickCount += 1;
           }
           if (row.pickSurplus != null) {
             totalPickSurplus += row.pickSurplus;
             hasPickSurplus = true;
+            pickSurplusCount += 1;
           }
-          if (row.impliedAuctionValue != null && row.auctionPrice != null) {
+          const price = toNumber(row.auctionPrice);
+          if (row.impliedAuctionValue != null && price != null && price > 0) {
             totalImpliedValue += row.impliedAuctionValue;
-            totalAuctionSpend += toNumber(row.auctionPrice) ?? 0;
+            totalAuctionSpend += price;
           }
           if (row.starterTierHit) starterTierHits += 1;
           if (row.eliteTierHit) eliteTierHits += 1;
         });
 
+        const avgVoB = rows.length ? totalVoB / rows.length : null;
+        const avgSurplusDollars = hasSurplusDollars && surplusPickCount > 0
+          ? totalSurplusDollars / surplusPickCount
+          : null;
+        const avgPickSurplus = hasPickSurplus && pickSurplusCount > 0
+          ? totalPickSurplus / pickSurplusCount
+          : null;
+
         return {
           psmePoints: psmeWeightTotal ? psmeWeightedTotal / psmeWeightTotal : null,
-          totalVoB,
-          totalSurplusDollars: hasSurplusDollars ? totalSurplusDollars : null,
+          avgVoB,
+          avgSurplusDollars,
           roiRate: totalAuctionSpend > 0 ? (totalImpliedValue / totalAuctionSpend) - 1 : null,
-          totalPickSurplus: hasPickSurplus ? totalPickSurplus : null,
+          avgPickSurplus,
           starterTierHits,
           eliteTierHits,
           starterTierRate: rows.length ? starterTierHits / rows.length : null,
@@ -849,10 +869,10 @@
           <td>${item.rank}</td>
           <td>${item.manager}</td>
           <td>${formatDelta(item.psmePoints)}</td>
-          <td>${formatDelta(item.totalVoB)}</td>
-          <td>${formatDelta(item.totalSurplusDollars)}</td>
-          <td>${formatPct(item.roiRate)}</td>
-          <td>${formatDelta(item.totalPickSurplus)}</td>
+          <td>${formatDelta(item.avgVoB)}</td>
+          <td>${formatDelta(item.avgSurplusDollars)}</td>
+          <td>${formatSignedPct(item.roiRate)}</td>
+          <td>${formatDelta(item.avgPickSurplus)}</td>
           <td>${item.starterTierHits}/${item.eligiblePicks} (${formatPct(item.starterTierRate)})</td>
           <td>${item.eliteTierHits}/${item.eligiblePicks} (${formatPct(item.eliteTierRate)})</td>
           <td>${item.eligiblePicks}</td>
@@ -884,10 +904,10 @@
           <td>${item.manager}</td>
           <td>${item.year}</td>
           <td>${formatDelta(item.psmePoints)}</td>
-          <td>${formatDelta(item.totalVoB)}</td>
-          <td>${formatDelta(item.totalSurplusDollars)}</td>
-          <td>${formatPct(item.roiRate)}</td>
-          <td>${formatDelta(item.totalPickSurplus)}</td>
+          <td>${formatDelta(item.avgVoB)}</td>
+          <td>${formatDelta(item.avgSurplusDollars)}</td>
+          <td>${formatSignedPct(item.roiRate)}</td>
+          <td>${formatDelta(item.avgPickSurplus)}</td>
           <td>${item.starterTierHits}/${item.eligiblePicks} (${formatPct(item.starterTierRate)})</td>
           <td>${item.eliteTierHits}/${item.eligiblePicks} (${formatPct(item.eliteTierRate)})</td>
           <td>${item.eligiblePicks}</td>
@@ -917,7 +937,7 @@
           <td>${String(row.nflTeam || row.nfl || "—").toUpperCase()}</td>
           <td>${formatDelta(row.psme)}</td>
           <td>${formatDelta(row.voB)}</td>
-          <td>${formatPct(row.roi)}</td>
+          <td>${formatSignedPct(row.roi)}</td>
           <td>${row.acquisitionCost}</td>
           <td>${row.finalPositionRank ?? "—"}</td>
         </tr>
@@ -941,10 +961,10 @@
         rank: 'Sort rank after applying current table sort settings.',
         manager: 'Draft manager/owner for the selected slice.',
         psmePoints: 'Percentile Surplus vs Market Expectation (points-based outcome). Equation: outcome percentile − expected percentile, weighted by pick capital.',
-        totalVoB: 'Total Value over Baseline points across drafted players. Equation: player season points − replacement baseline points at that position/year.',
-        totalSurplusDollars: 'Auction Surplus Dollars. Converts positive VoB to implied auction value and subtracts paid cost.',
-        roiRate: 'Auction ROI. Equation: total implied auction value ÷ total auction spend − 1. Only shown when priced picks exist.',
-        totalPickSurplus: 'Beat-the-Pick surplus for snake drafts. Uses smoothed leave-one-season-out expected VoB by overall pick.',
+        avgVoB: 'Average Value over Baseline points per eligible pick. Equation: total VoB ÷ eligible picks.',
+        avgSurplusDollars: 'Average estimated value minus auction cost across priced auction picks.',
+        roiRate: 'Value per dollar spent (based on estimated value).',
+        avgPickSurplus: 'Average snake pick surplus versus expected VoB by draft slot.',
         starterTierRate: 'Starter Yield (Starter Hits): share of eligible picks that finished inside that season\'s rules-aware starter tier.',
         eliteTierRate: 'Elite Yield (Star Hits): share of eligible picks finishing in an elite cutoff that scales with team count.',
         eligiblePicks: 'Count of eligible non-K/DST picks with season points in the current filter.'
@@ -954,10 +974,10 @@
         manager: 'Manager for this season-level split.',
         year: 'Draft season for this manager row.',
         psmePoints: 'Season-level PSME-Points for that manager and year.',
-        totalVoB: 'Season-level total Value over Baseline points.',
-        totalSurplusDollars: 'Season-level auction surplus dollars from implied value minus spend.',
-        roiRate: 'Season-level auction ROI where prices exist.',
-        totalPickSurplus: 'Season-level snake pick surplus versus smoothed expected slot outcomes.',
+        avgVoB: 'Season-level average Value over Baseline points per eligible pick.',
+        avgSurplusDollars: 'Average estimated value minus auction cost across priced auction picks.',
+        roiRate: 'Value per dollar spent (based on estimated value).',
+        avgPickSurplus: 'Season-level average snake pick surplus versus expected slot outcomes.',
         starterTierRate: 'Season-level starter-yield hit rate for eligible picks.',
         eliteTierRate: 'Season-level elite-yield hit rate for eligible picks.',
         eligiblePicks: 'Eligible picks drafted by this manager in this season.'
