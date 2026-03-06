@@ -469,6 +469,11 @@
       return Math.round(value).toLocaleString('en-US');
     }
 
+    function formatYear(value) {
+      if (!Number.isFinite(value)) return '—';
+      return String(Math.round(value));
+    }
+
     function compareValues(a, b) {
       if (a == null && b == null) return 0;
       if (a == null) return 1;
@@ -507,8 +512,8 @@
 
       document.querySelectorAll('table[data-sort-table]').forEach((table) => {
         const sort = state.sorts[table.dataset.sortTable];
-        const headers = Array.from(table.querySelectorAll('thead th'));
-        const sortedIndex = headers.findIndex((header) => header.dataset.sortKey === sort?.key);
+        const sortedHeader = table.querySelector(`thead th.sortable[data-sort-key="${sort?.key || ''}"]`);
+        const sortedIndex = Number.isFinite(sortedHeader?.cellIndex) ? sortedHeader.cellIndex : -1;
         table.querySelectorAll('tbody tr').forEach((row) => {
           row.querySelectorAll('td').forEach((cell, index) => {
             cell.classList.toggle('sorted-col', sortedIndex >= 0 && index === sortedIndex);
@@ -738,16 +743,15 @@
     }
 
     function buildManagerAnalyticsRows(filtered) {
-      const eligibleRows = filtered.filter((row) => ['QB', 'RB', 'WR', 'TE'].includes(row.position) && Number.isFinite(row.seasonPoints));
-      if (!eligibleRows.length) {
+      const globalEligibleRows = state.rows.filter((row) => ['QB', 'RB', 'WR', 'TE'].includes(row.position) && Number.isFinite(row.seasonPoints));
+      if (!globalEligibleRows.length) {
         return { leaderboard: [], seasonRows: [], pickRows: [] };
       }
 
-      const globalEligibleRows = state.rows.filter((row) => ['QB', 'RB', 'WR', 'TE'].includes(row.position) && Number.isFinite(row.seasonPoints));
       const outcomeMeta = buildYearPositionOutcomeMeta(globalEligibleRows);
       const pointsTable = buildYearPositionPointsTable(globalEligibleRows);
 
-      const tempRows = eligibleRows.map((row) => {
+      const tempRows = globalEligibleRows.map((row) => {
         const outcome = outcomeMeta.get(row);
         const baselinePoints = getBaselinePoints(row.year, row.position, pointsTable);
         return {
@@ -773,7 +777,7 @@
         return new Map([...grouped.entries()].map(([pick, values]) => [pick, average(values)]));
       };
 
-      const allYears = [...new Set(eligibleRows.map((row) => row.year))];
+      const allYears = [...new Set(globalEligibleRows.map((row) => row.year))];
       allYears.forEach((year) => {
         const trainRows = snakeRows.filter((entry) => entry.row.year !== year);
         snakeCurveByYear.set(year, Object.fromEntries(snakeKeys.map((key) => [key, buildCurve(trainRows, key)])));
@@ -800,7 +804,7 @@
         yearVoBToDollar.set(year, totalVoB > 0 ? totalSpend / totalVoB : leagueVoBToDollar);
       });
 
-      const pickRows = tempRows.map(({ row, outcome, voB, outcomePercentile }) => {
+      const allPickRows = tempRows.map(({ row, outcome, voB, outcomePercentile }) => {
         const expectedRank = row.auctionPrice != null ? row.posPriceOrder : row.posDraftOrder;
         const expectedPool = row.auctionPrice != null ? row.posPriceCount : row.posDraftCount;
 
@@ -857,6 +861,13 @@
             : `$${formatInteger(row.auctionPrice)}`
         };
       });
+
+      const filteredEligibleRows = filtered.filter((row) => ['QB', 'RB', 'WR', 'TE'].includes(row.position) && Number.isFinite(row.seasonPoints));
+      if (!filteredEligibleRows.length) {
+        return { leaderboard: [], seasonRows: [], pickRows: [] };
+      }
+      const filteredSourceIndexes = new Set(filteredEligibleRows.map((row) => row.__sourceIndex));
+      const pickRows = allPickRows.filter((row) => filteredSourceIndexes.has(row.__sourceIndex));
 
       const summarizeManagerRows = (rows) => {
         let psmeWeightedTotal = 0;
@@ -1000,7 +1011,7 @@
         <tr>
           <td>${formatInteger(item.rank)}</td>
           <td>${item.manager}</td>
-          <td>${formatInteger(item.year)}</td>
+          <td>${formatYear(item.year)}</td>
           <td>${formatDelta(item.psmePoints)}</td>
           <td>${formatDelta(item.avgVoB)}</td>
           <td>${formatInteger(item.starterTierHits)}/${formatInteger(item.eligiblePicks)} (${formatPct(item.starterTierRate)})</td>
@@ -1028,7 +1039,7 @@
 
       tbody.innerHTML = paging.visibleRows.map((row) => `
         <tr>
-          <td>${formatInteger(row.year)}</td>
+          <td>${formatYear(row.year)}</td>
           <td>${row.manager}</td>
           <td>${row.name}</td>
           <td>${row.position}</td>
