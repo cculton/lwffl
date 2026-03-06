@@ -128,18 +128,14 @@
     tbody tr:hover { background: rgba(56,189,248,0.05); }
 
     th[data-tooltip] { position: relative; }
-    th[data-tooltip]:hover::before,
-    th[data-tooltip]:focus-visible::before {
-      content: attr(data-tooltip);
-      position: absolute;
-      left: 0;
-      top: calc(100% + 8px);
-      z-index: 20;
-      width: min(320px, 78vw);
+    .column-tooltip {
+      position: fixed;
+      z-index: 2000;
+      width: min(340px, calc(100vw - 20px));
       padding: 8px 10px;
       border-radius: 8px;
       border: 1px solid rgba(56,189,248,0.5);
-      background: rgba(2,6,23,0.96);
+      background: rgba(2,6,23,0.98);
       color: var(--text-main);
       font-size: 0.73rem;
       line-height: 1.35;
@@ -148,7 +144,10 @@
       white-space: normal;
       box-shadow: 0 8px 24px rgba(0,0,0,0.45);
       pointer-events: none;
+      opacity: 0;
+      transition: opacity 120ms ease;
     }
+    .column-tooltip.visible { opacity: 1; }
     .status { color: var(--text-soft); margin-bottom: 12px; font-size: 0.86rem; }
 
     .insight-list {
@@ -219,7 +218,7 @@
         <p>Manager leaderboard command center built from draft outcome efficiency metrics</p>
       </div>
 
-      <div class="status">Note: Draft analytics calculations include only QB, RB, WR, and TE picks.</div>
+      <div class="status">Note: Draft analytics calculations include only QB, RB, WR, and TE picks. The league used a snake draft from 2014-2023 and has used an auction draft since 2024.</div>
 
       <section class="panel">
         <h2>Metric Glossary</h2>
@@ -227,37 +226,37 @@
         <ul class="insight-list">
           <li>
             <span class="metric-name">PSME-Points</span>
-            <p><span class="metric-label">What it is</span><span class="metric-copy">Percentile Surplus vs Market Expectation using season points outcome percentile minus expected draft percentile, weighted by draft capital.</span></p>
+            <p><span class="metric-label">What it is</span><span class="metric-copy">A score that compares how each pick finished versus draft expectations, then gives more weight to bigger investments.</span></p>
             <p><span class="metric-label">What it means</span><span class="metric-copy">This shows how much better or worse your picks performed versus what the draft market expected, with bigger investments counting more.</span></p>
           </li>
           <li>
             <span class="metric-name">Avg VoB</span>
-            <p><span class="metric-label">What it is</span><span class="metric-copy">Average Value over Baseline points per eligible pick. Equation: total VoB ÷ eligible picks.</span></p>
+            <p><span class="metric-label">What it is</span><span class="metric-copy">The average points each eligible pick gave you above a starter-level baseline at that position.</span></p>
             <p><span class="metric-label">What it means</span><span class="metric-copy">This is your average points edge per pick over a starter-level baseline at each position.</span></p>
           </li>
           <li>
             <span class="metric-name">Starter Hits</span>
-            <p><span class="metric-label">What it is</span><span class="metric-copy">Share of eligible picks that finished inside the starter cutoff by position for that year's lineup rules.</span></p>
+            <p><span class="metric-label">What it is</span><span class="metric-copy">The percent of eligible picks that finished as starter-quality players for that season's lineup setup.</span></p>
             <p><span class="metric-label">What it means</span><span class="metric-copy">Higher values mean you consistently drafted players who were good enough to be regular lineup starters.</span></p>
           </li>
           <li>
             <span class="metric-name">Elite Hits</span>
-            <p><span class="metric-label">What it is</span><span class="metric-copy">Share of eligible picks that finished in the elite tier.</span></p>
+            <p><span class="metric-label">What it is</span><span class="metric-copy">The percent of eligible picks that finished in the top tier at their position.</span></p>
             <p><span class="metric-label">What it means</span><span class="metric-copy">Higher values mean you found more true difference-makers who can swing matchups and seasons.</span></p>
           </li>
           <li>
             <span class="metric-name">ROI</span>
-            <p><span class="metric-label">What it is</span><span class="metric-copy">Value per dollar spent based on estimated value.</span></p>
+            <p><span class="metric-label">What it is</span><span class="metric-copy">How much estimated player value you got for each auction dollar spent.</span></p>
             <p><span class="metric-label">What it means</span><span class="metric-copy">This shows how efficiently auction dollars were spent; positive ROI means you got more value than you paid for.</span></p>
           </li>
           <li>
             <span class="metric-name">Avg Surplus $</span>
-            <p><span class="metric-label">What it is</span><span class="metric-copy">Average estimated value minus auction cost across priced auction picks.</span></p>
+            <p><span class="metric-label">What it is</span><span class="metric-copy">Average estimated value minus auction price across your auction picks.</span></p>
             <p><span class="metric-label">What it means</span><span class="metric-copy">This estimates how much value, in dollars, you gained or lost per auction pick versus the price paid.</span></p>
           </li>
           <li>
             <span class="metric-name">Avg Pick Surplus</span>
-            <p><span class="metric-label">What it is</span><span class="metric-copy">Average snake pick surplus vs expected VoB for draft slot.</span></p>
+            <p><span class="metric-label">What it is</span><span class="metric-copy">Average extra value from snake picks compared with what is normally expected at those draft slots.</span></p>
             <p><span class="metric-label">What it means</span><span class="metric-copy">This shows whether your snake picks typically beat or fell short of the value usually expected at those draft positions.</span></p>
           </li>
         </ul>
@@ -397,6 +396,11 @@
     const positionSelect = document.getElementById('positionSelect');
     const roundCostSelect = document.getElementById('roundCostSelect');
     const statusEl = document.getElementById('status');
+
+    const tooltipEl = document.createElement('div');
+    tooltipEl.className = 'column-tooltip';
+    document.body.appendChild(tooltipEl);
+    let activeTooltipHeader = null;
 
     const TABLE_PAGE_SIZE = 20;
 
@@ -1039,41 +1043,41 @@
 
     const columnExplainers = {
       managerLeaderboard: {
-        rank: 'Sort rank after applying current table sort settings.',
-        manager: 'Draft manager/owner for the selected slice.',
-        psmePoints: 'Percentile Surplus vs Market Expectation (points-based outcome). Equation: outcome percentile − expected percentile, weighted by pick capital.',
-        avgVoB: 'Average Value over Baseline points per eligible pick. Equation: total VoB ÷ eligible picks.',
-        avgSurplusDollars: 'Average estimated value minus auction cost across priced auction picks.',
-        roiRate: 'Value per dollar spent (based on estimated value).',
-        avgPickSurplus: 'Average snake pick surplus versus expected VoB by draft slot.',
-        starterTierRate: 'Starter Hits: share of eligible picks that finished inside that season\'s rules-aware starter tier.',
-        eliteTierRate: 'Elite Hits: share of eligible picks finishing in an elite cutoff that scales with team count.',
-        eligiblePicks: 'Count of eligible non-K/DST picks with season points in the current filter.'
+        rank: 'Ranking based on the current sort and filters.',
+        manager: 'Manager in the current filtered view.',
+        psmePoints: 'PSME-Points: how much your picks beat or missed expectations, with bigger investments weighted more.',
+        avgVoB: 'Avg VoB: average points above a starter-level baseline per eligible pick.',
+        avgSurplusDollars: 'Avg Surplus $: average estimated value minus auction price on auction picks.',
+        roiRate: 'ROI: estimated value returned per auction dollar spent.',
+        avgPickSurplus: 'Avg Pick Surplus: average extra value from snake picks versus typical slot expectations.',
+        starterTierRate: 'Starter Hits: percent of eligible picks that finished as starter-quality players.',
+        eliteTierRate: 'Elite Hits: percent of eligible picks that finished in the elite tier.',
+        eligiblePicks: 'Number of eligible QB/RB/WR/TE picks with season outcomes in this filter.'
       },
       managerSeasons: {
-        rank: 'Sort rank after applying current table sort settings.',
-        manager: 'Manager for this season-level split.',
-        year: 'Draft season for this manager row.',
-        psmePoints: 'Season-level PSME-Points for that manager and year.',
-        avgVoB: 'Season-level average Value over Baseline points per eligible pick.',
-        avgSurplusDollars: 'Average estimated value minus auction cost across priced auction picks.',
-        roiRate: 'Value per dollar spent (based on estimated value).',
-        avgPickSurplus: 'Season-level average snake pick surplus versus expected slot outcomes.',
-        starterTierRate: 'Season-level starter-yield hit rate for eligible picks.',
-        eliteTierRate: 'Season-level elite-yield hit rate for eligible picks.',
-        eligiblePicks: 'Eligible picks drafted by this manager in this season.'
+        rank: 'Ranking based on the current sort and filters.',
+        manager: 'Manager for this season row.',
+        year: 'Draft year for this row.',
+        psmePoints: 'PSME-Points for this manager-year slice.',
+        avgVoB: 'Avg VoB for this manager-year slice.',
+        avgSurplusDollars: 'Avg Surplus $ for this manager-year slice (auction picks only).',
+        roiRate: 'ROI for this manager-year slice (auction picks only).',
+        avgPickSurplus: 'Avg Pick Surplus for this manager-year slice (snake picks only).',
+        starterTierRate: 'Starter Hits for this manager-year slice.',
+        eliteTierRate: 'Elite Hits for this manager-year slice.',
+        eligiblePicks: 'Count of eligible picks for this manager-year slice.'
       },
       managerPicks: {
-        year: 'Draft season for this specific pick.',
-        manager: 'Manager who made the draft pick.',
-        name: 'Player drafted.',
-        position: 'Player position bucket used for baselines.',
-        nflTeam: 'NFL team for the drafted player in that season.',
-        psme: 'Pick-level percentile surplus vs market expectation. Primary value indicator for this table.',
+        year: 'Draft year for this pick.',
+        manager: 'Manager who made this pick.',
+        name: 'Drafted player.',
+        position: 'Player position used for baseline and tier comparisons.',
+        nflTeam: 'NFL team for that season.',
+        psme: 'Pick-level PSME result: how this pick performed versus expectation.',
         voB: 'Pick-level Value over Baseline points.',
-        roi: 'Pick-level auction ROI: implied auction value ÷ paid price − 1. Displays — for non-auction picks.',
-        finalPositionRank: 'Final position rank among drafted players only for that year and position, based on season points outcome.',
-        acquisitionCost: 'Snake round/pick or auction dollars paid for this pick.'
+        roi: 'Pick-level auction ROI (estimated value per dollar). Not shown for snake picks.',
+        finalPositionRank: 'Final position finish for this player within drafted players at that position and year.',
+        acquisitionCost: 'Draft cost: snake round/pick or auction dollars paid.'
       }
     };
 
@@ -1088,6 +1092,52 @@
           th.dataset.tooltip = text;
           th.tabIndex = 0;
         });
+      });
+    }
+
+    function hideColumnTooltip() {
+      activeTooltipHeader = null;
+      tooltipEl.classList.remove('visible');
+    }
+
+    function positionColumnTooltip(th) {
+      const rect = th.getBoundingClientRect();
+      const tooltipWidth = Math.min(340, window.innerWidth - 20);
+      const tooltipLeft = Math.min(
+        Math.max(10, rect.left),
+        window.innerWidth - tooltipWidth - 10
+      );
+      const tooltipTop = Math.min(
+        rect.bottom + 8,
+        window.innerHeight - tooltipEl.offsetHeight - 10
+      );
+      tooltipEl.style.left = `${tooltipLeft}px`;
+      tooltipEl.style.top = `${Math.max(10, tooltipTop)}px`;
+    }
+
+    function showColumnTooltip(th) {
+      const text = th?.dataset?.tooltip;
+      if (!text) return;
+      activeTooltipHeader = th;
+      tooltipEl.textContent = text;
+      tooltipEl.classList.add('visible');
+      positionColumnTooltip(th);
+    }
+
+    function wireColumnTooltips() {
+      document.querySelectorAll('th[data-tooltip]').forEach((th) => {
+        th.addEventListener('mouseenter', () => showColumnTooltip(th));
+        th.addEventListener('mouseleave', hideColumnTooltip);
+        th.addEventListener('focus', () => showColumnTooltip(th));
+        th.addEventListener('blur', hideColumnTooltip);
+      });
+
+      window.addEventListener('scroll', () => {
+        if (activeTooltipHeader) positionColumnTooltip(activeTooltipHeader);
+      }, { passive: true });
+
+      window.addEventListener('resize', () => {
+        if (activeTooltipHeader) positionColumnTooltip(activeTooltipHeader);
       });
     }
 
@@ -1454,6 +1504,7 @@
         wireSortableHeaders();
         wirePaginationControls();
         applyColumnExplainers();
+        wireColumnTooltips();
         render();
       } catch (error) {
         console.error(error);
