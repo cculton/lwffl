@@ -111,9 +111,43 @@
       margin: 10px 0 2px;
     }
 
+    .season-banner {
+      display: none;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+      padding: 18px;
+      border-radius: 14px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      background: rgba(15, 23, 42, 0.6);
+    }
+    .season-banner.loaded { display: grid; }
+    .season-banner .sb-item { text-align: center; }
+    .season-banner .sb-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .season-banner .sb-value {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f9fafb;
+    }
+    .season-banner .sb-sub {
+      font-size: 0.72rem;
+      color: var(--text-soft);
+      margin-top: 2px;
+    }
+
     @media (max-width: 800px) {
       .links-grid {
         grid-template-columns: 1fr;
+      }
+      .season-banner {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
       }
     }
   </style>
@@ -127,6 +161,8 @@
         <h1>Legion of Whom<br>Fantasy Football League</h1>
         <p>Full catalogue of stats and accomplishments · 2014–Present</p>
       </header>
+
+      <div id="seasonBanner" class="season-banner"></div>
 
       <main>
         <div class="links-grid">
@@ -153,6 +189,16 @@
           </a>
 
           <div class="nav-section">Stats &amp; Records</div>
+
+          <a href="champions.html" class="nav-card">
+            <div>
+              <div class="nav-title">🏆 Champions</div>
+              <div class="nav-desc">
+                Every LWFFL season at a glance — champions, runners-up, scoring titles, and more.
+              </div>
+            </div>
+            <div class="nav-footer">Open →</div>
+          </a>
 
           <a href="record-book.html" class="nav-card">
             <div>
@@ -260,6 +306,50 @@
     </div>
   </div>
 
+  <script>
+    (async function loadSeasonBanner() {
+      try {
+        const res = await fetch('final-standings.json');
+        if (!res.ok) return;
+        const data = await res.json();
+        const maxYear = Math.max(...data.map(r => r.year));
+        const season = data.filter(r => r.year === maxYear);
+        if (!season.length) return;
+
+        season.sort((a, b) => (a.final_standing ?? 99) - (b.final_standing ?? 99));
+        const champ = season[0];
+        const runnerUp = season[1];
+        const lastPlace = season[season.length - 1];
+
+        const scoringTitle = season.slice().sort((a, b) => (b.points_for ?? 0) - (a.points_for ?? 0))[0];
+
+        const banner = document.getElementById('seasonBanner');
+        banner.innerHTML = `
+          <div class="sb-item">
+            <div class="sb-label">${maxYear} Champion</div>
+            <div class="sb-value">🏆 ${champ.manager}</div>
+            <div class="sb-sub">${champ.wins}-${champ.losses}</div>
+          </div>
+          <div class="sb-item">
+            <div class="sb-label">Runner-Up</div>
+            <div class="sb-value">${runnerUp.manager}</div>
+            <div class="sb-sub">${runnerUp.wins}-${runnerUp.losses}</div>
+          </div>
+          <div class="sb-item">
+            <div class="sb-label">Scoring Title</div>
+            <div class="sb-value">${scoringTitle.manager}</div>
+            <div class="sb-sub">${Number(scoringTitle.points_for).toLocaleString()} pts</div>
+          </div>
+          <div class="sb-item">
+            <div class="sb-label">Last Place</div>
+            <div class="sb-value">${lastPlace.manager}</div>
+            <div class="sb-sub">${lastPlace.wins}-${lastPlace.losses}</div>
+          </div>
+        `;
+        banner.classList.add('loaded');
+      } catch (e) { /* silent fail — banner just doesn't show */ }
+    })();
+  </script>
   <script src="nav-loader.js"></script>
 </body>
 </html>
