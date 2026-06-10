@@ -1,33 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="style.css">
   <meta charset="UTF-8" />
   <meta name="robots" content="noindex, nofollow" />
   <title>LWFFL Record Book and More</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    :root {
-      --bg-main: #020617;
-      --card-bg: #020617;
-      --accent: #38bdf8;
-      --border-subtle: #1f2937;
-      --text-main: #e5e7eb;
-      --text-muted: #9ca3af;
-      --text-soft: #6b7280;
-    }
-
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #020617 0%, #020617 35%, #020617 100%);
-      color: var(--text-main);
-      min-height: 100vh;
-      padding: 24px 16px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -76,7 +56,7 @@
 
     .links-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr)); /* MAX TWO PER ROW */
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
     }
 
@@ -99,14 +79,6 @@
       box-shadow:
         0 18px 35px rgba(15, 23, 42, 0.9),
         0 0 0 1px rgba(56, 189, 248, 0.3);
-    }
-
-    .nav-label {
-      font-size: 0.75rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 6px;
     }
 
     .nav-title {
@@ -147,6 +119,8 @@
   </style>
 </head>
 <body>
+  <div id="nav-placeholder"></div>
+
   <div class="shell">
     <div class="container">
       <header>
@@ -167,7 +141,7 @@
             </div>
             <div class="nav-footer">Open →</div>
           </a>
-          
+
           <a href="amendment-history.html" class="nav-card">
             <div>
               <div class="nav-title">✏️ Amendment History</div>
@@ -184,7 +158,7 @@
             <div>
               <div class="nav-title">📖 Record Book</div>
               <div class="nav-desc">
-                Peruse league records with various categories and filters. 
+                Peruse league records with various categories and filters.
               </div>
             </div>
             <div class="nav-footer">Open →</div>
@@ -194,7 +168,7 @@
             <div>
               <div class="nav-title">🏆 Postseason Accomplishments</div>
               <div class="nav-desc">
-                An interactive table showing championships, playoff appearances, and more. 
+                An interactive table showing championships, playoff appearances, and more.
               </div>
             </div>
             <div class="nav-footer">Open →</div>
@@ -239,19 +213,19 @@
             </div>
             <div class="nav-footer">Open →</div>
           </a>
-          
+
           <div class="nav-section">Amusement</div>
 
           <a href="manager-cards.html" class="nav-card">
             <div>
               <div class="nav-title">👤 Manager Cards</div>
               <div class="nav-desc">
-                Visually rich profiles that summarize each manager’s performance, earnings, stats, and more.
+                Visually rich profiles that summarize each manager's performance, earnings, stats, and more.
               </div>
             </div>
             <div class="nav-footer">Open →</div>
           </a>
-          
+
           <a href="probability-machine.html" class="nav-card">
             <div>
               <div class="nav-title">🕹️ Probability Machine</div>
@@ -260,6 +234,17 @@
               </div>
             </div>
             <div class="nav-footer">Open →</div>
+          </a>
+
+          <a href="draft-analytics.html" class="nav-card">
+            <div>
+              <div class="nav-title">📈 Draft Analytics</div>
+              <div class="nav-desc">
+                Manager leaderboard and efficiency metrics built from draft outcome data.
+              </div>
+            </div>
+            <div class="nav-footer">Open →</div>
+          </a>
 
           <a href="scorigami.html" class="nav-card">
             <div>
@@ -274,5 +259,7 @@
       </main>
     </div>
   </div>
+
+  <script src="nav-loader.js"></script>
 </body>
 </html>

@@ -10,42 +10,25 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
 
-    :root {
-      /* Dark Navy Theme */
-      --bg-main: #020617;
-      --card-bg: #020617;
-      --accent: #38bdf8;
-      --accent-dim: rgba(56, 189, 248, 0.15);
-      --border-subtle: #1f2937;
-      --text-main: #e5e7eb;
-      --text-muted: #9ca3af;
-      --text-soft: #6b7280;
+  --accent-dim: rgba(56, 189, 248, 0.15);
 
-      --positive: #22c55e;
-      --negative: #ef4444;
-      --warning: #f59e0b;
+  --money: #22c55e;
 
-      /* Money: make $$$ green */
-      --money: #22c55e;
+  --gold: #fbbf24;
 
-      /* Badges */
-      --gold: #fbbf24;
-      --gold-bg: rgba(251, 191, 36, 0.1);
-      --silver: #cbd5e1;
-      --silver-bg: rgba(203, 213, 225, 0.1);
-      --bronze: #d97706;
-      --bronze-bg: rgba(217, 119, 6, 0.1);
-    }
+  --gold-bg: rgba(251, 191, 36, 0.1);
 
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #020617 0%, #020617 35%, #020617 100%);
-      color: var(--text-main);
-      min-height: 100vh;
-      padding: 24px 16px;
-    }
+  --silver: #cbd5e1;
+
+  --silver-bg: rgba(203, 213, 225, 0.1);
+
+  --bronze: #d97706;
+
+  --bronze-bg: rgba(217, 119, 6, 0.1);
+
+}
 
     .shell { max-width: 1200px; margin: 24px auto; }
 
@@ -1189,8 +1172,6 @@
       });
       els.statEarnings.textContent = moneyFmt(money);
     }
-
-
 
     function withLiveCurrentSeason(managerName, seasons, games) {
       const existing = (seasons || []).map(s => ({ ...s }));
