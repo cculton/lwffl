@@ -44,14 +44,14 @@
   <!-- ============ GAME LOG ============ -->
   <section id="tab-games">
     <div class="filter-bar">
-      <div><label class="field-label" for="gMgr">Manager</label>
-        <select id="gMgr"><option value="">All managers</option></select></div>
-      <div><label class="field-label" for="gOpp">Opponent</label>
-        <select id="gOpp"><option value="">All opponents</option></select></div>
-      <div><label class="field-label" for="gYear">Season</label>
-        <select id="gYear"><option value="">All seasons</option></select></div>
-      <div><label class="field-label" for="gWeek">Week</label>
-        <select id="gWeek"><option value="">All weeks</option></select></div>
+      <div class="full-span"><label class="field-label">Manager</label>
+        <div id="gMgr" class="pill-group"></div></div>
+      <div class="full-span"><label class="field-label">Opponent</label>
+        <div id="gOpp" class="pill-group"></div></div>
+      <div class="full-span"><label class="field-label">Season</label>
+        <div id="gYear" class="pill-group"></div></div>
+      <div class="full-span"><label class="field-label">Week</label>
+        <div id="gWeek" class="pill-group"></div></div>
       <div><label class="field-label" for="gType">Type</label>
         <select id="gType">
           <option value="">All matchups</option>
@@ -73,10 +73,10 @@
   <!-- ============ SEASON STATS ============ -->
   <section id="tab-seasons" hidden>
     <div class="filter-bar">
-      <div><label class="field-label" for="sMgr">Manager</label>
-        <select id="sMgr"><option value="">All managers</option></select></div>
-      <div><label class="field-label" for="sYear">Season</label>
-        <select id="sYear"><option value="">All seasons</option></select></div>
+      <div class="full-span"><label class="field-label">Manager</label>
+        <div id="sMgr" class="pill-group"></div></div>
+      <div class="full-span"><label class="field-label">Season</label>
+        <div id="sYear" class="pill-group"></div></div>
       <div><label class="field-label" for="sPlayoffs">Made Playoffs</label>
         <select id="sPlayoffs">
           <option value="">All seasons</option>
@@ -91,10 +91,10 @@
   <!-- ============ WEEKLY TRENDS ============ -->
   <section id="tab-weeks" hidden>
     <div class="filter-bar">
-      <div><label class="field-label" for="wMgr">Manager</label>
-        <select id="wMgr"><option value="">League-wide</option></select></div>
-      <div><label class="field-label" for="wYear">Season</label>
-        <select id="wYear"><option value="">All seasons</option></select></div>
+      <div class="full-span"><label class="field-label">Manager</label>
+        <div id="wMgr" class="pill-group"></div></div>
+      <div class="full-span"><label class="field-label">Season</label>
+        <div id="wYear" class="pill-group"></div></div>
     </div>
     <div class="filter-count" id="wCount"></div>
     <div id="wTable"></div>
@@ -106,7 +106,7 @@
 </footer>
 
 <script src="assets/data.js"></script>
-<script src="assets/tables.js"></script>
+<script src="assets/tables.js?v=2"></script>
 <script>
 LWFFL.load().then(M => {
   const { fmt, mlink, ylink, isPlayoff } = LWFFL;
@@ -130,9 +130,10 @@ LWFFL.load().then(M => {
     sortKey: p.year * 100 + p.week
   }));
 
-  ["gMgr", "gOpp"].forEach(id => fillSelectNames(document.getElementById(id), names));
-  fillSelect(document.getElementById("gYear"), yearsDesc);
-  fillSelect(document.getElementById("gWeek"), Array.from({length: 17}, (_, i) => String(i + 1)));
+  const selGMgr  = multiPills(document.getElementById("gMgr"),  names,      gUpdate, n => LWFFL.shortName(n));
+  const selGOpp  = multiPills(document.getElementById("gOpp"),  names,      gUpdate, n => LWFFL.shortName(n));
+  const selGYear = multiPills(document.getElementById("gYear"), yearsDesc,  gUpdate);
+  const selGWeek = multiPills(document.getElementById("gWeek"), Array.from({length: 17}, (_, i) => String(i + 1)), gUpdate);
 
   const gCols = [
     { key: "sortKey", label: "When", dir: "desc", render: r => `${ylink(r.year)} · Wk ${r.week}` },
@@ -149,17 +150,13 @@ LWFFL.load().then(M => {
   ];
 
   function gFiltered() {
-    const mgr = document.getElementById("gMgr").value;
-    const opp = document.getElementById("gOpp").value;
-    const year = document.getElementById("gYear").value;
-    const week = document.getElementById("gWeek").value;
     const type = document.getElementById("gType").value;
     const res = document.getElementById("gRes").value;
     return perfRows.filter(r =>
-      (!mgr || r.manager === mgr) &&
-      (!opp || r.opp === opp) &&
-      (!year || String(r.year) === year) &&
-      (!week || String(r.week) === week) &&
+      (!selGMgr.size  || selGMgr.has(r.manager)) &&
+      (!selGOpp.size  || selGOpp.has(r.opp)) &&
+      (!selGYear.size || selGYear.has(String(r.year))) &&
+      (!selGWeek.size || selGWeek.has(String(r.week))) &&
       (!type || (type === "po") === isPlayoff(r)) &&
       (!res || r.result === res)
     );
@@ -187,7 +184,7 @@ LWFFL.load().then(M => {
       `${rows.length.toLocaleString()} of ${perfRows.length.toLocaleString()} performances`;
     gTable.update(rows);
   }
-  ["gMgr", "gOpp", "gYear", "gWeek", "gType", "gRes"].forEach(id =>
+  ["gType", "gRes"].forEach(id =>
     document.getElementById(id).addEventListener("change", gUpdate));
   gUpdate();
 
@@ -205,8 +202,8 @@ LWFFL.load().then(M => {
     };
   });
 
-  fillSelectNames(document.getElementById("sMgr"), names);
-  fillSelect(document.getElementById("sYear"), yearsDesc);
+  const selSMgr  = multiPills(document.getElementById("sMgr"),  names,     sUpdate, n => LWFFL.shortName(n));
+  const selSYear = multiPills(document.getElementById("sYear"), yearsDesc, sUpdate);
 
   const sCols = [
     { key: "year", label: "Year", render: r => ylink(r.year) },
@@ -229,12 +226,10 @@ LWFFL.load().then(M => {
   ];
 
   function sFiltered() {
-    const mgr = document.getElementById("sMgr").value;
-    const year = document.getElementById("sYear").value;
     const po = document.getElementById("sPlayoffs").value;
     return seasonRows.filter(r =>
-      (!mgr || r.manager === mgr) &&
-      (!year || String(r.year) === year) &&
+      (!selSMgr.size  || selSMgr.has(r.manager)) &&
+      (!selSYear.size || selSYear.has(String(r.year))) &&
       (!po || (po === "yes") === (r.seed != null))
     );
   }
@@ -259,15 +254,14 @@ LWFFL.load().then(M => {
       `${rows.length} of ${seasonRows.length} manager-seasons · records here are regular season (the official standings basis)`;
     sTable.update(rows);
   }
-  ["sMgr", "sYear", "sPlayoffs"].forEach(id =>
-    document.getElementById(id).addEventListener("change", sUpdate));
+  document.getElementById("sPlayoffs").addEventListener("change", sUpdate);
   sUpdate();
 
   /* =================================================================
      WEEKLY TRENDS — by-week averages, league-wide or per manager
      ================================================================= */
-  fillSelectNames(document.getElementById("wMgr"), names);
-  fillSelect(document.getElementById("wYear"), yearsDesc);
+  const selWMgr  = multiPills(document.getElementById("wMgr"),  names,     wUpdate, n => LWFFL.shortName(n));
+  const selWYear = multiPills(document.getElementById("wYear"), yearsDesc, wUpdate);
 
   const wCols = [
     { key: "week", label: "Week", num: true, dir: "asc" },
@@ -279,11 +273,9 @@ LWFFL.load().then(M => {
   ];
 
   function wRows() {
-    const mgr = document.getElementById("wMgr").value;
-    const year = document.getElementById("wYear").value;
     const pool = M.perfs.filter(p =>
-      (!mgr || p.manager === mgr) &&
-      (!year || String(p.year) === year)
+      (!selWMgr.size  || selWMgr.has(p.manager)) &&
+      (!selWYear.size || selWYear.has(String(p.year)))
     );
     const rows = [];
     for (let w = 1; w <= 17; w++) {
@@ -297,7 +289,7 @@ LWFFL.load().then(M => {
         avg: scores.reduce((a, b) => a + b, 0) / scores.length,
         max: Math.max(...scores),
         min: Math.min(...scores),
-        winPct: mgr ? (wins + ties * 0.5) / games.length : null,
+        winPct: selWMgr.size ? (wins + ties * 0.5) / games.length : null,
         n: games.length
       });
     }
@@ -310,14 +302,12 @@ LWFFL.load().then(M => {
   });
 
   function wUpdate() {
-    const mgr = document.getElementById("wMgr").value;
-    const year = document.getElementById("wYear").value;
+    const who = selWMgr.size ? [...selWMgr].map(n => LWFFL.shortName(n)).join(", ") : "League-wide";
+    const when = selWYear.size ? [...selWYear].join(", ") : "all seasons";
     document.getElementById("wCount").textContent =
-      `${mgr || "League-wide"} · ${year || "all seasons"} — win % shown when a manager is selected`;
+      `${who} · ${when} — win % shown when a manager is selected`;
     wTable.update(wRows());
   }
-  ["wMgr", "wYear"].forEach(id =>
-    document.getElementById(id).addEventListener("change", wUpdate));
   wUpdate();
 
 }).catch(err => {

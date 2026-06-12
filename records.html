@@ -69,13 +69,13 @@
         <option value="po">Playoffs only</option>
       </select>
     </div>
-    <div>
-      <label class="field-label" for="mgrSel">Manager</label>
-      <select id="mgrSel"><option value="">All managers</option></select>
+    <div class="full-span">
+      <label class="field-label">Manager</label>
+      <div id="mgrSel" class="pill-group"></div>
     </div>
-    <div>
-      <label class="field-label" for="yearSel">Season</label>
-      <select id="yearSel"><option value="">All seasons</option></select>
+    <div class="full-span">
+      <label class="field-label">Season</label>
+      <div id="yearSel" class="pill-group"></div>
     </div>
   </div>
   <div class="filter-count" id="countLine"></div>
@@ -88,13 +88,13 @@
 </footer>
 
 <script src="assets/data.js"></script>
-<script src="assets/tables.js"></script>
+<script src="assets/tables.js?v=2"></script>
 <script>
 LWFFL.load().then(M => {
   const { fmt, mlink, ylink, recordStr, isPlayoff } = LWFFL;
   const names = Object.values(M.managers).map(m => m.name).sort();
-  fillSelectNames(document.getElementById("mgrSel"), names);
-  fillSelect(document.getElementById("yearSel"), M.years.slice().reverse().map(String));
+  const selMgr  = multiPills(document.getElementById("mgrSel"),  names, render, n => LWFFL.shortName(n));
+  const selYear = multiPills(document.getElementById("yearSel"), M.years.slice().reverse().map(String), render);
 
   const rankCol = { key: "_rank", label: "#", get: () => null, render: (r, rank) => `<span style="color:var(--soft);font-weight:600">${rank}</span>` };
   const whenCol = { key: "_when", label: "When", get: r => r.year * 100 + (r.week || 0), render: r => `${ylink(r.year)}${r.week ? " · Wk " + r.week : ""}` };
@@ -104,35 +104,30 @@ LWFFL.load().then(M => {
 
   function filteredPerfs() {
     const scope = document.getElementById("scopeSel").value;
-    const mgr = document.getElementById("mgrSel").value;
-    const year = document.getElementById("yearSel").value;
     return M.perfs.filter(p => scopeOk(p, scope) &&
-      (!mgr || p.manager === mgr) && (!year || String(p.year) === year));
+      (!selMgr.size  || selMgr.has(p.manager)) &&
+      (!selYear.size || selYear.has(String(p.year))));
   }
 
   function filteredGames() {
     const scope = document.getElementById("scopeSel").value;
-    const mgr = document.getElementById("mgrSel").value;
-    const year = document.getElementById("yearSel").value;
     return M.games.filter(g => scopeOk(g, scope) &&
-      (!mgr || g.manager1 === mgr || g.manager2 === mgr) &&
-      (!year || String(g.year) === year));
+      (!selMgr.size  || selMgr.has(g.manager1) || selMgr.has(g.manager2)) &&
+      (!selYear.size || selYear.has(String(g.year))));
   }
 
   function filteredSeasons() {
-    const mgr = document.getElementById("mgrSel").value;
-    const year = document.getElementById("yearSel").value;
     return M.standings.filter(r =>
-      (!mgr || r.manager === mgr) && (!year || String(r.year) === year));
+      (!selMgr.size  || selMgr.has(r.manager)) &&
+      (!selYear.size || selYear.has(String(r.year))));
   }
 
   /* ---- streak computation over filtered perfs (chronological) ---- */
   function computeStreaks(kind) {
     const scope = document.getElementById("scopeSel").value;
-    const mgr = document.getElementById("mgrSel").value;
-    const year = document.getElementById("yearSel").value;
     const pool = M.perfs.filter(p => scopeOk(p, scope) &&
-      (!mgr || p.manager === mgr) && (!year || String(p.year) === year));
+      (!selMgr.size  || selMgr.has(p.manager)) &&
+      (!selYear.size || selYear.has(String(p.year))));
     const won = p => kind === "win" ? p.pf > p.pa : p.pf < p.pa;
 
     const state = {};
@@ -254,7 +249,7 @@ LWFFL.load().then(M => {
     table = dataTable(holder, { columns: cols, rows, initialSort: cat.sort, pageSize: 25 });
   }
 
-  ["catSel", "scopeSel", "mgrSel", "yearSel"].forEach(id =>
+  ["catSel", "scopeSel"].forEach(id =>
     document.getElementById(id).addEventListener("change", render));
   render();
 

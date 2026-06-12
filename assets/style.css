@@ -340,6 +340,36 @@ td.sorted-cell { background: rgba(56, 189, 248, 0.045); }
   margin: -8px 0 14px 4px;
 }
 
+.filter-bar .full-span { grid-column: 1 / -1; }
+
+.pill-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  padding-top: 2px;
+}
+
+.filter-pill {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-solid);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.13s;
+  white-space: nowrap;
+}
+.filter-pill:hover { color: var(--text); border-color: var(--accent); }
+.filter-pill.on {
+  background: rgba(56, 189, 248, 0.14);
+  border-color: rgba(56, 189, 248, 0.55);
+  color: var(--accent);
+}
+
 /* ---------- Manager links & avatars ---------- */
 
 a.mlink {

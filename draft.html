@@ -112,12 +112,12 @@
     <div class="mgr-pills" id="mgrPills"></div>
 
     <div class="filter-bar">
-      <div><label class="field-label" for="fYear">Year</label>
-        <select id="fYear"><option value="">All years</option></select></div>
-      <div><label class="field-label" for="fPos">Position</label>
-        <select id="fPos"><option value="">All positions</option></select></div>
-      <div><label class="field-label" for="fRound">Round (snake era)</label>
-        <select id="fRound"><option value="">All rounds</option></select></div>
+      <div class="full-span"><label class="field-label">Year</label>
+        <div id="fYear" class="pill-group"></div></div>
+      <div class="full-span"><label class="field-label">Position</label>
+        <div id="fPos" class="pill-group"></div></div>
+      <div class="full-span"><label class="field-label">Round (snake era)</label>
+        <div id="fRound" class="pill-group"></div></div>
       <div><label class="field-label" for="fPrice">Price (auction era)</label>
         <input class="search-input" id="fPrice" type="text" list="priceRanges" placeholder="e.g. 1-5, 40+, 12" />
         <datalist id="priceRanges">
@@ -189,7 +189,7 @@
 </footer>
 
 <script src="assets/data.js"></script>
-<script src="assets/tables.js"></script>
+<script src="assets/tables.js?v=2"></script>
 <script>
 (async () => {
   const { fmt, mlink, ylink, shortName, slugify } = LWFFL;
@@ -259,9 +259,9 @@
     histUpdate();
   });
 
-  fillSelect(document.getElementById("fYear"), years.map(String));
-  fillSelect(document.getElementById("fPos"), positions);
-  fillSelect(document.getElementById("fRound"), rounds.map(String));
+  const selYears = multiPills(document.getElementById("fYear"), years.map(String), histUpdate);
+  const selPos   = multiPills(document.getElementById("fPos"),   positions,          histUpdate);
+  const selRounds = multiPills(document.getElementById("fRound"), rounds.map(String), histUpdate);
 
   const deltaCell = p => p.delta == null ? "—"
     : `<span class="${p.delta > 0 ? "pos" : p.delta < 0 ? "neg" : ""}" style="font-weight:700"${
@@ -297,25 +297,22 @@
   }
 
   function histFiltered() {
-    const year = document.getElementById("fYear").value;
-    const pos = document.getElementById("fPos").value;
-    const round = document.getElementById("fRound").value;
     const price = parsePrice(document.getElementById("fPrice").value);
     const era = document.getElementById("fEra").value;
     const grade = document.getElementById("fGrade").value;
     const search = document.getElementById("fSearch").value.trim().toLowerCase();
     /* round applies to snake picks, price to auction picks; when both are
        set they OR, so comparable slots from both eras show side by side */
-    const matchRound = p => p.round != null && String(p.round) === round;
+    const matchRound = p => p.round != null && selRounds.has(String(p.round));
     const matchPrice = p => p.price != null && p.price >= price.lo && p.price <= price.hi;
     const slotOk = p =>
-      (!round && !price) ||
-      (round && price ? matchRound(p) || matchPrice(p)
-        : round ? matchRound(p) : matchPrice(p));
+      (!selRounds.size && !price) ||
+      (selRounds.size && price ? matchRound(p) || matchPrice(p)
+        : selRounds.size ? matchRound(p) : matchPrice(p));
     return picks.filter(p =>
       (!selected.size || selected.has(p.manager)) &&
-      (!year || String(p.year) === year) &&
-      (!pos || p.position === pos) &&
+      (!selYears.size || selYears.has(String(p.year))) &&
+      (!selPos.size || selPos.has(p.position)) &&
       slotOk(p) &&
       (!era || (era === "auction") === p.auction) &&
       (!grade ||
@@ -353,7 +350,7 @@
       `${rows.length.toLocaleString()} of ${picks.length.toLocaleString()} picks · ${who}`;
     histTable.update(rows);
   }
-  ["fYear", "fPos", "fRound", "fEra", "fGrade"].forEach(id =>
+  ["fEra", "fGrade"].forEach(id =>
     document.getElementById(id).addEventListener("change", histUpdate));
   ["fSearch", "fPrice"].forEach(id =>
     document.getElementById(id).addEventListener("input", histUpdate));

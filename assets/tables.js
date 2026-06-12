@@ -117,3 +117,24 @@ function fillSelectNames(sel, names) {
     sel.appendChild(o);
   });
 }
+
+/* Build a pill-based multi-select. Returns the live Set of selected values.
+   container: a DOM element to render pills into.
+   values: array of string values.
+   onChange: called with no args whenever selection changes.
+   labelFn: optional function(value) -> display string. */
+function multiPills(container, values, onChange, labelFn) {
+  const sel = new Set();
+  container.innerHTML = values.map(v =>
+    `<button type="button" class="filter-pill" data-v="${v}">${labelFn ? labelFn(v) : v}</button>`
+  ).join("");
+  container.addEventListener("click", e => {
+    const btn = e.target.closest(".filter-pill");
+    if (!btn) return;
+    const v = btn.dataset.v;
+    if (sel.has(v)) sel.delete(v); else sel.add(v);
+    btn.classList.toggle("on", sel.has(v));
+    onChange();
+  });
+  return sel;
+}
