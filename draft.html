@@ -86,11 +86,11 @@
       <a href="managers.html">Managers</a>
       <a href="seasons.html">Seasons</a>
       <a href="h2h.html">Head-to-Head</a>
-      <a href="draft.html" class="active">Draft</a>
+      <a href="draft.html" class="active">Draft Central</a>
       <a href="explorer.html">Stat Lab</a>
       <a href="records.html">Records</a>
       <a href="arcade.html">Arcade</a>
-      <a href="league.html">Rulebook</a>
+      <a href="league.html">Constitution</a>
     </div>
   </div>
 </nav>
@@ -118,6 +118,17 @@
         <select id="fPos"><option value="">All positions</option></select></div>
       <div><label class="field-label" for="fRound">Round (snake era)</label>
         <select id="fRound"><option value="">All rounds</option></select></div>
+      <div><label class="field-label" for="fPrice">Price (auction era)</label>
+        <input class="search-input" id="fPrice" type="text" list="priceRanges" placeholder="e.g. 1-5, 40+, 12" />
+        <datalist id="priceRanges">
+          <option value="1-5"></option>
+          <option value="6-10"></option>
+          <option value="11-20"></option>
+          <option value="21-30"></option>
+          <option value="31-40"></option>
+          <option value="41-50"></option>
+          <option value="51+"></option>
+        </datalist></div>
       <div><label class="field-label" for="fEra">Draft Type</label>
         <select id="fEra">
           <option value="">Both eras</option>
@@ -148,8 +159,12 @@
       Taken as the QB2 but finished QB20? <strong style="color:var(--red)">Δ −18</strong> — a bust.
       In the auction era, draft order at a position is set by price paid instead of pick number,
       so the same scale works across both formats. Kickers and defenses aren't graded.
-      One calibration note: league-wide, deltas skew negative (an injury can drop a player 50 spots,
-      but a hit can only beat his draft slot by so much) — the all-time hit rate is about 39%,
+      <strong>Downside is capped at replacement level:</strong> if a player finishes worse than the
+      number of players drafted at his position that year (roughly WR65, RB53, QB19, TE17), his
+      finish is treated as that line — once a player falls out of the draftable pool entirely,
+      WR175 vs WR239 is meaningless, but the draft capital spent on him still counts.
+      Even with the cap, deltas skew slightly negative (an injury can erase a pick, but a hit can
+      only beat his slot by so much) — the all-time hit rate is about 40%,
       so anyone above that is genuinely beating the board.
     </div>
 
@@ -202,13 +217,17 @@
     arr.sort((a, b) => a.auction
       ? (b.price - a.price) || (a.overall - b.overall)
       : a.overall - b.overall);
-    arr.forEach((p, i) => { p.posDraftRank = i + 1; });
+    arr.forEach((p, i) => { p.posDraftRank = i + 1; p.posDepth = arr.length; });
   });
 
+  /* Δ uses a replacement-level cap: a finish rank worse than the number of
+     players drafted at that position that year is treated as that number —
+     once a player falls out of the draftable pool, WR175 vs WR239 is noise,
+     but the draft capital spent on him still counts against the pick. */
   const GRADED_POS = new Set(["QB", "RB", "WR", "TE"]);
   picks.forEach(p => {
     p.graded = GRADED_POS.has(p.position) && p.posRank != null;
-    p.delta = p.graded ? p.posDraftRank - p.posRank : null;
+    p.delta = p.graded ? p.posDraftRank - Math.min(p.posRank, p.posDepth) : null;
   });
   const graded = picks.filter(p => p.graded);
 
@@ -245,7 +264,9 @@
   fillSelect(document.getElementById("fRound"), rounds.map(String));
 
   const deltaCell = p => p.delta == null ? "—"
-    : `<span class="${p.delta > 0 ? "pos" : p.delta < 0 ? "neg" : ""}" style="font-weight:700">${p.delta > 0 ? "+" : ""}${p.delta}</span>`;
+    : `<span class="${p.delta > 0 ? "pos" : p.delta < 0 ? "neg" : ""}" style="font-weight:700"${
+        p.posRank > p.posDepth ? ` title="Finish capped at ${p.position}${p.posDepth} (replacement level — ${p.posDepth} ${p.position}s were drafted in ${p.year})"` : ""
+      }>${p.delta > 0 ? "+" : ""}${p.delta}${p.posRank > p.posDepth ? "*" : ""}</span>`;
 
   const histCols = [
     { key: "year", label: "Year", render: p => ylink(p.year) },
@@ -264,18 +285,38 @@
     { key: "delta", label: "Δ Value", num: true, render: deltaCell }
   ];
 
+  /* price filter accepts "12" (exact), "1-5" (range), or "40+" (minimum) */
+  function parsePrice(s) {
+    s = s.trim().replace(/[$\s]/g, "");
+    if (!s) return null;
+    let m;
+    if ((m = s.match(/^(\d+)-(\d+)$/))) return { lo: +m[1], hi: +m[2] };
+    if ((m = s.match(/^(\d+)\+$/))) return { lo: +m[1], hi: Infinity };
+    if ((m = s.match(/^(\d+)$/))) return { lo: +m[1], hi: +m[1] };
+    return null;
+  }
+
   function histFiltered() {
     const year = document.getElementById("fYear").value;
     const pos = document.getElementById("fPos").value;
     const round = document.getElementById("fRound").value;
+    const price = parsePrice(document.getElementById("fPrice").value);
     const era = document.getElementById("fEra").value;
     const grade = document.getElementById("fGrade").value;
     const search = document.getElementById("fSearch").value.trim().toLowerCase();
+    /* round applies to snake picks, price to auction picks; when both are
+       set they OR, so comparable slots from both eras show side by side */
+    const matchRound = p => p.round != null && String(p.round) === round;
+    const matchPrice = p => p.price != null && p.price >= price.lo && p.price <= price.hi;
+    const slotOk = p =>
+      (!round && !price) ||
+      (round && price ? matchRound(p) || matchPrice(p)
+        : round ? matchRound(p) : matchPrice(p));
     return picks.filter(p =>
       (!selected.size || selected.has(p.manager)) &&
       (!year || String(p.year) === year) &&
       (!pos || p.position === pos) &&
-      (!round || String(p.round) === round) &&
+      slotOk(p) &&
       (!era || (era === "auction") === p.auction) &&
       (!grade ||
         (grade === "steal" && p.delta != null && p.delta >= 10) ||
@@ -291,7 +332,7 @@
     if (!g.length) return `${rows.length.toLocaleString()} picks · none graded (K/D/ST are not graded)`;
     const avg = g.reduce((a, p) => a + p.delta, 0) / g.length;
     const hits = g.filter(p => p.delta >= 0).length;
-    return `${g.length.toLocaleString()} graded picks · avg Δ <strong>${avg >= 0 ? "+" : ""}${avg.toFixed(1)}</strong> · hit rate <strong>${(hits / g.length * 100).toFixed(0)}%</strong>`;
+    return `${g.length.toLocaleString()} graded picks · avg Δ <strong>${avg >= 0 ? "+" : ""}${avg.toFixed(1)}</strong> · hit rate <strong>${(hits / g.length * 100).toFixed(0)}%</strong> · * = downside capped at replacement level`;
   }
 
   const histTableEl = document.getElementById("histTable");
@@ -314,7 +355,8 @@
   }
   ["fYear", "fPos", "fRound", "fEra", "fGrade"].forEach(id =>
     document.getElementById(id).addEventListener("change", histUpdate));
-  document.getElementById("fSearch").addEventListener("input", histUpdate);
+  ["fSearch", "fPrice"].forEach(id =>
+    document.getElementById(id).addEventListener("input", histUpdate));
   histUpdate();
 
   /* =========================================================

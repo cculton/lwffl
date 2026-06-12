@@ -21,11 +21,11 @@
       <a href="managers.html" class="active">Managers</a>
       <a href="seasons.html">Seasons</a>
       <a href="h2h.html">Head-to-Head</a>
-      <a href="draft.html">Draft</a>
+      <a href="draft.html">Draft Central</a>
       <a href="explorer.html">Stat Lab</a>
       <a href="records.html">Records</a>
       <a href="arcade.html">Arcade</a>
-      <a href="league.html">Rulebook</a>
+      <a href="league.html">Constitution</a>
     </div>
   </div>
 </nav>
@@ -60,7 +60,10 @@ function renderIndex(M) {
     b.career.titles.length - a.career.titles.length || b.career.winPct - a.career.winPct
   );
 
-  const cards = list.map(m => {
+  const active = list.filter(m => m.career.active);
+  const alums = list.filter(m => !m.career.active);
+
+  const card = m => {
     const c = m.career;
     return `
       <a class="card" href="managers.html?m=${m.slug}">
@@ -79,7 +82,7 @@ function renderIndex(M) {
           ${c.scoringTitles.length ? `<span class="pill accent">🕹️ ${c.scoringTitles.length}</span>` : ""}
         </div>
       </a>`;
-  }).join("");
+  };
 
   const main = document.getElementById("main");
   main.classList.remove("loading");
@@ -88,7 +91,10 @@ function renderIndex(M) {
       <h1>Managers</h1>
       <p class="sub">${list.length} all-time managers, ranked by championships then win percentage</p>
     </header>
-    <div class="grid grid-auto">${cards}</div>`;
+    <div class="section-label" style="margin-top:0">Active <span style="font-weight:400;text-transform:none;letter-spacing:0">— ${active.length} managers</span></div>
+    <div class="grid grid-auto">${active.map(card).join("")}</div>
+    <div class="section-label">Alums <span style="font-weight:400;text-transform:none;letter-spacing:0">— ${alums.length} former managers</span></div>
+    <div class="grid grid-auto">${alums.map(card).join("")}</div>`;
 }
 
 /* ---------- Manager profile ---------- */
