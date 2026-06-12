@@ -151,9 +151,9 @@ const LWFFL = (() => {
     if (cachePromise) return cachePromise;
     cachePromise = (async () => {
       const [standings, games, seeds] = await Promise.all([
-        fetch("../final-standings.json").then(r => r.json()),
-        fetch("../league-scores.json").then(r => r.json()),
-        fetch("../playoff-seeds.json").then(r => r.json())
+        fetch("final-standings.json").then(r => r.json()),
+        fetch("league-scores.json").then(r => r.json()),
+        fetch("playoff-seeds.json").then(r => r.json())
       ]);
       games.forEach(g => {
         g.year = Number(g.year);

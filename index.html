@@ -1,350 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="stylesheet" href="style.css">
   <meta charset="UTF-8" />
-  <meta name="robots" content="noindex, nofollow" />
-  <title>LWFFL Record Book and More</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    .shell {
-      max-width: 900px;
-      width: 100%;
-      margin: 24px auto;
-    }
-
-    .container {
-      background:
-        radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%),
-        radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.18), transparent 55%),
-        var(--card-bg);
-      border-radius: 18px;
-      border: 1px solid rgba(148, 163, 184, 0.3);
-      box-shadow:
-        0 40px 80px rgba(0, 0, 0, 0.8),
-        0 0 0 1px rgba(15, 23, 42, 0.9);
-      padding: 32px 24px 28px;
-      backdrop-filter: blur(14px);
-    }
-
-    header {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-
-    header h1 {
-      font-size: 1.9rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      font-weight: 700;
-      color: #f9fafb;
-      line-height: 1.3;
-    }
-
-    header p {
-      margin-top: 14px;
-      color: var(--text-soft);
-      font-size: 0.85rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-    }
-
-    .links-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .nav-card {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 16px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(31, 41, 55, 0.9);
-      background: rgba(15, 23, 42, 0.94);
-      text-decoration: none;
-      color: inherit;
-      transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
-    }
-
-    .nav-card:hover {
-      background: rgba(15, 23, 42, 0.99);
-      transform: translateY(-2px);
-      box-shadow:
-        0 18px 35px rgba(15, 23, 42, 0.9),
-        0 0 0 1px rgba(56, 189, 248, 0.3);
-    }
-
-    .nav-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #e5e7eb;
-      margin-bottom: 4px;
-    }
-
-    .nav-desc {
-      font-size: 0.8rem;
-      color: var(--text-soft);
-      line-height: 1.4;
-    }
-
-    .nav-footer {
-      margin-top: 12px;
-      font-size: 0.72rem;
-      color: var(--accent);
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-
-    .nav-section {
-      grid-column: 1 / -1;
-      font-size: 0.75rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin: 10px 0 2px;
-    }
-
-    .season-banner {
-      display: none;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 28px;
-      padding: 18px;
-      border-radius: 14px;
-      border: 1px solid rgba(56, 189, 248, 0.2);
-      background: rgba(15, 23, 42, 0.6);
-    }
-    .season-banner.loaded { display: grid; }
-    .season-banner .sb-item { text-align: center; }
-    .season-banner .sb-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 4px;
-    }
-    .season-banner .sb-value {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #f9fafb;
-    }
-    .season-banner .sb-sub {
-      font-size: 0.72rem;
-      color: var(--text-soft);
-      margin-top: 2px;
-    }
-
-    @media (max-width: 800px) {
-      .links-grid {
-        grid-template-columns: 1fr;
-      }
-      .season-banner {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-      }
-    }
-  </style>
+  <meta name="robots" content="noindex, nofollow" />
+  <title>LWFFL — Legion of Whom Fantasy Football League</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-  <div id="nav-placeholder"></div>
 
-  <div class="shell">
-    <div class="container">
-      <header>
-        <h1>Legion of Whom<br>Fantasy Football League</h1>
-        <p>Full catalogue of stats and accomplishments · 2014–Present</p>
-      </header>
-
-      <div id="seasonBanner" class="season-banner"></div>
-
-      <main>
-        <div class="links-grid">
-          <div class="nav-section">Administrative</div>
-
-          <a href="constitution.html" class="nav-card">
-            <div>
-              <div class="nav-title">📕 League Constitution</div>
-              <div class="nav-desc">
-                Full text of the league constitution with easy navigation.
-              </div>
-            </div>
-            <div class="nav-footer">Open →</div>
-          </a>
-
-          <a href="amendment-history.html" class="nav-card">
-            <div>
-              <div class="nav-title">✏️ Amendment History</div>
-              <div class="nav-desc">
-                A history of approved league amendments and LM-implemented rules from newest to oldest.
-              </div>
-            </div>
-            <div class="nav-footer">Open →</div>
-          </a>
-
-          <div class="nav-section">Stats &amp; Records</div>
-
-          <a href="champions.html" class="nav-card">
-            <div>
-              <div class="nav-title">🏆 Champions</div>
-              <div class="nav-desc">
-                Every LWFFL season at a glance — champions, runners-up, scoring titles, and more.
-              </div>
-            </div>
-            <div class="nav-footer">Open →</div>
-          </a>
-
-          <a href="record-book.html" class="nav-card">
-            <div>
-              <div class="nav-title">📖 Record Book</div>
-              <div class="nav-desc">
-                Peruse league records with various categories and filters.
-              </div>
-            </div>
-            <div class="nav-footer">Open →</div>
-          </a>
-
-          <a href="postseason-accomplishments.html" class="nav-card">
-            <div>
-              <div class="nav-title">🏆 Postseason Accomplishments</div>
-              <div class="nav-desc">
-                An interactive table showing championships, playoff appearances, and more.
-              </div>
-            </div>
-            <div class="nav-footer">Open →</div>
-          </a>
-
-          <a href="season-stats.html" class="nav-card">
-            <div>
-              <div class="nav-title">📊 Season By Season Stats</div>
-              <div class="nav-desc">
-                Sortable table of all single-season performances in LWFFL history.
-              </div>
-            </div>
-            <div class="nav-footer">Open →</div>
-          </a>
-
-          <a href="head-to-head.html" class="nav-card">
-            <div>
-              <div class="nav-title">⚔️ H2H Matchup History</div>
-              <div class="nav-desc">
-                Explore every matchup between any two managers: outcomes, series streaks and more.
-              </div>
-            </div>
-            <div class="nav-footer">Open →</div>
-          </a>
-
-          <a href="weekly-performance.html" class="nav-card">
-            <div>
-              <div class="nav-title">🗓️ Weekly Performance</div>
-              <div class="nav-desc">
-                See which managers excel in which weeks plus leaguewide averages for each week.
-              </div>
-            </div>
-            <div class="nav-footer">Open →</div>
-          </a>
-
-          <a href="draft-history.html" class="nav-card">
-            <div>
-              <div class="nav-title">🧾 Draft History Archive</div>
-              <div class="nav-desc">
-                Browse historical draft logs by team and review complete draft boards by season.
-              </div>
-            </div>
-            <div class="nav-footer">Open →</div>
-          </a>
-
-          <div class="nav-section">Amusement</div>
-
-          <a href="manager-cards.html" class="nav-card">
-            <div>
-              <div class="nav-title">👤 Manager Cards</div>
-              <div class="nav-desc">
-                Visually rich profiles that summarize each manager's performance, earnings, stats, and more.
-              </div>
-            </div>
-            <div class="nav-footer">Open →</div>
-          </a>
-
-          <a href="probability-machine.html" class="nav-card">
-            <div>
-              <div class="nav-title">🕹️ Probability Machine</div>
-              <div class="nav-desc">
-                Calculate weekly win probabilities and season playoff odds using historical league data.
-              </div>
-            </div>
-            <div class="nav-footer">Open →</div>
-          </a>
-
-          <a href="draft-analytics.html" class="nav-card">
-            <div>
-              <div class="nav-title">📈 Draft Analytics</div>
-              <div class="nav-desc">
-                Manager leaderboard and efficiency metrics built from draft outcome data.
-              </div>
-            </div>
-            <div class="nav-footer">Open →</div>
-          </a>
-
-          <a href="scorigami.html" class="nav-card">
-            <div>
-              <div class="nav-title">💥 Scorigami Search</div>
-              <div class="nav-desc">
-                See what scores have and haven't been recorded in the course of LWFFL history.
-              </div>
-            </div>
-            <div class="nav-footer">Open →</div>
-          </a>
-        </div>
-      </main>
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>LW</span>FFL</a>
+    <div class="nav-links">
+      <a href="index.html" class="active">Home</a>
+      <a href="managers.html">Managers</a>
+      <a href="seasons.html">Seasons</a>
+      <a href="h2h.html">Head-to-Head</a>
+      <a href="draft.html">Draft</a>
+      <a href="explorer.html">Stat Lab</a>
+      <a href="records.html">Records</a>
+      <a href="arcade.html">Arcade</a>
+      <a href="league.html">Rulebook</a>
     </div>
   </div>
+</nav>
 
-  <script>
-    (async function loadSeasonBanner() {
-      try {
-        const res = await fetch('final-standings.json');
-        if (!res.ok) return;
-        const data = await res.json();
-        const maxYear = Math.max(...data.map(r => r.year));
-        const season = data.filter(r => r.year === maxYear);
-        if (!season.length) return;
+<div class="wrap">
 
-        season.sort((a, b) => (a.final_standing ?? 99) - (b.final_standing ?? 99));
-        const champ = season[0];
-        const runnerUp = season[1];
-        const lastPlace = season[season.length - 1];
+  <header class="hero">
+    <h1>Legion of Whom<br><span class="grad-text">Fantasy Football League</span></h1>
+    <p class="tagline">Twelve seasons. Sixteen managers. One thousand matchups of glory, heartbreak, and questionable waiver moves.</p>
+  </header>
 
-        const scoringTitle = season.slice().sort((a, b) => (b.points_for ?? 0) - (a.points_for ?? 0))[0];
+  <div id="main" class="loading">Loading league history…</div>
 
-        const banner = document.getElementById('seasonBanner');
-        banner.innerHTML = `
-          <div class="sb-item">
-            <div class="sb-label">${maxYear} Champion</div>
-            <div class="sb-value">🏆 ${champ.manager}</div>
-            <div class="sb-sub">${champ.wins}-${champ.losses}</div>
+</div>
+
+<footer class="footer">
+  LWFFL · Legion of Whom Fantasy Football League
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/tables.js"></script>
+<script>
+LWFFL.load().then(M => {
+  const { fmt, fmtInt, mlink, ylink, recordStr, shortName } = LWFFL;
+  const latest = M.seasonSummaries[M.seasonSummaries.length - 1];
+  const totalPoints = M.games.reduce((a, g) => a + g.score1 + g.score2, 0);
+
+  const careers = Object.values(M.managers)
+    .map(m => ({ name: m.name, slug: m.slug, ...m.career }))
+    .sort((a, b) =>
+      b.titles.length - a.titles.length ||
+      b.winPct - a.winPct
+    );
+
+  const podium = careers.filter(c => c.titles.length > 0).slice(0, 3);
+  const medals = ["🥇", "🥈", "🥉"];
+
+  document.getElementById("main").classList.remove("loading");
+  document.getElementById("main").innerHTML = `
+
+    <div class="champ-banner" style="margin-top:34px">
+      <div class="trophy">🏆</div>
+      <div style="flex:1;min-width:200px">
+        <div class="cb-label">Defending Champion · ${latest.year}</div>
+        <div class="cb-name">${mlink(latest.champ.manager)}</div>
+        <div class="cb-meta">
+          Defeated ${mlink(latest.runnerUp.manager)}
+          ${latest.champScore ? `${fmt(latest.champScore.winner)} – ${fmt(latest.champScore.loser)}` : ""}
+          in the championship · regular season ${recordStr(latest.champ.wins, latest.champ.losses, latest.champ.ties)}
+        </div>
+      </div>
+      <a class="pill accent" href="seasons.html?y=${latest.year}" style="text-decoration:none">Full season →</a>
+    </div>
+
+    <div class="section-label">League at a Glance</div>
+    <div class="grid grid-4">
+      <div class="card">
+        <div class="stat-label">Seasons</div>
+        <div class="stat-value">${M.years.length}</div>
+        <div class="stat-sub">${M.years[0]}–${M.years[M.years.length - 1]}</div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Matchups Played</div>
+        <div class="stat-value">${fmtInt(M.games.length)}</div>
+        <div class="stat-sub">regular season + playoffs</div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Points Scored</div>
+        <div class="stat-value">${fmtInt(totalPoints)}</div>
+        <div class="stat-sub">all-time, both sides</div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Managers</div>
+        <div class="stat-value">${careers.length}</div>
+        <div class="stat-sub">${careers.filter(c => c.active).length} active</div>
+      </div>
+    </div>
+
+    <div class="section-label">Title Podium</div>
+    <div class="grid grid-3">
+      ${podium.map((c, i) => `
+        <a class="card" href="managers.html?m=${c.slug}">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="font-size:2rem">${medals[i]}</div>
+            <div>
+              <div style="font-family:var(--font-display);font-weight:700;font-size:1.15rem">${shortName(c.name)}</div>
+              <div class="stat-sub">${c.titles.length} title${c.titles.length > 1 ? "s" : ""} · ${c.titles.join(", ")}</div>
+            </div>
           </div>
-          <div class="sb-item">
-            <div class="sb-label">Runner-Up</div>
-            <div class="sb-value">${runnerUp.manager}</div>
-            <div class="sb-sub">${runnerUp.wins}-${runnerUp.losses}</div>
-          </div>
-          <div class="sb-item">
-            <div class="sb-label">Scoring Title</div>
-            <div class="sb-value">${scoringTitle.manager}</div>
-            <div class="sb-sub">${Number(scoringTitle.points_for).toLocaleString()} pts</div>
-          </div>
-          <div class="sb-item">
-            <div class="sb-label">Last Place</div>
-            <div class="sb-value">${lastPlace.manager}</div>
-            <div class="sb-sub">${lastPlace.wins}-${lastPlace.losses}</div>
-          </div>
-        `;
-        banner.classList.add('loaded');
-      } catch (e) { /* silent fail — banner just doesn't show */ }
-    })();
-  </script>
-  <script src="nav-loader.js"></script>
+        </a>`).join("")}
+    </div>
+
+    <div class="section-label">All-Time Standings <span style="font-weight:400;text-transform:none;letter-spacing:0">— records include playoffs · click any column to sort</span></div>
+    <div id="allTimeTbl"></div>
+
+    <div class="section-label">Recent Champions</div>
+    <div class="grid grid-auto">
+      ${M.seasonSummaries.slice(-4).reverse().map(s => `
+        <a class="card" href="seasons.html?y=${s.year}">
+          <div class="stat-label">${s.year}</div>
+          <div style="font-family:var(--font-display);font-weight:700;font-size:1.15rem;margin-top:6px">🏆 ${shortName(s.champ.manager)}</div>
+          <div class="stat-sub">over ${shortName(s.runnerUp.manager)}${s.champScore ? ` · ${fmt(s.champScore.winner)}–${fmt(s.champScore.loser)}` : ""}</div>
+        </a>`).join("")}
+    </div>
+  `;
+
+  dataTable(document.getElementById("allTimeTbl"), {
+    columns: [
+      { key: "_rank", label: "#", get: () => null, render: (r, rank) => `<span style="color:var(--soft);font-weight:600">${rank}</span>` },
+      { key: "name", label: "Manager", dir: "asc",
+        render: c => `${mlink(c.name)}${c.active ? "" : ' <span class="pill" style="margin-left:6px">Alum</span>'}` },
+      { key: "seasons", label: "Seasons", num: true },
+      { key: "wins", label: "W", num: true },
+      { key: "losses", label: "L", num: true },
+      { key: "winPct", label: "Win %", num: true, render: c => (c.winPct * 100).toFixed(1) + "%" },
+      { key: "pf", label: "PF", num: true, render: c => fmtInt(c.pf) },
+      { key: "pa", label: "PA", num: true, render: c => fmtInt(c.pa) },
+      { key: "_ppg", label: "PPM", num: true, get: c => c.games ? c.pf / c.games : 0,
+        render: c => c.games ? (c.pf / c.games).toFixed(1) : "—" },
+      { key: "_titles", label: "Titles", num: true, get: c => c.titles.length,
+        render: c => c.titles.length ? "🏆".repeat(c.titles.length) : "—" },
+      { key: "_sct", label: "Scoring", num: true, get: c => c.scoringTitles.length,
+        render: c => c.scoringTitles.length || "—" },
+      { key: "playoffApps", label: "PO Apps", num: true },
+      { key: "bestFinish", label: "Best Fin", num: true, dir: "asc",
+        render: c => c.bestFinish === 1 ? "1st 🏆" : c.bestFinish }
+    ],
+    rows: careers,
+    initialSort: { key: "_titles", dir: "desc" }
+  });
+}).catch(err => {
+  console.error(err);
+  document.getElementById("main").textContent = "Could not load league data.";
+});
+</script>
 </body>
 </html>

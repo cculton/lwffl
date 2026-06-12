@@ -24,7 +24,7 @@
       <a href="draft.html">Draft</a>
       <a href="explorer.html">Stat Lab</a>
       <a href="records.html">Records</a>
-      <a href="arcade.html">🕹️ Arcade</a>
+      <a href="arcade.html">Arcade</a>
       <a href="league.html">Rulebook</a>
     </div>
   </div>
@@ -35,7 +35,7 @@
 </div>
 
 <footer class="footer">
-  LWFFL v2 concept · built from the same league data · <a href="../index.html">view classic site</a>
+  LWFFL · Legion of Whom Fantasy Football League
 </footer>
 
 <script src="assets/data.js"></script>
@@ -76,7 +76,7 @@ function renderIndex(M) {
           <span class="pill">${recordStr(c.wins, c.losses, c.ties)}</span>
           <span class="pill">${(c.winPct * 100).toFixed(1)}%</span>
           ${c.titles.length ? `<span class="pill gold">🏆 ${c.titles.length}</span>` : ""}
-          ${c.scoringTitles.length ? `<span class="pill accent">⚡ ${c.scoringTitles.length}</span>` : ""}
+          ${c.scoringTitles.length ? `<span class="pill accent">🕹️ ${c.scoringTitles.length}</span>` : ""}
         </div>
       </a>`;
   }).join("");
@@ -159,7 +159,7 @@ function renderProfile(M, m) {
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
           <span class="pill">${LWFFL.tenureStr(c.years, M.years[M.years.length - 1])}</span>
           ${c.titles.map(y => `<span class="pill gold">🏆 ${y}</span>`).join("")}
-          ${c.scoringTitles.map(y => `<span class="pill accent">⚡ ${y}</span>`).join("")}
+          ${c.scoringTitles.map(y => `<span class="pill accent">🕹️ ${y}</span>`).join("")}
         </div>
       </div>
       <div class="elo-badge" title="ELO power rating — updates after every matchup based on opponent strength, margin of victory, and playoff weighting">
@@ -191,7 +191,7 @@ function renderProfile(M, m) {
     <div class="section-label">Analytics</div>
     <div class="grid grid-2">
       <div class="card">
-        <div class="stat-label">⚡ ELO Progression</div>
+        <div class="stat-label">ELO Progression</div>
         <div class="chart-sub">End-of-season power rating vs league average (dashed) ·
           Current <strong style="color:var(--accent)">${M.elo.ratings[m.name].elo}</strong> ·
           Peak ${M.elo.ratings[m.name].peak} · Floor ${M.elo.ratings[m.name].floor}</div>

@@ -23,7 +23,7 @@
       <a href="draft.html">Draft</a>
       <a href="explorer.html">Stat Lab</a>
       <a href="records.html">Records</a>
-      <a href="arcade.html">🕹️ Arcade</a>
+      <a href="arcade.html">Arcade</a>
       <a href="league.html">Rulebook</a>
     </div>
   </div>
@@ -34,7 +34,7 @@
 </div>
 
 <footer class="footer">
-  LWFFL v2 concept · built from the same league data · <a href="../index.html">view classic site</a>
+  LWFFL · Legion of Whom Fantasy Football League
 </footer>
 
 <script src="assets/data.js"></script>
@@ -62,7 +62,7 @@ function renderIndex(M) {
       </div>
       <div style="margin-top:12px;font-weight:700">🏆 ${shortName(s.champ.manager)}</div>
       <div class="stat-sub">over ${shortName(s.runnerUp.manager)}${s.champScore ? ` · ${fmt(s.champScore.winner)}–${fmt(s.champScore.loser)}` : ""}</div>
-      <div class="stat-sub" style="margin-top:6px">⚡ Scoring title: ${shortName(s.scoring.manager)}</div>
+      <div class="stat-sub" style="margin-top:6px">🕹️ Scoring title: ${shortName(s.scoring.manager)}</div>
     </a>`).join("");
 
   const main = document.getElementById("main");
@@ -160,7 +160,7 @@ function renderSeason(M, s) {
     <div class="section-label">Season Superlatives</div>
     <div class="grid grid-3">
       <div class="card">
-        <div class="stat-label">⚡ Scoring Title</div>
+        <div class="stat-label">🕹️ Scoring Title</div>
         <div class="stat-value" style="font-size:1.2rem">${mlink(s.scoring.manager)}</div>
         <div class="stat-sub">${fmtInt(s.scoring.points_for)} points</div>
       </div>
@@ -189,7 +189,7 @@ function renderSeason(M, s) {
       { key: "final_standing", label: "#", num: true, dir: "asc",
         render: r => `<span style="color:var(--soft);font-weight:600">${r.final_standing}</span>` },
       { key: "manager", label: "Manager", dir: "asc",
-        render: r => `${mlink(r.manager)}${r.final_standing === 1 ? ' <span class="pill gold">🏆</span>' : ""}${r.manager === s.scoring.manager ? ' <span class="pill accent">⚡</span>' : ""}` },
+        render: r => `${mlink(r.manager)}${r.final_standing === 1 ? ' <span class="pill gold">🏆</span>' : ""}${r.manager === s.scoring.manager ? ' <span class="pill accent">🕹️</span>' : ""}` },
       { key: "winPct", label: "Record", num: true,
         render: r => `${recordStr(r.wins, r.losses, r.ties)} (${(r.winPct * 100).toFixed(1)}%)` },
       { key: "points_for", label: "PF", num: true, render: r => `<span class="pos">${fmt(r.points_for, 1)}</span>` },
