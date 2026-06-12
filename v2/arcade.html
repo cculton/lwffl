@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Arcade — LWFFL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <style>
+    /* shared input styles */
+    .arc-input {
+      padding: 12px 16px;
+      background: var(--surface-solid);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 1.05rem;
+      font-weight: 600;
+      font-family: var(--font-body);
+      width: 100%;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .arc-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+    }
+    .arc-btn {
+      padding: 12px 26px;
+      background: var(--accent-grad);
+      color: #06101e;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.92rem;
+      font-family: var(--font-body);
+      cursor: pointer;
+      height: 47px;
+      transition: transform 0.12s, box-shadow 0.15s;
+      white-space: nowrap;
+    }
+    .arc-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(56, 189, 248, 0.3); }
+
+    /* scorigami */
+    .score-search { display: flex; gap: 12px; max-width: 480px; margin: 0 auto 28px; }
+    .score-search input { text-align: center; font-family: var(--font-display); font-size: 1.2rem; }
+    .gami-banner {
+      text-align: center;
+      padding: 48px 24px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(129, 140, 248, 0.4);
+      background:
+        radial-gradient(ellipse 70% 100% at 50% 0%, rgba(129, 140, 248, 0.12), transparent),
+        var(--surface);
+      margin-bottom: 24px;
+    }
+    .gami-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 6vw, 3.2rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, #f472b6, #a855f7 50%, #38bdf8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gamiPulse 3s ease-in-out infinite;
+    }
+    @keyframes gamiPulse {
+      0%, 100% { filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.25)); }
+      50% { filter: drop-shadow(0 0 28px rgba(168, 85, 247, 0.55)); }
+    }
+    .gami-sub { margin-top: 12px; color: var(--muted); font-size: 1.05rem; }
+
+    /* odds */
+    .big-prob {
+      font-family: var(--font-display);
+      font-size: clamp(2.6rem, 7vw, 4rem);
+      font-weight: 700;
+      line-height: 1;
+      background: var(--accent-grad);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .verdict { font-size: 1rem; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>LW</span>FFL</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="managers.html">Managers</a>
+      <a href="seasons.html">Seasons</a>
+      <a href="h2h.html">Head-to-Head</a>
+      <a href="draft.html">Draft</a>
+      <a href="explorer.html">Stat Lab</a>
+      <a href="records.html">Records</a>
+      <a href="arcade.html" class="active">🕹️ Arcade</a>
+      <a href="league.html">Rulebook</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="page-head">
+    <h1>🕹️ Arcade</h1>
+    <p class="sub">The league toy box — scorigami hunting and probability machines</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="gami">Scorigami</button>
+    <button class="tab-btn" data-tab="weekly">Win Probability</button>
+    <button class="tab-btn" data-tab="season">Playoff Odds</button>
+  </div>
+
+  <!-- ================= SCORIGAMI ================= -->
+  <section id="tab-gami">
+    <p class="sub" style="text-align:center;color:var(--muted);margin-bottom:18px">
+      Has this exact score ever happened in league history — or would it be a first?
+    </p>
+    <div class="score-search">
+      <input class="arc-input" type="number" id="scoreInput" placeholder="Enter a score" step="0.01" aria-label="Score to search" />
+      <button class="arc-btn" type="button" id="checkBtn">Check</button>
+    </div>
+    <div id="gamiResult"></div>
+    <div class="section-label">Most Common Scores in League History</div>
+    <div id="commonGrid" class="grid grid-auto"></div>
+  </section>
+
+  <!-- ================= WIN PROBABILITY ================= -->
+  <section id="tab-weekly" hidden>
+    <div class="card" style="margin-bottom:20px">
+      <div class="grid grid-3" style="align-items:end">
+        <div>
+          <label class="field-label" for="typeSel">Matchup Type</label>
+          <select id="typeSel">
+            <option value="reg">Regular season</option>
+            <option value="po">Playoffs</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="scoreIn">Your Score</label>
+          <input class="arc-input" type="number" id="scoreIn" placeholder="e.g. 105.5" step="0.1" />
+        </div>
+        <button class="arc-btn" type="button" id="weeklyBtn">Calculate</button>
+      </div>
+      <div class="chart-sub" style="margin-top:10px">
+        The model fits a normal distribution to <strong id="poolCount">0</strong> historical scores for the selected matchup type.
+      </div>
+    </div>
+
+    <div id="weeklyResult" hidden>
+      <div class="grid grid-3" style="margin-bottom:20px">
+        <div class="card" style="text-align:center">
+          <div class="stat-label">Win Probability</div>
+          <div class="big-prob" id="probOut">—</div>
+          <div class="verdict" id="verdictOut"></div>
+        </div>
+        <div class="card" style="text-align:center">
+          <div class="stat-label">League Average</div>
+          <div class="stat-value" id="meanOut">—</div>
+          <div class="stat-sub">std dev <span id="stdOut">—</span></div>
+        </div>
+        <div class="card" style="text-align:center">
+          <div class="stat-label">vs Average</div>
+          <div class="stat-value" id="diffOut">—</div>
+          <div class="stat-sub">points above/below the mean</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="stat-label">Score Distribution</div>
+      <div class="chart-sub">Every historical score in 10-point buckets — your bucket highlights in green</div>
+      <div class="chart-box" style="height:300px"><canvas id="histChart"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ================= PLAYOFF ODDS ================= -->
+  <section id="tab-season" hidden>
+    <div class="card" style="margin-bottom:20px">
+      <div class="grid grid-3" style="align-items:end">
+        <div>
+          <label class="field-label" for="winsIn">Season Wins</label>
+          <input class="arc-input" type="number" id="winsIn" placeholder="e.g. 8" min="0" max="14" />
+        </div>
+        <div>
+          <label class="field-label" for="ppmIn">— or — Points Per Matchup</label>
+          <input class="arc-input" type="number" id="ppmIn" placeholder="e.g. 100.5" step="0.1" />
+        </div>
+        <button class="arc-btn" type="button" id="seasonBtn">Get Odds</button>
+      </div>
+      <div class="chart-sub" style="margin-top:10px">
+        Finds historical teams with a similar profile across <strong id="seasonCount">0</strong> manager-seasons and reports how their seasons ended.
+      </div>
+    </div>
+
+    <div id="seasonResult" hidden>
+      <div class="grid grid-3">
+        <div class="card" style="text-align:center">
+          <div class="stat-label">Make Playoffs</div>
+          <div class="big-prob" id="poOut">—</div>
+        </div>
+        <div class="card" style="text-align:center">
+          <div class="stat-label">Reach Championship</div>
+          <div class="big-prob" id="finalsOut">—</div>
+        </div>
+        <div class="card" style="text-align:center">
+          <div class="stat-label">Win It All</div>
+          <div class="big-prob" id="champOut">—</div>
+        </div>
+      </div>
+      <div class="filter-count" style="margin-top:14px" id="cohortNote"></div>
+    </div>
+  </section>
+</div>
+
+<footer class="footer">
+  LWFFL v2 concept · built from the same league data · <a href="../index.html">view classic site</a>
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/tables.js"></script>
+<script>
+LWFFL.load().then(M => {
+  const { fmt, mlink, ylink, isPlayoff } = LWFFL;
+
+  /* ---------- tabs (deep-linkable via ?tab=) ---------- */
+  const TABS = ["gami", "weekly", "season"];
+  function showTab(tab) {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+    TABS.forEach(t => document.getElementById("tab-" + t).hidden = t !== tab);
+    const url = new URL(location);
+    url.searchParams.set("tab", tab);
+    history.replaceState(null, "", url);
+  }
+  document.querySelectorAll(".tab-btn").forEach(b =>
+    b.addEventListener("click", () => showTab(b.dataset.tab)));
+
+  /* ================= SCORIGAMI ================= */
+  (() => {
+    const counts = {};
+    M.perfs.forEach(p => {
+      const k = p.pf.toFixed(2);
+      counts[k] = (counts[k] || 0) + 1;
+    });
+    const common = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    document.getElementById("commonGrid").innerHTML = common.map(([score, n]) => `
+      <a class="card" href="#" data-score="${score}" style="text-align:center">
+        <div class="stat-value" style="font-family:var(--font-display)">${parseFloat(score)}</div>
+        <div class="stat-sub">${n} times</div>
+      </a>`).join("");
+
+    function check() {
+      const val = parseFloat(document.getElementById("scoreInput").value);
+      const out = document.getElementById("gamiResult");
+      if (isNaN(val)) { out.innerHTML = ""; return; }
+
+      const matches = M.perfs.filter(p => Math.abs(p.pf - val) < 0.001);
+      const url = new URL(location);
+      url.searchParams.set("s", String(val));
+      history.replaceState(null, "", url);
+
+      if (!matches.length) {
+        out.innerHTML = `
+          <div class="gami-banner">
+            <div class="gami-title">SCORIGAMI!</div>
+            <div class="gami-sub">
+              <strong>${fmt(val)}</strong> has never been scored in ${M.perfs.length.toLocaleString()} all-time performances.<br>
+              Score it this week and you make league history.
+            </div>
+          </div>`;
+        return;
+      }
+
+      out.innerHTML = `
+        <div class="champ-banner" style="margin-bottom:18px">
+          <div class="trophy">🔁</div>
+          <div style="flex:1;min-width:200px">
+            <div class="cb-label">Not a Scorigami</div>
+            <div class="cb-name">${fmt(val)} has happened ${matches.length} time${matches.length > 1 ? "s" : ""}</div>
+            <div class="cb-meta">Every occurrence is listed below — click any column to sort.</div>
+          </div>
+        </div>
+        <div id="gamiTbl"></div>`;
+
+      dataTable(document.getElementById("gamiTbl"), {
+        columns: [
+          { key: "_when", label: "When", get: p => p.year * 100 + p.week, render: p => `${ylink(p.year)} · Wk ${p.week}` },
+          { key: "playoffs", label: "Type", dir: "asc", get: p => isPlayoff(p) ? p.playoffs : "Regular",
+            render: p => `<span class="pill ${isPlayoff(p) ? "accent" : ""}">${isPlayoff(p) ? p.playoffs : "Regular"}</span>` },
+          { key: "manager", label: "Manager", dir: "asc", render: p => mlink(p.manager) },
+          { key: "pf", label: "Score", num: true, render: p => `<strong>${fmt(p.pf)}</strong>` },
+          { key: "_res", label: "Result", dir: "asc", get: p => p.pf > p.pa ? "W" : p.pf < p.pa ? "L" : "T",
+            render: p => { const r = p.pf > p.pa ? "W" : p.pf < p.pa ? "L" : "T";
+              return `<span class="${r === "W" ? "pos" : r === "L" ? "neg" : ""}">${r}</span>`; } },
+          { key: "opp", label: "Opponent", dir: "asc", render: p => `${mlink(p.opp)} (${fmt(p.pa)})` }
+        ],
+        rows: matches,
+        initialSort: { key: "_when", dir: "desc" }
+      });
+    }
+
+    document.getElementById("commonGrid").addEventListener("click", e => {
+      const card = e.target.closest("[data-score]");
+      if (!card) return;
+      e.preventDefault();
+      document.getElementById("scoreInput").value = card.dataset.score;
+      check();
+    });
+    document.getElementById("checkBtn").addEventListener("click", check);
+    document.getElementById("scoreInput").addEventListener("keypress", e => { if (e.key === "Enter") check(); });
+
+    const q = new URLSearchParams(location.search).get("s");
+    if (q) {
+      document.getElementById("scoreInput").value = q;
+      check();
+    }
+  })();
+
+  /* ================= WIN PROBABILITY ================= */
+  (() => {
+    let chart = null;
+    let pool = [], mean = 0, std = 1;
+
+    function rebuildPool() {
+      const type = document.getElementById("typeSel").value;
+      pool = M.perfs.filter(p => (type === "po") === isPlayoff(p)).map(p => p.pf);
+      mean = pool.reduce((a, b) => a + b, 0) / pool.length;
+      std = Math.sqrt(pool.reduce((a, b) => a + (b - mean) ** 2, 0) / pool.length);
+      document.getElementById("poolCount").textContent = pool.length.toLocaleString();
+      renderHist();
+    }
+
+    function normCdf(z) {
+      const t = 1 / (1 + 0.2316419 * Math.abs(z));
+      const d = 0.3989423 * Math.exp(-z * z / 2);
+      let p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+      return z > 0 ? 1 - p : p;
+    }
+
+    function calcWeekly() {
+      const val = parseFloat(document.getElementById("scoreIn").value);
+      if (isNaN(val)) return;
+      const prob = normCdf((val - mean) / std);
+      const diff = val - mean;
+
+      document.getElementById("probOut").textContent = `${(prob * 100).toFixed(1)}%`;
+      document.getElementById("meanOut").textContent = fmt(mean);
+      document.getElementById("stdOut").textContent = fmt(std);
+      const diffEl = document.getElementById("diffOut");
+      diffEl.textContent = (diff >= 0 ? "+" : "") + fmt(diff, 1);
+      diffEl.style.color = diff >= 0 ? "var(--green)" : "var(--red)";
+
+      const tiers = [
+        [0.90, "var(--green)", "Dominant.", "Absolute powerhouse score."],
+        [0.75, "var(--green)", "Strong favorite.", "You should win this handily."],
+        [0.60, "var(--accent)", "Solid.", "Odds are in your favor."],
+        [0.40, "#fbbf24", "Coin flip.", "Could go either way."],
+        [0.20, "var(--red)", "Underdog.", "You need your opponent to struggle."],
+        [-1, "var(--red)", "Miracle needed.", "Start praying to the fantasy gods."]
+      ];
+      const t = tiers.find(x => prob >= x[0]);
+      document.getElementById("verdictOut").innerHTML =
+        `<span style="color:${t[1]};font-weight:700">${t[2]}</span> <span style="color:var(--muted)">${t[3]}</span>`;
+
+      document.getElementById("weeklyResult").hidden = false;
+      renderHist(val);
+    }
+
+    function renderHist(userScore) {
+      const bins = {};
+      const max = Math.max(...pool);
+      for (let b = 0; b <= Math.ceil(max / 10) * 10; b += 10) bins[b] = 0;
+      pool.forEach(s => { bins[Math.floor(s / 10) * 10]++; });
+      const labels = Object.keys(bins);
+      const data = Object.values(bins);
+      const userBucket = userScore != null ? Math.floor(userScore / 10) * 10 : null;
+
+      const bg = labels.map((l, i) => data[i] === 0 ? "transparent"
+        : Number(l) === userBucket ? "#34d399" : "rgba(56,189,248,0.35)");
+      const border = labels.map((l, i) => data[i] === 0 ? "transparent"
+        : Number(l) === userBucket ? "#34d399" : "#38bdf8");
+
+      if (chart) chart.destroy();
+      Chart.defaults.color = "#64748b";
+      Chart.defaults.font.family = "Inter, system-ui, sans-serif";
+      chart = new Chart(document.getElementById("histChart"), {
+        type: "bar",
+        data: { labels, datasets: [{ data, backgroundColor: bg, borderColor: border,
+          borderWidth: 1, borderRadius: 4, minBarLength: 4 }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: "rgba(255,255,255,0.05)" } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    document.getElementById("typeSel").addEventListener("change", () => {
+      rebuildPool();
+      if (document.getElementById("scoreIn").value) calcWeekly();
+    });
+    document.getElementById("weeklyBtn").addEventListener("click", calcWeekly);
+    document.getElementById("scoreIn").addEventListener("keypress", e => { if (e.key === "Enter") calcWeekly(); });
+    rebuildPool();
+  })();
+
+  /* ================= PLAYOFF ODDS ================= */
+  (() => {
+    const playoffYears = {};
+    M.perfs.forEach(p => {
+      if (isPlayoff(p)) (playoffYears[p.manager] = playoffYears[p.manager] || new Set()).add(p.year);
+    });
+    const history = M.standings.map(r => {
+      const g = (r.wins || 0) + (r.losses || 0) + (r.ties || 0);
+      return {
+        wins: r.wins || 0,
+        ppm: g ? r.points_for / g : 0,
+        madePO: (playoffYears[r.manager] && playoffYears[r.manager].has(r.year)) || (r.final_standing ?? 99) <= 6,
+        madeFinals: (r.final_standing ?? 99) <= 2,
+        champ: r.final_standing === 1
+      };
+    });
+    document.getElementById("seasonCount").textContent = history.length;
+
+    function calcSeason() {
+      const w = document.getElementById("winsIn").value;
+      const p = document.getElementById("ppmIn").value;
+      let cohort = [], label = "";
+      if (w !== "") {
+        const wins = parseInt(w, 10);
+        cohort = history.filter(t => t.wins === wins);
+        if (cohort.length < 5) cohort = history.filter(t => Math.abs(t.wins - wins) <= 1);
+        label = `${wins}-win seasons`;
+      } else if (p !== "") {
+        const ppm = parseFloat(p);
+        cohort = history.filter(t => Math.abs(t.ppm - ppm) <= ppm * 0.05);
+        label = `seasons within 5% of ${ppm} PPM`;
+      } else return;
+
+      if (!cohort.length) {
+        document.getElementById("cohortNote").textContent = "No historical seasons match that profile.";
+        document.getElementById("seasonResult").hidden = false;
+        return;
+      }
+
+      const pct = n => `${Math.round(n / cohort.length * 100)}%`;
+      document.getElementById("poOut").textContent = pct(cohort.filter(t => t.madePO).length);
+      document.getElementById("finalsOut").textContent = pct(cohort.filter(t => t.madeFinals).length);
+      document.getElementById("champOut").textContent = pct(cohort.filter(t => t.champ).length);
+      document.getElementById("cohortNote").textContent = `Based on ${cohort.length} historical ${label}.`;
+      document.getElementById("seasonResult").hidden = false;
+    }
+
+    document.getElementById("seasonBtn").addEventListener("click", calcSeason);
+    ["winsIn", "ppmIn"].forEach(id =>
+      document.getElementById(id).addEventListener("keypress", e => { if (e.key === "Enter") calcSeason(); }));
+  })();
+
+  /* honor ?tab= deep link (after sections initialized) */
+  const tabParam = new URLSearchParams(location.search).get("tab");
+  if (TABS.includes(tabParam)) showTab(tabParam);
+
+}).catch(err => {
+  console.error(err);
+  document.querySelector(".wrap").innerHTML += '<div class="loading">Could not load league data.</div>';
+});
+</script>
+</body>
+</html>

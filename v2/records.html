@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Records — LWFFL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>LW</span>FFL</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="managers.html">Managers</a>
+      <a href="seasons.html">Seasons</a>
+      <a href="h2h.html">Head-to-Head</a>
+      <a href="draft.html">Draft</a>
+      <a href="explorer.html">Stat Lab</a>
+      <a href="records.html" class="active">Records</a>
+      <a href="arcade.html">🕹️ Arcade</a>
+      <a href="league.html">Rulebook</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="page-head">
+    <h1>Record Book</h1>
+    <p class="sub">Full ranked lists for every category — filter by scope and manager, sort any column</p>
+  </header>
+
+  <div class="filter-bar">
+    <div>
+      <label class="field-label" for="catSel">Category</label>
+      <select id="catSel">
+        <optgroup label="Single Matchup">
+          <option value="gameHigh" selected>Highest Scores</option>
+          <option value="gameLow">Lowest Scores</option>
+          <option value="blowout">Biggest Blowouts</option>
+          <option value="nailbiter">Closest Matchups</option>
+          <option value="combined">Highest-Scoring Matchups</option>
+          <option value="lowCombined">Lowest-Scoring Matchups</option>
+        </optgroup>
+        <optgroup label="Season">
+          <option value="seasonPF">Most Points (Season)</option>
+          <option value="seasonLowPF">Fewest Points (Season)</option>
+          <option value="seasonPA">Most Points Against (Season)</option>
+          <option value="bestRecord">Best Records</option>
+          <option value="worstRecord">Worst Records</option>
+          <option value="moves">Most Transactions</option>
+        </optgroup>
+        <optgroup label="Streaks">
+          <option value="winStreak">Longest Win Streaks</option>
+          <option value="lossStreak">Longest Losing Streaks</option>
+        </optgroup>
+      </select>
+    </div>
+    <div>
+      <label class="field-label" for="scopeSel">Scope</label>
+      <select id="scopeSel">
+        <option value="">All matchups</option>
+        <option value="reg">Regular season</option>
+        <option value="po">Playoffs only</option>
+      </select>
+    </div>
+    <div>
+      <label class="field-label" for="mgrSel">Manager</label>
+      <select id="mgrSel"><option value="">All managers</option></select>
+    </div>
+    <div>
+      <label class="field-label" for="yearSel">Season</label>
+      <select id="yearSel"><option value="">All seasons</option></select>
+    </div>
+  </div>
+  <div class="filter-count" id="countLine"></div>
+
+  <div id="recTable" class="loading">Computing records…</div>
+</div>
+
+<footer class="footer">
+  LWFFL v2 concept · built from the same league data · <a href="../index.html">view classic site</a>
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/tables.js"></script>
+<script>
+LWFFL.load().then(M => {
+  const { fmt, mlink, ylink, recordStr, isPlayoff } = LWFFL;
+  const names = Object.values(M.managers).map(m => m.name).sort();
+  fillSelectNames(document.getElementById("mgrSel"), names);
+  fillSelect(document.getElementById("yearSel"), M.years.slice().reverse().map(String));
+
+  const rankCol = { key: "_rank", label: "#", get: () => null, render: (r, rank) => `<span style="color:var(--soft);font-weight:600">${rank}</span>` };
+  const whenCol = { key: "_when", label: "When", get: r => r.year * 100 + (r.week || 0), render: r => `${ylink(r.year)}${r.week ? " · Wk " + r.week : ""}` };
+
+  /* ---- scope / filter helpers ---- */
+  const scopeOk = (g, scope) => !scope || (scope === "po") === isPlayoff(g);
+
+  function filteredPerfs() {
+    const scope = document.getElementById("scopeSel").value;
+    const mgr = document.getElementById("mgrSel").value;
+    const year = document.getElementById("yearSel").value;
+    return M.perfs.filter(p => scopeOk(p, scope) &&
+      (!mgr || p.manager === mgr) && (!year || String(p.year) === year));
+  }
+
+  function filteredGames() {
+    const scope = document.getElementById("scopeSel").value;
+    const mgr = document.getElementById("mgrSel").value;
+    const year = document.getElementById("yearSel").value;
+    return M.games.filter(g => scopeOk(g, scope) &&
+      (!mgr || g.manager1 === mgr || g.manager2 === mgr) &&
+      (!year || String(g.year) === year));
+  }
+
+  function filteredSeasons() {
+    const mgr = document.getElementById("mgrSel").value;
+    const year = document.getElementById("yearSel").value;
+    return M.standings.filter(r =>
+      (!mgr || r.manager === mgr) && (!year || String(r.year) === year));
+  }
+
+  /* ---- streak computation over filtered perfs (chronological) ---- */
+  function computeStreaks(kind) {
+    const scope = document.getElementById("scopeSel").value;
+    const mgr = document.getElementById("mgrSel").value;
+    const year = document.getElementById("yearSel").value;
+    const pool = M.perfs.filter(p => scopeOk(p, scope) &&
+      (!mgr || p.manager === mgr) && (!year || String(p.year) === year));
+    const won = p => kind === "win" ? p.pf > p.pa : p.pf < p.pa;
+
+    const state = {};
+    const out = [];
+    pool.forEach(p => {
+      const st = state[p.manager] || (state[p.manager] = { len: 0 });
+      if (won(p)) {
+        if (st.len === 0) st.start = { year: p.year, week: p.week };
+        st.len++;
+        st.end = { year: p.year, week: p.week };
+      } else {
+        if (st.len > 0) out.push({ manager: p.manager, len: st.len, start: st.start, end: st.end });
+        st.len = 0;
+      }
+    });
+    Object.entries(state).forEach(([manager, st]) => {
+      if (st.len > 0) out.push({ manager, len: st.len, start: st.start, end: st.end, active: true });
+    });
+    return out;
+  }
+
+  /* ---- category definitions ---- */
+  const perfCols = [
+    rankCol,
+    { key: "manager", label: "Manager", dir: "asc", render: r => mlink(r.manager) },
+    { key: "pf", label: "Score", num: true, render: r => `<strong>${fmt(r.pf)}</strong>` },
+    { key: "margin", label: "Margin", num: true, get: r => r.pf - r.pa,
+      render: r => { const m = r.pf - r.pa; return `<span class="${m > 0 ? "pos" : m < 0 ? "neg" : ""}">${m > 0 ? "+" : ""}${fmt(m)}</span>`; } },
+    { key: "opp", label: "Opponent", dir: "asc", render: r => `${mlink(r.opp)} (${fmt(r.pa)})` },
+    { key: "playoffs", label: "Type", dir: "asc", get: r => isPlayoff(r) ? r.playoffs : "Regular",
+      render: r => `<span class="pill ${isPlayoff(r) ? "accent" : ""}">${isPlayoff(r) ? r.playoffs : "Regular"}</span>` },
+    whenCol
+  ];
+
+  const gameColsFor = valueLabel => [
+    rankCol,
+    { key: "_val", label: valueLabel, num: true, get: r => r._val, render: r => `<strong>${fmt(r._val)}</strong>` },
+    { key: "winner", label: "Winner", dir: "asc", get: r => r._winner, render: r => mlink(r._winner) },
+    { key: "_final", label: "Final", get: r => Math.max(r.score1, r.score2),
+      render: r => `${fmt(Math.max(r.score1, r.score2))} – ${fmt(Math.min(r.score1, r.score2))} vs ${mlink(r._loser)}` },
+    { key: "playoffs", label: "Type", dir: "asc", get: r => isPlayoff(r) ? r.playoffs : "Regular",
+      render: r => `<span class="pill ${isPlayoff(r) ? "accent" : ""}">${isPlayoff(r) ? r.playoffs : "Regular"}</span>` },
+    whenCol
+  ];
+
+  const seasonCols = [
+    rankCol,
+    { key: "manager", label: "Manager", dir: "asc", render: r => mlink(r.manager) },
+    { key: "points_for", label: "PF", num: true, render: r => fmt(r.points_for, 1) },
+    { key: "points_against", label: "PA", num: true, render: r => fmt(r.points_against, 1) },
+    { key: "_rec", label: "Record", num: true, get: r => r._pct,
+      render: r => `${recordStr(r.wins, r.losses, r.ties)} (${(r._pct * 100).toFixed(1)}%)` },
+    { key: "transaction_count", label: "Moves", num: true },
+    { key: "final_standing", label: "Finish", num: true, dir: "asc",
+      render: r => r.final_standing === 1 ? `${r.final_standing} 🏆` : r.final_standing },
+    { key: "year", label: "Year", render: r => ylink(r.year) }
+  ];
+
+  const streakCols = [
+    rankCol,
+    { key: "manager", label: "Manager", dir: "asc",
+      render: r => `${mlink(r.manager)}${r.active ? ' <span class="pill green">Active</span>' : ""}` },
+    { key: "len", label: "Matchups", num: true, render: r => `<strong>${r.len}</strong>` },
+    { key: "_span", label: "Span", get: r => r.start.year * 100 + r.start.week,
+      render: r => `${ylink(r.start.year)} Wk ${r.start.week} → ${ylink(r.end.year)} Wk ${r.end.week}` }
+  ];
+
+  function decorateGames(games, valFn) {
+    return games.map(g => ({
+      ...g,
+      _val: valFn(g),
+      _winner: g.score1 > g.score2 ? g.manager1 : g.manager2,
+      _loser: g.score1 > g.score2 ? g.manager2 : g.manager1
+    }));
+  }
+
+  function decorateSeasons(rows) {
+    return rows.map(r => {
+      const g = (r.wins || 0) + (r.losses || 0) + (r.ties || 0);
+      return { ...r, _pct: g ? (r.wins + (r.ties || 0) * 0.5) / g : 0 };
+    });
+  }
+
+  const CATS = {
+    gameHigh:    { cols: perfCols, sort: { key: "pf", dir: "desc" }, rows: () => filteredPerfs(), count: "performances" },
+    gameLow:     { cols: perfCols, sort: { key: "pf", dir: "asc" }, rows: () => filteredPerfs(), count: "performances" },
+    blowout:     { cols: () => gameColsFor("Margin"), sort: { key: "_val", dir: "desc" },
+                   rows: () => decorateGames(filteredGames().filter(g => g.score1 !== g.score2), g => Math.abs(g.score1 - g.score2)), count: "matchups" },
+    nailbiter:   { cols: () => gameColsFor("Margin"), sort: { key: "_val", dir: "asc" },
+                   rows: () => decorateGames(filteredGames().filter(g => g.score1 !== g.score2), g => Math.abs(g.score1 - g.score2)), count: "matchups" },
+    combined:    { cols: () => gameColsFor("Total Pts"), sort: { key: "_val", dir: "desc" },
+                   rows: () => decorateGames(filteredGames(), g => g.score1 + g.score2), count: "matchups" },
+    lowCombined: { cols: () => gameColsFor("Total Pts"), sort: { key: "_val", dir: "asc" },
+                   rows: () => decorateGames(filteredGames(), g => g.score1 + g.score2), count: "matchups" },
+    seasonPF:    { cols: seasonCols, sort: { key: "points_for", dir: "desc" }, rows: () => decorateSeasons(filteredSeasons()), count: "manager-seasons", noScope: true },
+    seasonLowPF: { cols: seasonCols, sort: { key: "points_for", dir: "asc" }, rows: () => decorateSeasons(filteredSeasons()), count: "manager-seasons", noScope: true },
+    seasonPA:    { cols: seasonCols, sort: { key: "points_against", dir: "desc" }, rows: () => decorateSeasons(filteredSeasons()), count: "manager-seasons", noScope: true },
+    bestRecord:  { cols: seasonCols, sort: { key: "_rec", dir: "desc" }, rows: () => decorateSeasons(filteredSeasons()), count: "manager-seasons", noScope: true },
+    worstRecord: { cols: seasonCols, sort: { key: "_rec", dir: "asc" }, rows: () => decorateSeasons(filteredSeasons()), count: "manager-seasons", noScope: true },
+    moves:       { cols: seasonCols, sort: { key: "transaction_count", dir: "desc" }, rows: () => decorateSeasons(filteredSeasons()), count: "manager-seasons", noScope: true },
+    winStreak:   { cols: streakCols, sort: { key: "len", dir: "desc" }, rows: () => computeStreaks("win"), count: "streaks" },
+    lossStreak:  { cols: streakCols, sort: { key: "len", dir: "desc" }, rows: () => computeStreaks("loss"), count: "streaks" }
+  };
+
+  let table = null;
+
+  function render() {
+    const cat = CATS[document.getElementById("catSel").value];
+    document.getElementById("scopeSel").disabled = !!cat.noScope;
+    const rows = cat.rows();
+    const cols = typeof cat.cols === "function" ? cat.cols() : cat.cols;
+    document.getElementById("countLine").textContent =
+      `${rows.length.toLocaleString()} ${cat.count}` + (cat.noScope ? " · scope filter does not apply to season categories" : "");
+    const el = document.getElementById("recTable");
+    el.classList.remove("loading");
+    el.textContent = "";
+    const holder = document.createElement("div");
+    el.appendChild(holder);
+    table = dataTable(holder, { columns: cols, rows, initialSort: cat.sort, pageSize: 25 });
+  }
+
+  ["catSel", "scopeSel", "mgrSel", "yearSel"].forEach(id =>
+    document.getElementById(id).addEventListener("change", render));
+  render();
+
+}).catch(err => {
+  console.error(err);
+  document.getElementById("recTable").textContent = "Could not load league data.";
+});
+</script>
+</body>
+</html>

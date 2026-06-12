@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Managers — LWFFL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>LW</span>FFL</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="managers.html" class="active">Managers</a>
+      <a href="seasons.html">Seasons</a>
+      <a href="h2h.html">Head-to-Head</a>
+      <a href="draft.html">Draft</a>
+      <a href="explorer.html">Stat Lab</a>
+      <a href="records.html">Records</a>
+      <a href="arcade.html">🕹️ Arcade</a>
+      <a href="league.html">Rulebook</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div id="main" class="loading">Loading managers…</div>
+</div>
+
+<footer class="footer">
+  LWFFL v2 concept · built from the same league data · <a href="../index.html">view classic site</a>
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/tables.js"></script>
+<script>
+const initials = name => name.split(/\s+/).map(w => w[0]).join("").toUpperCase();
+
+LWFFL.load().then(M => {
+  const slug = new URLSearchParams(location.search).get("m");
+  if (slug && M.managers[slug]) renderProfile(M, M.managers[slug]);
+  else renderIndex(M);
+}).catch(err => {
+  console.error(err);
+  document.getElementById("main").textContent = "Could not load league data.";
+});
+
+/* ---------- Manager index ---------- */
+
+function renderIndex(M) {
+  const { recordStr } = LWFFL;
+  const list = Object.values(M.managers).sort((a, b) =>
+    b.career.titles.length - a.career.titles.length || b.career.winPct - a.career.winPct
+  );
+
+  const cards = list.map(m => {
+    const c = m.career;
+    return `
+      <a class="card" href="managers.html?m=${m.slug}">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+          <div class="avatar">${initials(m.name)}</div>
+          <div style="min-width:0">
+            <div style="font-family:var(--font-display);font-weight:700;font-size:1.08rem">${LWFFL.shortName(m.name)}</div>
+            <div class="stat-sub">${LWFFL.tenureStr(c.years, M.years[M.years.length - 1])}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="pill accent">${M.elo.ratings[m.name].elo} ELO</span>
+          <span class="pill">${recordStr(c.wins, c.losses, c.ties)}</span>
+          <span class="pill">${(c.winPct * 100).toFixed(1)}%</span>
+          ${c.titles.length ? `<span class="pill gold">🏆 ${c.titles.length}</span>` : ""}
+          ${c.scoringTitles.length ? `<span class="pill accent">⚡ ${c.scoringTitles.length}</span>` : ""}
+        </div>
+      </a>`;
+  }).join("");
+
+  const main = document.getElementById("main");
+  main.classList.remove("loading");
+  main.innerHTML = `
+    <header class="page-head">
+      <h1>Managers</h1>
+      <p class="sub">${list.length} all-time managers, ranked by championships then win percentage</p>
+    </header>
+    <div class="grid grid-auto">${cards}</div>`;
+}
+
+/* ---------- Manager profile ---------- */
+
+function renderProfile(M, m) {
+  const { fmt, fmtInt, mlink, ylink, recordStr, sparkline } = LWFFL;
+  const c = m.career;
+  const myPerfs = M.perfs.filter(p => p.manager === m.name);
+
+  /* memorable games */
+  const best = myPerfs.slice().sort((a, b) => b.pf - a.pf)[0];
+  const worst = myPerfs.slice().sort((a, b) => a.pf - b.pf)[0];
+  const wins = myPerfs.filter(p => p.pf > p.pa);
+  const losses = myPerfs.filter(p => p.pf < p.pa);
+  const biggestWin = wins.slice().sort((a, b) => (b.pf - b.pa) - (a.pf - a.pa))[0];
+  const worstLoss = losses.slice().sort((a, b) => (b.pa - b.pf) - (a.pa - a.pf))[0];
+
+  const gameCard = (label, p, extra) => p ? `
+    <div class="card">
+      <div class="stat-label">${label}</div>
+      <div class="stat-value" style="font-size:1.35rem">${fmt(p.pf)}<span style="color:var(--soft);font-size:0.9rem;font-weight:500"> vs ${fmt(p.pa)}</span></div>
+      <div class="stat-sub">${extra} ${mlink(p.opp)} · ${ylink(p.year)} Wk ${p.week}</div>
+    </div>` : "";
+
+  /* season + rivals data (rendered as sortable tables below).
+     Records and PF/PA per season come from every matchup played that
+     year — playoffs included — so they sum to the career totals. */
+  const byYear = {};
+  myPerfs.forEach(p => {
+    const o = byYear[p.year] = byYear[p.year] || { w: 0, l: 0, t: 0, pf: 0, pa: 0, g: 0 };
+    if (p.pf > p.pa) o.w++; else if (p.pf < p.pa) o.l++; else o.t++;
+    o.pf += p.pf; o.pa += p.pa; o.g++;
+  });
+  const seasonData = m.seasons.map(r => {
+    const o = byYear[r.year] || { w: 0, l: 0, t: 0, pf: 0, pa: 0, g: 0 };
+    return {
+      year: r.year,
+      wins: o.w, losses: o.l, ties: o.t, g: o.g,
+      points_for: o.pf, points_against: o.pa,
+      ppm: o.g ? o.pf / o.g : null,
+      winPct: o.g ? (o.w + o.t * 0.5) / o.g : 0,
+      weekly_margin: r.weekly_margin,
+      transaction_count: r.transaction_count,
+      final_standing: r.final_standing,
+      seed: M.seedMap[`${r.manager}_${r.year}`] ?? null
+    };
+  });
+
+  const rivals = Object.entries(M.h2h[m.name] || {})
+    .map(([opp, r]) => ({
+      opp, ...r,
+      total: r.w + r.l + r.t,
+      winPct: (r.w + r.l + r.t) ? (r.w + r.t * 0.5) / (r.w + r.l + r.t) : 0,
+      diff: r.pf - r.pa
+    }));
+
+  const finishes = m.seasons.map(r => r.final_standing ?? 12);
+
+  const main = document.getElementById("main");
+  main.classList.remove("loading");
+  main.innerHTML = `
+    <a class="back-link" href="managers.html">← All managers</a>
+
+    <header style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-bottom:30px">
+      <div class="avatar lg">${initials(m.name)}</div>
+      <div style="flex:1;min-width:220px">
+        <h1 style="font-family:var(--font-display);font-size:clamp(1.7rem,4vw,2.4rem);font-weight:700;line-height:1.1">${LWFFL.shortName(m.name)}</h1>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+          <span class="pill">${LWFFL.tenureStr(c.years, M.years[M.years.length - 1])}</span>
+          ${c.titles.map(y => `<span class="pill gold">🏆 ${y}</span>`).join("")}
+          ${c.scoringTitles.map(y => `<span class="pill accent">⚡ ${y}</span>`).join("")}
+        </div>
+      </div>
+      <div class="elo-badge" title="ELO power rating — updates after every matchup based on opponent strength, margin of victory, and playoff weighting">
+        <div class="elo-num">${M.elo.ratings[m.name].elo}</div>
+        <div class="elo-tag">ELO</div>
+        <div class="elo-rank">${M.elo.ratings[m.name].rank ? `#${M.elo.ratings[m.name].rank} of ${M.elo.rankedCount}` : "unranked"}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="stat-label">Career finish trend</div>
+        ${sparkline(finishes)}
+      </div>
+    </header>
+
+    <div class="grid grid-4">
+      <div class="card"><div class="stat-label">Record</div><div class="stat-value">${recordStr(c.wins, c.losses, c.ties)}</div><div class="stat-sub">${(c.winPct * 100).toFixed(1)}% win rate · incl. playoffs</div></div>
+      <div class="card"><div class="stat-label">Championships</div><div class="stat-value">${c.titles.length}</div><div class="stat-sub">${c.runnerUps.length} runner-up finish${c.runnerUps.length === 1 ? "" : "es"}</div></div>
+      <div class="card"><div class="stat-label">Playoff Appearances</div><div class="stat-value">${c.playoffApps}</div><div class="stat-sub">in ${c.seasons} seasons</div></div>
+      <div class="card"><div class="stat-label">Points Per Matchup</div><div class="stat-value">${fmt(c.pf / c.games, 1)}</div><div class="stat-sub">${fmtInt(c.pf)} career points</div></div>
+    </div>
+
+    <div class="section-label">Memorable Matchups</div>
+    <div class="grid grid-4">
+      ${gameCard("Best Matchup", best, "def.")}
+      ${gameCard("Worst Matchup", worst, "vs")}
+      ${gameCard("Biggest Win", biggestWin, "def.")}
+      ${gameCard("Toughest Loss", worstLoss, "vs")}
+    </div>
+
+    <div class="section-label">Analytics</div>
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="stat-label">⚡ ELO Progression</div>
+        <div class="chart-sub">End-of-season power rating vs league average (dashed) ·
+          Current <strong style="color:var(--accent)">${M.elo.ratings[m.name].elo}</strong> ·
+          Peak ${M.elo.ratings[m.name].peak} · Floor ${M.elo.ratings[m.name].floor}</div>
+        <div class="chart-box"><canvas id="eloChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="stat-label">✦ Luck Index</div>
+        <div class="chart-sub">Each season's points-for rank plotted against points-against rank</div>
+        <div class="chart-box"><canvas id="luckChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="stat-label">💓 Heart Attack Ratio</div>
+        <div class="chart-sub">Record in matchups decided by fewer than 5 points</div>
+        <div class="chart-box"><canvas id="heartChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="stat-label">📊 Scoring Spread</div>
+        <div class="chart-sub">Lowest and highest single-matchup score each season</div>
+        <div class="chart-box"><canvas id="spreadChart"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="stat-label">🏁 Post-Season Fate</div>
+      <div class="chart-sub">Conversion funnel from seasons played to championship glory</div>
+      <div id="fateFlow" class="fate-flow"></div>
+    </div>
+
+    <div class="section-label">Season by Season <span style="font-weight:400;text-transform:none;letter-spacing:0">— records include playoffs</span></div>
+    <div id="seasonTbl"></div>
+
+    <div class="section-label">Rivalries</div>
+    <div id="rivalTbl"></div>
+  `;
+
+  dataTable(document.getElementById("seasonTbl"), {
+    columns: [
+      { key: "year", label: "Year", render: r => ylink(r.year) },
+      { key: "winPct", label: "Record", num: true,
+        render: r => `${recordStr(r.wins, r.losses, r.ties)} (${(r.winPct * 100).toFixed(1)}%)` },
+      { key: "points_for", label: "PF", num: true, render: r => `<span class="pos">${fmt(r.points_for, 1)}</span>` },
+      { key: "points_against", label: "PA", num: true, render: r => `<span class="neg">${fmt(r.points_against, 1)}</span>` },
+      { key: "ppm", label: "PPM", num: true, render: r => r.ppm == null ? "—" : fmt(r.ppm, 1) },
+      { key: "weekly_margin", label: "Margin", num: true,
+        render: r => r.weekly_margin == null ? "—" : `<span class="${r.weekly_margin >= 0 ? "pos" : "neg"}">${r.weekly_margin > 0 ? "+" : ""}${fmt(r.weekly_margin, 1)}</span>` },
+      { key: "seed", label: "Seed", num: true, dir: "asc" },
+      { key: "final_standing", label: "Finish", num: true, dir: "asc",
+        render: r => r.final_standing === 1 ? `${r.final_standing} <span class="pill gold">🏆</span>`
+          : r.final_standing === 2 ? `${r.final_standing} <span class="pill">2nd</span>` : r.final_standing },
+      { key: "transaction_count", label: "Moves", num: true }
+    ],
+    rows: seasonData,
+    initialSort: { key: "year", dir: "desc" }
+  });
+
+  dataTable(document.getElementById("rivalTbl"), {
+    columns: [
+      { key: "opp", label: "Opponent", dir: "asc", render: r => mlink(r.opp) },
+      { key: "total", label: "MP", num: true },
+      { key: "w", label: "W", num: true },
+      { key: "l", label: "L", num: true },
+      { key: "t", label: "T", num: true },
+      { key: "winPct", label: "Win %", num: true, render: r => (r.winPct * 100).toFixed(1) + "%" },
+      { key: "pf", label: "PF", num: true, render: r => fmt(r.pf, 1) },
+      { key: "pa", label: "PA", num: true, render: r => fmt(r.pa, 1) },
+      { key: "diff", label: "Diff", num: true,
+        render: r => `<span class="${r.diff >= 0 ? "pos" : "neg"}">${r.diff >= 0 ? "+" : ""}${fmt(r.diff, 1)}</span>` },
+      { key: "_h2h", label: "", get: () => null,
+        render: r => `<a class="ylink" href="h2h.html?a=${LWFFL.slugify(m.name)}&b=${LWFFL.slugify(r.opp)}">Series →</a>` }
+    ],
+    rows: rivals,
+    initialSort: { key: "total", dir: "desc" },
+    footer: rows => {
+      const w = rows.reduce((a, r) => a + r.w, 0), l = rows.reduce((a, r) => a + r.l, 0), t = rows.reduce((a, r) => a + r.t, 0);
+      return `Combined head-to-head record: <strong>${recordStr(w, l, t)}</strong>`;
+    }
+  });
+
+  renderCharts(M, m, c, myPerfs);
+  document.title = `${LWFFL.shortName(m.name)} — LWFFL`;
+}
+
+/* ---------- Analytics charts (ported from the classic manager cards) ---------- */
+
+function renderCharts(M, m, c, myPerfs) {
+  Chart.defaults.color = "#64748b";
+  Chart.defaults.font.family = "Inter, system-ui, sans-serif";
+  const common = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+
+  /* ELO progression vs league average */
+  const eloPts = (M.elo.seasonal[m.name] || []).filter(d => d.year >= c.firstYear);
+  new Chart(document.getElementById("eloChart"), {
+    type: "line",
+    data: {
+      labels: eloPts.map(d => d.year),
+      datasets: [
+        { label: "ELO", data: eloPts.map(d => d.elo), borderColor: "#38bdf8",
+          backgroundColor: "rgba(56,189,248,0.1)", borderWidth: 3, pointRadius: 4,
+          pointHoverRadius: 7, pointBackgroundColor: "#fff", tension: 0.15, fill: true },
+        { label: "League avg", data: eloPts.map(d => Math.round(M.elo.leagueAvg[d.year])),
+          borderColor: "rgba(255,255,255,0.25)", borderWidth: 1.5, borderDash: [5, 5],
+          pointRadius: 0, fill: false }
+      ]
+    },
+    options: {
+      ...common,
+      plugins: { legend: { display: true, position: "top", align: "end", labels: { boxWidth: 12, font: { size: 10 } } } },
+      scales: { y: { grid: { color: "rgba(255,255,255,0.05)" } }, x: { grid: { display: false } } }
+    }
+  });
+
+  /* Luck Index — PF rank vs PA rank scatter with quadrant labels */
+  const luckPts = m.seasons.map(r => {
+    const ranks = M.seasonRanks[`${m.name}_${r.year}`] || { pfRank: 6, paRank: 6 };
+    return { x: ranks.pfRank, y: ranks.paRank, year: r.year };
+  });
+  const quadrants = {
+    id: "quadrants",
+    beforeDraw(chart) {
+      const { ctx, chartArea: { top, bottom, left, right } } = chart;
+      const midX = (left + right) / 2, midY = (top + bottom) / 2;
+      ctx.save();
+      ctx.strokeStyle = "rgba(255,255,255,0.1)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(midX, top); ctx.lineTo(midX, bottom);
+      ctx.moveTo(left, midY); ctx.lineTo(right, midY);
+      ctx.stroke();
+      ctx.font = "600 9px Inter, system-ui";
+      ctx.fillStyle = "rgba(255,255,255,0.4)";
+      ctx.textAlign = "center";
+      ctx.fillText("DOMINANT & LUCKY", (left + midX) / 2, top + 14);
+      ctx.fillText("SUBPAR & LUCKY", (midX + right) / 2, top + 14);
+      ctx.fillText("DOMINANT & UNLUCKY", (left + midX) / 2, bottom - 8);
+      ctx.fillText("SUBPAR & UNLUCKY", (midX + right) / 2, bottom - 8);
+      ctx.restore();
+    }
+  };
+  new Chart(document.getElementById("luckChart"), {
+    type: "scatter",
+    data: { datasets: [{ data: luckPts, backgroundColor: "rgba(56,189,248,0.55)",
+      borderColor: "rgba(56,189,248,0.9)", pointBorderWidth: 2, pointRadius: 6, pointHoverRadius: 8 }] },
+    plugins: [quadrants],
+    options: {
+      ...common,
+      layout: { padding: { top: 8 } },
+      scales: {
+        x: { title: { display: true, text: "PF Rank (1 = Best)" }, min: 0, max: 12,
+          ticks: { stepSize: 1 }, grid: { display: false } },
+        y: { title: { display: true, text: "PA Rank (1 = Unlucky)" }, min: 0, max: 13,
+          ticks: { stepSize: 1, callback: v => v === 13 ? null : v }, grid: { display: false } }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => `${ctx.raw.year}: PF #${ctx.raw.x} | PA #${ctx.raw.y}` } }
+      }
+    }
+  });
+
+  /* Heart Attack Ratio — record in matchups decided by < 5 */
+  let haW = 0, haL = 0;
+  myPerfs.forEach(p => {
+    if (Math.abs(p.pf - p.pa) < 5) {
+      if (p.pf > p.pa) haW++;
+      else if (p.pf < p.pa) haL++;
+    }
+  });
+  new Chart(document.getElementById("heartChart"), {
+    type: "doughnut",
+    data: { labels: ["Wins", "Losses"], datasets: [{ data: [haW, haL],
+      backgroundColor: ["#34d399", "#f87171"], borderWidth: 0, hoverOffset: 4 }] },
+    options: {
+      ...common,
+      cutout: "65%",
+      plugins: { legend: { display: true, position: "bottom", labels: { color: "#94a3b8" } } }
+    }
+  });
+
+  /* Scoring Spread — floor/ceiling floating bars per season */
+  const years = m.seasons.map(r => r.year);
+  const spreadData = years.map(y => {
+    const scores = myPerfs.filter(p => p.year === y).map(p => p.pf);
+    return scores.length ? [Math.min(...scores), Math.max(...scores)] : [0, 0];
+  });
+  new Chart(document.getElementById("spreadChart"), {
+    type: "bar",
+    data: { labels: years, datasets: [{ data: spreadData,
+      backgroundColor: "rgba(56,189,248,0.4)", borderRadius: 4 }] },
+    options: {
+      ...common,
+      scales: { y: { grid: { color: "rgba(255,255,255,0.05)" } }, x: { grid: { display: false } } }
+    }
+  });
+
+  /* Post-Season Fate funnel */
+  const finals = m.seasons.filter(r => (r.final_standing ?? 99) <= 2).length;
+  const pct = n => c.seasons ? (n / c.seasons) * 100 : 0;
+  document.getElementById("fateFlow").innerHTML = `
+    <div class="fate-step"><div class="fate-bar" style="width:100%"></div><div class="fate-label">Seasons Played</div><div class="fate-val">${c.seasons}</div></div>
+    <div class="fate-step step-playoffs"><div class="fate-bar" style="width:${pct(c.playoffApps)}%"></div><div class="fate-label">Made Playoffs</div><div class="fate-val">${c.playoffApps}</div></div>
+    <div class="fate-step step-finals"><div class="fate-bar" style="width:${pct(finals)}%"></div><div class="fate-label">Made Finals</div><div class="fate-val">${finals}</div></div>
+    <div class="fate-step step-titles"><div class="fate-bar" style="width:${pct(c.titles.length)}%"></div><div class="fate-label">Champion</div><div class="fate-val">${c.titles.length}</div></div>
+  `;
+}
+</script>
+</body>
+</html>

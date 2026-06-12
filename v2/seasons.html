@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Seasons — LWFFL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>LW</span>FFL</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="managers.html">Managers</a>
+      <a href="seasons.html" class="active">Seasons</a>
+      <a href="h2h.html">Head-to-Head</a>
+      <a href="draft.html">Draft</a>
+      <a href="explorer.html">Stat Lab</a>
+      <a href="records.html">Records</a>
+      <a href="arcade.html">🕹️ Arcade</a>
+      <a href="league.html">Rulebook</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div id="main" class="loading">Loading seasons…</div>
+</div>
+
+<footer class="footer">
+  LWFFL v2 concept · built from the same league data · <a href="../index.html">view classic site</a>
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/tables.js"></script>
+<script>
+LWFFL.load().then(M => {
+  const y = Number(new URLSearchParams(location.search).get("y"));
+  const summary = M.seasonSummaries.find(s => s.year === y);
+  if (summary) renderSeason(M, summary);
+  else renderIndex(M);
+}).catch(err => {
+  console.error(err);
+  document.getElementById("main").textContent = "Could not load league data.";
+});
+
+/* ---------- Season index ---------- */
+
+function renderIndex(M) {
+  const { fmt, shortName } = LWFFL;
+  const cards = M.seasonSummaries.slice().reverse().map(s => `
+    <a class="card" href="seasons.html?y=${s.year}">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <div style="font-family:var(--font-display);font-weight:700;font-size:1.5rem" class="grad-text">${s.year}</div>
+        <span class="pill">${s.rows.length} teams</span>
+      </div>
+      <div style="margin-top:12px;font-weight:700">🏆 ${shortName(s.champ.manager)}</div>
+      <div class="stat-sub">over ${shortName(s.runnerUp.manager)}${s.champScore ? ` · ${fmt(s.champScore.winner)}–${fmt(s.champScore.loser)}` : ""}</div>
+      <div class="stat-sub" style="margin-top:6px">⚡ Scoring title: ${shortName(s.scoring.manager)}</div>
+    </a>`).join("");
+
+  const main = document.getElementById("main");
+  main.classList.remove("loading");
+  main.innerHTML = `
+    <header class="page-head">
+      <h1>Seasons</h1>
+      <p class="sub">${M.years.length} seasons of league history, newest first</p>
+    </header>
+    <div class="grid grid-auto">${cards}</div>`;
+}
+
+/* ---------- Season detail ---------- */
+
+function renderSeason(M, s) {
+  const { fmt, fmtInt, mlink, recordStr, isPlayoff } = LWFFL;
+  const y = s.year;
+
+  /* standings data (rendered as a sortable table below) */
+  const standingsData = s.rows.map(r => {
+    const g = (r.wins || 0) + (r.losses || 0) + (r.ties || 0);
+    return {
+      ...r, g,
+      ppm: g ? r.points_for / g : null,
+      seed: M.seedMap[`${r.manager}_${y}`] ?? null,
+      winPct: g ? (r.wins + (r.ties || 0) * 0.5) / g : 0
+    };
+  });
+
+  /* playoff games grouped by round */
+  const rounds = ["First Round", "Semifinals", "Championship"];
+  const playoffGames = M.games.filter(g => g.year === y && isPlayoff(g));
+  const playoffHtml = rounds.map(round => {
+    const games = playoffGames.filter(g => g.playoffs === round);
+    if (!games.length) return "";
+    return `
+      <div class="section-label">${round}</div>
+      <div class="grid grid-auto">
+        ${games.map(g => {
+          const w1 = g.score1 > g.score2;
+          return `
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;gap:10px">
+                <span style="font-weight:${w1 ? 700 : 400};color:${w1 ? "var(--text)" : "var(--muted)"}">${mlink(g.manager1)}</span>
+                <span class="num" style="font-weight:${w1 ? 700 : 400};color:${w1 ? "var(--green)" : "var(--muted)"}">${fmt(g.score1)}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;gap:10px;margin-top:8px">
+                <span style="font-weight:${!w1 ? 700 : 400};color:${!w1 ? "var(--text)" : "var(--muted)"}">${mlink(g.manager2)}</span>
+                <span class="num" style="font-weight:${!w1 ? 700 : 400};color:${!w1 ? "var(--green)" : "var(--muted)"}">${fmt(g.score2)}</span>
+              </div>
+            </div>`;
+        }).join("")}
+      </div>`;
+  }).join("");
+
+  /* season superlatives */
+  const yearPerfs = M.perfs.filter(p => p.year === y);
+  const topGame = yearPerfs.slice().sort((a, b) => b.pf - a.pf)[0];
+  const yearGames = M.games.filter(g => g.year === y);
+  const closest = yearGames.filter(g => g.score1 !== g.score2)
+    .sort((a, b) => Math.abs(a.score1 - a.score2) - Math.abs(b.score1 - b.score2))[0];
+  const blowout = yearGames.slice()
+    .sort((a, b) => Math.abs(b.score1 - b.score2) - Math.abs(a.score1 - a.score2))[0];
+
+  const prev = M.years.includes(y - 1) ? `<a class="ylink" href="seasons.html?y=${y - 1}">← ${y - 1}</a>` : "<span></span>";
+  const next = M.years.includes(y + 1) ? `<a class="ylink" href="seasons.html?y=${y + 1}">${y + 1} →</a>` : "<span></span>";
+
+  const main = document.getElementById("main");
+  main.classList.remove("loading");
+  main.innerHTML = `
+    <div style="display:flex;justify-content:space-between;margin-bottom:18px">
+      ${prev}
+      <a class="back-link" href="seasons.html" style="margin:0">All seasons</a>
+      ${next}
+    </div>
+
+    <header class="page-head" style="text-align:center">
+      <h1><span class="grad-text">${y}</span> Season</h1>
+      <p class="sub">${s.rows.length} teams · ${yearGames.length} matchups</p>
+    </header>
+
+    <div class="champ-banner">
+      <div class="trophy">🏆</div>
+      <div style="flex:1;min-width:200px">
+        <div class="cb-label">League Champion</div>
+        <div class="cb-name">${mlink(s.champ.manager)}</div>
+        <div class="cb-meta">
+          Defeated ${mlink(s.runnerUp.manager)}
+          ${s.champScore ? `${fmt(s.champScore.winner)} – ${fmt(s.champScore.loser)}` : ""}
+          · regular season ${recordStr(s.champ.wins, s.champ.losses, s.champ.ties)}
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Season Superlatives</div>
+    <div class="grid grid-3">
+      <div class="card">
+        <div class="stat-label">⚡ Scoring Title</div>
+        <div class="stat-value" style="font-size:1.2rem">${mlink(s.scoring.manager)}</div>
+        <div class="stat-sub">${fmtInt(s.scoring.points_for)} points</div>
+      </div>
+      ${topGame ? `
+      <div class="card">
+        <div class="stat-label">🔥 Highest Score</div>
+        <div class="stat-value" style="font-size:1.2rem">${fmt(topGame.pf)}</div>
+        <div class="stat-sub">${mlink(topGame.manager)} · Week ${topGame.week}</div>
+      </div>` : ""}
+      ${closest ? `
+      <div class="card">
+        <div class="stat-label">😬 Closest Matchup</div>
+        <div class="stat-value" style="font-size:1.2rem">${fmt(Math.abs(closest.score1 - closest.score2))}</div>
+        <div class="stat-sub">${mlink(closest.manager1)} vs ${mlink(closest.manager2)} · Week ${closest.week}</div>
+      </div>` : ""}
+    </div>
+
+    <div class="section-label">Final Standings <span style="font-weight:400;text-transform:none;letter-spacing:0">— regular season records</span></div>
+    <div id="standingsTbl"></div>
+
+    ${playoffHtml}
+  `;
+
+  dataTable(document.getElementById("standingsTbl"), {
+    columns: [
+      { key: "final_standing", label: "#", num: true, dir: "asc",
+        render: r => `<span style="color:var(--soft);font-weight:600">${r.final_standing}</span>` },
+      { key: "manager", label: "Manager", dir: "asc",
+        render: r => `${mlink(r.manager)}${r.final_standing === 1 ? ' <span class="pill gold">🏆</span>' : ""}${r.manager === s.scoring.manager ? ' <span class="pill accent">⚡</span>' : ""}` },
+      { key: "winPct", label: "Record", num: true,
+        render: r => `${recordStr(r.wins, r.losses, r.ties)} (${(r.winPct * 100).toFixed(1)}%)` },
+      { key: "points_for", label: "PF", num: true, render: r => `<span class="pos">${fmt(r.points_for, 1)}</span>` },
+      { key: "points_against", label: "PA", num: true, render: r => `<span class="neg">${fmt(r.points_against, 1)}</span>` },
+      { key: "ppm", label: "PPM", num: true, render: r => r.ppm == null ? "—" : fmt(r.ppm, 1) },
+      { key: "weekly_margin", label: "Margin", num: true,
+        render: r => r.weekly_margin == null ? "—" : `<span class="${r.weekly_margin >= 0 ? "pos" : "neg"}">${r.weekly_margin > 0 ? "+" : ""}${fmt(r.weekly_margin, 1)}</span>` },
+      { key: "division_finish", label: "Div", num: true, dir: "asc" },
+      { key: "seed", label: "Seed", num: true, dir: "asc" },
+      { key: "transaction_count", label: "Moves", num: true }
+    ],
+    rows: standingsData,
+    initialSort: { key: "final_standing", dir: "asc" }
+  });
+
+  document.title = `${y} Season — LWFFL`;
+}
+</script>
+</body>
+</html>

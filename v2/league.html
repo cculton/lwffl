@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>League — LWFFL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    html { scroll-padding-top: 84px; }
+
+    .toc-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .toc-pills a {
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface-solid);
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .toc-pills a:hover { color: var(--accent); border-color: var(--accent); }
+
+    .law-section { margin-bottom: 18px; }
+    .law-section h2 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+    .law-section h2 .num { color: var(--accent); margin-right: 8px; }
+    .law-section h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 18px 0 8px;
+    }
+    .law-section p, .law-section li {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.65;
+      margin-bottom: 10px;
+    }
+    .law-section ol, .law-section ul { margin-left: 22px; margin-bottom: 10px; }
+
+    .division-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 14px 0; }
+    .division-box {
+      background: var(--surface-solid);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+    }
+    .division-name {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .division-box li { list-style: none; margin: 0 0 4px; color: var(--text); font-size: 0.88rem; }
+    .division-box ul { margin: 0; }
+
+    .rules-table { width: 100%; border-collapse: collapse; margin: 10px 0 4px; }
+    .rules-table td, .rules-table th {
+      padding: 8px 12px;
+      font-size: 0.86rem;
+      border-bottom: 1px solid var(--border);
+      white-space: normal;
+    }
+    .rules-table td:last-child, .rules-table th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+    .rules-table .val { color: var(--accent); font-weight: 700; }
+
+    .payout-box { margin: 14px 0; }
+    .payout-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .payout-row:last-child { border-bottom: none; }
+    .payout-amount { font-family: var(--font-display); font-weight: 700; color: var(--green); }
+
+    @media (max-width: 700px) { .division-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>LW</span>FFL</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="managers.html">Managers</a>
+      <a href="seasons.html">Seasons</a>
+      <a href="h2h.html">Head-to-Head</a>
+      <a href="draft.html">Draft</a>
+      <a href="explorer.html">Stat Lab</a>
+      <a href="records.html">Records</a>
+      <a href="arcade.html">🕹️ Arcade</a>
+      <a href="league.html" class="active">Rulebook</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="page-head">
+    <h1>League Constitution</h1>
+    <p class="sub">The governing document of the Legion of Whom, plus every amendment ever passed</p>
+  </header>
+
+  <nav class="toc-pills">
+    <a href="#overview">Overview</a>
+    <a href="#rosters">Rosters</a>
+    <a href="#scoring">Scoring</a>
+    <a href="#draft">Draft</a>
+    <a href="#season">Regular Season</a>
+    <a href="#free-agency">Free Agency</a>
+    <a href="#trades">Trades</a>
+    <a href="#postseason">Postseason</a>
+    <a href="#payouts">Buy-In &amp; Payouts</a>
+    <a href="#disputes">Disputes &amp; Powers</a>
+    <a href="#amendments">Amendment History</a>
+  </nav>
+
+  <section id="overview" class="card law-section">
+    <h2><span class="num">I.</span>League Overview</h2>
+    <p>This is a 12-team, head-to-head style league with three divisions and four teams per division.</p>
+    <div class="division-grid">
+      <div class="division-box">
+        <div class="division-name">First-Round Busts</div>
+        <ul><li>Bryce R.</li><li>Ryan C. (co-LM)</li><li>Ryan T.</li><li>Will S.</li></ul>
+      </div>
+      <div class="division-box">
+        <div class="division-name">Undrafted Free Agents</div>
+        <ul><li>Chad D.</li><li>Matt D.</li><li>Stu S.</li><li>Thomas H.</li></ul>
+      </div>
+      <div class="division-box">
+        <div class="division-name">Washed-Up Veterans</div>
+        <ul><li>Adam G.</li><li>Cobey C. (co-LM)</li><li>Connor G.</li><li>Samuel W.</li></ul>
+      </div>
+    </div>
+    <p>Second managers are permitted, though the team will still have only one vote in the league's processes. Buy-in and payout arrangements must be agreed upon between the two managers. Please seek approval from the co-LMs if you wish to add a second manager to your team.</p>
+  </section>
+
+  <section id="rosters" class="card law-section">
+    <h2><span class="num">II.</span>Rosters</h2>
+    <p>Roster settings closely reflect ESPN standard leagues. Each roster consists of: QB (1), RB (2), WR (2), WR/TE (1), FLEX (1), D/ST (1), K (1), BENCH (6) and IR (2).</p>
+    <p>RBs, WRs and TEs are eligible to be played in the FLEX position.</p>
+    <p>Players who are declared "out" are eligible to be placed in the IR slot. If a player placed in the IR slot no longer carries an injury designation, the team's roster will be locked from making transactions until either 1) roster modifications allow the player in the IR slot to be moved to the active roster or 2) another IR-eligible player is exchanged with the healthy player in the IR slot.</p>
+    <p>This league observes the ESPN undroppables list to reduce the risk of collusion or other strategies that threaten to erode the competitive balance of the league.</p>
+  </section>
+
+  <section id="scoring" class="card law-section">
+    <h2><span class="num">III.</span>Scoring Settings</h2>
+    <p>This league uses a decimal scoring system. See below for a comprehensive list of point values.</p>
+
+    <h3>Passing</h3>
+    <table class="rules-table">
+      <tr><td>Passing Yards</td><td class="val">0.04</td></tr>
+      <tr><td>Each Pass Completed</td><td class="val">0.2</td></tr>
+      <tr><td>Each Incomplete Pass</td><td class="val">-0.3</td></tr>
+      <tr><td>TD Pass</td><td class="val">4</td></tr>
+      <tr><td>Interceptions Thrown</td><td class="val">-2</td></tr>
+      <tr><td>2pt Passing Conversion</td><td class="val">2</td></tr>
+    </table>
+    <p>Each passing yard is 0.04 points, or 1 point per 25 yards. QBs receive a reward of 0.2 points per complete pass and a penalty of -0.3 per incomplete pass (break-even point is a 60 percent completion rate). This gives a modest reward to efficient QBs and assesses a slight penalty to inefficient ones.</p>
+
+    <h3>Rushing</h3>
+    <table class="rules-table">
+      <tr><td>Rushing Yards</td><td class="val">0.1</td></tr>
+      <tr><td>TD Rush</td><td class="val">6</td></tr>
+      <tr><td>2pt Rushing Conversion</td><td class="val">2</td></tr>
+    </table>
+
+    <h3>Receiving</h3>
+    <p>Each receiving yard is 0.1 points. Pass-catchers also earn 0.2 points per reception, or 1 point per 5 receptions.</p>
+    <table class="rules-table">
+      <tr><td>Receiving Yards</td><td class="val">0.1</td></tr>
+      <tr><td>Each Reception</td><td class="val">0.2</td></tr>
+      <tr><td>TD Reception</td><td class="val">6</td></tr>
+      <tr><td>2pt Receiving Conversion</td><td class="val">2</td></tr>
+    </table>
+
+    <h3>Miscellaneous</h3>
+    <table class="rules-table">
+      <tr><td>Kickoff Return Yards</td><td class="val">0.02</td></tr>
+      <tr><td>Punt Return Yards</td><td class="val">0.04</td></tr>
+      <tr><td>Kickoff / Punt Return TD</td><td class="val">6</td></tr>
+      <tr><td>Fumble Recovered for TD</td><td class="val">6</td></tr>
+      <tr><td>Total Fumbles Lost</td><td class="val">-2</td></tr>
+    </table>
+
+    <h3>Defense / Special Teams</h3>
+    <table class="rules-table">
+      <tr><td>Return TD (KO, Punt, INT, Fumble, Block)</td><td class="val">6</td></tr>
+      <tr><td>2pt Return</td><td class="val">2</td></tr>
+      <tr><td>1pt Safety</td><td class="val">1</td></tr>
+      <tr><td>Each Sack</td><td class="val">1</td></tr>
+      <tr><td>Blocked Punt, PAT, or FG</td><td class="val">2</td></tr>
+      <tr><td>Each Interception</td><td class="val">2</td></tr>
+      <tr><td>Each Fumble Recovered</td><td class="val">2</td></tr>
+      <tr><td>Each Safety</td><td class="val">4</td></tr>
+      <tr><td>Default Starting Score</td><td class="val">11.5</td></tr>
+      <tr><td>Each Point Allowed</td><td class="val">-0.5</td></tr>
+    </table>
+    <p>Each D/ST starts with 11.5 points and loses 0.5 points for each point it surrenders — the break-even point is 25 points allowed, roughly the league-wide average. Values stack: an interception returned for a touchdown earns 2 points for the interception plus 6 for the return TD, totaling 8.</p>
+
+    <h3>Kicking</h3>
+    <p>Kicker scoring is scaled back compared to standard ESPN leagues, with harsher penalties for shorter missed FGs. There is no penalty for missing a 60+ yard attempt.</p>
+    <table class="rules-table">
+      <thead><tr><th>Action</th><th>Made</th><th>Missed</th></tr></thead>
+      <tbody>
+        <tr><td>PAT</td><td class="val">1</td><td class="val">-1.5</td></tr>
+        <tr><td>FG (0–39 yds)</td><td class="val">1.5</td><td class="val">-1.5</td></tr>
+        <tr><td>FG (40–49 yds)</td><td class="val">2.5</td><td class="val">-1</td></tr>
+        <tr><td>FG (50–59 yds)</td><td class="val">3.5</td><td class="val">-0.5</td></tr>
+        <tr><td>FG (60+ yds)</td><td class="val">4.5</td><td class="val">0</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="draft" class="card law-section">
+    <h2><span class="num">IV.</span>Draft Procedure</h2>
+    <p>This league uses an auction-style (salary cap) draft with a $200 budget, conducted at a time determined to be best for the majority of managers. It should be held no earlier than the conclusion of the second week of the NFL preseason, and no later than 24 hours before the first NFL regular season game, except under unusual circumstances. Managers unable to draft at a tentatively decided time should notify one of the LMs of the conflict as soon as possible. The draft can be moved on draft day to adjust for unforeseen circumstances if there is unanimous league approval.</p>
+  </section>
+
+  <section id="season" class="card law-section">
+    <h2><span class="num">V.</span>Regular Season Schedule</h2>
+    <p>The regular season consists of 14 one-week matchups. Each team faces their division opponents twice per season (6 weeks) and non-division opponents once per season (8 weeks). The regular season has two three-week divisional matchup periods, one mid-season and one to conclude the regular season in weeks 12–14. There is no tiebreaker for regular season matchups.</p>
+    <p>Standings in each division are determined by winning percentage. If two teams have the same winning percentage, "points for" is used as the tiebreaker.</p>
+  </section>
+
+  <section id="free-agency" class="card law-section">
+    <h2><span class="num">VI.</span>Free Agency</h2>
+    <p>This league uses Free Agent Auction Bidding (FAAB) for acquiring players via free agency. Each team starts the season with a $100 budget. Submitted bids process early each Wednesday morning. There is no minimum bid. If two or more managers bid the same amount for a player, ties are broken by reverse order of standings.</p>
+    <p>After bids are processed each week, all unclaimed players become free agents and can be freely added on a first come, first served basis. All free agents lock again once their game kicks off for that week. Players dropped after Wednesday's processing go on waivers for 1 day, subject to the FAAB rules above.</p>
+    <p>FAAB dollars are not tradeable and do not roll over between seasons.</p>
+    <p>The FAAB budgets of teams who do not qualify for the playoffs are set to $0 at the conclusion of the regular season. Teams eliminated during the playoffs also have their budgets zeroed at the end of the week they are eliminated, allowing eliminated teams to make acquisitions without interfering with those in contention.</p>
+  </section>
+
+  <section id="trades" class="card law-section">
+    <h2><span class="num">VII.</span>Trades</h2>
+    <p>Trades process automatically after acceptance. There is no trade review period.</p>
+    <p>If there is ever an objection to an accepted trade, a review can be initiated through the league Discord or by contacting either League Manager. The LMs jointly review the trade; the only grounds for a veto is a trade that threatens the integrity or competitive balance of the league (i.e., collusion).</p>
+    <p>If a review involves a trade made by one of the LMs, the other LM individually rules on it. If a review involves a trade between both LMs, the rest of the league decides.</p>
+    <p>The trade deadline is the Wednesday prior to Week 11 at noon ET.</p>
+  </section>
+
+  <section id="postseason" class="card law-section">
+    <h2><span class="num">VIII.</span>Postseason</h2>
+    <h3>Playoff Seeding &amp; Tiebreakers</h3>
+    <p>Six of the 12 teams advance to the playoffs. Division winners are reserved the No. 1–3 seeds, ordered by winning percentage. The No. 4 seed is the "record wildcard" — the remaining team with the best winning percentage. The No. 5–6 seeds are the "points wildcards" — the remaining two teams with the most points for, regardless of division.</p>
+    <p>Winning-percentage ties are broken in order:</p>
+    <ol>
+      <li>Most total points for in regular season</li>
+      <li>Head-to-head record in regular season</li>
+      <li>Most total points against in regular season</li>
+      <li>Coin flip</li>
+    </ol>
+    <h3>Playoff Schedule</h3>
+    <p>The playoffs span Weeks 15–17. Each playoff matchup lasts one week, and the top two seeds receive a first-round bye. Ties are broken using the seeding tiebreakers above.</p>
+    <p>Teams eliminated in the semifinals play a 3rd-place game with prize money implications (see Section IX).</p>
+    <h3>Playoff Matchups</h3>
+    <p>During the first two rounds, the top active seed chooses their opponent: in the First Round the No. 3 seed picks among seeds 4–6; in the Semifinals the No. 1 seed picks among the remaining teams. If no choice is submitted, the highest active seed is assigned the lowest active seed.</p>
+    <h3>Consolation Bracket</h3>
+    <p>The consolation bracket follows the same format as the playoff bracket. There is no prize for winning it. Consolation teams have their FAAB budgets set to $0.</p>
+  </section>
+
+  <section id="payouts" class="card law-section">
+    <h2><span class="num">IX.</span>Buy-In &amp; Payout Structure</h2>
+    <h3>Buy-In</h3>
+    <p>The buy-in is <strong style="color:var(--green)">$75</strong>, collected via Venmo, due by Aug. 31 at 11:59 p.m. ET each season.</p>
+    <p>A late payment may be subject to a fee and automatically results in a 10-point deduction from the team's Week 1 matchup, repeating each subsequent week until paid. Payments received after a matchup's first kickoff still incur that week's deduction.</p>
+    <p>Any manager who has not paid before Oct. 1 is ineligible to collect prize money. If an ineligible team wins prize money, the amount rolls to the following year's pool or is distributed equally among the other managers, at the co-LMs' discretion.</p>
+    <h3>Payout</h3>
+    <div class="payout-box">
+      <div class="payout-row"><span>League Champion</span><span class="payout-amount">$450</span></div>
+      <div class="payout-row"><span>2nd Place</span><span class="payout-amount">$175</span></div>
+      <div class="payout-row"><span>3rd Place</span><span class="payout-amount">$100</span></div>
+      <div class="payout-row"><span>Regular Season Points Leader</span><span class="payout-amount">$100</span></div>
+      <div class="payout-row"><span>4th Place</span><span class="payout-amount">$75</span></div>
+    </div>
+    <p>Winnings are distributed via Venmo within two weeks of the fantasy season's conclusion.</p>
+  </section>
+
+  <section id="disputes" class="card law-section">
+    <h2><span class="num">X.</span>Disputes, Amendments &amp; LM Powers</h2>
+    <h3>Disputes</h3>
+    <p>For matters not addressed in this constitution, the co-LMs allow time for league-wide discussion, varying with the matter's time-sensitivity. After discussion, a majority vote (seven of 12) determines the outcome; abstentions shift the majority threshold accordingly. Tie votes are decided by the co-LMs. Outcomes can be codified as amendments if the co-LMs deem it necessary.</p>
+    <h3>Amendments</h3>
+    <p>A week-long amendment proposal window opens before each season, beginning no later than Aug. 14. Proposals are presented as polls in the league Discord with only two options: "for" and "against."</p>
+    <p>Each proposal needs at least 3 approval votes and zero dissenting votes to pass — one dissent nullifies it. However, a proposal with 9 or more approvals passes regardless of dissents. Polls stay open for 72 hours; a co-LM posts the official outcome.</p>
+    <p>Each manager may have one active proposal at a time. Failed proposals can be reworked and re-proposed. Amendments proposed outside the window require unanimous approval.</p>
+    <h3>LM Powers</h3>
+    <ul>
+      <li>Remove people from and invite people to the league</li>
+      <li>Levy punishments</li>
+      <li>Edit without notice items in this document deemed immaterial</li>
+    </ul>
+  </section>
+
+  <section id="amendments">
+    <div class="section-label">Amendment History — every passed amendment and implemented LM decision</div>
+    <div id="amendTbl"></div>
+  </section>
+</div>
+
+<footer class="footer">
+  LWFFL v2 concept · built from the same league data · <a href="../index.html">view classic site</a>
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/tables.js"></script>
+<script>
+const AMENDMENTS = [
+  { year: 2025, name: "Amendment #18 – TE/WR Flex", category: "Roster", desc: "Removed the dedicated TE spot and replaced it with a WR/TE flex position.", status: "Passed" },
+  { year: 2025, name: "Amendment #17 – Permanent Auction", category: "Draft", desc: "Made the auction draft the permanent default format going forward.", status: "Passed" },
+  { year: 2024, name: "Amendment #16 – One-Year Auction", category: "Draft", desc: "Used an auction draft for that season only, with permanence reconsidered later.", status: "Passed" },
+  { year: 2022, name: "Amendment #15 – Payout Structure", category: "Finances", desc: "Payout structure changed to: 1st: $450, 2nd: $175, 3rd: $100, 4th: $75, Scoring Title: $100.", status: "Passed" },
+  { year: 2022, name: "Amendment #12 – Playoff Opponent Choice", category: "Playoffs", desc: "Highest remaining seed selects their playoff opponent in the first round and semifinals.", status: "Passed" },
+  { year: 2021, name: "Amendment #14 – 3-Division Realignment", category: "Structure", desc: "Moved the league to three divisions and updated schedule and playoff seeding around division winners.", status: "Passed" },
+  { year: 2021, name: "Amendment #13 – Instant Processing", category: "Trades", desc: "Trades process immediately when accepted; LMs handle suspected collusion manually.", status: "Passed" },
+  { year: 2021, name: "Amendment #11 – Kicker Scoring", category: "Scoring", desc: "Added a 60+ yard FG tier and adjusted scoring and penalties across FG ranges.", status: "Passed" },
+  { year: 2021, name: "Amendment #10 – FAAB Process Change", category: "Waivers", desc: "First weekly run uses FAAB; the rest of the week is free agent add/drop.", status: "Passed" },
+  { year: 2021, name: "Amendment #9 – Buy-In Increase", category: "Finances", desc: "Raised the buy-in from $50 to $75 with payouts adjusted accordingly.", status: "Passed" },
+  { year: 2020, name: "LM Decision – Extra IR Slot", category: "Roster", desc: "Added an additional IR spot to help handle COVID-related player absences.", status: "Implemented" },
+  { year: 2020, name: "Amendment #8 – COVID Contingency", category: "Finances", desc: "Defined refunds and payout rules if the NFL season was shortened or canceled.", status: "Passed" },
+  { year: 2020, name: "Amendment #7 – Buy-In Increase", category: "Finances", desc: "Increased the buy-in from $40 to $50 with proportional prize adjustments.", status: "Passed" },
+  { year: 2018, name: "Amendment #6 – Buy-In Increase", category: "Finances", desc: "Doubled the buy-in from $20 to $40 while maintaining proportional payout structure.", status: "Passed" },
+  { year: 2018, name: "Amendment #5 – Thursday Trade Rule", category: "Trades", desc: "Allowed accelerated same-day review for Thursday night trades submitted by noon.", status: "Passed" },
+  { year: 2017, name: "Amendment #4 – H2H Tiebreaker", category: "Standings", desc: "Sets tiebreakers as: Points For > Head-to-Head > Points Against > Coin Flip.", status: "Passed" },
+  { year: 2016, name: "Amendment #3 – Division Realignment", category: "Structure", desc: "Realigned divisions by swapping two manager pairs between divisions.", status: "Passed" },
+  { year: 2015, name: "LM Decision – Expansion", category: "Structure", desc: "Expanded the league to 12 managers with two additions.", status: "Implemented" },
+  { year: 2015, name: "Amendment #2 – Points Wildcard", category: "Playoffs", desc: "Awarded the 6th playoff spot to the highest points-for team instead of best record.", status: "Passed" },
+  { year: 2015, name: "Amendment #1 – FAAB & Reviews", category: "Waivers", desc: "Implemented $100 FAAB system and shortened trade review period to 1 day.", status: "Passed" }
+];
+
+dataTable(document.getElementById("amendTbl"), {
+  columns: [
+    { key: "year", label: "Year", num: true },
+    { key: "name", label: "Amendment", dir: "asc", render: r => `<strong>${r.name}</strong>` },
+    { key: "category", label: "Category", dir: "asc", render: r => `<span class="pill accent">${r.category}</span>` },
+    { key: "desc", label: "Description", dir: "asc",
+      render: r => `<span style="white-space:normal;display:block;min-width:280px;color:var(--muted)">${r.desc}</span>` },
+    { key: "status", label: "Status", dir: "asc",
+      render: r => `<span class="pill ${r.status === "Passed" ? "green" : "accent"}">${r.status}</span>` }
+  ],
+  rows: AMENDMENTS,
+  initialSort: { key: "year", dir: "desc" }
+});
+</script>
+</body>
+</html>

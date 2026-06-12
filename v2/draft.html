@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Draft — LWFFL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .mgr-pills {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .mgr-pill {
+      padding: 7px 13px;
+      border-radius: 999px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface-solid);
+      color: var(--muted);
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.13s;
+    }
+    .mgr-pill:hover { color: var(--text); border-color: var(--accent); }
+    .mgr-pill.on {
+      background: rgba(56, 189, 248, 0.14);
+      border-color: rgba(56, 189, 248, 0.55);
+      color: var(--accent);
+    }
+    .search-input {
+      padding: 10px 14px;
+      background: var(--surface-solid);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: var(--font-body);
+      width: 100%;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+    }
+    .explainer {
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      background: rgba(56, 189, 248, 0.05);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 22px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .explainer strong { color: var(--text); }
+    .mini-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .mini-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.84rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .mini-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .mini-row .who { color: var(--text); font-weight: 600; min-width: 0; }
+    .mini-row .meta { color: var(--soft); font-size: 0.76rem; }
+    .mini-row .val { font-family: var(--font-display); font-weight: 700; white-space: nowrap; }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>LW</span>FFL</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="managers.html">Managers</a>
+      <a href="seasons.html">Seasons</a>
+      <a href="h2h.html">Head-to-Head</a>
+      <a href="draft.html" class="active">Draft</a>
+      <a href="explorer.html">Stat Lab</a>
+      <a href="records.html">Records</a>
+      <a href="arcade.html">🕹️ Arcade</a>
+      <a href="league.html">Rulebook</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="page-head">
+    <h1>Draft Central</h1>
+    <p class="sub">Every pick since 2014 — snake era (2014–2023) and auction era (2024–present)</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="history">Pick History</button>
+    <button class="tab-btn" data-tab="analytics">Analytics</button>
+  </div>
+
+  <!-- ================= HISTORY ================= -->
+  <section id="tab-history">
+    <div class="section-label" style="margin-top:0">Managers <span style="font-weight:400;text-transform:none;letter-spacing:0">— select any combination, or none for everyone</span></div>
+    <div class="mgr-pills" id="mgrPills"></div>
+
+    <div class="filter-bar">
+      <div><label class="field-label" for="fYear">Year</label>
+        <select id="fYear"><option value="">All years</option></select></div>
+      <div><label class="field-label" for="fPos">Position</label>
+        <select id="fPos"><option value="">All positions</option></select></div>
+      <div><label class="field-label" for="fRound">Round (snake era)</label>
+        <select id="fRound"><option value="">All rounds</option></select></div>
+      <div><label class="field-label" for="fEra">Draft Type</label>
+        <select id="fEra">
+          <option value="">Both eras</option>
+          <option value="snake">Snake (2014–2023)</option>
+          <option value="auction">Auction (2024–present)</option>
+        </select></div>
+      <div><label class="field-label" for="fGrade">Outcome</label>
+        <select id="fGrade">
+          <option value="">All picks</option>
+          <option value="steal">Steals (Δ ≥ +10)</option>
+          <option value="hit">Hits (Δ ≥ 0)</option>
+          <option value="miss">Misses (Δ &lt; 0)</option>
+          <option value="bust">Busts (Δ ≤ −10)</option>
+        </select></div>
+      <div><label class="field-label" for="fSearch">Player Search</label>
+        <input class="search-input" id="fSearch" type="text" placeholder="e.g. McCaffrey" /></div>
+    </div>
+    <div class="filter-count" id="histCount"></div>
+    <div id="histTable" class="loading">Loading draft history…</div>
+  </section>
+
+  <!-- ================= ANALYTICS ================= -->
+  <section id="tab-analytics" hidden>
+    <div class="explainer">
+      <strong>How picks are graded.</strong> Every QB, RB, WR, and TE pick gets a value score (Δ):
+      where the player was taken among his position that year versus where he finished.
+      Drafted as the 12th RB off the board but finished as the RB3? That's <strong style="color:var(--green)">Δ +9</strong> — a steal.
+      Taken as the QB2 but finished QB20? <strong style="color:var(--red)">Δ −18</strong> — a bust.
+      In the auction era, draft order at a position is set by price paid instead of pick number,
+      so the same scale works across both formats. Kickers and defenses aren't graded.
+      One calibration note: league-wide, deltas skew negative (an injury can drop a player 50 spots,
+      but a hit can only beat his draft slot by so much) — the all-time hit rate is about 39%,
+      so anyone above that is genuinely beating the board.
+    </div>
+
+    <div id="superlatives" class="grid grid-4"></div>
+
+    <div class="section-label">Drafter Leaderboard <span style="font-weight:400;text-transform:none;letter-spacing:0">— QB/RB/WR/TE picks only · click any column to sort</span></div>
+    <div id="leaderTable"></div>
+
+    <div class="section-label">All-Time Steals &amp; Busts</div>
+    <div class="grid grid-2">
+      <div id="stealsTable"></div>
+      <div id="bustsTable"></div>
+    </div>
+
+    <div class="section-label">Era Corners</div>
+    <div class="grid grid-4" id="eraCorners"></div>
+  </section>
+</div>
+
+<footer class="footer">
+  LWFFL v2 concept · built from the same league data · <a href="../index.html">view classic site</a>
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/tables.js"></script>
+<script>
+(async () => {
+  const { fmt, mlink, ylink, shortName, slugify } = LWFFL;
+
+  const raw = await fetch("../draft-history-2.json").then(r => r.json());
+
+  /* ---------- enrich picks ---------- */
+  const picks = raw.map(p => ({
+    ...p,
+    year: Number(p.year),
+    overall: Number(p.overall),
+    round: p.round === "" || p.round == null ? null : Number(p.round),
+    price: p.price === "" || p.price == null ? null : Number(p.price),
+    posRank: (typeof p.positionrank === "number" && p.positionrank > 0) ? p.positionrank : null,
+    auction: Number(p.year) >= 2024
+  }));
+
+  /* position draft order within each year:
+     snake → by overall pick; auction → by price paid (ties by sale order) */
+  const groups = {};
+  picks.forEach(p => {
+    (groups[`${p.year}|${p.position}`] = groups[`${p.year}|${p.position}`] || []).push(p);
+  });
+  Object.values(groups).forEach(arr => {
+    arr.sort((a, b) => a.auction
+      ? (b.price - a.price) || (a.overall - b.overall)
+      : a.overall - b.overall);
+    arr.forEach((p, i) => { p.posDraftRank = i + 1; });
+  });
+
+  const GRADED_POS = new Set(["QB", "RB", "WR", "TE"]);
+  picks.forEach(p => {
+    p.graded = GRADED_POS.has(p.position) && p.posRank != null;
+    p.delta = p.graded ? p.posDraftRank - p.posRank : null;
+  });
+  const graded = picks.filter(p => p.graded);
+
+  const managers = [...new Set(picks.map(p => p.manager))].sort();
+  const years = [...new Set(picks.map(p => p.year))].sort((a, b) => b - a);
+  const positions = [...new Set(picks.map(p => p.position))].sort();
+  const rounds = [...new Set(picks.map(p => p.round).filter(r => r != null))].sort((a, b) => a - b);
+
+  /* ---------- tabs ---------- */
+  document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("active", x === b));
+    document.getElementById("tab-history").hidden = b.dataset.tab !== "history";
+    document.getElementById("tab-analytics").hidden = b.dataset.tab !== "analytics";
+  }));
+
+  /* =========================================================
+     HISTORY — multi-manager pills + filters + sortable table
+     ========================================================= */
+  const selected = new Set();
+  const pillsEl = document.getElementById("mgrPills");
+  pillsEl.innerHTML = managers.map(m =>
+    `<button type="button" class="mgr-pill" data-m="${m}">${shortName(m)}</button>`).join("");
+  pillsEl.addEventListener("click", e => {
+    const btn = e.target.closest(".mgr-pill");
+    if (!btn) return;
+    const m = btn.dataset.m;
+    if (selected.has(m)) selected.delete(m); else selected.add(m);
+    btn.classList.toggle("on", selected.has(m));
+    histUpdate();
+  });
+
+  fillSelect(document.getElementById("fYear"), years.map(String));
+  fillSelect(document.getElementById("fPos"), positions);
+  fillSelect(document.getElementById("fRound"), rounds.map(String));
+
+  const deltaCell = p => p.delta == null ? "—"
+    : `<span class="${p.delta > 0 ? "pos" : p.delta < 0 ? "neg" : ""}" style="font-weight:700">${p.delta > 0 ? "+" : ""}${p.delta}</span>`;
+
+  const histCols = [
+    { key: "year", label: "Year", render: p => ylink(p.year) },
+    { key: "overall", label: "Pick", num: true, dir: "asc",
+      render: p => p.auction ? `#${p.overall}` : `${p.round}.${String(p.overall - (p.round - 1) * (p.year === 2014 ? 10 : 12)).padStart(2, "0")} (#${p.overall})` },
+    { key: "price", label: "$", num: true, render: p => p.price != null ? `$${p.price}` : "—" },
+    { key: "name", label: "Player", dir: "asc", render: p => `<strong>${p.name}</strong>` },
+    { key: "position", label: "Pos", dir: "asc",
+      render: p => `<span class="pill">${p.position}</span>` },
+    { key: "nflTeam", label: "NFL", dir: "asc" },
+    { key: "manager", label: "Manager", dir: "asc", render: p => mlink(p.manager) },
+    { key: "posDraftRank", label: "Drafted", num: true, dir: "asc",
+      render: p => `${p.position}${p.posDraftRank}` },
+    { key: "posRank", label: "Finished", num: true, dir: "asc",
+      render: p => p.posRank != null ? `${p.position}${p.posRank}` : "—" },
+    { key: "delta", label: "Δ Value", num: true, render: deltaCell }
+  ];
+
+  function histFiltered() {
+    const year = document.getElementById("fYear").value;
+    const pos = document.getElementById("fPos").value;
+    const round = document.getElementById("fRound").value;
+    const era = document.getElementById("fEra").value;
+    const grade = document.getElementById("fGrade").value;
+    const search = document.getElementById("fSearch").value.trim().toLowerCase();
+    return picks.filter(p =>
+      (!selected.size || selected.has(p.manager)) &&
+      (!year || String(p.year) === year) &&
+      (!pos || p.position === pos) &&
+      (!round || String(p.round) === round) &&
+      (!era || (era === "auction") === p.auction) &&
+      (!grade ||
+        (grade === "steal" && p.delta != null && p.delta >= 10) ||
+        (grade === "hit" && p.delta != null && p.delta >= 0) ||
+        (grade === "miss" && p.delta != null && p.delta < 0) ||
+        (grade === "bust" && p.delta != null && p.delta <= -10)) &&
+      (!search || p.name.toLowerCase().includes(search))
+    );
+  }
+
+  function histFooter(rows) {
+    const g = rows.filter(p => p.graded);
+    if (!g.length) return `${rows.length.toLocaleString()} picks · none graded (K/D/ST are not graded)`;
+    const avg = g.reduce((a, p) => a + p.delta, 0) / g.length;
+    const hits = g.filter(p => p.delta >= 0).length;
+    return `${g.length.toLocaleString()} graded picks · avg Δ <strong>${avg >= 0 ? "+" : ""}${avg.toFixed(1)}</strong> · hit rate <strong>${(hits / g.length * 100).toFixed(0)}%</strong>`;
+  }
+
+  const histTableEl = document.getElementById("histTable");
+  histTableEl.classList.remove("loading");
+  histTableEl.textContent = "";
+  const histHolder = document.createElement("div");
+  histTableEl.appendChild(histHolder);
+  const histTable = dataTable(histHolder, {
+    columns: histCols, rows: histFiltered(),
+    initialSort: { key: "year", dir: "desc" },
+    pageSize: 25, footer: histFooter
+  });
+
+  function histUpdate() {
+    const rows = histFiltered();
+    const who = selected.size ? [...selected].map(shortName).join(", ") : "all managers";
+    document.getElementById("histCount").textContent =
+      `${rows.length.toLocaleString()} of ${picks.length.toLocaleString()} picks · ${who}`;
+    histTable.update(rows);
+  }
+  ["fYear", "fPos", "fRound", "fEra", "fGrade"].forEach(id =>
+    document.getElementById(id).addEventListener("change", histUpdate));
+  document.getElementById("fSearch").addEventListener("input", histUpdate);
+  histUpdate();
+
+  /* =========================================================
+     ANALYTICS — leaderboard, superlatives, steals & busts
+     ========================================================= */
+  const MIN_PICKS = 30;
+
+  const rows = managers.map(mgr => {
+    const mine = graded.filter(p => p.manager === mgr);
+    if (!mine.length) return null;
+    const avg = mine.reduce((a, p) => a + p.delta, 0) / mine.length;
+    const snake = mine.filter(p => !p.auction);
+    const auct = mine.filter(p => p.auction);
+    const best = mine.slice().sort((a, b) => b.delta - a.delta)[0];
+    return {
+      manager: mgr,
+      picks: mine.length,
+      hitRate: mine.filter(p => p.delta >= 0).length / mine.length,
+      avg,
+      steals: mine.filter(p => p.delta >= 10).length,
+      busts: mine.filter(p => p.delta <= -10).length,
+      snakeAvg: snake.length ? snake.reduce((a, p) => a + p.delta, 0) / snake.length : null,
+      auctAvg: auct.length ? auct.reduce((a, p) => a + p.delta, 0) / auct.length : null,
+      best
+    };
+  }).filter(Boolean);
+
+  const qualified = rows.filter(r => r.picks >= MIN_PICKS);
+  const bestDrafter = qualified.slice().sort((a, b) => b.avg - a.avg)[0];
+  const worstDrafter = qualified.slice().sort((a, b) => a.avg - b.avg)[0];
+  const bestPick = graded.slice().sort((a, b) => b.delta - a.delta)[0];
+  const worstPick = graded.slice().sort((a, b) => a.delta - b.delta)[0];
+
+  document.getElementById("superlatives").innerHTML = `
+    <div class="card">
+      <div class="stat-label">🏆 Best Drafter</div>
+      <div class="stat-value" style="font-size:1.2rem">${mlink(bestDrafter.manager)}</div>
+      <div class="stat-sub">avg Δ ${bestDrafter.avg >= 0 ? "+" : ""}${bestDrafter.avg.toFixed(1)} · ${(bestDrafter.hitRate * 100).toFixed(0)}% hit rate</div>
+    </div>
+    <div class="card">
+      <div class="stat-label">🥴 Toughest Luck at the Table</div>
+      <div class="stat-value" style="font-size:1.2rem">${mlink(worstDrafter.manager)}</div>
+      <div class="stat-sub">avg Δ ${worstDrafter.avg >= 0 ? "+" : ""}${worstDrafter.avg.toFixed(1)} · ${(worstDrafter.hitRate * 100).toFixed(0)}% hit rate</div>
+    </div>
+    <div class="card">
+      <div class="stat-label">💎 Greatest Steal Ever</div>
+      <div class="stat-value" style="font-size:1.2rem">${bestPick.name}</div>
+      <div class="stat-sub">${mlink(bestPick.manager)} · ${ylink(bestPick.year)} · drafted ${bestPick.position}${bestPick.posDraftRank}, finished ${bestPick.position}${bestPick.posRank} (Δ +${bestPick.delta})</div>
+    </div>
+    <div class="card">
+      <div class="stat-label">💣 Biggest Bust Ever</div>
+      <div class="stat-value" style="font-size:1.2rem">${worstPick.name}</div>
+      <div class="stat-sub">${mlink(worstPick.manager)} · ${ylink(worstPick.year)} · drafted ${worstPick.position}${worstPick.posDraftRank}, finished ${worstPick.position}${worstPick.posRank} (Δ ${worstPick.delta})</div>
+    </div>`;
+
+  const avgCell = v => v == null ? "—"
+    : `<span class="${v > 0 ? "pos" : v < 0 ? "neg" : ""}" style="font-weight:700">${v > 0 ? "+" : ""}${v.toFixed(1)}</span>`;
+
+  dataTable(document.getElementById("leaderTable"), {
+    columns: [
+      { key: "_rank", label: "#", get: () => null, render: (r, rank) => `<span style="color:var(--soft);font-weight:600">${rank}</span>` },
+      { key: "manager", label: "Manager", dir: "asc", render: r => mlink(r.manager) },
+      { key: "picks", label: "Picks", num: true },
+      { key: "avg", label: "Avg Δ", num: true, render: r => avgCell(r.avg) },
+      { key: "hitRate", label: "Hit Rate", num: true, render: r => (r.hitRate * 100).toFixed(0) + "%" },
+      { key: "steals", label: "Steals", num: true, render: r => `<span class="pos">${r.steals}</span>` },
+      { key: "busts", label: "Busts", num: true, render: r => `<span class="neg">${r.busts}</span>` },
+      { key: "snakeAvg", label: "Snake Δ", num: true, render: r => avgCell(r.snakeAvg) },
+      { key: "auctAvg", label: "Auction Δ", num: true, render: r => avgCell(r.auctAvg) },
+      { key: "_best", label: "Best Pick", get: r => r.best.delta,
+        render: r => `${r.best.name} <span class="pos" style="font-size:0.78rem">+${r.best.delta}</span>` }
+    ],
+    rows,
+    initialSort: { key: "avg", dir: "desc" },
+    footer: () => `Steal = pick that finished 10+ spots better at its position than where it was taken · Bust = 10+ spots worse · managers below ${MIN_PICKS} graded picks are excluded from Best/Worst Drafter honors`
+  });
+
+  const pickCols = label => [
+    { key: "_rank", label: "#", get: () => null, render: (p, rank) => `<span style="color:var(--soft);font-weight:600">${rank}</span>` },
+    { key: "name", label, dir: "asc",
+      render: p => `<strong>${p.name}</strong><div style="font-size:0.74rem;color:var(--soft)">${shortName(p.manager)} · ${p.year} · ${p.auction ? "$" + p.price : "Rd " + p.round}</div>` },
+    { key: "_arc", label: "Drafted → Finished", get: p => p.posDraftRank,
+      render: p => `${p.position}${p.posDraftRank} → ${p.position}${p.posRank}` },
+    { key: "delta", label: "Δ", num: true, render: deltaCell }
+  ];
+
+  dataTable(document.getElementById("stealsTable"), {
+    columns: pickCols("Steal"),
+    rows: graded.slice().sort((a, b) => b.delta - a.delta).slice(0, 10),
+    initialSort: { key: "delta", dir: "desc" }
+  });
+  dataTable(document.getElementById("bustsTable"), {
+    columns: pickCols("Bust"),
+    rows: graded.slice().sort((a, b) => a.delta - b.delta).slice(0, 10),
+    initialSort: { key: "delta", dir: "asc" }
+  });
+
+  /* era corners */
+  const miniList = list => list.map(p => `
+    <div class="mini-row">
+      <div>
+        <div class="who">${p.name}</div>
+        <div class="meta">${shortName(p.manager)} · ${p.year} · ${p.auction ? "$" + p.price : "Rd " + p.round} · ${p.position}${p.posDraftRank} → ${p.position}${p.posRank}</div>
+      </div>
+      <div class="val ${p.delta >= 0 ? "pos" : "neg"}">${p.delta > 0 ? "+" : ""}${p.delta}</div>
+    </div>`).join("");
+
+  const lateGems = graded.filter(p => !p.auction && p.round >= 8).sort((a, b) => b.delta - a.delta).slice(0, 5);
+  const r1Whiffs = graded.filter(p => !p.auction && p.round === 1).sort((a, b) => a.delta - b.delta).slice(0, 5);
+  const bargains = graded.filter(p => p.auction && p.price <= 5).sort((a, b) => b.delta - a.delta).slice(0, 5);
+  const priceyBusts = graded.filter(p => p.auction && p.price >= 40).sort((a, b) => a.delta - b.delta).slice(0, 5);
+
+  document.getElementById("eraCorners").innerHTML = `
+    <div class="card"><div class="stat-label">🕵️ Late-Round Gems <span style="text-transform:none">(snake, Rd 8+)</span></div><div class="mini-list">${miniList(lateGems)}</div></div>
+    <div class="card"><div class="stat-label">🫠 Round-1 Whiffs <span style="text-transform:none">(snake)</span></div><div class="mini-list">${miniList(r1Whiffs)}</div></div>
+    <div class="card"><div class="stat-label">🛒 Bargain Bin Heroes <span style="text-transform:none">(auction, ≤ $5)</span></div><div class="mini-list">${miniList(bargains)}</div></div>
+    <div class="card"><div class="stat-label">💸 Pricey Disappointments <span style="text-transform:none">(auction, ≥ $40)</span></div><div class="mini-list">${miniList(priceyBusts)}</div></div>`;
+
+})().catch(err => {
+  console.error(err);
+  document.getElementById("histTable").textContent = "Could not load draft data.";
+});
+</script>
+</body>
+</html>

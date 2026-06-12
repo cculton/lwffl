@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Head-to-Head — LWFFL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>LW</span>FFL</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="managers.html">Managers</a>
+      <a href="seasons.html">Seasons</a>
+      <a href="h2h.html" class="active">Head-to-Head</a>
+      <a href="draft.html">Draft</a>
+      <a href="explorer.html">Stat Lab</a>
+      <a href="records.html">Records</a>
+      <a href="arcade.html">🕹️ Arcade</a>
+      <a href="league.html">Rulebook</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="page-head">
+    <h1>Head-to-Head</h1>
+    <p class="sub">Every meeting between any two managers in league history</p>
+  </header>
+
+  <div class="card" style="margin-bottom:24px">
+    <div class="grid grid-2">
+      <div>
+        <label class="field-label" for="selA">Manager</label>
+        <select id="selA" disabled><option>Loading…</option></select>
+      </div>
+      <div>
+        <label class="field-label" for="selB">Opponent</label>
+        <select id="selB" disabled><option>Loading…</option></select>
+      </div>
+    </div>
+  </div>
+
+  <div id="results"><div class="loading">Pick two managers to see their series.</div></div>
+</div>
+
+<footer class="footer">
+  LWFFL v2 concept · built from the same league data · <a href="../index.html">view classic site</a>
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/tables.js"></script>
+<script>
+let MODEL = null;
+
+LWFFL.load().then(M => {
+  MODEL = M;
+  const names = Object.values(M.managers).map(m => m.name).sort();
+  const selA = document.getElementById("selA");
+  const selB = document.getElementById("selB");
+
+  selA.innerHTML = '<option value="">Select manager…</option>' +
+    names.map(n => `<option value="${n}">${LWFFL.shortName(n)}</option>`).join("");
+  selB.innerHTML = '<option value="">Select opponent…</option>' +
+    names.map(n => `<option value="${n}">${LWFFL.shortName(n)}</option>`).join("");
+  selA.disabled = selB.disabled = false;
+
+  /* allow deep-linking: h2h.html?a=slug&b=slug */
+  const q = new URLSearchParams(location.search);
+  const findName = s => names.find(n => LWFFL.slugify(n) === s);
+  if (q.get("a") && findName(q.get("a"))) selA.value = findName(q.get("a"));
+  if (q.get("b") && findName(q.get("b"))) selB.value = findName(q.get("b"));
+
+  selA.addEventListener("change", render);
+  selB.addEventListener("change", render);
+  render();
+}).catch(err => {
+  console.error(err);
+  document.getElementById("results").innerHTML = '<div class="loading">Could not load league data.</div>';
+});
+
+function render() {
+  const { fmt, mlink, ylink, recordStr, isPlayoff, shortName } = LWFFL;
+  const a = document.getElementById("selA").value;
+  const b = document.getElementById("selB").value;
+  const out = document.getElementById("results");
+
+  if (!a || !b) {
+    out.innerHTML = '<div class="loading">Pick two managers to see their series.</div>';
+    return;
+  }
+  if (a === b) {
+    out.innerHTML = '<div class="loading">Pick two different managers.</div>';
+    return;
+  }
+
+  const rec = (MODEL.h2h[a] || {})[b];
+  if (!rec || !rec.games.length) {
+    out.innerHTML = '<div class="loading">These two have never met.</div>';
+    return;
+  }
+
+  const games = rec.games.slice().sort((x, y) => y.year - x.year || y.week - x.week);
+
+  /* current streak */
+  let streakType = null, streakLen = 0;
+  for (const g of games) {
+    const r = g.pf > g.pa ? "W" : g.pf < g.pa ? "L" : "T";
+    if (streakType === null) { streakType = r; streakLen = 1; }
+    else if (r === streakType) streakLen++;
+    else break;
+  }
+  const streakOwner = streakType === "W" ? shortName(a) : streakType === "L" ? shortName(b) : "Tied";
+  const total = rec.w + rec.l + rec.t;
+
+  out.innerHTML = `
+    <div class="grid grid-3" style="margin-bottom:24px">
+      <div class="card" style="text-align:center">
+        <div class="stat-label">${shortName(a)}</div>
+        <div class="stat-value" style="color:${rec.w > rec.l ? "var(--green)" : "inherit"}">${rec.w}</div>
+        <div class="stat-sub">wins · avg ${fmt(rec.pf / total)}</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="stat-label">Current Streak</div>
+        <div class="stat-value">${streakType}${streakLen}</div>
+        <div class="stat-sub">${streakOwner}</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="stat-label">${shortName(b)}</div>
+        <div class="stat-value" style="color:${rec.l > rec.w ? "var(--green)" : "inherit"}">${rec.l}</div>
+        <div class="stat-sub">wins · avg ${fmt(rec.pa / total)}</div>
+      </div>
+    </div>
+
+    <div id="logTbl"></div>
+    ${rec.t ? `<p style="margin-top:12px;color:var(--soft);font-size:0.85rem">Series includes ${rec.t} tie${rec.t > 1 ? "s" : ""}.</p>` : ""}
+  `;
+
+  dataTable(document.getElementById("logTbl"), {
+    columns: [
+      { key: "_when", label: "When", get: g => g.year * 100 + g.week, render: g => `${ylink(g.year)} · Wk ${g.week}` },
+      { key: "playoffs", label: "Type", dir: "asc", get: g => isPlayoff(g) ? g.playoffs : "Regular",
+        render: g => `<span class="pill ${isPlayoff(g) ? "accent" : ""}">${isPlayoff(g) ? g.playoffs : "Regular"}</span>` },
+      { key: "pf", label: shortName(a), num: true,
+        render: g => `<span class="${g.pf > g.pa ? "pos" : g.pf < g.pa ? "neg" : ""}">${fmt(g.pf)}</span>` },
+      { key: "pa", label: shortName(b), num: true,
+        render: g => `<span class="${g.pa > g.pf ? "pos" : g.pa < g.pf ? "neg" : ""}">${fmt(g.pa)}</span>` },
+      { key: "_margin", label: "Margin", num: true, get: g => Math.abs(g.pf - g.pa), render: g => fmt(Math.abs(g.pf - g.pa)) },
+      { key: "_winner", label: "Winner", dir: "asc", get: g => g.pf > g.pa ? a : g.pf < g.pa ? b : "Tie",
+        render: g => g.pf > g.pa ? shortName(a) : g.pf < g.pa ? shortName(b) : "Tie" }
+    ],
+    rows: games,
+    initialSort: { key: "_when", dir: "desc" },
+    footer: rows => {
+      const avgA = rows.reduce((x, g) => x + g.pf, 0) / rows.length;
+      const avgB = rows.reduce((x, g) => x + g.pa, 0) / rows.length;
+      return `${rows.length} meetings · ${shortName(a)} avg <strong>${fmt(avgA)}</strong> · ${shortName(b)} avg <strong>${fmt(avgB)}</strong>`;
+    }
+  });
+
+  /* keep URL shareable */
+  const url = new URL(location);
+  url.searchParams.set("a", LWFFL.slugify(a));
+  url.searchParams.set("b", LWFFL.slugify(b));
+  history.replaceState(null, "", url);
+}
+</script>
+</body>
+</html>
