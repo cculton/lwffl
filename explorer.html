@@ -109,7 +109,7 @@
 <script src="assets/tables.js?v=2"></script>
 <script>
 LWFFL.load().then(M => {
-  const { fmt, mlink, ylink, isPlayoff } = LWFFL;
+  const { fmt, mlink, ylink, isPlayoff, managerCell, finishCell } = LWFFL;
   const names = Object.values(M.managers).map(m => m.name).sort();
   const yearsDesc = M.years.slice().reverse().map(String);
 
@@ -139,14 +139,14 @@ LWFFL.load().then(M => {
     { key: "sortKey", label: "When", dir: "desc", render: r => `${ylink(r.year)} · Wk ${r.week}` },
     { key: "playoffs", label: "Type", dir: "asc", get: r => isPlayoff(r) ? r.playoffs : "Regular",
       render: r => `<span class="pill ${isPlayoff(r) ? "accent" : ""}">${isPlayoff(r) ? r.playoffs : "Regular"}</span>` },
-    { key: "manager", label: "Manager", dir: "asc", render: r => mlink(r.manager) },
+    { key: "manager", label: "Manager", dir: "asc", render: r => managerCell(r.manager) },
     { key: "pf", label: "Score", num: true, render: r => `<strong>${fmt(r.pf)}</strong>` },
+    { key: "opp", label: "Opponent", dir: "asc", render: r => managerCell(r.opp) },
     { key: "pa", label: "Opp Score", num: true, render: r => fmt(r.pa) },
     { key: "margin", label: "Margin", num: true,
       render: r => `<span class="${r.margin > 0 ? "pos" : r.margin < 0 ? "neg" : ""}">${r.margin > 0 ? "+" : ""}${fmt(r.margin)}</span>` },
     { key: "result", label: "Result", dir: "asc",
-      render: r => `<span class="${r.result === "W" ? "pos" : r.result === "L" ? "neg" : ""}">${r.result}</span>` },
-    { key: "opp", label: "Opponent", dir: "asc", render: r => mlink(r.opp) }
+      render: r => `<span class="${r.result === "W" ? "pos" : r.result === "L" ? "neg" : ""}">${r.result}</span>` }
   ];
 
   function gFiltered() {
@@ -207,7 +207,7 @@ LWFFL.load().then(M => {
 
   const sCols = [
     { key: "year", label: "Year", render: r => ylink(r.year) },
-    { key: "manager", label: "Manager", dir: "asc", render: r => mlink(r.manager) },
+    { key: "manager", label: "Manager", dir: "asc", render: r => managerCell(r.manager) },
     { key: "wins", label: "W", num: true },
     { key: "losses", label: "L", num: true },
     { key: "ties", label: "T", num: true },
@@ -220,8 +220,7 @@ LWFFL.load().then(M => {
       render: r => r.weekly_margin == null ? "—" : `<span class="${r.weekly_margin >= 0 ? "pos" : "neg"}">${r.weekly_margin > 0 ? "+" : ""}${fmt(r.weekly_margin, 1)}</span>` },
     { key: "division_finish", label: "Div", num: true, dir: "asc" },
     { key: "seed", label: "Seed", num: true, dir: "asc" },
-    { key: "final_standing", label: "Finish", num: true, dir: "asc",
-      render: r => r.final_standing === 1 ? `${r.final_standing} 🏆` : r.final_standing },
+    { key: "final_standing", label: "Finish", num: true, dir: "asc", render: r => finishCell(r.final_standing) },
     { key: "transaction_count", label: "Moves", num: true }
   ];
 

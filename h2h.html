@@ -56,7 +56,7 @@
 </footer>
 
 <script src="assets/data.js"></script>
-<script src="assets/tables.js"></script>
+<script src="assets/tables.js?v=2"></script>
 <script>
 let MODEL = null;
 
@@ -87,7 +87,7 @@ LWFFL.load().then(M => {
 });
 
 function render() {
-  const { fmt, mlink, ylink, recordStr, isPlayoff, shortName } = LWFFL;
+  const { fmt, mlink, ylink, recordStr, isPlayoff, shortName, managerCell } = LWFFL;
   const a = document.getElementById("selA").value;
   const b = document.getElementById("selB").value;
   const out = document.getElementById("results");
@@ -154,7 +154,7 @@ function render() {
         render: g => `<span class="${g.pa > g.pf ? "pos" : g.pa < g.pf ? "neg" : ""}">${fmt(g.pa)}</span>` },
       { key: "_margin", label: "Margin", num: true, get: g => Math.abs(g.pf - g.pa), render: g => fmt(Math.abs(g.pf - g.pa)) },
       { key: "_winner", label: "Winner", dir: "asc", get: g => g.pf > g.pa ? a : g.pf < g.pa ? b : "Tie",
-        render: g => g.pf > g.pa ? shortName(a) : g.pf < g.pa ? shortName(b) : "Tie" }
+        render: g => g.pf > g.pa ? managerCell(a) : g.pf < g.pa ? managerCell(b) : "Tie" }
     ],
     rows: games,
     initialSort: { key: "_when", dir: "desc" },

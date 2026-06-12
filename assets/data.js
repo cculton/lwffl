@@ -12,7 +12,8 @@ const LWFFL = (() => {
   const shortName = name => {
     const parts = String(name).trim().split(/\s+/);
     if (parts.length === 1) return parts[0];
-    return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+    const first = parts[0] === "Tom" ? "Thomas" : parts[0];
+    return `${first} ${parts[parts.length - 1][0]}.`;
   };
 
   const fmt = (n, d = 2) =>
@@ -21,6 +22,22 @@ const LWFFL = (() => {
   const fmtInt = n => Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
 
   const mlink = name => `<a class="mlink" href="managers.html?m=${slugify(name)}">${shortName(name)}</a>`;
+
+  let activeByName = {};
+
+  const alumPill = name => activeByName[name] === false
+    ? ' <span class="pill" title="Former manager">Alum</span>'
+    : "";
+
+  const managerCell = name => `${mlink(name)}${alumPill(name)}`;
+
+  const finishCell = finish => {
+    if (finish == null) return "—";
+    if (finish === 1) return `${finish} 🏆`;
+    if (finish === 2) return `${finish} 🥈`;
+    if (finish === 3) return `${finish} 🥉`;
+    return finish;
+  };
 
   /* tenure with gap detection: [2015..2022, 2024, 2025] → "2015–2022, 2024–present" */
   const tenureStr = (yearsArr, lastLeagueYear) => {
@@ -222,6 +239,7 @@ const LWFFL = (() => {
         pa: my.reduce((a, p) => a + p.pa, 0),
         titles: ss.filter(r => r.final_standing === 1).map(r => r.year),
         runnerUps: ss.filter(r => r.final_standing === 2).map(r => r.year),
+        thirdPlaces: ss.filter(r => r.final_standing === 3).map(r => r.year),
         bestFinish: Math.min(...ss.map(r => r.final_standing ?? 99)),
         firstYear: ss[0].year,
         lastYear: ss[ss.length - 1].year,
@@ -236,6 +254,7 @@ const LWFFL = (() => {
       c.active = c.lastYear === years[years.length - 1];
       m.career = c;
     });
+    activeByName = Object.fromEntries(Object.values(managers).map(m => [m.name, m.career.active]));
 
     /* ----- Head-to-head matrix ----- */
     const h2h = {};
@@ -273,5 +292,5 @@ const LWFFL = (() => {
     return { years, managers, seasonSummaries, games, perfs, h2h, seedMap, standings, seasonRanks, elo };
   }
 
-  return { load, slugify, shortName, tenureStr, fmt, fmtInt, mlink, ylink, recordStr, sparkline, isPlayoff };
+  return { load, slugify, shortName, tenureStr, fmt, fmtInt, mlink, alumPill, managerCell, finishCell, ylink, recordStr, sparkline, isPlayoff };
 })();

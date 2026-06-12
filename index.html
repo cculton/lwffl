@@ -44,10 +44,10 @@
 </footer>
 
 <script src="assets/data.js"></script>
-<script src="assets/tables.js"></script>
+<script src="assets/tables.js?v=2"></script>
 <script>
 LWFFL.load().then(M => {
-  const { fmt, fmtInt, mlink, ylink, recordStr, shortName } = LWFFL;
+  const { fmt, fmtInt, mlink, ylink, recordStr, shortName, managerCell, finishCell } = LWFFL;
   const latest = M.seasonSummaries[M.seasonSummaries.length - 1];
   const totalPoints = M.games.reduce((a, g) => a + g.score1 + g.score2, 0);
 
@@ -134,7 +134,7 @@ LWFFL.load().then(M => {
     columns: [
       { key: "_rank", label: "#", get: () => null, render: (r, rank) => `<span style="color:var(--soft);font-weight:600">${rank}</span>` },
       { key: "name", label: "Manager", dir: "asc",
-        render: c => `${mlink(c.name)}${c.active ? "" : ' <span class="pill" style="margin-left:6px">Alum</span>'}` },
+        render: c => managerCell(c.name) },
       { key: "seasons", label: "Seasons", num: true },
       { key: "wins", label: "W", num: true },
       { key: "losses", label: "L", num: true },
@@ -149,7 +149,7 @@ LWFFL.load().then(M => {
         render: c => c.scoringTitles.length || "—" },
       { key: "playoffApps", label: "PO Apps", num: true },
       { key: "bestFinish", label: "Best Fin", num: true, dir: "asc",
-        render: c => c.bestFinish === 1 ? "1st 🏆" : c.bestFinish }
+        render: c => finishCell(c.bestFinish) }
     ],
     rows: careers,
     initialSort: { key: "_titles", dir: "desc" }

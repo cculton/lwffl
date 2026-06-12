@@ -159,10 +159,11 @@
       Taken as the QB2 but finished QB20? <strong style="color:var(--red)">Δ −18</strong> — a bust.
       In the auction era, draft order at a position is set by price paid instead of pick number,
       so the same scale works across both formats. Kickers and defenses aren't graded.
+      <p style="margin-top:10px">
       <strong>Downside is capped at replacement level:</strong> if a player finishes worse than the
       number of players drafted at his position that year (roughly WR65, RB53, QB19, TE17), his
       finish is treated as that line — once a player falls out of the draftable pool entirely,
-      WR175 vs WR239 is meaningless, but the draft capital spent on him still counts.
+      WR175 vs WR239 is meaningless, but the draft capital spent on him still counts.</p>
       Even with the cap, deltas skew slightly negative (an injury can erase a pick, but a hit can
       only beat his slot by so much) — the all-time hit rate is about 40%,
       so anyone above that is genuinely beating the board.
@@ -192,7 +193,7 @@
 <script src="assets/tables.js?v=2"></script>
 <script>
 (async () => {
-  const { fmt, mlink, ylink, shortName, slugify } = LWFFL;
+  const { fmt, mlink, ylink, shortName, slugify, managerCell } = LWFFL;
 
   const raw = await fetch("draft-history-2.json").then(r => r.json());
 
@@ -233,7 +234,9 @@
 
   const managers = [...new Set(picks.map(p => p.manager))].sort();
   const years = [...new Set(picks.map(p => p.year))].sort((a, b) => b - a);
-  const positions = [...new Set(picks.map(p => p.position))].sort();
+  const posOrder = ["QB", "RB", "WR", "TE", "D/ST", "K"];
+  const positions = [...new Set(picks.map(p => p.position))]
+    .sort((a, b) => (posOrder.indexOf(a) === -1 ? 99 : posOrder.indexOf(a)) - (posOrder.indexOf(b) === -1 ? 99 : posOrder.indexOf(b)) || a.localeCompare(b));
   const rounds = [...new Set(picks.map(p => p.round).filter(r => r != null))].sort((a, b) => a - b);
 
   /* ---------- tabs ---------- */
@@ -277,7 +280,7 @@
     { key: "position", label: "Pos", dir: "asc",
       render: p => `<span class="pill">${p.position}</span>` },
     { key: "nflTeam", label: "NFL", dir: "asc" },
-    { key: "manager", label: "Manager", dir: "asc", render: p => mlink(p.manager) },
+    { key: "manager", label: "Manager", dir: "asc", render: p => managerCell(p.manager) },
     { key: "posDraftRank", label: "Drafted", num: true, dir: "asc",
       render: p => `${p.position}${p.posDraftRank}` },
     { key: "posRank", label: "Finished", num: true, dir: "asc",
@@ -359,7 +362,7 @@
   /* =========================================================
      ANALYTICS — leaderboard, superlatives, steals & busts
      ========================================================= */
-  const MIN_PICKS = 30;
+  const MIN_PICKS = 100;
 
   const rows = managers.map(mgr => {
     const mine = graded.filter(p => p.manager === mgr);
@@ -394,17 +397,17 @@
       <div class="stat-sub">avg Δ ${bestDrafter.avg >= 0 ? "+" : ""}${bestDrafter.avg.toFixed(1)} · ${(bestDrafter.hitRate * 100).toFixed(0)}% hit rate</div>
     </div>
     <div class="card">
-      <div class="stat-label">🥴 Toughest Luck at the Table</div>
+      <div class="stat-label">🥴 Needs a New Scouting Department</div>
       <div class="stat-value" style="font-size:1.2rem">${mlink(worstDrafter.manager)}</div>
       <div class="stat-sub">avg Δ ${worstDrafter.avg >= 0 ? "+" : ""}${worstDrafter.avg.toFixed(1)} · ${(worstDrafter.hitRate * 100).toFixed(0)}% hit rate</div>
     </div>
     <div class="card">
-      <div class="stat-label">💎 Greatest Steal Ever</div>
+      <div class="stat-label">💎 All-Time Gem</div>
       <div class="stat-value" style="font-size:1.2rem">${bestPick.name}</div>
       <div class="stat-sub">${mlink(bestPick.manager)} · ${ylink(bestPick.year)} · drafted ${bestPick.position}${bestPick.posDraftRank}, finished ${bestPick.position}${bestPick.posRank} (Δ +${bestPick.delta})</div>
     </div>
     <div class="card">
-      <div class="stat-label">💣 Biggest Bust Ever</div>
+      <div class="stat-label">💣 Biggest Bust</div>
       <div class="stat-value" style="font-size:1.2rem">${worstPick.name}</div>
       <div class="stat-sub">${mlink(worstPick.manager)} · ${ylink(worstPick.year)} · drafted ${worstPick.position}${worstPick.posDraftRank}, finished ${worstPick.position}${worstPick.posRank} (Δ ${worstPick.delta})</div>
     </div>`;
@@ -415,7 +418,7 @@
   dataTable(document.getElementById("leaderTable"), {
     columns: [
       { key: "_rank", label: "#", get: () => null, render: (r, rank) => `<span style="color:var(--soft);font-weight:600">${rank}</span>` },
-      { key: "manager", label: "Manager", dir: "asc", render: r => mlink(r.manager) },
+      { key: "manager", label: "Manager", dir: "asc", render: r => managerCell(r.manager) },
       { key: "picks", label: "Picks", num: true },
       { key: "avg", label: "Avg Δ", num: true, render: r => avgCell(r.avg) },
       { key: "hitRate", label: "Hit Rate", num: true, render: r => (r.hitRate * 100).toFixed(0) + "%" },
@@ -434,7 +437,7 @@
   const pickCols = label => [
     { key: "_rank", label: "#", get: () => null, render: (p, rank) => `<span style="color:var(--soft);font-weight:600">${rank}</span>` },
     { key: "name", label, dir: "asc",
-      render: p => `<strong>${p.name}</strong><div style="font-size:0.74rem;color:var(--soft)">${shortName(p.manager)} · ${p.year} · ${p.auction ? "$" + p.price : "Rd " + p.round}</div>` },
+      render: p => `<strong>${p.name}</strong><div style="font-size:0.74rem;color:var(--soft)">${managerCell(p.manager)} · ${p.year} · ${p.auction ? "$" + p.price : "Rd " + p.round}</div>` },
     { key: "_arc", label: "Drafted → Finished", get: p => p.posDraftRank,
       render: p => `${p.position}${p.posDraftRank} → ${p.position}${p.posRank}` },
     { key: "delta", label: "Δ", num: true, render: deltaCell }

@@ -109,7 +109,7 @@
 
 <div class="wrap">
   <header class="page-head">
-    <h1>🕹️ Arcade</h1>
+    <h1>Arcade</h1>
     <p class="sub">The league toy box — scorigami hunting and probability machines</p>
   </header>
 
@@ -226,10 +226,10 @@
 </footer>
 
 <script src="assets/data.js"></script>
-<script src="assets/tables.js"></script>
+<script src="assets/tables.js?v=2"></script>
 <script>
 LWFFL.load().then(M => {
-  const { fmt, mlink, ylink, isPlayoff } = LWFFL;
+  const { fmt, mlink, ylink, isPlayoff, managerCell } = LWFFL;
 
   /* ---------- tabs (deep-linkable via ?tab=) ---------- */
   const TABS = ["gami", "weekly", "season"];
@@ -296,12 +296,12 @@ LWFFL.load().then(M => {
           { key: "_when", label: "When", get: p => p.year * 100 + p.week, render: p => `${ylink(p.year)} · Wk ${p.week}` },
           { key: "playoffs", label: "Type", dir: "asc", get: p => isPlayoff(p) ? p.playoffs : "Regular",
             render: p => `<span class="pill ${isPlayoff(p) ? "accent" : ""}">${isPlayoff(p) ? p.playoffs : "Regular"}</span>` },
-          { key: "manager", label: "Manager", dir: "asc", render: p => mlink(p.manager) },
+          { key: "manager", label: "Manager", dir: "asc", render: p => managerCell(p.manager) },
           { key: "pf", label: "Score", num: true, render: p => `<strong>${fmt(p.pf)}</strong>` },
           { key: "_res", label: "Result", dir: "asc", get: p => p.pf > p.pa ? "W" : p.pf < p.pa ? "L" : "T",
             render: p => { const r = p.pf > p.pa ? "W" : p.pf < p.pa ? "L" : "T";
               return `<span class="${r === "W" ? "pos" : r === "L" ? "neg" : ""}">${r}</span>`; } },
-          { key: "opp", label: "Opponent", dir: "asc", render: p => `${mlink(p.opp)} (${fmt(p.pa)})` }
+          { key: "opp", label: "Opponent", dir: "asc", render: p => `${managerCell(p.opp)} (${fmt(p.pa)})` }
         ],
         rows: matches,
         initialSort: { key: "_when", dir: "desc" }

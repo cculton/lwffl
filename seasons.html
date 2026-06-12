@@ -38,7 +38,7 @@
 </footer>
 
 <script src="assets/data.js"></script>
-<script src="assets/tables.js"></script>
+<script src="assets/tables.js?v=2"></script>
 <script>
 LWFFL.load().then(M => {
   const y = Number(new URLSearchParams(location.search).get("y"));
@@ -78,7 +78,7 @@ function renderIndex(M) {
 /* ---------- Season detail ---------- */
 
 function renderSeason(M, s) {
-  const { fmt, fmtInt, mlink, recordStr, isPlayoff } = LWFFL;
+  const { fmt, fmtInt, mlink, recordStr, isPlayoff, managerCell } = LWFFL;
   const y = s.year;
 
   /* standings data (rendered as a sortable table below) */
@@ -106,11 +106,11 @@ function renderSeason(M, s) {
           return `
             <div class="card">
               <div style="display:flex;justify-content:space-between;gap:10px">
-                <span style="font-weight:${w1 ? 700 : 400};color:${w1 ? "var(--text)" : "var(--muted)"}">${mlink(g.manager1)}</span>
+                <span style="font-weight:${w1 ? 700 : 400};color:${w1 ? "var(--text)" : "var(--muted)"}">${managerCell(g.manager1)}</span>
                 <span class="num" style="font-weight:${w1 ? 700 : 400};color:${w1 ? "var(--green)" : "var(--muted)"}">${fmt(g.score1)}</span>
               </div>
               <div style="display:flex;justify-content:space-between;gap:10px;margin-top:8px">
-                <span style="font-weight:${!w1 ? 700 : 400};color:${!w1 ? "var(--text)" : "var(--muted)"}">${mlink(g.manager2)}</span>
+                <span style="font-weight:${!w1 ? 700 : 400};color:${!w1 ? "var(--text)" : "var(--muted)"}">${managerCell(g.manager2)}</span>
                 <span class="num" style="font-weight:${!w1 ? 700 : 400};color:${!w1 ? "var(--green)" : "var(--muted)"}">${fmt(g.score2)}</span>
               </div>
             </div>`;
@@ -187,9 +187,9 @@ function renderSeason(M, s) {
   dataTable(document.getElementById("standingsTbl"), {
     columns: [
       { key: "final_standing", label: "#", num: true, dir: "asc",
-        render: r => `<span style="color:var(--soft);font-weight:600">${r.final_standing}</span>` },
+        render: r => `<span style="color:var(--soft);font-weight:600">${LWFFL.finishCell(r.final_standing)}</span>` },
       { key: "manager", label: "Manager", dir: "asc",
-        render: r => `${mlink(r.manager)}${r.final_standing === 1 ? ' <span class="pill gold">🏆</span>' : ""}${r.manager === s.scoring.manager ? ' <span class="pill accent">🕹️</span>' : ""}` },
+        render: r => `${managerCell(r.manager)}${r.final_standing === 1 ? ' <span class="pill gold">🏆</span>' : ""}${r.manager === s.scoring.manager ? ' <span class="pill accent">🕹️</span>' : ""}` },
       { key: "winPct", label: "Record", num: true,
         render: r => `${recordStr(r.wins, r.losses, r.ties)} (${(r.winPct * 100).toFixed(1)}%)` },
       { key: "points_for", label: "PF", num: true, render: r => `<span class="pos">${fmt(r.points_for, 1)}</span>` },

@@ -91,7 +91,7 @@
 <script src="assets/tables.js?v=2"></script>
 <script>
 LWFFL.load().then(M => {
-  const { fmt, mlink, ylink, recordStr, isPlayoff } = LWFFL;
+  const { fmt, mlink, ylink, recordStr, isPlayoff, managerCell, finishCell } = LWFFL;
   const names = Object.values(M.managers).map(m => m.name).sort();
   const selMgr  = multiPills(document.getElementById("mgrSel"),  names, render, n => LWFFL.shortName(n));
   const selYear = multiPills(document.getElementById("yearSel"), M.years.slice().reverse().map(String), render);
@@ -152,11 +152,11 @@ LWFFL.load().then(M => {
   /* ---- category definitions ---- */
   const perfCols = [
     rankCol,
-    { key: "manager", label: "Manager", dir: "asc", render: r => mlink(r.manager) },
+    { key: "manager", label: "Manager", dir: "asc", render: r => managerCell(r.manager) },
     { key: "pf", label: "Score", num: true, render: r => `<strong>${fmt(r.pf)}</strong>` },
     { key: "margin", label: "Margin", num: true, get: r => r.pf - r.pa,
       render: r => { const m = r.pf - r.pa; return `<span class="${m > 0 ? "pos" : m < 0 ? "neg" : ""}">${m > 0 ? "+" : ""}${fmt(m)}</span>`; } },
-    { key: "opp", label: "Opponent", dir: "asc", render: r => `${mlink(r.opp)} (${fmt(r.pa)})` },
+    { key: "opp", label: "Opponent", dir: "asc", render: r => `${managerCell(r.opp)} (${fmt(r.pa)})` },
     { key: "playoffs", label: "Type", dir: "asc", get: r => isPlayoff(r) ? r.playoffs : "Regular",
       render: r => `<span class="pill ${isPlayoff(r) ? "accent" : ""}">${isPlayoff(r) ? r.playoffs : "Regular"}</span>` },
     whenCol
@@ -165,9 +165,9 @@ LWFFL.load().then(M => {
   const gameColsFor = valueLabel => [
     rankCol,
     { key: "_val", label: valueLabel, num: true, get: r => r._val, render: r => `<strong>${fmt(r._val)}</strong>` },
-    { key: "winner", label: "Winner", dir: "asc", get: r => r._winner, render: r => mlink(r._winner) },
+    { key: "winner", label: "Winner", dir: "asc", get: r => r._winner, render: r => managerCell(r._winner) },
     { key: "_final", label: "Final", get: r => Math.max(r.score1, r.score2),
-      render: r => `${fmt(Math.max(r.score1, r.score2))} – ${fmt(Math.min(r.score1, r.score2))} vs ${mlink(r._loser)}` },
+      render: r => `${fmt(Math.max(r.score1, r.score2))} – ${fmt(Math.min(r.score1, r.score2))} vs ${managerCell(r._loser)}` },
     { key: "playoffs", label: "Type", dir: "asc", get: r => isPlayoff(r) ? r.playoffs : "Regular",
       render: r => `<span class="pill ${isPlayoff(r) ? "accent" : ""}">${isPlayoff(r) ? r.playoffs : "Regular"}</span>` },
     whenCol
@@ -175,21 +175,20 @@ LWFFL.load().then(M => {
 
   const seasonCols = [
     rankCol,
-    { key: "manager", label: "Manager", dir: "asc", render: r => mlink(r.manager) },
+    { key: "manager", label: "Manager", dir: "asc", render: r => managerCell(r.manager) },
     { key: "points_for", label: "PF", num: true, render: r => fmt(r.points_for, 1) },
     { key: "points_against", label: "PA", num: true, render: r => fmt(r.points_against, 1) },
     { key: "_rec", label: "Record", num: true, get: r => r._pct,
       render: r => `${recordStr(r.wins, r.losses, r.ties)} (${(r._pct * 100).toFixed(1)}%)` },
     { key: "transaction_count", label: "Moves", num: true },
-    { key: "final_standing", label: "Finish", num: true, dir: "asc",
-      render: r => r.final_standing === 1 ? `${r.final_standing} 🏆` : r.final_standing },
+    { key: "final_standing", label: "Finish", num: true, dir: "asc", render: r => finishCell(r.final_standing) },
     { key: "year", label: "Year", render: r => ylink(r.year) }
   ];
 
   const streakCols = [
     rankCol,
     { key: "manager", label: "Manager", dir: "asc",
-      render: r => `${mlink(r.manager)}${r.active ? ' <span class="pill green">Active</span>' : ""}` },
+      render: r => `${managerCell(r.manager)}${r.active ? ' <span class="pill green">Active</span>' : ""}` },
     { key: "len", label: "Matchups", num: true, render: r => `<strong>${r.len}</strong>` },
     { key: "_span", label: "Span", get: r => r.start.year * 100 + r.start.week,
       render: r => `${ylink(r.start.year)} Wk ${r.start.week} → ${ylink(r.end.year)} Wk ${r.end.week}` }
