@@ -170,12 +170,19 @@ function renderSeason(M, s) {
         <div class="stat-value" style="font-size:1.2rem">${fmt(topGame.pf)}</div>
         <div class="stat-sub">${mlink(topGame.manager)} · Week ${topGame.week}</div>
       </div>` : ""}
-      ${closest ? `
+      ${closest ? (() => {
+        const c1Win = closest.score1 >= closest.score2;
+        const winner = c1Win ? closest.manager1 : closest.manager2;
+        const loser = c1Win ? closest.manager2 : closest.manager1;
+        const wScore = c1Win ? closest.score1 : closest.score2;
+        const lScore = c1Win ? closest.score2 : closest.score1;
+        return `
       <div class="card">
         <div class="stat-label">😬 Closest Matchup</div>
         <div class="stat-value" style="font-size:1.2rem">${fmt(Math.abs(closest.score1 - closest.score2))}</div>
-        <div class="stat-sub">${mlink(closest.manager1)} vs ${mlink(closest.manager2)} · Week ${closest.week}</div>
-      </div>` : ""}
+        <div class="stat-sub">${mlink(winner)} def. ${mlink(loser)} · ${fmt(wScore)}–${fmt(lScore)} · Week ${closest.week}</div>
+      </div>`;
+      })() : ""}
     </div>
 
     <div class="section-label">Final Standings <span style="font-weight:400;text-transform:none;letter-spacing:0">— regular season records</span></div>
