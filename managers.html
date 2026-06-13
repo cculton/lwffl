@@ -130,6 +130,7 @@ function renderProfile(M, m) {
     if (p.pf > p.pa) o.w++; else if (p.pf < p.pa) o.l++; else o.t++;
     o.pf += p.pf; o.pa += p.pa; o.g++;
   });
+  const completedYears = new Set(m.seasons.map(r => r.year));
   const seasonData = m.seasons.map(r => {
     const o = byYear[r.year] || { w: 0, l: 0, t: 0, pf: 0, pa: 0, g: 0 };
     return {
@@ -143,6 +144,22 @@ function renderProfile(M, m) {
       final_standing: r.final_standing,
       seed: M.seedMap[`${r.manager}_${r.year}`] ?? null
     };
+  });
+  /* add any in-progress season years that have game data but no final standings yet */
+  Object.keys(byYear).map(Number).filter(y => !completedYears.has(y)).forEach(y => {
+    const o = byYear[y];
+    seasonData.push({
+      year: y,
+      wins: o.w, losses: o.l, ties: o.t, g: o.g,
+      points_for: o.pf, points_against: o.pa,
+      ppm: o.g ? o.pf / o.g : null,
+      winPct: o.g ? (o.w + o.t * 0.5) / o.g : 0,
+      weekly_margin: null,
+      transaction_count: null,
+      final_standing: null,
+      seed: M.seedMap[`${m.name}_${y}`] ?? null,
+      inProgress: true
+    });
   });
 
   const rivals = Object.entries(M.h2h[m.name] || {})
@@ -163,13 +180,12 @@ function renderProfile(M, m) {
     <header style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-bottom:30px">
       <div class="avatar lg">${initials(m.name)}</div>
       <div style="flex:1;min-width:220px">
-        <h1 style="font-family:var(--font-display);font-size:clamp(1.7rem,4vw,2.4rem);font-weight:700;line-height:1.1">${LWFFL.shortName(m.name)}</h1>
+        <h1 style="font-family:var(--font-display);font-size:clamp(1.7rem,4vw,2.4rem);font-weight:700;line-height:1.1;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">${LWFFL.shortName(m.name)}<span style="font-family:var(--font-body);font-size:0.9rem;font-weight:500;color:var(--muted)">${LWFFL.tenureStr(c.years, M.years[M.years.length - 1])}</span></h1>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
-          <span class="pill">${LWFFL.tenureStr(c.years, M.years[M.years.length - 1])}</span>
-          ${c.titles.map(y => `<span class="pill gold" title="Championship season">🏆 ${y}</span>`).join("")}
-          ${c.runnerUps.map(y => `<span class="pill" title="Runner-up finish">🥈 ${y}</span>`).join("")}
-          ${c.thirdPlaces.map(y => `<span class="pill" title="Third-place finish">🥉 ${y}</span>`).join("")}
-          ${c.scoringTitles.map(y => `<span class="pill accent" title="Scoring title">🕹️ ${y}</span>`).join("")}
+          ${c.titles.map(y => `<span class="pill gold" title="Championship season">🏆 Championship · ${y}</span>`).join("")}
+          ${c.runnerUps.map(y => `<span class="pill" title="Runner-up finish">🥈 Runner-Up · ${y}</span>`).join("")}
+          ${c.thirdPlaces.map(y => `<span class="pill" title="Third-place finish">🥉 Third Place · ${y}</span>`).join("")}
+          ${c.scoringTitles.map(y => `<span class="pill accent" title="Scoring title">🕹️ Scoring Title · ${y}</span>`).join("")}
         </div>
       </div>
       <div class="elo-badge" title="ELO power rating — updates after every matchup based on opponent strength, margin of victory, and playoff weighting">
@@ -184,7 +200,7 @@ function renderProfile(M, m) {
     </header>
 
     <div class="grid grid-4">
-      <div class="card"><div class="stat-label">Record</div><div class="stat-value">${recordStr(c.wins, c.losses, c.ties)}</div><div class="stat-sub">${(c.winPct * 100).toFixed(1)}% win rate · incl. playoffs</div></div>
+      <div class="card"><div class="stat-label">Record</div><div class="stat-value">${recordStr(c.wins, c.losses, c.ties)}</div><div class="stat-sub">${(c.winPct * 100).toFixed(1)}% win pct · incl. playoffs</div></div>
       <div class="card"><div class="stat-label">Championships</div><div class="stat-value">${c.titles.length}</div><div class="stat-sub">${c.runnerUps.length} runner-up finish${c.runnerUps.length === 1 ? "" : "es"}</div></div>
       <div class="card"><div class="stat-label">Playoff Appearances</div><div class="stat-value">${c.playoffApps}</div><div class="stat-sub">in ${c.seasons} seasons</div></div>
       <div class="card"><div class="stat-label">Points Per Matchup</div><div class="stat-value">${fmt(c.pf / c.games, 1)}</div><div class="stat-sub">${fmtInt(c.pf)} career points</div></div>
@@ -192,8 +208,8 @@ function renderProfile(M, m) {
 
     <div class="section-label">Memorable Matchups</div>
     <div class="grid grid-4">
-      ${gameCard("Best Matchup", best, "def.")}
-      ${gameCard("Worst Matchup", worst, "vs")}
+      ${gameCard("Highest Score", best, "def.")}
+      ${gameCard("Lowest Score", worst, "vs")}
       ${gameCard("Biggest Win", biggestWin, "def.")}
       ${gameCard("Worst Loss", worstLoss, "vs")}
     </div>
@@ -238,7 +254,7 @@ function renderProfile(M, m) {
 
   dataTable(document.getElementById("seasonTbl"), {
     columns: [
-      { key: "year", label: "Year", render: r => ylink(r.year) },
+      { key: "year", label: "Year", render: r => r.inProgress ? `${ylink(r.year)} <span class="pill accent" style="font-size:0.7rem;padding:2px 7px">Live</span>` : ylink(r.year) },
       { key: "winPct", label: "Record", num: true,
         render: r => `${recordStr(r.wins, r.losses, r.ties)} (${(r.winPct * 100).toFixed(1)}%)` },
       { key: "points_for", label: "PF", num: true, render: r => `<span class="pos">${fmt(r.points_for, 1)}</span>` },
@@ -248,7 +264,7 @@ function renderProfile(M, m) {
         render: r => r.weekly_margin == null ? "—" : `<span class="${r.weekly_margin >= 0 ? "pos" : "neg"}">${r.weekly_margin > 0 ? "+" : ""}${fmt(r.weekly_margin, 1)}</span>` },
       { key: "seed", label: "Seed", num: true, dir: "asc" },
       { key: "final_standing", label: "Finish", num: true, dir: "asc",
-        render: r => finishCell(r.final_standing) },
+        render: r => r.inProgress ? `<span style="color:var(--soft)">—</span>` : finishCell(r.final_standing) },
       { key: "transaction_count", label: "Moves", num: true }
     ],
     rows: seasonData,

@@ -174,6 +174,12 @@
     <div class="section-label">Drafter Leaderboard <span style="font-weight:400;text-transform:none;letter-spacing:0">— QB/RB/WR/TE picks only · click any column to sort</span></div>
     <div id="leaderTable"></div>
 
+    <div class="section-label">Best &amp; Worst Drafts <span style="font-weight:400;text-transform:none;letter-spacing:0">— by avg Δ per draft year · min 5 graded picks</span></div>
+    <div class="grid grid-2">
+      <div><div class="stat-label" style="margin-bottom:8px">🏆 Best Drafts</div><div id="bestDraftsTable"></div></div>
+      <div><div class="stat-label" style="margin-bottom:8px">💀 Worst Drafts</div><div id="worstDraftsTable"></div></div>
+    </div>
+
     <div class="section-label">All-Time Steals &amp; Busts</div>
     <div class="grid grid-2">
       <div id="stealsTable"></div>
@@ -442,6 +448,39 @@
       render: p => `${p.position}${p.posDraftRank} → ${p.position}${p.posRank}` },
     { key: "delta", label: "Δ", num: true, render: deltaCell }
   ];
+
+  /* best / worst drafts by manager+year avg delta (min 5 graded picks) */
+  const MIN_DRAFT_PICKS = 5;
+  const draftYearRows = [];
+  managers.forEach(mgr => {
+    years.forEach(y => {
+      const mine = graded.filter(p => p.manager === mgr && p.year === y);
+      if (mine.length < MIN_DRAFT_PICKS) return;
+      const avg = mine.reduce((a, p) => a + p.delta, 0) / mine.length;
+      const hits = mine.filter(p => p.delta >= 0).length;
+      draftYearRows.push({ manager: mgr, year: y, picks: mine.length, avg, hitRate: hits / mine.length, auction: mine[0].auction });
+    });
+  });
+
+  const draftYearCols = [
+    { key: "_rank", label: "#", get: () => null, render: (r, rank) => `<span style="color:var(--soft);font-weight:600">${rank}</span>` },
+    { key: "manager", label: "Manager", dir: "asc", render: r => managerCell(r.manager) },
+    { key: "year", label: "Year", render: r => ylink(r.year) },
+    { key: "picks", label: "Picks", num: true },
+    { key: "avg", label: "Avg Δ", num: true, render: r => avgCell(r.avg) },
+    { key: "hitRate", label: "Hit %", num: true, render: r => (r.hitRate * 100).toFixed(0) + "%" }
+  ];
+
+  dataTable(document.getElementById("bestDraftsTable"), {
+    columns: draftYearCols,
+    rows: draftYearRows.slice().sort((a, b) => b.avg - a.avg).slice(0, 10),
+    initialSort: { key: "avg", dir: "desc" }
+  });
+  dataTable(document.getElementById("worstDraftsTable"), {
+    columns: draftYearCols,
+    rows: draftYearRows.slice().sort((a, b) => a.avg - b.avg).slice(0, 10),
+    initialSort: { key: "avg", dir: "asc" }
+  });
 
   dataTable(document.getElementById("stealsTable"), {
     columns: pickCols("Steal"),
