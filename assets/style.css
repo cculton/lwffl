@@ -12,9 +12,9 @@
   --text: #e8ecf4;
   --muted: #94a3b8;
   --soft: #64748b;
-  --accent: #38bdf8;
+  --accent: #0085CA;
   --accent-2: #818cf8;
-  --accent-grad: linear-gradient(135deg, #38bdf8, #818cf8);
+  --accent-grad: linear-gradient(135deg, #0085CA, #818cf8);
   --gold: #fbbf24;
   --silver: #cbd5e1;
   --bronze: #d97706;
@@ -45,12 +45,12 @@ body::before {
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(ellipse 70% 45% at 15% -5%, rgba(56, 189, 248, 0.10), transparent),
+    radial-gradient(ellipse 70% 45% at 15% -5%, rgba(0, 133, 202, 0.10), transparent),
     radial-gradient(ellipse 60% 40% at 95% 10%, rgba(129, 140, 248, 0.09), transparent),
-    radial-gradient(ellipse 80% 50% at 50% 110%, rgba(56, 189, 248, 0.05), transparent);
+    radial-gradient(ellipse 80% 50% at 50% 110%, rgba(0, 133, 202, 0.05), transparent);
 }
 
-::selection { background: rgba(56, 189, 248, 0.3); }
+::selection { background: rgba(0, 133, 202, 0.3); }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -121,7 +121,7 @@ body::before {
 
 .nav-links a.active {
   color: var(--accent);
-  background: rgba(56, 189, 248, 0.12);
+  background: rgba(0, 133, 202, 0.12);
 }
 
 /* ---------- Layout ---------- */
@@ -185,7 +185,7 @@ a.card { text-decoration: none; color: inherit; display: block; }
 
 .card.hoverable:hover,
 a.card:hover {
-  border-color: rgba(56, 189, 248, 0.35);
+  border-color: rgba(0, 133, 202, 0.35);
   transform: translateY(-2px);
   box-shadow: 0 12px 32px rgba(2, 6, 23, 0.5);
 }
@@ -243,7 +243,7 @@ td {
 
 tbody tr:last-child td { border-bottom: none; }
 tbody tr { transition: background 0.12s; }
-tbody tr:hover { background: rgba(56, 189, 248, 0.05); }
+tbody tr:hover { background: rgba(0, 133, 202, 0.05); }
 
 td.num, th.num { text-align: right; }
 
@@ -256,9 +256,9 @@ th.sortable { cursor: pointer; transition: color 0.12s, background 0.12s; }
 th.sortable:hover { color: var(--accent); }
 th.sortable.sorted {
   color: var(--accent);
-  background: rgba(56, 189, 248, 0.1);
+  background: rgba(0, 133, 202, 0.1);
 }
-td.sorted-cell { background: rgba(56, 189, 248, 0.045); }
+td.sorted-cell { background: rgba(0, 133, 202, 0.045); }
 
 .tbl-foot {
   display: flex;
@@ -316,8 +316,8 @@ td.sorted-cell { background: rgba(56, 189, 248, 0.045); }
 }
 .tab-btn:hover { color: var(--text); border-color: var(--accent); }
 .tab-btn.active {
-  background: rgba(56, 189, 248, 0.12);
-  border-color: rgba(56, 189, 248, 0.5);
+  background: rgba(0, 133, 202, 0.12);
+  border-color: rgba(0, 133, 202, 0.5);
   color: var(--accent);
 }
 
@@ -365,8 +365,8 @@ td.sorted-cell { background: rgba(56, 189, 248, 0.045); }
 }
 .filter-pill:hover { color: var(--text); border-color: var(--accent); }
 .filter-pill.on {
-  background: rgba(56, 189, 248, 0.14);
-  border-color: rgba(56, 189, 248, 0.55);
+  background: rgba(0, 133, 202, 0.14);
+  border-color: rgba(0, 133, 202, 0.55);
   color: var(--accent);
 }
 
@@ -379,7 +379,7 @@ a.mlink {
   border-bottom: 1px solid transparent;
   transition: color 0.15s, border-color 0.15s;
 }
-a.mlink:hover { color: var(--accent); border-bottom-color: rgba(56, 189, 248, 0.5); }
+a.mlink:hover { color: var(--accent); border-bottom-color: rgba(0, 133, 202, 0.5); }
 
 a.ylink {
   color: var(--muted);
@@ -396,8 +396,8 @@ a.ylink:hover { color: var(--accent); }
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(129, 140, 248, 0.2));
-  border: 1.5px solid rgba(56, 189, 248, 0.4);
+  background: linear-gradient(135deg, rgba(0, 133, 202, 0.25), rgba(129, 140, 248, 0.2));
+  border: 1.5px solid rgba(0, 133, 202, 0.4);
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.1rem;
@@ -426,7 +426,7 @@ a.ylink:hover { color: var(--accent); }
 }
 
 .pill.gold { border-color: rgba(251, 191, 36, 0.45); background: rgba(251, 191, 36, 0.1); color: var(--gold); }
-.pill.accent { border-color: rgba(56, 189, 248, 0.45); background: rgba(56, 189, 248, 0.1); color: var(--accent); }
+.pill.accent { border-color: rgba(0, 133, 202, 0.45); background: rgba(0, 133, 202, 0.1); color: var(--accent); }
 .pill.green { border-color: rgba(52, 211, 153, 0.4); background: rgba(52, 211, 153, 0.08); color: var(--green); }
 
 /* ---------- Hero (homepage) ---------- */
@@ -490,10 +490,10 @@ a.ylink:hover { color: var(--accent); }
   height: 108px;
   border-radius: 22px;
   background:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(56, 189, 248, 0.25), transparent),
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0, 133, 202, 0.25), transparent),
     var(--surface-solid);
-  border: 2px solid rgba(56, 189, 248, 0.55);
-  box-shadow: 0 0 24px rgba(56, 189, 248, 0.18), inset 0 0 18px rgba(56, 189, 248, 0.07);
+  border: 2px solid rgba(0, 133, 202, 0.55);
+  box-shadow: 0 0 24px rgba(0, 133, 202, 0.18), inset 0 0 18px rgba(0, 133, 202, 0.07);
   flex-shrink: 0;
 }
 
@@ -544,7 +544,7 @@ a.ylink:hover { color: var(--accent); }
 .fate-bar {
   height: 38px;
   border-radius: 8px;
-  background: linear-gradient(90deg, rgba(56, 189, 248, 0.35), rgba(56, 189, 248, 0.15));
+  background: linear-gradient(90deg, rgba(0, 133, 202, 0.35), rgba(0, 133, 202, 0.15));
   min-width: 42px;
   transition: width 0.4s ease;
 }
@@ -618,7 +618,7 @@ select {
 select:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+  box-shadow: 0 0 0 3px rgba(0, 133, 202, 0.15);
 }
 
 select option { background: var(--surface-solid); }
