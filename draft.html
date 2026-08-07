@@ -200,6 +200,7 @@
 <script>
 (async () => {
   const { fmt, mlink, ylink, shortName, slugify, managerCell } = LWFFL;
+  const M = await LWFFL.load();
 
   const raw = await fetch("draft-history-2.json").then(r => r.json());
 
@@ -435,7 +436,7 @@
       { key: "_best", label: "Best Pick", get: r => r.best.delta,
         render: r => `${r.best.name} <span class="pos" style="font-size:0.78rem">+${r.best.delta}</span>` }
     ],
-    rows,
+    rows: rows.filter(r => M.managers[slugify(r.manager)]?.career.active),
     initialSort: { key: "avg", dir: "desc" },
     footer: () => `Steal = pick that finished 10+ spots better at its position than where it was taken · Bust = 10+ spots worse · managers below ${MIN_PICKS} graded picks are excluded from Best/Worst Drafter honors`
   });
