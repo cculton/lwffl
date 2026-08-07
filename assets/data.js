@@ -31,6 +31,7 @@ const LWFFL = (() => {
     `<a class="mlink" href="managers.html?m=${slugify(name)}">${shortName(name)}</a>${alumPill(name)}`;
 
   const managerCell = name => mlink(name);
+  const managerLabel = name => `${shortName(name)}${alumPill(name)}`;
 
   const finishCell = finish => {
     if (finish == null) return "—";
@@ -293,5 +294,5 @@ const LWFFL = (() => {
     return { years, managers, seasonSummaries, games, perfs, h2h, seedMap, standings, seasonRanks, elo };
   }
 
-  return { load, slugify, shortName, tenureStr, fmt, fmtInt, mlink, alumPill, managerCell, finishCell, ylink, recordStr, sparkline, isPlayoff };
+  return { load, slugify, shortName, tenureStr, fmt, fmtInt, mlink, alumPill, managerCell, managerLabel, finishCell, ylink, recordStr, sparkline, isPlayoff };
 })();
