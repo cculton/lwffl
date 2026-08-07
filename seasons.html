@@ -53,16 +53,16 @@ LWFFL.load().then(M => {
 /* ---------- Season index ---------- */
 
 function renderIndex(M) {
-  const { fmt, shortName } = LWFFL;
+  const { fmt, shortName, managerLabel } = LWFFL;
   const cards = M.seasonSummaries.slice().reverse().map(s => `
     <a class="card" href="seasons.html?y=${s.year}">
       <div style="display:flex;justify-content:space-between;align-items:baseline">
         <div style="font-family:var(--font-display);font-weight:700;font-size:1.5rem" class="grad-text">${s.year}</div>
         <span class="pill">${s.rows.length} teams</span>
       </div>
-      <div style="margin-top:12px;font-weight:700">🏆 ${shortName(s.champ.manager)}</div>
-      <div class="stat-sub">over ${shortName(s.runnerUp.manager)}${s.champScore ? ` · ${fmt(s.champScore.winner)}–${fmt(s.champScore.loser)}` : ""}</div>
-      <div class="stat-sub" style="margin-top:6px">🕹️ Scoring title: ${shortName(s.scoring.manager)}</div>
+      <div style="margin-top:12px;font-weight:700">🏆 ${managerLabel(s.champ.manager)}</div>
+      <div class="stat-sub">over ${managerLabel(s.runnerUp.manager)}${s.champScore ? ` · ${fmt(s.champScore.winner)}–${fmt(s.champScore.loser)}` : ""}</div>
+      <div class="stat-sub" style="margin-top:6px">🕹️ Scoring title: ${managerLabel(s.scoring.manager)}</div>
     </a>`).join("");
 
   const main = document.getElementById("main");
