@@ -8,11 +8,11 @@ const LWFFL = (() => {
   const slugify = name =>
     String(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
-  /* privacy-friendly display: "Cobey Culton" → "Cobey C." */
+  /* First names are sufficient except where the two Ryans need differentiation. */
   const shortName = name => {
     const parts = String(name).trim().split(/\s+/);
-    if (parts.length === 1) return parts[0];
     const first = parts[0] === "Tom" ? "Thomas" : parts[0];
+    if (first !== "Ryan" || parts.length === 1) return first;
     return `${first} ${parts[parts.length - 1][0]}.`;
   };
 
@@ -21,15 +21,16 @@ const LWFFL = (() => {
 
   const fmtInt = n => Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
 
-  const mlink = name => `<a class="mlink" href="managers.html?m=${slugify(name)}">${shortName(name)}</a>`;
-
   let activeByName = {};
 
   const alumPill = name => activeByName[name] === false
     ? ' <span class="pill" title="Former manager">Alum</span>'
     : "";
 
-  const managerCell = name => `${mlink(name)}${alumPill(name)}`;
+  const mlink = name =>
+    `<a class="mlink" href="managers.html?m=${slugify(name)}">${shortName(name)}</a>${alumPill(name)}`;
+
+  const managerCell = name => mlink(name);
 
   const finishCell = finish => {
     if (finish == null) return "—";
