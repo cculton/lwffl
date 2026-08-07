@@ -27,7 +27,7 @@
     .arc-input:focus {
       outline: none;
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+      box-shadow: 0 0 0 3px rgba(0, 133, 202, 0.15);
     }
     .arc-btn {
       padding: 12px 26px;
@@ -43,7 +43,7 @@
       transition: transform 0.12s, box-shadow 0.15s;
       white-space: nowrap;
     }
-    .arc-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(56, 189, 248, 0.3); }
+    .arc-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0, 133, 202, 0.3); }
 
     /* scorigami */
     .score-search { display: flex; gap: 12px; max-width: 480px; margin: 0 auto 28px; }
@@ -62,7 +62,7 @@
       font-family: var(--font-display);
       font-size: clamp(2.2rem, 6vw, 3.2rem);
       font-weight: 700;
-      background: linear-gradient(135deg, #f472b6, #a855f7 50%, #38bdf8);
+      background: linear-gradient(135deg, #f472b6, #a855f7 50%, #0085CA);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -385,9 +385,9 @@ LWFFL.load().then(M => {
       const userBucket = userScore != null ? Math.floor(userScore / 10) * 10 : null;
 
       const bg = labels.map((l, i) => data[i] === 0 ? "transparent"
-        : Number(l) === userBucket ? "#34d399" : "rgba(56,189,248,0.35)");
+        : Number(l) === userBucket ? "#34d399" : "rgba(0,133,202,0.35)");
       const border = labels.map((l, i) => data[i] === 0 ? "transparent"
-        : Number(l) === userBucket ? "#34d399" : "#38bdf8");
+        : Number(l) === userBucket ? "#34d399" : "#0085CA");
 
       if (chart) chart.destroy();
       Chart.defaults.color = "#64748b";
