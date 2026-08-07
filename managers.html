@@ -312,8 +312,8 @@ function renderCharts(M, m, c, myPerfs) {
     data: {
       labels: eloPts.map(d => d.year),
       datasets: [
-        { label: "ELO", data: eloPts.map(d => d.elo), borderColor: "#38bdf8",
-          backgroundColor: "rgba(56,189,248,0.1)", borderWidth: 3, pointRadius: 4,
+        { label: "ELO", data: eloPts.map(d => d.elo), borderColor: "#0085CA",
+          backgroundColor: "rgba(0,133,202,0.1)", borderWidth: 3, pointRadius: 4,
           pointHoverRadius: 7, pointBackgroundColor: "#fff", tension: 0.15, fill: true },
         { label: "League avg", data: eloPts.map(d => Math.round(M.elo.leagueAvg[d.year])),
           borderColor: "rgba(255,255,255,0.25)", borderWidth: 1.5, borderDash: [5, 5],
@@ -357,8 +357,8 @@ function renderCharts(M, m, c, myPerfs) {
   };
   new Chart(document.getElementById("luckChart"), {
     type: "scatter",
-    data: { datasets: [{ data: luckPts, backgroundColor: "rgba(56,189,248,0.55)",
-      borderColor: "rgba(56,189,248,0.9)", pointBorderWidth: 2, pointRadius: 6, pointHoverRadius: 8 }] },
+    data: { datasets: [{ data: luckPts, backgroundColor: "rgba(0,133,202,0.55)",
+      borderColor: "rgba(0,133,202,0.9)", pointBorderWidth: 2, pointRadius: 6, pointHoverRadius: 8 }] },
     plugins: [quadrants],
     options: {
       ...common,
@@ -404,7 +404,7 @@ function renderCharts(M, m, c, myPerfs) {
   new Chart(document.getElementById("spreadChart"), {
     type: "bar",
     data: { labels: years, datasets: [{ data: spreadData,
-      backgroundColor: "rgba(56,189,248,0.4)", borderRadius: 4 }] },
+      backgroundColor: "rgba(0,133,202,0.4)", borderRadius: 4 }] },
     options: {
       ...common,
       scales: { y: { grid: { color: "rgba(255,255,255,0.05)" } }, x: { grid: { display: false } } }
