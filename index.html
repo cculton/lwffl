@@ -47,7 +47,7 @@
 <script src="assets/tables.js?v=2"></script>
 <script>
 LWFFL.load().then(M => {
-  const { fmt, fmtInt, mlink, ylink, recordStr, shortName, managerCell, finishCell } = LWFFL;
+  const { fmt, fmtInt, mlink, ylink, recordStr, shortName, managerLabel, managerCell, finishCell } = LWFFL;
   const latest = M.seasonSummaries[M.seasonSummaries.length - 1];
   const totalPoints = M.games.reduce((a, g) => a + g.score1 + g.score2, 0);
 
@@ -109,7 +109,7 @@ LWFFL.load().then(M => {
           <div style="display:flex;align-items:center;gap:14px">
             <div style="font-size:2rem">${medals[i]}</div>
             <div>
-              <div style="font-family:var(--font-display);font-weight:700;font-size:1.15rem">${shortName(c.name)}</div>
+              <div style="font-family:var(--font-display);font-weight:700;font-size:1.15rem">${managerLabel(c.name)}</div>
               <div class="stat-sub">${c.titles.length} title${c.titles.length > 1 ? "s" : ""} · ${c.titles.join(", ")}</div>
             </div>
           </div>
@@ -124,8 +124,8 @@ LWFFL.load().then(M => {
       ${M.seasonSummaries.slice(-4).reverse().map(s => `
         <a class="card" href="seasons.html?y=${s.year}">
           <div class="stat-label">${s.year}</div>
-          <div style="font-family:var(--font-display);font-weight:700;font-size:1.15rem;margin-top:6px">🏆 ${shortName(s.champ.manager)}</div>
-          <div class="stat-sub">over ${shortName(s.runnerUp.manager)}${s.champScore ? ` · ${fmt(s.champScore.winner)}–${fmt(s.champScore.loser)}` : ""}</div>
+          <div style="font-family:var(--font-display);font-weight:700;font-size:1.15rem;margin-top:6px">🏆 ${managerLabel(s.champ.manager)}</div>
+          <div class="stat-sub">over ${managerLabel(s.runnerUp.manager)}${s.champScore ? ` · ${fmt(s.champScore.winner)}–${fmt(s.champScore.loser)}` : ""}</div>
         </a>`).join("")}
     </div>
   `;
