@@ -9115,5 +9115,59 @@
     "manager2": "Stuart Sundseth",
     "score2": 97.86,
     "playoffs": "Championship"
+  },
+  {
+    "year": 2026,
+    "week": 1,
+    "manager1": "Cobey Culton",
+    "score1": 123.72,
+    "manager2": "Ryan Turnau",
+    "score2": 81.72,
+    "playoffs": "N/A"
+  },
+  {
+    "year": 2026,
+    "week": 1,
+    "manager1": "Will Shoe",
+    "score1": 81.96,
+    "manager2": "Tom Hos",
+    "score2": 90.22,
+    "playoffs": "N/A"
+  },
+  {
+    "year": 2026,
+    "week": 1,
+    "manager1": "Samuel Wheeler",
+    "score1": 91.46,
+    "manager2": "Bryce Rickenbaker",
+    "score2": 74.26,
+    "playoffs": "N/A"
+  },
+  {
+    "year": 2026,
+    "week": 1,
+    "manager1": "Adam Goho",
+    "score1": 63.22,
+    "manager2": "Matt Dengler",
+    "score2": 89.96,
+    "playoffs": "N/A"
+  },
+  {
+    "year": 2026,
+    "week": 1,
+    "manager1": "Connor Glair",
+    "score1": 104.36,
+    "manager2": "Stuart Sundseth",
+    "score2": 138.3,
+    "playoffs": "N/A"
+  },
+  {
+    "year": 2026,
+    "week": 1,
+    "manager1": "Ryan Carson",
+    "score1": 90.8,
+    "manager2": "Chad Denton",
+    "score2": 107.04,
+    "playoffs": "N/A"
   }
 ]
