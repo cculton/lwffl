@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Transactions — LWFFL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .ctrl-row { display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; margin-bottom:18px; }
+    .ctrl-row > div { flex:0 0 auto; }
+    .pill-group { display:flex; flex-wrap:wrap; gap:6px; }
+
+    /* single-hue magnitude bars: identity comes from the text label, never colour */
+    .fbar-row { display:grid; grid-template-columns:130px 1fr 70px; gap:12px; align-items:center;
+                padding:6px 0; }
+    .fbar-name { font-size:0.87rem; }
+    .fbar-track { background:var(--surface-2); border-radius:4px; height:16px; overflow:hidden; }
+    .fbar-fill { height:100%; background:var(--accent); border-radius:0 4px 4px 0; min-width:2px; }
+    .fbar-val { text-align:right; font-variant-numeric:tabular-nums; font-weight:600; font-size:0.87rem; }
+    @media (max-width:560px){ .fbar-row { grid-template-columns:96px 1fr 58px; gap:8px; } }
+
+    .trade-card { margin-bottom:14px; }
+    .trade-head { display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+                  padding-bottom:10px; margin-bottom:12px; border-bottom:1px solid var(--border-strong); }
+    .trade-sides { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+    @media (max-width:640px){ .trade-sides { grid-template-columns:1fr; } }
+    .trade-side h4 { margin:0 0 8px; font-family:var(--font-display); font-size:0.82rem;
+                     letter-spacing:.05em; text-transform:uppercase; color:var(--soft); font-weight:700; }
+    .trade-side ul { margin:0; padding-left:16px; font-size:0.89rem; line-height:1.7; }
+    .tx-item { font-size:0.87rem; line-height:1.5; }
+    .tx-add { color:var(--green); } .tx-drop { color:var(--muted); }
+    .note { background:rgba(0,133,202,.07); border:1px solid var(--border); border-left:3px solid var(--accent);
+            border-radius:var(--radius-sm); padding:12px 16px; font-size:0.83rem; color:var(--muted);
+            margin-bottom:20px; line-height:1.55; }
+    .note strong { color:var(--text); }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>LW</span>FFL</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="managers.html">Managers</a>
+      <a href="seasons.html">Seasons</a>
+      <a href="boxscores.html">Box Scores</a>
+      <a href="transactions.html" class="active">Transactions</a>
+      <a href="h2h.html">Head-to-Head</a>
+      <a href="draft.html">Draft Central</a>
+      <a href="explorer.html">Stat Lab</a>
+      <a href="records.html">Records</a>
+      <a href="arcade.html">Arcade</a>
+      <a href="league.html">Constitution</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="page-head">
+    <h1>Transactions</h1>
+    <p class="sub" id="sub">Loading…</p>
+  </header>
+
+  <div class="grid grid-4" id="cards" style="margin-bottom:26px"></div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab-btn on" data-tab="ledger">Ledger</button>
+    <button class="tab-btn" data-tab="faab">FAAB</button>
+    <button class="tab-btn" data-tab="trades">Trades</button>
+    <button class="tab-btn" data-tab="activity">Activity</button>
+  </div>
+
+  <div id="panel"><div class="loading">Loading…</div></div>
+</div>
+
+<footer class="footer">
+  LWFFL · Legion of Whom Fantasy Football League
+</footer>
+
+<script src="assets/data.js?v=2"></script>
+<script src="assets/tables.js?v=2"></script>
+<script>
+const CACHE = {};
+let IDX = null, TAB = "ledger";
+
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const money = n => "$" + Number(n).toLocaleString("en-US");
+const nm = m => m ? LWFFL.shortName(m) : "—";
+const ml = m => m ? LWFFL.mlink(m) : "—";
+const when = ms => ms ? new Date(ms).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—";
+
+const TYPE_LABEL = { WAIVER: "Waiver", FREEAGENT: "Free agent", TRADE_ACCEPT: "Trade",
+  TRADE_PROPOSAL: "Trade proposed", TRADE_DECLINE: "Trade declined", TRADE_UPHOLD: "Trade upheld",
+  ROSTER: "Lineup", FUTURE_ROSTER: "Lineup (future)" };
+const statusLabel = s => s === "EXECUTED" ? "Completed"
+  : s === "CANCELED" ? "Canceled"
+  : s === "PENDING" ? "Never processed"
+  : s && s.startsWith("FAILED") ? "Failed" : (s || "—");
+
+async function season(y) {
+  if (!CACHE[y]) CACHE[y] = fetch(`transactions-${y}.json`).then(r => r.json());
+  return CACHE[y];
+}
+
+(async () => {
+  try {
+    const [idx] = await Promise.all([
+      fetch("transactions-index.json").then(r => r.json()),
+      LWFFL.load().catch(() => null)
+    ]);
+    IDX = idx;
+    const t = IDX.totals;
+    document.getElementById("sub").textContent =
+      `${t.transactions.toLocaleString()} moves from ${IDX.ledgerFrom} to ${IDX.seasons[IDX.seasons.length - 1].year}`;
+
+    document.getElementById("cards").innerHTML = `
+      <div class="card"><div class="stat-label">Transactions</div>
+        <div class="stat-value">${t.transactions.toLocaleString()}</div>
+        <div class="stat-sub">since ${IDX.ledgerFrom}</div></div>
+      <div class="card"><div class="stat-label">FAAB Spent</div>
+        <div class="stat-value">${money(t.faab)}</div>
+        <div class="stat-sub">on winning waiver claims</div></div>
+      <div class="card"><div class="stat-label">Trades Completed</div>
+        <div class="stat-value">${t.trades}</div>
+        <div class="stat-sub">across ${IDX.seasons.length} seasons</div></div>
+      <div class="card"><div class="stat-label">Biggest Bid</div>
+        <div class="stat-value">${t.topBid ? money(t.topBid.bid) : "—"}</div>
+        <div class="stat-sub">${t.topBid ? `${esc(nm(t.topBid.mgr))} · ${esc(t.topBid.player)} · ${t.topBid.year}` : ""}</div></div>`;
+
+    document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("on", x === b));
+      TAB = b.dataset.tab;
+      const u = new URL(location); u.searchParams.set("tab", TAB); history.replaceState(null, "", u);
+      render();
+    }));
+    const q = new URLSearchParams(location.search).get("tab");
+    if (q && document.querySelector(`.tab-btn[data-tab="${q}"]`)) {
+      TAB = q;
+      document.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("on", x.dataset.tab === q));
+    }
+    render();
+  } catch (e) {
+    console.error(e);
+    document.getElementById("panel").innerHTML = '<div class="loading">Could not load transaction data.</div>';
+  }
+})();
+
+function render() {
+  const p = document.getElementById("panel");
+  p.classList.remove("loading");
+  ({ ledger: renderLedger, faab: renderFaab, trades: renderTrades, activity: renderActivity })[TAB](p);
+}
+
+const yearOptions = sel => IDX.seasons.slice().reverse()
+  .map(s => `<option value="${s.year}"${s.year === sel ? " selected" : ""}>${s.year}</option>`).join("");
+
+/* ---------------- Ledger ---------------- */
+async function renderLedger(p) {
+  const latest = IDX.seasons[IDX.seasons.length - 1].year;
+  p.innerHTML = `
+    <div class="ctrl-row">
+      <div><label class="field-label" for="lY">Season</label>
+        <select id="lY">${yearOptions(latest)}</select></div>
+      <div><label class="field-label" for="lS">Show</label>
+        <select id="lS">
+          <option value="done">Completed only</option>
+          <option value="all">Everything, including failed</option>
+          <option value="failed">Failed &amp; canceled only</option>
+        </select></div>
+      <div style="flex:1 1 220px">
+        <label class="field-label">Type</label>
+        <div class="pill-group" id="lT"></div>
+      </div>
+    </div>
+    <div id="lTbl"><div class="loading">Loading…</div></div>`;
+
+  const types = ["WAIVER", "FREEAGENT", "TRADE_ACCEPT", "ROSTER"];
+  let tbl = null, rows = [];
+
+  const picked = multiPills(document.getElementById("lT"), types, apply, v => TYPE_LABEL[v] || v);
+
+  async function load() {
+    const y = Number(document.getElementById("lY").value);
+    rows = (await season(y)).transactions;
+    apply();
+  }
+  function apply() {
+    const mode = document.getElementById("lS").value;
+    let r = rows.filter(t => {
+      if (mode === "done" && t.st !== "EXECUTED") return false;
+      if (mode === "failed" && t.st === "EXECUTED") return false;
+      if (picked.size && !picked.has(t.ty)) return false;
+      return true;
+    });
+    if (tbl) tbl.update(r); else tbl = build(r);
+  }
+  function build(r) {
+    return dataTable(document.getElementById("lTbl"), {
+      pageSize: 40,
+      columns: [
+        { key: "wk", label: "Wk", num: true, dir: "asc" },
+        { key: "date", label: "Date", get: t => t.date || 0, render: t => when(t.date) },
+        { key: "mgr", label: "Manager", dir: "asc", render: t => ml(t.mgr) },
+        { key: "ty", label: "Type", dir: "asc",
+          render: t => `<span class="pill${t.ty === "TRADE_ACCEPT" ? " accent" : ""}">${TYPE_LABEL[t.ty] || t.ty}</span>` },
+        { key: "_what", label: "Move", get: t => t.items.length, render: t =>
+            t.items.map(i => i.t === "ADD"
+              ? `<span class="tx-item tx-add">+ ${esc(i.p)}</span>`
+              : i.t === "DROP" ? `<span class="tx-item tx-drop">− ${esc(i.p)}</span>`
+              : `<span class="tx-item tx-drop">${esc(i.p)}</span>`).join("<br>") || "—" },
+        { key: "bid", label: "Bid", num: true, render: t => t.bid ? money(t.bid) : "—" },
+        { key: "st", label: "Result", dir: "asc", render: t =>
+            `<span class="${t.st === "EXECUTED" ? "pos" : "neg"}">${statusLabel(t.st)}</span>` }
+      ],
+      rows: r,
+      initialSort: { key: "wk", dir: "asc" },
+      footer: rr => `${rr.length.toLocaleString()} transactions`
+    });
+  }
+  document.getElementById("lY").addEventListener("change", load);
+  document.getElementById("lS").addEventListener("change", apply);
+  load();
+}
+
+/* ---------------- FAAB ---------------- */
+async function renderFaab(p) {
+  const latest = IDX.seasons[IDX.seasons.length - 1].year;
+  p.innerHTML = `
+    <div class="note">
+      FAAB figures are built from <strong>winning waiver bids in the transaction log</strong>.
+      ESPN also exposes a <code>budgetSpent</code> counter, but for completed seasons it reports
+      essentially the full $100 for nearly every team regardless of actual spending, so it is not used here.
+    </div>
+    <div class="ctrl-row">
+      <div><label class="field-label" for="fY">Season</label>
+        <select id="fY">${yearOptions(latest)}</select></div>
+    </div>
+    <div class="section-label">Spend by manager</div>
+    <div class="card" id="fBars" style="margin-bottom:26px"></div>
+    <div class="section-label">Biggest winning bids, all time</div>
+    <div id="fTop"></div>`;
+
+  async function draw() {
+    const y = Number(document.getElementById("fY").value);
+    const d = await season(y);
+    const entries = Object.entries(d.faabByManager).filter(([m]) => m && m !== "null");
+    const max = Math.max(1, ...entries.map(([, v]) => v));
+    const total = entries.reduce((a, [, v]) => a + v, 0);
+    document.getElementById("fBars").innerHTML = entries.length ? `
+      ${entries.map(([m, v]) => `
+        <div class="fbar-row">
+          <div class="fbar-name">${ml(m)}</div>
+          <div class="fbar-track"><div class="fbar-fill" style="width:${(v / max * 100).toFixed(1)}%"></div></div>
+          <div class="fbar-val">${money(v)}</div>
+        </div>`).join("")}
+      <div class="bs-sum" style="display:flex;justify-content:space-between;padding-top:12px;margin-top:8px;
+           border-top:1px solid var(--border-strong);font-family:var(--font-display);font-weight:700">
+        <span>${y} total</span><span>${money(total)}</span></div>`
+      : '<div style="color:var(--soft);font-size:0.87rem">No winning bids recorded this season.</div>';
+  }
+  document.getElementById("fY").addEventListener("change", draw);
+  draw();
+
+  dataTable(document.getElementById("fTop"), {
+    columns: [
+      { key: "bid", label: "Bid", num: true, render: b => `<span class="pos">${money(b.bid)}</span>` },
+      { key: "player", label: "Player", dir: "asc" },
+      { key: "mgr", label: "Manager", dir: "asc", render: b => ml(b.mgr) },
+      { key: "year", label: "Season", num: true, render: b => LWFFL.ylink(b.year) },
+      { key: "week", label: "Wk", num: true }
+    ],
+    rows: IDX.topBids,
+    initialSort: { key: "bid", dir: "desc" }
+  });
+}
+
+/* ---------------- Trades ---------------- */
+async function renderTrades(p) {
+  p.innerHTML = '<div class="loading">Loading trades…</div>';
+  const all = [];
+  for (const s of IDX.seasons.slice().reverse()) {
+    const d = await season(s.year);
+    (d.trades || []).forEach(t => all.push({ ...t, year: s.year }));
+  }
+  if (!all.length) { p.innerHTML = '<div class="loading">No completed trades found.</div>'; return; }
+  all.sort((a, b) => b.year - a.year || b.wk - a.wk);
+
+  const detailed = all.filter(t => t.detail).length;
+  const note = `
+    <div class="note">
+      All <strong>${all.length} completed trades</strong> are listed — the count matches ESPN's own
+      per-team trade counters in every season. ESPN discards the trade's proposal record once it
+      goes through, though, so the players involved survive for only
+      <strong>${detailed} of them</strong>; the rest show the managers and the date only.
+    </div>`;
+
+  p.innerHTML = note + all.map(t => {
+    const sides = Object.entries(t.sides || {});
+    const head = (sides.length ? sides.map(([m]) => nm(m)) : (t.parties || []).map(nm));
+    return `
+      <div class="card trade-card">
+        <div class="trade-head">
+          <div style="font-family:var(--font-display);font-weight:700">
+            ${head.length ? esc(head.join(" ↔ ")) : "Trade"}
+          </div>
+          <div style="font-size:0.82rem;color:var(--soft)">${t.year} · Week ${t.wk} · ${when(t.date)}</div>
+        </div>
+        ${sides.length ? `
+          <div class="trade-sides">
+            ${sides.map(([m, players]) => `
+              <div class="trade-side">
+                <h4>${esc(nm(m))} received</h4>
+                <ul>${players.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+              </div>`).join("")}
+          </div>`
+        : `<div style="font-size:0.85rem;color:var(--soft)">
+             Players traded were not retained in ESPN's archive.
+           </div>`}
+      </div>`;
+  }).join("");
+}
+
+/* ---------------- Activity ---------------- */
+function renderActivity(p) {
+  const rows = Object.entries(IDX.careers).map(([m, v]) => ({ mgr: m, ...v,
+    winRate: v.claims ? (v.claims - v.lost) / v.claims : null }));
+  p.innerHTML = `
+    <div class="note">
+      Itemized transactions start in <strong>${IDX.ledgerFrom}</strong> — ESPN's archive has no
+      per-transaction records before that. For 2014–2017 only per-team season totals survive,
+      shown in the second table.
+    </div>
+    <div class="section-label">Career activity, ${IDX.ledgerFrom}–present</div>
+    <div id="aTbl" style="margin-bottom:26px"></div>
+    <div class="section-label">Season totals from ESPN's counters, 2014–2017</div>
+    <div id="cTbl"></div>`;
+
+  dataTable(document.getElementById("aTbl"), {
+    columns: [
+      { key: "mgr", label: "Manager", dir: "asc", render: r => ml(r.mgr) },
+      { key: "adds", label: "Adds", num: true },
+      { key: "drops", label: "Drops", num: true },
+      { key: "faab", label: "FAAB", num: true, render: r => money(r.faab) },
+      { key: "claims", label: "Claims", num: true },
+      { key: "lost", label: "Lost", num: true,
+        render: r => r.lost ? `<span class="neg">${r.lost}</span>` : "0" },
+      { key: "winRate", label: "Claim win %", num: true,
+        render: r => r.winRate == null ? "—" : (r.winRate * 100).toFixed(0) + "%" },
+      { key: "trades", label: "Trades", num: true }
+    ],
+    rows, initialSort: { key: "adds", dir: "desc" }
+  });
+
+  const old = [];
+  [2014, 2015, 2016, 2017].forEach(y => {
+    Object.entries(IDX.counters[String(y)] || {}).forEach(([m, v]) =>
+      old.push({ year: y, mgr: m, ...v }));
+  });
+  dataTable(document.getElementById("cTbl"), {
+    pageSize: 24,
+    columns: [
+      { key: "year", label: "Season", num: true, dir: "desc", render: r => LWFFL.ylink(r.year) },
+      { key: "mgr", label: "Manager", dir: "asc", render: r => ml(r.mgr) },
+      { key: "acquisitions", label: "Acquisitions", num: true },
+      { key: "drops", label: "Drops", num: true },
+      { key: "trades", label: "Trades", num: true }
+    ],
+    rows: old, initialSort: { key: "acquisitions", dir: "desc" }
+  });
+}
+</script>
+</body>
+</html>
