@@ -19,6 +19,7 @@
       <a href="index.html">Home</a>
       <a href="managers.html">Managers</a>
       <a href="seasons.html" class="active">Seasons</a>
+      <a href="boxscores.html">Box Scores</a>
       <a href="h2h.html">Head-to-Head</a>
       <a href="draft.html">Draft Central</a>
       <a href="explorer.html">Stat Lab</a>
@@ -142,6 +143,7 @@ function renderSeason(M, s) {
     <header class="page-head" style="text-align:center">
       <h1><span class="grad-text">${y}</span> Season</h1>
       <p class="sub">${s.rows.length} teams · ${yearGames.length} matchups</p>
+      <p style="margin-top:10px"><a class="ylink" href="boxscores.html?y=${y}">View every lineup from ${y} →</a></p>
     </header>
 
     <div class="champ-banner">
