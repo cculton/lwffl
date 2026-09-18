@@ -86,7 +86,7 @@
 <script src="assets/tables.js?v=2"></script>
 <script>
 const CACHE = {};
-let IDX = null, TAB = "ledger";
+let IDX = null, TRADES = null, TAB = "ledger";
 
 const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -94,6 +94,10 @@ const money = n => "$" + Number(n).toLocaleString("en-US");
 const nm = m => m ? LWFFL.shortName(m) : "—";
 const ml = m => m ? LWFFL.mlink(m) : "—";
 const when = ms => ms ? new Date(ms).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—";
+// trades-history.json carries plain ISO dates ("2016-09-13"); noon keeps it off the UTC boundary
+const whenFull = iso => iso
+  ? new Date(iso + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+  : "date unknown";
 
 const TYPE_LABEL = { WAIVER: "Waiver", FREEAGENT: "Free agent", TRADE_ACCEPT: "Trade",
   TRADE_PROPOSAL: "Trade proposed", TRADE_DECLINE: "Trade declined", TRADE_UPHOLD: "Trade upheld",
@@ -110,11 +114,12 @@ async function season(y) {
 
 (async () => {
   try {
-    const [idx] = await Promise.all([
+    const [idx, tr] = await Promise.all([
       fetch("transactions-index.json").then(r => r.json()),
+      fetch("trades-history.json").then(r => r.json()).catch(() => null),
       LWFFL.load().catch(() => null)
     ]);
-    IDX = idx;
+    IDX = idx; TRADES = tr;
     const t = IDX.totals;
     document.getElementById("sub").textContent =
       `${t.transactions.toLocaleString()} moves from ${IDX.ledgerFrom} to ${IDX.seasons[IDX.seasons.length - 1].year}`;
@@ -127,8 +132,10 @@ async function season(y) {
         <div class="stat-value">${money(t.faab)}</div>
         <div class="stat-sub">on winning waiver claims</div></div>
       <div class="card"><div class="stat-label">Trades Completed</div>
-        <div class="stat-value">${t.trades}</div>
-        <div class="stat-sub">across ${IDX.seasons.length} seasons</div></div>
+        <div class="stat-value">${TRADES ? TRADES.totalPerCounters : t.trades}</div>
+        <div class="stat-sub">${TRADES
+          ? `all time · ${TRADES.withPlayers} with player detail`
+          : `across ${IDX.seasons.length} seasons`}</div></div>
       <div class="card"><div class="stat-label">Biggest Bid</div>
         <div class="stat-value">${t.topBid ? money(t.topBid.bid) : "—"}</div>
         <div class="stat-sub">${t.topBid ? `${esc(nm(t.topBid.mgr))} · ${esc(t.topBid.player)} · ${t.topBid.year}` : ""}</div></div>`;
@@ -281,49 +288,65 @@ async function renderFaab(p) {
 }
 
 /* ---------------- Trades ---------------- */
-async function renderTrades(p) {
-  p.innerHTML = '<div class="loading">Loading trades…</div>';
-  const all = [];
-  for (const s of IDX.seasons.slice().reverse()) {
-    const d = await season(s.year);
-    (d.trades || []).forEach(t => all.push({ ...t, year: s.year }));
-  }
-  if (!all.length) { p.innerHTML = '<div class="loading">No completed trades found.</div>'; return; }
-  all.sort((a, b) => b.year - a.year || b.wk - a.wk);
+function renderTrades(p) {
+  if (!TRADES) { p.innerHTML = '<div class="loading">Trade history unavailable.</div>'; return; }
 
-  const detailed = all.filter(t => t.detail).length;
+  const gaps = TRADES.undocumentedSeasons || {};
+  const gapYears = Object.keys(gaps).map(Number).sort();
+  const gapTotal = Object.values(gaps).reduce((a, b) => a + b, 0);
+
   const note = `
     <div class="note">
-      All <strong>${all.length} completed trades</strong> are listed — the count matches ESPN's own
-      per-team trade counters in every season. ESPN discards the trade's proposal record once it
-      goes through, though, so the players involved survive for only
-      <strong>${detailed} of them</strong>; the rest show the managers and the date only.
+      <strong>${TRADES.totalPerCounters} trades</strong> have been completed in league history.
+      <strong>${TRADES.withPlayers}</strong> are reconstructed here in full — both sides, every player —
+      from ESPN's trade confirmation emails, and the per-season counts match ESPN's own
+      per-team trade counters exactly for ${TRADES.seasons.filter(s => s.reconciles).length} seasons.
+      ${gapTotal ? `The remaining <strong>${gapTotal}</strong> are from
+        ${gapYears.join(" and ")}: ESPN did not send trade notification emails before September 2016
+        and its transaction API has no records before 2018, so those trades are known to have happened
+        but their contents are gone.` : ""}
     </div>`;
 
-  p.innerHTML = note + all.map(t => {
-    const sides = Object.entries(t.sides || {});
-    const head = (sides.length ? sides.map(([m]) => nm(m)) : (t.parties || []).map(nm));
+  const byYear = {};
+  TRADES.trades.forEach(t => (byYear[t.year] = byYear[t.year] || []).push(t));
+  const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
+
+  const gapBlocks = gapYears.slice().reverse().map(y => `
+    <div class="section-label">${y}</div>
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-size:0.88rem;color:var(--muted)">
+        <strong style="color:var(--text)">${gaps[y]} trades</strong> were completed this season
+        — ESPN's per-team counters record them — but no detail survives anywhere.
+      </div>
+    </div>`).join("");
+
+  p.innerHTML = note + years.map(y => {
+    const list = byYear[y].slice().reverse();
     return `
-      <div class="card trade-card">
-        <div class="trade-head">
-          <div style="font-family:var(--font-display);font-weight:700">
-            ${head.length ? esc(head.join(" ↔ ")) : "Trade"}
-          </div>
-          <div style="font-size:0.82rem;color:var(--soft)">${t.year} · Week ${t.wk} · ${when(t.date)}</div>
-        </div>
-        ${sides.length ? `
-          <div class="trade-sides">
-            ${sides.map(([m, players]) => `
-              <div class="trade-side">
-                <h4>${esc(nm(m))} received</h4>
-                <ul>${players.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
-              </div>`).join("")}
-          </div>`
-        : `<div style="font-size:0.85rem;color:var(--soft)">
-             Players traded were not retained in ESPN's archive.
-           </div>`}
-      </div>`;
-  }).join("");
+      <div class="section-label">${y} <span style="font-weight:400;text-transform:none;letter-spacing:0">— ${list.length} trade${list.length > 1 ? "s" : ""}</span></div>
+      ${list.map(t => {
+        const sides = Object.entries(t.receives || {});
+        const head = sides.length ? sides.map(([m]) => nm(m)) : (t.parties || []).map(nm);
+        return `
+          <div class="card trade-card">
+            <div class="trade-head">
+              <div style="font-family:var(--font-display);font-weight:700">${esc(head.join(" ↔ "))}</div>
+              <div style="font-size:0.82rem;color:var(--soft)">${whenFull(t.date)}</div>
+            </div>
+            ${sides.length ? `
+              <div class="trade-sides">
+                ${sides.map(([m, players]) => `
+                  <div class="trade-side">
+                    <h4>${esc(nm(m))} received</h4>
+                    <ul>${players.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+                  </div>`).join("")}
+              </div>`
+            : `<div style="font-size:0.85rem;color:var(--soft)">
+                 ${esc(t.note || "Players traded were not retained in ESPN's archive.")}
+               </div>`}
+          </div>`;
+      }).join("")}`;
+  }).join("") + gapBlocks;
 }
 
 /* ---------------- Activity ---------------- */
