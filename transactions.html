@@ -89,7 +89,7 @@
   <div class="grid grid-4" id="cards" style="margin-bottom:26px"></div>
 
   <div class="tabs" id="tabs">
-    <button class="tab-btn on" data-tab="ledger">Ledger</button>
+    <button class="tab-btn active" data-tab="ledger">Ledger</button>
     <button class="tab-btn" data-tab="faab">FAAB</button>
     <button class="tab-btn" data-tab="trades">Trades</button>
     <button class="tab-btn" data-tab="activity">Activity</button>
@@ -163,7 +163,7 @@ async function season(y) {
         <div class="stat-sub">${t.topBid ? `${esc(nm(t.topBid.mgr))} · ${esc(t.topBid.player)} · ${t.topBid.year}` : ""}</div></div>`;
 
     document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => {
-      document.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("on", x === b));
+      document.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("active", x === b));
       TAB = b.dataset.tab;
       const u = new URL(location); u.searchParams.set("tab", TAB); history.replaceState(null, "", u);
       render();
@@ -171,7 +171,7 @@ async function season(y) {
     const q = new URLSearchParams(location.search).get("tab");
     if (q && document.querySelector(`.tab-btn[data-tab="${q}"]`)) {
       TAB = q;
-      document.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("on", x.dataset.tab === q));
+      document.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("active", x.dataset.tab === q));
     }
     render();
   } catch (e) {
@@ -259,28 +259,49 @@ async function renderLedger(p) {
 
 /* ---------------- FAAB ---------------- */
 async function renderFaab(p) {
-  const latest = IDX.seasons[IDX.seasons.length - 1].year;
+  const yearOpts = `<option value="all">All time</option>` +
+    IDX.seasons.slice().reverse().map(s => `<option value="${s.year}">${s.year}</option>`).join("");
   p.innerHTML = `
-    <div class="note">
-      FAAB figures are built from <strong>winning waiver bids in the transaction log</strong>.
-      ESPN also exposes a <code>budgetSpent</code> counter, but for completed seasons it reports
-      essentially the full $100 for nearly every team regardless of actual spending, so it is not used here.
-    </div>
     <div class="ctrl-row">
       <div><label class="field-label" for="fY">Season</label>
-        <select id="fY">${yearOptions(latest)}</select></div>
+        <select id="fY">${yearOpts}</select></div>
     </div>
     <div class="section-label">Spend by manager</div>
     <div class="card" id="fBars" style="margin-bottom:26px"></div>
-    <div class="section-label">Biggest winning bids, all time</div>
+    <div class="section-label">Biggest winning bids</div>
     <div id="fTop"></div>`;
 
+  function bidsForYear(d) {
+    return d.transactions
+      .filter(t => t.bid > 0)
+      .map(t => ({
+        bid: t.bid, mgr: t.mgr, year: d.year, week: t.wk,
+        player: (t.items.find(i => i.t === "ADD") || {}).p || "—"
+      }))
+      .sort((a, b) => b.bid - a.bid)
+      .slice(0, 25);
+  }
+
+  let tbl = null;
+
   async function draw() {
-    const y = Number(document.getElementById("fY").value);
-    const d = await season(y);
-    const entries = Object.entries(d.faabByManager).filter(([m]) => m && m !== "null");
+    const sel = document.getElementById("fY").value;
+    let entries, total, label, bids;
+    if (sel === "all") {
+      entries = Object.entries(IDX.careers).map(([m, v]) => [m, v.faab]).filter(([, v]) => v > 0);
+      total = IDX.totals.faab;
+      label = "All-time total";
+      bids = IDX.topBids;
+    } else {
+      const y = Number(sel);
+      const d = await season(y);
+      entries = Object.entries(d.faabByManager).filter(([m]) => m && m !== "null");
+      total = entries.reduce((a, [, v]) => a + v, 0);
+      label = `${y} total`;
+      bids = bidsForYear(d);
+    }
+    entries.sort((a, b) => b[1] - a[1]);
     const max = Math.max(1, ...entries.map(([, v]) => v));
-    const total = entries.reduce((a, [, v]) => a + v, 0);
     document.getElementById("fBars").innerHTML = entries.length ? `
       ${entries.map(([m, v]) => `
         <div class="fbar-row">
@@ -290,23 +311,28 @@ async function renderFaab(p) {
         </div>`).join("")}
       <div class="bs-sum" style="display:flex;justify-content:space-between;padding-top:12px;margin-top:8px;
            border-top:1px solid var(--border-strong);font-family:var(--font-display);font-weight:700">
-        <span>${y} total</span><span>${money(total)}</span></div>`
+        <span>${label}</span><span>${money(total)}</span></div>`
       : '<div style="color:var(--soft);font-size:0.87rem">No winning bids recorded this season.</div>';
+
+    if (tbl) tbl.update(bids); else tbl = buildBids(bids);
   }
+
+  function buildBids(rows) {
+    return dataTable(document.getElementById("fTop"), {
+      columns: [
+        { key: "bid", label: "Bid", num: true, render: b => `<span class="pos">${money(b.bid)}</span>` },
+        { key: "player", label: "Player", dir: "asc" },
+        { key: "mgr", label: "Manager", dir: "asc", render: b => ml(b.mgr) },
+        { key: "year", label: "Season", num: true, render: b => LWFFL.ylink(b.year) },
+        { key: "week", label: "Wk", num: true }
+      ],
+      rows,
+      initialSort: { key: "bid", dir: "desc" }
+    });
+  }
+
   document.getElementById("fY").addEventListener("change", draw);
   draw();
-
-  dataTable(document.getElementById("fTop"), {
-    columns: [
-      { key: "bid", label: "Bid", num: true, render: b => `<span class="pos">${money(b.bid)}</span>` },
-      { key: "player", label: "Player", dir: "asc" },
-      { key: "mgr", label: "Manager", dir: "asc", render: b => ml(b.mgr) },
-      { key: "year", label: "Season", num: true, render: b => LWFFL.ylink(b.year) },
-      { key: "week", label: "Wk", num: true }
-    ],
-    rows: IDX.topBids,
-    initialSort: { key: "bid", dir: "desc" }
-  });
 }
 
 /* ---------------- Trades ---------------- */
@@ -319,14 +345,13 @@ function renderTrades(p) {
 
   const note = `
     <div class="note">
-      <strong>${TRADES.totalPerCounters} trades</strong> have been completed in league history.
-      <strong>${TRADES.withPlayers}</strong> are reconstructed here in full — both sides, every player —
-      from ESPN's trade confirmation emails, and the per-season counts match ESPN's own
-      per-team trade counters exactly for ${TRADES.seasons.filter(s => s.reconciles).length} seasons.
-      ${gapTotal ? `The remaining <strong>${gapTotal}</strong> are from
-        ${gapYears.join(" and ")}: ESPN did not send trade notification emails before September 2016
-        and its transaction API has no records before 2018, so those trades are known to have happened
-        but their contents are gone.` : ""}
+      <strong>${TRADES.totalPerCounters} trades</strong> have gone down in league history.
+      We've got full detail — both sides, every player — on <strong>${TRADES.withPlayers}</strong>
+      of them, pulled from ESPN's old trade confirmation emails. The counts match ESPN's own
+      trade totals exactly for ${TRADES.seasons.filter(s => s.reconciles).length} seasons.
+      ${gapTotal ? `The other <strong>${gapTotal}</strong> happened in
+        ${gapYears.join(" and ")}. We know they happened — ESPN just didn't send trade emails
+        before September 2016, and its records don't go back before 2018, so the details are gone.` : ""}
     </div>`;
 
   const byYear = {};
@@ -337,8 +362,8 @@ function renderTrades(p) {
     <div class="section-label">${y}</div>
     <div class="card" style="margin-bottom:14px">
       <div style="font-size:0.88rem;color:var(--muted)">
-        <strong style="color:var(--text)">${gaps[y]} trades</strong> were completed this season
-        — ESPN's per-team counters record them — but no detail survives anywhere.
+        <strong style="color:var(--text)">${gaps[y]} trades</strong> happened this season.
+        ESPN's counters confirm it, but nobody knows who traded what — the details are gone.
       </div>
     </div>`).join("");
 
@@ -361,37 +386,41 @@ function scoringExplainer() {
     <div class="grid grid-2" style="margin-bottom:10px">
       <div class="card metric-card">
         <h4>Lineup Points</h4>
-        <div class="metric-q">Did you get more out of it than the other guy?</div>
-        <p>Take every player you acquired. For each week after the trade, his points count
-           <strong>only if you actually started him</strong>. Bench him and he's worth nothing.
-           Drop him, or trade him again, and he stops counting from that moment.</p>
-        <p>This is the fix for the obvious way of judging a trade — adding up what the players
-           went on to score. Trading for a 200-point quarterback when you already have a good one
-           gets you close to nothing, because <strong>you can't start both</strong>. Raw points
-           would hand you all 200 anyway.</p>
+        <div class="metric-q">Did you get more out of the trade than the other guy?</div>
+        <p>Every player you got in a trade gets tracked week by week, but his points only count
+           <strong>if you actually started him</strong>. Bench him and he's worth zero. Drop him,
+           or trade him away again, and he's done counting from that point on.</p>
+        <p>That's different from the usual way people judge trades — just adding up what the players
+           went on to score. Say you land a quarterback who racks up 200 points the rest of the way,
+           but you already had a good one. That trade barely helped you, because
+           <strong>you can only start one QB</strong>. Total points would still give you credit for
+           all 200.</p>
         <div class="metric-scope">All ${TV.scored} trades with player detail, ${TV.firstYear}–present.</div>
       </div>
       <div class="card metric-card">
         <h4>Swap-Back Margin</h4>
         <div class="metric-q">Would you have been better off not trading at all?</div>
-        <p>Every week after the trade, your roster gets rebuilt twice: once as it really was, and
-           once as it would have been without the trade — players you got taken out, players you
-           gave up put back in at their <strong>real scores that week</strong>. Both versions are
-           then filled out into the best legal starting nine, and the difference is the trade's doing.</p>
-        <p>Optimizing <strong>both</strong> versions is what keeps it honest. Judging your real
-           lineup against a perfect hindsight one would quietly credit the trade for good start/sit
-           calls it had nothing to do with. It's the stingier number of the two, because it charges
-           you for whoever the new player pushed out of your lineup.</p>
-        <div class="metric-scope">${TV.benchEraScored} trades, 2018 and later — ESPN never archived
-          benches before that, so there is no roster to rebuild.</div>
+        <p>For every week after the trade, your roster gets rebuilt two ways: what actually
+           happened, and what would've happened if the trade never went through — the players you
+           got are pulled out, and the players you gave away are put back in at whatever they
+           <strong>actually scored that week</strong>. Then we set the best possible lineup for
+           both versions and compare.</p>
+        <p>Setting the best lineup for <strong>both</strong> sides is what makes this fair. Compare
+           your real lineup to a perfect hindsight one instead, and the trade gets credit for good
+           bench decisions that had nothing to do with it. This number tends to run lower than
+           Lineup Points, because it also charges you for whoever the new player bumped out of
+           your starting spot.</p>
+        <div class="metric-scope">${TV.benchEraScored} trades, 2018 and later. ESPN didn't keep
+          bench data before that, so there's no roster to rebuild.</div>
       </div>
     </div>
     <div class="note">
-      Both measure <strong>how a trade turned out</strong>, not whether it was a good idea. ESPN
-      doesn't keep the projections a manager was looking at, so nothing here can tell a sound trade
-      from a lucky one — a torn ACL the following Sunday looks identical to a bad read.
-      Swap-back also runs slightly generous: in ${TV.unobservableReturns} player-weeks the player you
-      gave up had been dropped by everyone, so there's no score to put back in your hypothetical lineup.
+      One thing to keep in mind: both of these measure <strong>how a trade turned out</strong>, not
+      whether it was smart at the time. We don't know what a manager was thinking when he pulled the
+      trigger, so a good trade wrecked by a season-ending injury looks the same here as a bad one.
+      Swap-back also runs a little generous — in ${TV.unobservableReturns} player-weeks, the guy
+      you gave up had already been dropped by everyone, so there's no real score to plug back into
+      your imaginary lineup.
     </div>`;
 }
 
@@ -419,9 +448,9 @@ function buildCareerTable() {
     ],
     rows: TV.career,
     initialSort: { key: "net", dir: "desc" },
-    footer: () => `Net lineup points is your haul minus theirs, summed over every trade. The
-      swap-back column covers only the ${TV.benchEraScored} trades from 2018 on; the count in
-      parentheses is how many of that manager's trades it could be computed for.`
+    footer: () => `Net lineup points is what you got minus what they got, added up across every
+      trade. Swap-back only covers the ${TV.benchEraScored} trades from 2018 on — the number in
+      parentheses is how many of each manager's trades that includes.`
   });
 }
 
@@ -477,9 +506,9 @@ function renderActivity(p) {
     winRate: v.claims ? (v.claims - v.lost) / v.claims : null }));
   p.innerHTML = `
     <div class="note">
-      Itemized transactions start in <strong>${IDX.ledgerFrom}</strong> — ESPN's archive has no
-      per-transaction records before that. For 2014–2017 only per-team season totals survive,
-      shown in the second table.
+      Play-by-play transaction data starts in <strong>${IDX.ledgerFrom}</strong> — that's as far
+      back as ESPN kept it. For 2014–2017, all that's left is each team's season totals, in the
+      table below.
     </div>
     <div class="section-label">Career activity, ${IDX.ledgerFrom}–present</div>
     <div id="aTbl" style="margin-bottom:26px"></div>

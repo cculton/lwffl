@@ -168,16 +168,16 @@ async function go(openId, openMgr) {
 
   const notes = [];
   if (data.inferredSlots) notes.push(
-    "ESPN's archive for this season stores the nine starters but not their lineup slots, " +
-    "so the <strong>positions below are reconstructed</strong> from each player's eligibility and that " +
-    "season's roster rules. Player points and team totals are exact. " +
-    "<strong>Bench players were never archived</strong> for this era and cannot be recovered.");
+    "ESPN kept the nine starters for this season but not which position each one played, so the " +
+    "<strong>positions below are our best guess</strong> — based on the player's eligibility and " +
+    "that year's roster rules. The points and totals are exact either way. " +
+    "<strong>Bench players weren't archived at all</strong> for this era, so those are gone for good.");
   if (anyPlayoff(WEEK)) notes.push(
-    "Playoff week — only <strong>championship bracket</strong> matchups are shown. " +
-    "Consolation games don't count anywhere else on this site, so they aren't recorded here either.");
+    "This is a playoff week, so you're only seeing <strong>championship bracket</strong> games. " +
+    "Consolation games aren't tracked anywhere else on the site, so we left them out here too.");
   if (YEAR === 2018) notes.push(
-    "ESPN re-scores 2018 defenses under the league's current settings, which inflates every D/ST line. " +
-    "Those values are <strong>corrected here</strong> back to what they actually scored in 2018.");
+    "ESPN re-scores 2018 defenses using today's settings, which bumps up every D/ST line. " +
+    "We <strong>fixed those numbers</strong> to show what they actually scored back in 2018.");
   document.getElementById("note").innerHTML =
     notes.map(n => `<div class="note">${n}</div>`).join("");
 
