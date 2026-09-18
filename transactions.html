@@ -37,6 +37,26 @@
             border-radius:var(--radius-sm); padding:12px 16px; font-size:0.83rem; color:var(--muted);
             margin-bottom:20px; line-height:1.55; }
     .note strong { color:var(--text); }
+
+    /* trade scoring */
+    .metric-card h4 { margin:0 0 4px; font-family:var(--font-display); font-size:1rem; font-weight:700; }
+    .metric-q { font-size:0.84rem; color:var(--accent-2); font-style:italic; margin-bottom:10px; }
+    .metric-card p { margin:0 0 9px; font-size:0.86rem; line-height:1.6; color:var(--muted); }
+    .metric-card p:last-child { margin-bottom:0; }
+    .metric-card strong { color:var(--text); }
+    .metric-scope { margin-top:11px; padding-top:9px; border-top:1px solid var(--border);
+                    font-size:0.78rem; color:var(--soft); }
+
+    /* keep both sides' totals on the same line even when one haul is longer */
+    .trade-side { display:flex; flex-direction:column; }
+    .trade-side ul { flex:1 0 auto; }
+    .tv-foot { margin-top:12px; padding-top:9px; border-top:1px solid var(--border);
+               font-size:0.8rem; color:var(--soft); display:flex; flex-wrap:wrap; gap:4px 14px; }
+    .tv-foot b { color:var(--text); font-variant-numeric:tabular-nums; }
+    .trade-side li span.tv-p { color:var(--soft); font-size:0.82rem; }
+    .verdict { margin-top:13px; padding-top:11px; border-top:1px solid var(--border-strong);
+               font-size:0.86rem; }
+    .verdict .num { font-variant-numeric:tabular-nums; font-weight:700; }
   </style>
 </head>
 <body>
@@ -86,7 +106,7 @@
 <script src="assets/tables.js?v=2"></script>
 <script>
 const CACHE = {};
-let IDX = null, TRADES = null, TAB = "ledger";
+let IDX = null, TRADES = null, TV = null, TVBY = {}, TAB = "ledger";
 
 const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -114,12 +134,14 @@ async function season(y) {
 
 (async () => {
   try {
-    const [idx, tr] = await Promise.all([
+    const [idx, tr, tv] = await Promise.all([
       fetch("transactions-index.json").then(r => r.json()),
       fetch("trades-history.json").then(r => r.json()).catch(() => null),
+      fetch("trade-value.json").then(r => r.json()).catch(() => null),
       LWFFL.load().catch(() => null)
     ]);
-    IDX = idx; TRADES = tr;
+    IDX = idx; TRADES = tr; TV = tv;
+    if (TV) TV.trades.forEach(t => { TVBY[`${t.year}|${t.date}|${t.parties.join("|")}`] = t; });
     const t = IDX.totals;
     document.getElementById("sub").textContent =
       `${t.transactions.toLocaleString()} moves from ${IDX.ledgerFrom} to ${IDX.seasons[IDX.seasons.length - 1].year}`;
@@ -320,33 +342,133 @@ function renderTrades(p) {
       </div>
     </div>`).join("");
 
-  p.innerHTML = note + years.map(y => {
+  const cards = years.map(y => {
     const list = byYear[y].slice().reverse();
     return `
       <div class="section-label">${y} <span style="font-weight:400;text-transform:none;letter-spacing:0">— ${list.length} trade${list.length > 1 ? "s" : ""}</span></div>
-      ${list.map(t => {
-        const sides = Object.entries(t.receives || {});
-        const head = sides.length ? sides.map(([m]) => nm(m)) : (t.parties || []).map(nm);
-        return `
-          <div class="card trade-card">
-            <div class="trade-head">
-              <div style="font-family:var(--font-display);font-weight:700">${esc(head.join(" ↔ "))}</div>
-              <div style="font-size:0.82rem;color:var(--soft)">${whenFull(t.date)}</div>
-            </div>
-            ${sides.length ? `
-              <div class="trade-sides">
-                ${sides.map(([m, players]) => `
-                  <div class="trade-side">
-                    <h4>${esc(nm(m))} received</h4>
-                    <ul>${players.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
-                  </div>`).join("")}
-              </div>`
-            : `<div style="font-size:0.85rem;color:var(--soft)">
-                 ${esc(t.note || "Players traded were not retained in ESPN's archive.")}
-               </div>`}
-          </div>`;
-      }).join("")}`;
+      ${list.map(tradeCard).join("")}`;
   }).join("") + gapBlocks;
+
+  p.innerHTML = note + scoringExplainer() + careerBlock() + cards;
+  if (TV) buildCareerTable();
+}
+
+/* ---- the two metrics, explained where they're used ---- */
+function scoringExplainer() {
+  if (!TV) return "";
+  return `
+    <div class="section-label">How a trade is scored</div>
+    <div class="grid grid-2" style="margin-bottom:10px">
+      <div class="card metric-card">
+        <h4>Lineup Points</h4>
+        <div class="metric-q">Did you get more out of it than the other guy?</div>
+        <p>Take every player you acquired. For each week after the trade, his points count
+           <strong>only if you actually started him</strong>. Bench him and he's worth nothing.
+           Drop him, or trade him again, and he stops counting from that moment.</p>
+        <p>This is the fix for the obvious way of judging a trade — adding up what the players
+           went on to score. Trading for a 200-point quarterback when you already have a good one
+           gets you close to nothing, because <strong>you can't start both</strong>. Raw points
+           would hand you all 200 anyway.</p>
+        <div class="metric-scope">All ${TV.scored} trades with player detail, ${TV.firstYear}–present.</div>
+      </div>
+      <div class="card metric-card">
+        <h4>Swap-Back Margin</h4>
+        <div class="metric-q">Would you have been better off not trading at all?</div>
+        <p>Every week after the trade, your roster gets rebuilt twice: once as it really was, and
+           once as it would have been without the trade — players you got taken out, players you
+           gave up put back in at their <strong>real scores that week</strong>. Both versions are
+           then filled out into the best legal starting nine, and the difference is the trade's doing.</p>
+        <p>Optimizing <strong>both</strong> versions is what keeps it honest. Judging your real
+           lineup against a perfect hindsight one would quietly credit the trade for good start/sit
+           calls it had nothing to do with. It's the stingier number of the two, because it charges
+           you for whoever the new player pushed out of your lineup.</p>
+        <div class="metric-scope">${TV.benchEraScored} trades, 2018 and later — ESPN never archived
+          benches before that, so there is no roster to rebuild.</div>
+      </div>
+    </div>
+    <div class="note">
+      Both measure <strong>how a trade turned out</strong>, not whether it was a good idea. ESPN
+      doesn't keep the projections a manager was looking at, so nothing here can tell a sound trade
+      from a lucky one — a torn ACL the following Sunday looks identical to a bad read.
+      Swap-back also runs slightly generous: in ${TV.unobservableReturns} player-weeks the player you
+      gave up had been dropped by everyone, so there's no score to put back in your hypothetical lineup.
+    </div>`;
+}
+
+function careerBlock() {
+  if (!TV) return "";
+  return `
+    <div class="section-label">Career trade ledger</div>
+    <div id="tvTbl" style="margin-bottom:26px"></div>`;
+}
+
+function buildCareerTable() {
+  const sign = (v, d = 1) => v == null ? "—"
+    : `<span class="${v > 0 ? "pos" : v < 0 ? "neg" : ""}">${v > 0 ? "+" : ""}${LWFFL.fmt(v, d)}</span>`;
+  dataTable(document.getElementById("tvTbl"), {
+    columns: [
+      { key: "manager", label: "Manager", dir: "asc", render: r => ml(r.manager) },
+      { key: "trades", label: "Trades", num: true },
+      { key: "won", label: "Won", num: true,
+        render: r => `${r.won}<span style="color:var(--soft)">/${r.trades}</span>` },
+      { key: "net", label: "Net lineup pts", num: true, render: r => sign(r.net) },
+      { key: "perTrade", label: "Per trade", num: true, render: r => sign(r.perTrade) },
+      { key: "swapBack", label: "Swap-back", num: true,
+        render: r => r.swapBack == null ? "—"
+          : `${sign(r.swapBack)} <span style="color:var(--soft);font-size:0.8rem">(${r.swapTrades})</span>` }
+    ],
+    rows: TV.career,
+    initialSort: { key: "net", dir: "desc" },
+    footer: () => `Net lineup points is your haul minus theirs, summed over every trade. The
+      swap-back column covers only the ${TV.benchEraScored} trades from 2018 on; the count in
+      parentheses is how many of that manager's trades it could be computed for.`
+  });
+}
+
+function tradeCard(t) {
+  const tv = TVBY[`${t.year}|${t.date}|${(t.parties || []).join("|")}`];
+  const sides = Object.entries(t.receives || {});
+  const head = sides.length ? sides.map(([m]) => nm(m)) : (t.parties || []).map(nm);
+
+  const sideHtml = ([m, players]) => {
+    const s = tv && tv.sides[m];
+    const lines = s
+      ? s.players.map(p => `<li>${esc(p.name)}
+          <span class="tv-p">— ${LWFFL.fmt(p.pts)} in ${p.starts} start${p.starts === 1 ? "" : "s"}</span></li>`)
+      : players.map(x => `<li>${esc(x)}</li>`);
+    return `
+      <div class="trade-side">
+        <h4>${esc(nm(m))} received</h4>
+        <ul>${lines.join("")}</ul>
+        ${s ? `<div class="tv-foot">
+          <span>Lineup points <b>${LWFFL.fmt(s.lineupPts)}</b></span>
+          ${s.swapBack == null ? "" :
+            `<span>Swap-back <b class="${s.swapBack > 0 ? "pos" : s.swapBack < 0 ? "neg" : ""}">${
+              s.swapBack > 0 ? "+" : ""}${LWFFL.fmt(s.swapBack)}</b></span>`}
+        </div>` : ""}
+      </div>`;
+  };
+
+  let verdict = "";
+  if (tv) {
+    const wk = `Week ${tv.week} · ${tv.weeksRemaining} week${tv.weeksRemaining === 1 ? "" : "s"} left in the season`;
+    verdict = `<div class="verdict">${tv.winner
+      ? `${ml(tv.winner)} came out ahead by <span class="num pos">${LWFFL.fmt(tv.margin)}</span> lineup points · ${wk}`
+      : `Dead even — neither side started a point more than the other · ${wk}`}</div>`;
+  }
+
+  return `
+    <div class="card trade-card">
+      <div class="trade-head">
+        <div style="font-family:var(--font-display);font-weight:700">${esc(head.join(" ↔ "))}</div>
+        <div style="font-size:0.82rem;color:var(--soft)">${whenFull(t.date)}</div>
+      </div>
+      ${sides.length
+        ? `<div class="trade-sides">${sides.map(sideHtml).join("")}</div>${verdict}`
+        : `<div style="font-size:0.85rem;color:var(--soft)">
+             ${esc(t.note || "Players traded were not retained in ESPN's archive.")}
+           </div>`}
+    </div>`;
 }
 
 /* ---------------- Activity ---------------- */
