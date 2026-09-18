@@ -1,0 +1,279 @@
+{
+ "generated": "2026-09-18",
+ "mostStarted": {
+  "Ryan Carson": {
+   "starts": 37,
+   "players": [
+    {
+     "name": "Russell Wilson",
+     "pos": "QB"
+    }
+   ]
+  },
+  "Cobey Culton": {
+   "starts": 28,
+   "players": [
+    {
+     "name": "DeAndre Hopkins",
+     "pos": "WR"
+    }
+   ]
+  },
+  "Connor Glair": {
+   "starts": 40,
+   "players": [
+    {
+     "name": "Zach Ertz",
+     "pos": "TE"
+    }
+   ]
+  },
+  "Jordan Williams": {
+   "starts": 13,
+   "players": [
+    {
+     "name": "Antonio Brown",
+     "pos": "WR"
+    },
+    {
+     "name": "Dan Bailey",
+     "pos": "K"
+    },
+    {
+     "name": "Rob Gronkowski",
+     "pos": "TE"
+    }
+   ]
+  },
+  "Matt Dengler": {
+   "starts": 35,
+   "players": [
+    {
+     "name": "Lamar Jackson",
+     "pos": "QB"
+    }
+   ]
+  },
+  "Bryce Rickenbaker": {
+   "starts": 40,
+   "players": [
+    {
+     "name": "Russell Wilson",
+     "pos": "QB"
+    }
+   ]
+  },
+  "Adam Goho": {
+   "starts": 35,
+   "players": [
+    {
+     "name": "Aaron Jones",
+     "pos": "RB"
+    }
+   ]
+  },
+  "Samuel Wheeler": {
+   "starts": 34,
+   "players": [
+    {
+     "name": "Mason Crosby",
+     "pos": "K"
+    }
+   ]
+  },
+  "Will Shoe": {
+   "starts": 64,
+   "players": [
+    {
+     "name": "Cam Newton",
+     "pos": "QB"
+    }
+   ]
+  },
+  "Chad Denton": {
+   "starts": 38,
+   "players": [
+    {
+     "name": "Justin Tucker",
+     "pos": "K"
+    }
+   ]
+  },
+  "Ryan Turnau": {
+   "starts": 40,
+   "players": [
+    {
+     "name": "Dak Prescott",
+     "pos": "QB"
+    }
+   ]
+  },
+  "Tom Hos": {
+   "starts": 26,
+   "players": [
+    {
+     "name": "Patrick Mahomes",
+     "pos": "QB"
+    }
+   ]
+  },
+  "Evan Turner": {
+   "starts": 26,
+   "players": [
+    {
+     "name": "Chris Boswell",
+     "pos": "K"
+    }
+   ]
+  },
+  "Ryan Davidson": {
+   "starts": 15,
+   "players": [
+    {
+     "name": "DeAndre Hopkins",
+     "pos": "WR"
+    },
+    {
+     "name": "LeSean McCoy",
+     "pos": "RB"
+    },
+    {
+     "name": "Tyreek Hill",
+     "pos": "WR"
+    }
+   ]
+  },
+  "Nick Sparks": {
+   "starts": 23,
+   "players": [
+    {
+     "name": "Darren Waller",
+     "pos": "TE"
+    }
+   ]
+  },
+  "Stuart Sundseth": {
+   "starts": 18,
+   "players": [
+    {
+     "name": "Brock Bowers",
+     "pos": "TE"
+    }
+   ]
+  }
+ },
+ "costliestBid": {
+  "Tom Hos": {
+   "bid": 52,
+   "player": "Elijah Mitchell",
+   "pos": "RB",
+   "year": 2021,
+   "week": 2,
+   "date": 1631692145336
+  },
+  "Ryan Carson": {
+   "bid": 26,
+   "player": "Elijah Mitchell",
+   "pos": "RB",
+   "year": 2021,
+   "week": 2,
+   "date": 1631692145336
+  },
+  "Matt Dengler": {
+   "bid": 50,
+   "player": "Marlon Mack",
+   "pos": "RB",
+   "year": 2018,
+   "week": 10,
+   "date": 1541689637121
+  },
+  "Cobey Culton": {
+   "bid": 53,
+   "player": "De'Von Achane",
+   "pos": "RB",
+   "year": 2023,
+   "week": 4,
+   "date": 1695787017103
+  },
+  "Will Shoe": {
+   "bid": 35,
+   "player": "Jared Cook",
+   "pos": "TE",
+   "year": 2018,
+   "week": 2,
+   "date": 1536768062020
+  },
+  "Chad Denton": {
+   "bid": 30,
+   "player": "Peyton Barber",
+   "pos": "RB",
+   "year": 2018,
+   "week": 7,
+   "date": 1539878465337
+  },
+  "Adam Goho": {
+   "bid": 36,
+   "player": "Brian Hill",
+   "pos": "RB",
+   "year": 2019,
+   "week": 11,
+   "date": 1573664405303
+  },
+  "Ryan Turnau": {
+   "bid": 65,
+   "player": "Isaac Guerendo",
+   "pos": "RB",
+   "year": 2024,
+   "week": 14,
+   "date": 1733305697452
+  },
+  "Connor Glair": {
+   "bid": 60,
+   "player": "Kenny Stills",
+   "pos": "WR",
+   "year": 2018,
+   "week": 15,
+   "date": 1544634062927
+  },
+  "Bryce Rickenbaker": {
+   "bid": 15,
+   "player": "David Johnson",
+   "pos": "RB",
+   "year": 2021,
+   "week": 14,
+   "date": 1638952859826
+  },
+  "Evan Turner": {
+   "bid": 5,
+   "player": "LeGarrette Blount",
+   "pos": "RB",
+   "year": 2018,
+   "week": 4,
+   "date": 1538323262170
+  },
+  "Samuel Wheeler": {
+   "bid": 40,
+   "player": "Malcolm Brown",
+   "pos": "RB",
+   "year": 2020,
+   "week": 2,
+   "date": 1600272017187
+  },
+  "Nick Sparks": {
+   "bid": 100,
+   "player": "Roschon Johnson",
+   "pos": "RB",
+   "year": 2023,
+   "week": 14,
+   "date": 1701851278907
+  },
+  "Stuart Sundseth": {
+   "bid": 10,
+   "player": "Baker Mayfield",
+   "pos": "QB",
+   "year": 2023,
+   "week": 12,
+   "date": 1700727070708
+  }
+ }
+}

@@ -44,8 +44,17 @@
 <script src="assets/tables.js?v=2"></script>
 <script>
 const initials = name => name.split(/\s+/).map(w => w[0]).join("").toUpperCase();
+const money = n => "$" + Number(n).toLocaleString("en-US");
 
-LWFFL.load().then(M => {
+let FO_IDX = null, FO_HL = null, FO_TV = null;
+
+Promise.all([
+  LWFFL.load(),
+  fetch("transactions-index.json").then(r => r.json()).catch(() => null),
+  fetch("manager-highlights.json").then(r => r.json()).catch(() => null),
+  fetch("trade-value.json").then(r => r.json()).catch(() => null)
+]).then(([M, idx, hl, tv]) => {
+  FO_IDX = idx; FO_HL = hl; FO_TV = tv;
   const slug = new URLSearchParams(location.search).get("m");
   if (slug && M.managers[slug]) renderProfile(M, M.managers[slug]);
   else renderIndex(M);
@@ -216,6 +225,17 @@ function renderProfile(M, m) {
       ${gameCard("Worst Loss", worstLoss, "vs")}
     </div>
 
+    <div class="section-label">Front Office</div>
+    <div class="grid grid-3">
+      ${faabSpentTile(m.name)}
+      ${costliestBidTile(m.name)}
+      ${mostStartedTile(m.name)}
+    </div>
+    <div class="grid grid-2" style="margin-top:14px">
+      ${bestTradeTile(m.name, true)}
+      ${bestTradeTile(m.name, false)}
+    </div>
+
     <div class="section-label">Analytics</div>
     <div class="grid grid-2">
       <div class="card">
@@ -298,6 +318,61 @@ function renderProfile(M, m) {
 
   renderCharts(M, m, c, myPerfs);
   document.title = `${LWFFL.shortName(m.name)} — LWFFL`;
+}
+
+/* ---------- Front Office tiles ---------- */
+
+function foTile(label, value, sub) {
+  return `
+    <div class="card">
+      <div class="stat-label">${label}</div>
+      <div class="stat-value" style="font-size:1.35rem">${value}</div>
+      <div class="stat-sub">${sub}</div>
+    </div>`;
+}
+
+function faabSpentTile(name) {
+  if (!FO_IDX) return foTile("Career FAAB Spent", "—", "");
+  const entries = Object.entries(FO_IDX.careers).filter(([, v]) => v.faab > 0);
+  const mine = FO_IDX.careers[name];
+  if (!mine || !mine.faab) return foTile("Career FAAB Spent", "$0", "No winning bids on record");
+  const rank = entries.slice().sort((a, b) => b[1].faab - a[1].faab).findIndex(([n]) => n === name) + 1;
+  return foTile("Career FAAB Spent",
+    `<a class="bxlink" href="transactions.html?tab=faab">${money(mine.faab)}</a>`,
+    `#${rank} of ${entries.length} all-time spenders`);
+}
+
+function costliestBidTile(name) {
+  const hit = FO_HL && FO_HL.costliestBid[name];
+  if (!hit) return foTile("Costliest FAAB Bid", "—", "No winning bids on record");
+  return foTile("Costliest FAAB Bid",
+    `<a class="bxlink" href="transactions.html?tab=faab">${money(hit.bid)}</a>`,
+    `${hit.player} · ${LWFFL.ylink(hit.year)}`);
+}
+
+function mostStartedTile(name) {
+  const hit = FO_HL && FO_HL.mostStarted[name];
+  if (!hit) return foTile("Most Started Player", "—", "");
+  const names = hit.players.map(p => p.name).join(", ");
+  const posNote = hit.players.length === 1 ? ` · ${hit.players[0].pos}` : " · tied";
+  return foTile("Most Started Player", names, `${hit.starts} career starts${posNote}`);
+}
+
+function bestTradeTile(name, wantBest) {
+  const label = wantBest ? "Best Trade (Swap-Back)" : "Worst Trade (Swap-Back)";
+  if (!FO_TV) return foTile(label, "—", "");
+  let pick = null;
+  FO_TV.trades.forEach(t => {
+    const s = t.sides[name];
+    if (!s || s.swapBack == null) return;
+    if (!pick || (wantBest ? s.swapBack > pick.val : s.swapBack < pick.val)) pick = { val: s.swapBack, trade: t };
+  });
+  if (!pick) return foTile(label, "—", "No trades scored (2018 and later only)");
+  const partner = pick.trade.parties.find(p => p !== name);
+  const cls = pick.val > 0 ? "pos" : pick.val < 0 ? "neg" : "";
+  return foTile(label,
+    `<a class="bxlink" href="transactions.html?tab=trades"><span class="${cls}">${pick.val > 0 ? "+" : ""}${LWFFL.fmt(pick.val)}</span></a>`,
+    `vs ${LWFFL.mlink(partner)} · ${pick.trade.year}`);
 }
 
 /* ---------- Analytics charts (ported from the classic manager cards) ---------- */
