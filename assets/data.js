@@ -59,6 +59,40 @@ const LWFFL = (() => {
   };
   const ylink = year => `<a class="ylink" href="seasons.html?y=${year}">${year}</a>`;
 
+  /* ---- box score deep links ----
+     Every matchup in league-scores.json has exactly one box score, so any score
+     shown anywhere on the site can link straight to the lineups behind it.
+     boxIndex guards against linking a week that hasn't been captured yet. */
+  let boxIndex = null;
+
+  const hasBox = (year, week) => {
+    if (!boxIndex) return true;                    // index unavailable — link anyway
+    const weeks = boxIndex[Number(year)];
+    if (!weeks) return false;
+    return week == null || weeks.has(Number(week));
+  };
+
+  const bxHref = (year, week, manager) => {
+    let u = `boxscores.html?y=${year}`;
+    if (week != null) u += `&w=${week}`;
+    if (manager) u += `&mgr=${slugify(manager)}`;
+    return u;
+  };
+
+  /* "Week 14" / "14" → that week's matchup grid */
+  const wlink = (year, week, label) => {
+    const text = label == null ? week : label;
+    return hasBox(year, week)
+      ? `<a class="bxlink" href="${bxHref(year, week)}">${text}</a>`
+      : String(text);
+  };
+
+  /* wrap a score (or any markup) in a link to that exact box score */
+  const bxlink = (year, week, manager, html) =>
+    hasBox(year, week)
+      ? `<a class="bxlink" href="${bxHref(year, week, manager)}" title="View lineups">${html}</a>`
+      : html;
+
   function recordStr(w, l, t) {
     return t ? `${w}-${l}-${t}` : `${w}-${l}`;
   }
@@ -169,11 +203,16 @@ const LWFFL = (() => {
   async function load() {
     if (cachePromise) return cachePromise;
     cachePromise = (async () => {
-      const [standings, games, seeds] = await Promise.all([
+      const [standings, games, seeds, box] = await Promise.all([
         fetch("final-standings.json").then(r => r.json()),
         fetch("league-scores.json").then(r => r.json()),
-        fetch("playoff-seeds.json").then(r => r.json())
+        fetch("playoff-seeds.json").then(r => r.json()),
+        fetch("boxscores-index.json").then(r => r.json()).catch(() => null)
       ]);
+      if (box) {
+        boxIndex = {};
+        box.seasons.forEach(s => { boxIndex[s.year] = new Set(s.weeks); });
+      }
       games.forEach(g => {
         g.year = Number(g.year);
         g.week = Number(g.week);
@@ -294,5 +333,5 @@ const LWFFL = (() => {
     return { years, managers, seasonSummaries, games, perfs, h2h, seedMap, standings, seasonRanks, elo };
   }
 
-  return { load, slugify, shortName, tenureStr, fmt, fmtInt, mlink, alumPill, managerCell, managerLabel, finishCell, ylink, recordStr, sparkline, isPlayoff };
+  return { load, slugify, shortName, tenureStr, fmt, fmtInt, mlink, alumPill, managerCell, managerLabel, finishCell, ylink, wlink, bxlink, bxHref, hasBox, recordStr, sparkline, isPlayoff };
 })();

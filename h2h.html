@@ -89,7 +89,7 @@ LWFFL.load().then(M => {
 });
 
 function render() {
-  const { fmt, mlink, ylink, recordStr, isPlayoff, shortName, managerCell } = LWFFL;
+  const { fmt, mlink, ylink, wlink, bxlink, recordStr, isPlayoff, shortName, managerCell } = LWFFL;
   const a = document.getElementById("selA").value;
   const b = document.getElementById("selB").value;
   const out = document.getElementById("results");
@@ -147,13 +147,14 @@ function render() {
 
   dataTable(document.getElementById("logTbl"), {
     columns: [
-      { key: "_when", label: "When", get: g => g.year * 100 + g.week, render: g => `${ylink(g.year)} · Wk ${g.week}` },
+      { key: "_when", label: "When", get: g => g.year * 100 + g.week,
+        render: g => `${ylink(g.year)} · ${wlink(g.year, g.week, "Wk " + g.week)}` },
       { key: "playoffs", label: "Type", dir: "asc", get: g => isPlayoff(g) ? g.playoffs : "Regular",
         render: g => `<span class="pill ${isPlayoff(g) ? "accent" : ""}">${isPlayoff(g) ? g.playoffs : "Regular"}</span>` },
       { key: "pf", label: shortName(a), num: true,
-        render: g => `<span class="${g.pf > g.pa ? "pos" : g.pf < g.pa ? "neg" : ""}">${fmt(g.pf)}</span>` },
+        render: g => `<span class="${g.pf > g.pa ? "pos" : g.pf < g.pa ? "neg" : ""}">${bxlink(g.year, g.week, a, fmt(g.pf))}</span>` },
       { key: "pa", label: shortName(b), num: true,
-        render: g => `<span class="${g.pa > g.pf ? "pos" : g.pa < g.pf ? "neg" : ""}">${fmt(g.pa)}</span>` },
+        render: g => `<span class="${g.pa > g.pf ? "pos" : g.pa < g.pf ? "neg" : ""}">${bxlink(g.year, g.week, b, fmt(g.pa))}</span>` },
       { key: "_margin", label: "Margin", num: true, get: g => Math.abs(g.pf - g.pa), render: g => fmt(Math.abs(g.pf - g.pa)) },
       { key: "_winner", label: "Winner", dir: "asc", get: g => g.pf > g.pa ? a : g.pf < g.pa ? b : "Tie",
         render: g => g.pf > g.pa ? managerCell(a) : g.pf < g.pa ? managerCell(b) : "Tie" }

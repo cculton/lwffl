@@ -49,7 +49,7 @@
 <script src="assets/tables.js?v=2"></script>
 <script>
 LWFFL.load().then(M => {
-  const { fmt, fmtInt, mlink, ylink, recordStr, shortName, managerLabel, managerCell, finishCell } = LWFFL;
+  const { fmt, fmtInt, mlink, ylink, bxlink, recordStr, shortName, managerLabel, managerCell, finishCell } = LWFFL;
   const latest = M.seasonSummaries[M.seasonSummaries.length - 1];
   const totalPoints = M.games.reduce((a, g) => a + g.score1 + g.score2, 0);
 
@@ -73,7 +73,8 @@ LWFFL.load().then(M => {
         <div class="cb-name">${mlink(latest.champ.manager)}</div>
         <div class="cb-meta">
           Defeated ${mlink(latest.runnerUp.manager)}
-          ${latest.champScore ? `${fmt(latest.champScore.winner)} – ${fmt(latest.champScore.loser)}` : ""}
+          ${latest.champScore ? bxlink(latest.year, latest.champGame.week, latest.champ.manager,
+              `${fmt(latest.champScore.winner)} – ${fmt(latest.champScore.loser)}`) : ""}
           in the championship · regular season ${recordStr(latest.champ.wins, latest.champ.losses, latest.champ.ties)}
         </div>
       </div>

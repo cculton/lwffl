@@ -80,7 +80,7 @@ function renderIndex(M) {
 /* ---------- Season detail ---------- */
 
 function renderSeason(M, s) {
-  const { fmt, fmtInt, mlink, recordStr, isPlayoff, managerCell } = LWFFL;
+  const { fmt, fmtInt, mlink, wlink, bxlink, bxHref, recordStr, isPlayoff, managerCell } = LWFFL;
   const y = s.year;
 
   /* standings data (rendered as a sortable table below) */
@@ -109,11 +109,14 @@ function renderSeason(M, s) {
             <div class="card">
               <div style="display:flex;justify-content:space-between;gap:10px">
                 <span style="font-weight:${w1 ? 700 : 400};color:${w1 ? "var(--text)" : "var(--muted)"}">${managerCell(g.manager1)}</span>
-                <span class="num" style="font-weight:${w1 ? 700 : 400};color:${w1 ? "var(--green)" : "var(--muted)"}">${fmt(g.score1)}</span>
+                <span class="num" style="font-weight:${w1 ? 700 : 400};color:${w1 ? "var(--green)" : "var(--muted)"}">${bxlink(y, g.week, g.manager1, fmt(g.score1))}</span>
               </div>
               <div style="display:flex;justify-content:space-between;gap:10px;margin-top:8px">
                 <span style="font-weight:${!w1 ? 700 : 400};color:${!w1 ? "var(--text)" : "var(--muted)"}">${managerCell(g.manager2)}</span>
-                <span class="num" style="font-weight:${!w1 ? 700 : 400};color:${!w1 ? "var(--green)" : "var(--muted)"}">${fmt(g.score2)}</span>
+                <span class="num" style="font-weight:${!w1 ? 700 : 400};color:${!w1 ? "var(--green)" : "var(--muted)"}">${bxlink(y, g.week, g.manager2, fmt(g.score2))}</span>
+              </div>
+              <div style="margin-top:12px;font-size:0.74rem;letter-spacing:.06em;text-transform:uppercase">
+                <a class="ylink" href="${bxHref(y, g.week, g.manager1)}">View lineups →</a>
               </div>
             </div>`;
         }).join("")}
@@ -154,7 +157,8 @@ function renderSeason(M, s) {
         <div class="cb-name">${mlink(s.champ.manager)}</div>
         <div class="cb-meta">
           Defeated ${mlink(s.runnerUp.manager)}
-          ${s.champScore ? `${fmt(s.champScore.winner)} – ${fmt(s.champScore.loser)}` : ""}
+          ${s.champScore ? bxlink(y, s.champGame.week, s.champ.manager,
+              `${fmt(s.champScore.winner)} – ${fmt(s.champScore.loser)}`) : ""}
           · regular season ${recordStr(s.champ.wins, s.champ.losses, s.champ.ties)}
         </div>
       </div>
@@ -170,8 +174,8 @@ function renderSeason(M, s) {
       ${topGame ? `
       <div class="card">
         <div class="stat-label">🔥 Highest Score</div>
-        <div class="stat-value" style="font-size:1.2rem">${fmt(topGame.pf)}</div>
-        <div class="stat-sub">${mlink(topGame.manager)} · Week ${topGame.week}</div>
+        <div class="stat-value" style="font-size:1.2rem">${bxlink(y, topGame.week, topGame.manager, fmt(topGame.pf))}</div>
+        <div class="stat-sub">${mlink(topGame.manager)} · ${wlink(y, topGame.week, "Week " + topGame.week)}</div>
       </div>` : ""}
       ${closest ? (() => {
         const c1Win = closest.score1 >= closest.score2;
@@ -182,8 +186,8 @@ function renderSeason(M, s) {
         return `
       <div class="card">
         <div class="stat-label">😬 Closest Matchup</div>
-        <div class="stat-value" style="font-size:1.2rem">${fmt(Math.abs(closest.score1 - closest.score2))}</div>
-        <div class="stat-sub">${mlink(winner)} def. ${mlink(loser)} · ${fmt(wScore)}–${fmt(lScore)} · Week ${closest.week}</div>
+        <div class="stat-value" style="font-size:1.2rem">${bxlink(y, closest.week, winner, fmt(Math.abs(closest.score1 - closest.score2)))}</div>
+        <div class="stat-sub">${mlink(winner)} def. ${mlink(loser)} · ${bxlink(y, closest.week, winner, `${fmt(wScore)}–${fmt(lScore)}`)} · ${wlink(y, closest.week, "Week " + closest.week)}</div>
       </div>`;
       })() : ""}
     </div>

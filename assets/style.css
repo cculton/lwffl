@@ -389,6 +389,18 @@ a.ylink {
 }
 a.ylink:hover { color: var(--accent); }
 
+/* Box score deep links. These wrap scores and week numbers that already carry
+   their own color (green for a win, red for a loss), so the link inherits
+   everything and announces itself only with a faint underline. */
+a.bxlink {
+  color: inherit;
+  font: inherit;
+  text-decoration: none;
+  border-bottom: 1px dotted rgba(129, 140, 248, 0.4);
+  transition: color 0.15s, border-color 0.15s;
+}
+a.bxlink:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
 .avatar {
   display: inline-flex;
   align-items: center;

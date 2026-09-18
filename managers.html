@@ -104,7 +104,7 @@ function renderIndex(M) {
 /* ---------- Manager profile ---------- */
 
 function renderProfile(M, m) {
-  const { fmt, fmtInt, mlink, ylink, recordStr, sparkline, managerCell, finishCell } = LWFFL;
+  const { fmt, fmtInt, mlink, ylink, wlink, bxlink, recordStr, sparkline, managerCell, finishCell } = LWFFL;
   const c = m.career;
   const myPerfs = M.perfs.filter(p => p.manager === m.name);
 
@@ -119,8 +119,8 @@ function renderProfile(M, m) {
   const gameCard = (label, p, extra) => p ? `
     <div class="card">
       <div class="stat-label">${label}</div>
-      <div class="stat-value" style="font-size:1.35rem">${fmt(p.pf)}<span style="color:var(--soft);font-size:0.9rem;font-weight:500"> vs ${fmt(p.pa)}</span></div>
-      <div class="stat-sub">${extra} ${mlink(p.opp)} · ${ylink(p.year)} Wk ${p.week}</div>
+      <div class="stat-value" style="font-size:1.35rem">${bxlink(p.year, p.week, p.manager, fmt(p.pf))}<span style="color:var(--soft);font-size:0.9rem;font-weight:500"> vs ${fmt(p.pa)}</span></div>
+      <div class="stat-sub">${extra} ${mlink(p.opp)} · ${ylink(p.year)} ${wlink(p.year, p.week, "Wk " + p.week)}</div>
     </div>` : "";
 
   /* season + rivals data (rendered as sortable tables below).

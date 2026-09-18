@@ -146,7 +146,7 @@ async function season(year) {
     WEEK = Number(q.get("w")) || null;
 
     sel.addEventListener("change", () => { YEAR = Number(sel.value); WEEK = null; go(); });
-    await go(q.get("m"));
+    await go(q.get("m"), q.get("mgr"));
   } catch (e) {
     console.error(e);
     document.getElementById("main").innerHTML =
@@ -154,7 +154,7 @@ async function season(year) {
   }
 })();
 
-async function go(openId) {
+async function go(openId, openMgr) {
   const data = await season(YEAR);
   const weeks = Object.keys(data.weeks).map(Number).sort((a, b) => a - b);
   if (!weeks.includes(WEEK)) WEEK = weeks[weeks.length - 1];
@@ -172,21 +172,33 @@ async function go(openId) {
     "so the <strong>positions below are reconstructed</strong> from each player's eligibility and that " +
     "season's roster rules. Player points and team totals are exact. " +
     "<strong>Bench players were never archived</strong> for this era and cannot be recovered.");
+  if (anyPlayoff(WEEK)) notes.push(
+    "Playoff week — only <strong>championship bracket</strong> matchups are shown. " +
+    "Consolation games don't count anywhere else on this site, so they aren't recorded here either.");
   if (YEAR === 2018) notes.push(
     "ESPN re-scores 2018 defenses under the league's current settings, which inflates every D/ST line. " +
     "Those values are <strong>corrected here</strong> back to what they actually scored in 2018.");
   document.getElementById("note").innerHTML =
     notes.map(n => `<div class="note">${n}</div>`).join("");
 
-  const found = openId && (data.weeks[String(WEEK)] || []).find(m => String(m.id) === String(openId));
-  if (found) renderOne(data, found); else renderWeek(data);
-  syncUrl();
+  /* ?m= is the matchup id; ?mgr= is a manager slug, which is what the rest of
+     the site links with — it only knows year, week and who was playing. */
+  const week = data.weeks[String(WEEK)] || [];
+  const found = openId != null
+    ? week.find(m => String(m.id) === String(openId))
+    : openMgr
+      ? week.find(m => [m.away, m.home].some(s =>
+          s.manager && LWFFL.slugify(s.manager) === openMgr))
+      : null;
+  if (found) { renderOne(data, found); syncUrl(found.id); }
+  else { renderWeek(data); syncUrl(); }
 }
 
 function syncUrl(id) {
   const u = new URL(location);
   u.searchParams.set("y", YEAR);
   u.searchParams.set("w", WEEK);
+  u.searchParams.delete("mgr");          // resolved to a matchup id by now
   if (id != null) u.searchParams.set("m", id); else u.searchParams.delete("m");
   history.replaceState(null, "", u);
   document.title = `${YEAR} Week ${WEEK} Box Scores — LWFFL`;

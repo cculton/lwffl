@@ -93,13 +93,14 @@
 <script src="assets/tables.js?v=2"></script>
 <script>
 LWFFL.load().then(M => {
-  const { fmt, mlink, ylink, recordStr, isPlayoff, managerCell, finishCell } = LWFFL;
+  const { fmt, mlink, ylink, wlink, bxlink, recordStr, isPlayoff, managerCell, finishCell } = LWFFL;
   const names = Object.values(M.managers).map(m => m.name).sort();
   const selMgr  = multiPills(document.getElementById("mgrSel"),  names, render, n => LWFFL.shortName(n));
   const selYear = multiPills(document.getElementById("yearSel"), M.years.slice().reverse().map(String), render);
 
   const rankCol = { key: "_rank", label: "#", get: () => null, render: (r, rank) => `<span style="color:var(--soft);font-weight:600">${rank}</span>` };
-  const whenCol = { key: "_when", label: "When", get: r => r.year * 100 + (r.week || 0), render: r => `${ylink(r.year)}${r.week ? " · Wk " + r.week : ""}` };
+  const whenCol = { key: "_when", label: "When", get: r => r.year * 100 + (r.week || 0),
+    render: r => `${ylink(r.year)}${r.week ? " · " + wlink(r.year, r.week, "Wk " + r.week) : ""}` };
 
   /* ---- scope / filter helpers ---- */
   const scopeOk = (g, scope) => !scope || (scope === "po") === isPlayoff(g);
@@ -155,10 +156,12 @@ LWFFL.load().then(M => {
   const perfCols = [
     rankCol,
     { key: "manager", label: "Manager", dir: "asc", render: r => managerCell(r.manager) },
-    { key: "pf", label: "Score", num: true, render: r => `<strong>${fmt(r.pf)}</strong>` },
+    { key: "pf", label: "Score", num: true,
+      render: r => bxlink(r.year, r.week, r.manager, `<strong>${fmt(r.pf)}</strong>`) },
     { key: "margin", label: "Margin", num: true, get: r => r.pf - r.pa,
       render: r => { const m = r.pf - r.pa; return `<span class="${m > 0 ? "pos" : m < 0 ? "neg" : ""}">${m > 0 ? "+" : ""}${fmt(m)}</span>`; } },
-    { key: "opp", label: "Opponent", dir: "asc", render: r => `${managerCell(r.opp)} (${fmt(r.pa)})` },
+    { key: "opp", label: "Opponent", dir: "asc",
+      render: r => `${managerCell(r.opp)} (${bxlink(r.year, r.week, r.opp, fmt(r.pa))})` },
     { key: "playoffs", label: "Type", dir: "asc", get: r => isPlayoff(r) ? r.playoffs : "Regular",
       render: r => `<span class="pill ${isPlayoff(r) ? "accent" : ""}">${isPlayoff(r) ? r.playoffs : "Regular"}</span>` },
     whenCol
@@ -169,7 +172,8 @@ LWFFL.load().then(M => {
     { key: "_val", label: valueLabel, num: true, get: r => r._val, render: r => `<strong>${fmt(r._val)}</strong>` },
     { key: "winner", label: "Winner", dir: "asc", get: r => r._winner, render: r => managerCell(r._winner) },
     { key: "_final", label: "Final", get: r => Math.max(r.score1, r.score2),
-      render: r => `${fmt(Math.max(r.score1, r.score2))} – ${fmt(Math.min(r.score1, r.score2))} vs ${managerCell(r._loser)}` },
+      render: r => `${bxlink(r.year, r.week, r._winner,
+        `${fmt(Math.max(r.score1, r.score2))} – ${fmt(Math.min(r.score1, r.score2))}`)} vs ${managerCell(r._loser)}` },
     { key: "playoffs", label: "Type", dir: "asc", get: r => isPlayoff(r) ? r.playoffs : "Regular",
       render: r => `<span class="pill ${isPlayoff(r) ? "accent" : ""}">${isPlayoff(r) ? r.playoffs : "Regular"}</span>` },
     whenCol
@@ -193,7 +197,8 @@ LWFFL.load().then(M => {
       render: r => `${managerCell(r.manager)}${r.active ? ' <span class="pill green">Active</span>' : ""}` },
     { key: "len", label: "Matchups", num: true, render: r => `<strong>${r.len}</strong>` },
     { key: "_span", label: "Span", get: r => r.start.year * 100 + r.start.week,
-      render: r => `${ylink(r.start.year)} Wk ${r.start.week} → ${ylink(r.end.year)} Wk ${r.end.week}` }
+      render: r => `${ylink(r.start.year)} ${wlink(r.start.year, r.start.week, "Wk " + r.start.week)}`
+                 + ` → ${ylink(r.end.year)} ${wlink(r.end.year, r.end.week, "Wk " + r.end.week)}` }
   ];
 
   function decorateGames(games, valFn) {

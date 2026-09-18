@@ -111,7 +111,7 @@
 <script src="assets/tables.js?v=2"></script>
 <script>
 LWFFL.load().then(M => {
-  const { fmt, mlink, ylink, isPlayoff, managerCell, finishCell } = LWFFL;
+  const { fmt, mlink, ylink, wlink, bxlink, isPlayoff, managerCell, finishCell } = LWFFL;
   const names = Object.values(M.managers).map(m => m.name).sort();
   const yearsDesc = M.years.slice().reverse().map(String);
 
@@ -138,13 +138,16 @@ LWFFL.load().then(M => {
   const selGWeek = multiPills(document.getElementById("gWeek"), Array.from({length: 17}, (_, i) => String(i + 1)), gUpdate);
 
   const gCols = [
-    { key: "sortKey", label: "When", dir: "desc", render: r => `${ylink(r.year)} · Wk ${r.week}` },
+    { key: "sortKey", label: "When", dir: "desc",
+      render: r => `${ylink(r.year)} · ${wlink(r.year, r.week, "Wk " + r.week)}` },
     { key: "playoffs", label: "Type", dir: "asc", get: r => isPlayoff(r) ? r.playoffs : "Regular",
       render: r => `<span class="pill ${isPlayoff(r) ? "accent" : ""}">${isPlayoff(r) ? r.playoffs : "Regular"}</span>` },
     { key: "manager", label: "Manager", dir: "asc", render: r => managerCell(r.manager) },
-    { key: "pf", label: "Score", num: true, render: r => `<strong>${fmt(r.pf)}</strong>` },
+    { key: "pf", label: "Score", num: true,
+      render: r => bxlink(r.year, r.week, r.manager, `<strong>${fmt(r.pf)}</strong>`) },
     { key: "opp", label: "Opponent", dir: "asc", render: r => managerCell(r.opp) },
-    { key: "pa", label: "Opp Score", num: true, render: r => fmt(r.pa) },
+    { key: "pa", label: "Opp Score", num: true,
+      render: r => bxlink(r.year, r.week, r.opp, fmt(r.pa)) },
     { key: "margin", label: "Margin", num: true,
       render: r => `<span class="${r.margin > 0 ? "pos" : r.margin < 0 ? "neg" : ""}">${r.margin > 0 ? "+" : ""}${fmt(r.margin)}</span>` },
     { key: "result", label: "Result", dir: "asc",

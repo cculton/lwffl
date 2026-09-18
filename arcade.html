@@ -231,7 +231,7 @@
 <script src="assets/tables.js?v=2"></script>
 <script>
 LWFFL.load().then(M => {
-  const { fmt, mlink, ylink, isPlayoff, managerCell } = LWFFL;
+  const { fmt, mlink, ylink, wlink, bxlink, isPlayoff, managerCell } = LWFFL;
 
   /* ---------- tabs (deep-linkable via ?tab=) ---------- */
   const TABS = ["gami", "weekly", "season"];
@@ -295,15 +295,18 @@ LWFFL.load().then(M => {
 
       dataTable(document.getElementById("gamiTbl"), {
         columns: [
-          { key: "_when", label: "When", get: p => p.year * 100 + p.week, render: p => `${ylink(p.year)} · Wk ${p.week}` },
+          { key: "_when", label: "When", get: p => p.year * 100 + p.week,
+            render: p => `${ylink(p.year)} · ${wlink(p.year, p.week, "Wk " + p.week)}` },
           { key: "playoffs", label: "Type", dir: "asc", get: p => isPlayoff(p) ? p.playoffs : "Regular",
             render: p => `<span class="pill ${isPlayoff(p) ? "accent" : ""}">${isPlayoff(p) ? p.playoffs : "Regular"}</span>` },
           { key: "manager", label: "Manager", dir: "asc", render: p => managerCell(p.manager) },
-          { key: "pf", label: "Score", num: true, render: p => `<strong>${fmt(p.pf)}</strong>` },
+          { key: "pf", label: "Score", num: true,
+            render: p => bxlink(p.year, p.week, p.manager, `<strong>${fmt(p.pf)}</strong>`) },
           { key: "_res", label: "Result", dir: "asc", get: p => p.pf > p.pa ? "W" : p.pf < p.pa ? "L" : "T",
             render: p => { const r = p.pf > p.pa ? "W" : p.pf < p.pa ? "L" : "T";
               return `<span class="${r === "W" ? "pos" : r === "L" ? "neg" : ""}">${r}</span>`; } },
-          { key: "opp", label: "Opponent", dir: "asc", render: p => `${managerCell(p.opp)} (${fmt(p.pa)})` }
+          { key: "opp", label: "Opponent", dir: "asc",
+            render: p => `${managerCell(p.opp)} (${bxlink(p.year, p.week, p.opp, fmt(p.pa))})` }
         ],
         rows: matches,
         initialSort: { key: "_when", dir: "desc" }
