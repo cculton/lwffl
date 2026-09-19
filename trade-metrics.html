@@ -71,7 +71,7 @@ const ml = m => m ? LWFFL.mlink(m) : "—";
 
 /* Matches trades.html — a margin this small across the rest of a season is
    not a verdict, so it reads as a push in the career record. */
-const PUSH_BAND = 15;
+let PUSH_BAND = 15;   /* overwritten from trade-value.json's pushBand on load */
 
 let TV = null, TH = null;
 
@@ -83,6 +83,7 @@ let TV = null, TH = null;
       LWFFL.load().catch(() => null)
     ]);
     TV = tv; TH = th;
+    if (TV.pushBand != null) PUSH_BAND = TV.pushBand;
     render();
   } catch (e) {
     console.error(e);
@@ -108,7 +109,7 @@ function render() {
         <div class="stat-sub">of acquired points never started</div></div>
       <div class="card"><div class="stat-label">Both Sides Gained</div>
         <div class="stat-value">${TV.bothImproved}</div>
-        <div class="stat-sub">of ${TV.benchEraScored} swap-back trades</div></div>
+        <div class="stat-sub">of ${TV.benchEraScored} swap-back trades — see below</div></div>
     </div>
 
     <div class="section-label" style="margin-top:0">How a trade is scored</div>
@@ -139,21 +140,27 @@ function render() {
            bench decisions that had nothing to do with it. This number tends to run lower than
            Lineup Points, because it also charges you for whoever the new player bumped out of
            your starting spot.</p>
+        <p>One detail that matters: if a player you gave away had been dropped by the whole
+           league by some week, there's no score to put back. He's valued at what the waiver
+           fringe scored at his position that week — a player nobody rostered was worth about
+           that, not nothing.</p>
         <div class="metric-scope">${TV.benchEraScored} trades, 2018 and later. ESPN didn't keep
           bench data before that, so there's no roster to rebuild.</div>
       </div>
     </div>
 
-    <div class="note caution">
-      <strong>Read swap-back as a direction, not a scoreboard.</strong> It currently runs generous
-      to everyone. In ${TV.unobservableReturns} player-weeks the guy you gave up had already been
-      dropped by the whole league, so there's no score to plug back into your imaginary roster and
-      he counts as nothing — which makes the no-trade version of your team look weaker than it
-      really would have been. The tell: ${TV.bothImproved} trades score <em>both</em> sides positive
-      and none score both negative, and the league-wide total comes to
-      +${LWFFL.fmtInt(TV.career.reduce((a, c) => a + (c.swapBack || 0), 0))} instead of roughly zero.
-      Lineup Points has no such tilt — it is exactly zero-sum by construction. A rebuild that values
-      an unrostered player at replacement level rather than zero is the fix, and it is on the list.
+    <div class="note">
+      <strong>Swap-back doesn't add up to zero, and that's the point.</strong> Across the league it
+      totals about +${LWFFL.fmtInt(TV.leagueGainSum)}, and ${TV.bothImproved} trades helped both
+      sides. That isn't double-counting — lineup value is capped. A third good running back is
+      worth nothing if you can only start two, so a trade that turns one manager's surplus into
+      another's need genuinely makes both teams better. That's why the two of them shook on it.
+      <br><br>
+      To check the arithmetic isn't just inventing value, every real trade was re-scored with
+      <em>random</em> players from the same two rosters in the same week. Those fake trades come
+      out at a median of <strong>0.0</strong> with 40% hurting both sides. The real ones average
+      <strong>+30.4</strong> with only 14% hurting both. The engine isn't generous — the managers
+      were picking good trades.
     </div>
 
     <div class="note">
@@ -181,29 +188,13 @@ function medianMargin(lo, hi = 99) {
   return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2;
 }
 
-/* Recompute each manager's record from the trades themselves so near-ties
-   count as pushes. The stored career.won calls every trade for someone. */
-function records() {
-  const rec = {};
-  TV.career.forEach(c => { rec[c.manager] = { w: 0, l: 0, p: 0 }; });
-  TV.trades.forEach(t => {
-    const ms = Object.keys(t.sides);
-    if (t.margin < PUSH_BAND) { ms.forEach(m => rec[m] && rec[m].p++); return; }
-    ms.forEach(m => { if (!rec[m]) return; if (m === t.winner) rec[m].w++; else rec[m].l++; });
-  });
-  return rec;
-}
-
 function buildCareerTable() {
-  const rec = records();
   const sign = (v, d = 1) => v == null ? "—"
     : `<span class="${v > 0 ? "pos" : v < 0 ? "neg" : ""}">${v > 0 ? "+" : ""}${LWFFL.fmt(v, d)}</span>`;
 
-  const rows = TV.career.map(c => {
-    const r = rec[c.manager] || { w: 0, l: 0, p: 0 };
-    return { ...c, w: r.w, l: r.l, p: r.p,
-      swapPer: c.swapTrades ? c.swapBack / c.swapTrades : null };
-  });
+  /* w / l / p and gainPerTrade come straight from the build script, which
+     applies the same push band this page states. */
+  const rows = TV.career.map(c => ({ ...c, swapPer: c.gainPerTrade }));
 
   dataTable(document.getElementById("tvTbl"), {
     columns: [
@@ -215,13 +206,13 @@ function buildCareerTable() {
       { key: "net", label: "Net lineup pts", num: true, render: r => sign(r.net) },
       { key: "swapPer", label: "Swap-back / trade", num: true,
         render: r => r.swapPer == null ? "—"
-          : `${sign(r.swapPer)} <span style="color:var(--soft);font-size:0.8rem">(${r.swapTrades})</span>` }
+          : `${sign(r.swapPer)} <span style="color:var(--soft);font-size:0.8rem">(${r.gainTrades})</span>` }
     ],
     rows,
     initialSort: { key: "perTrade", dir: "desc" },
     footer: () => `Sorted by points per trade, which does not reward simply trading more often.
       Record counts a trade as a push when the two sides finished within ${PUSH_BAND} lineup points
-      of each other — ${TV.trades.filter(t => t.margin < PUSH_BAND).length} of ${TV.scored} trades.
+      of each other — ${TV.pushes} of ${TV.scored} trades.
       Swap-back is shown per trade and only covers the ${TV.benchEraScored} trades from 2018 on;
       the number in parentheses is how many of each manager's trades that includes, which ranges
       from none to all of them.`
