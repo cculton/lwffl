@@ -12,7 +12,14 @@ The first Sunday of a fantasy season is supposed to tell you nothing. This one t
 
 ## The big number
 
-**138.30.** That's what Stuart hung on Connor, who put up 104.36 — a score that would have won four of the other five games this week and still lost by 34. There is no lineup decision available to Connor that changes the outcome. Some weeks you simply run into it.
+::: stat 138.30 | Stuart's opening score | Only one other manager cleared 110 all week.
+:::
+
+That's what Stuart hung on Connor, who put up 104.36 — a score that would have won four of the other five games this week and still lost by 34. There is no lineup decision available to Connor that changes the outcome. Some weeks you simply run into it.
+
+::: pull
+There is no lineup Connor sets that wins this game.
+:::
 
 ## The only real game
 
@@ -22,14 +29,30 @@ Thomas over Will by **8.26** was the week's lone contest, and the only matchup w
 
 Cobey's 123.72 was the second-best score of the week and buried Ryan T. by 42. Samuel and Matt both cleared 89 against opponents who didn't reach 75.
 
+::: stats
+138.30 | High | Stuart
+63.22 | Low | Adam
+8.26 | Closest | Thomas over Will
+:::
+
 Which brings us to the other end.
 
 ## Adam, 63.22
 
 The lowest opening-week score of his twelve seasons. He was never in it, and Matt only needed 89.96 to put him away — respectable, not fearsome. One week is one week. But it's a hole.
 
+::: scoreboard
+:::
+
 ## What it means
 
 Nothing, probably. Week 1 correlates with nothing except the standings, and the standings in September are decoration. Check back in five weeks and the league will look different.
 
 Except for Stuart. That looked real.
+
+::: standings
+:::
+
+::: note
+Every figure above is read from the league's box scores when the page loads, not typed into the post — so it will still be right years from now.
+:::

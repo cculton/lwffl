@@ -63,46 +63,129 @@ function parse(file) {
   return { meta, body: m[2].trim() };
 }
 
-/* ---------- markdown, deliberately small ---------- */
+/* ---------- markdown + league blocks ---------- */
 
-/* Escapes first, then marks up, so a post can never inject markup into the
-   page. Supports what a league write-up actually uses and nothing else. */
+/* Prose is ordinary markdown. Anything richer is a fenced block:
+ *
+ *   ::: stat 138.30 | Stuart | highest opening week since 2021
+ *   ::: stats            (one "value | label | note" per line)
+ *   ::: pull             (a pull quote, bigger than a blockquote)
+ *   ::: note             (an aside)
+ *   ::: scoreboard       (that week's finals, rendered from the box scores)
+ *   ::: standings        (the table as it stood after that week)
+ *
+ * The two embeds emit an empty div with a data-embed attribute and are filled
+ * client-side by assets/notebook.js, so the author places them mid-post
+ * rather than accepting whatever the template appends at the end — and the
+ * numbers still come from the league's own JSON, never typed into the post.
+ */
+
 function markdown(src) {
   const inline = t => esc(t)
+    .replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g,
+      '<img class="pb-inline-img" loading="lazy" alt="$1" src="$2">')
     .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>')
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/(^|[\s(])\*([^*]+)\*/g, "$1<em>$2</em>")
     .replace(/`([^`]+)`/g, "<code>$1</code>");
 
-  const out = [];
-  let list = null;
-  const closeList = () => { if (list) { out.push(`</${list}>`); list = null; } };
+  /* pull the fenced blocks out first so their contents never hit the
+     paragraph splitter */
+  const blocks = [];
+  src = src.replace(/^::: *(\w+)([^\n]*)\n([\s\S]*?)^:::[ \t]*$/gm,
+    (_, kind, args, inner) => {
+      blocks.push(renderBlock(kind, args.trim(), inner.trim(), inline));
+      return `\n\n\u0000BLOCK${blocks.length - 1}\u0000\n\n`;
+    });
 
+  const out = [];
+  let first = true;
   for (const block of src.split(/\n{2,}/)) {
     const b = block.trim();
     if (!b) continue;
-    if (/^###\s/.test(b)) { closeList(); out.push(`<h3>${inline(b.slice(4))}</h3>`); continue; }
-    if (/^##\s/.test(b))  { closeList(); out.push(`<h2>${inline(b.slice(3))}</h2>`); continue; }
+    const ph = /^\u0000BLOCK(\d+)\u0000$/.exec(b);
+    if (ph) { out.push(blocks[Number(ph[1])]); continue; }
+    if (/^###\s/.test(b)) { out.push(`<h3>${inline(b.slice(4))}</h3>`); continue; }
+    if (/^##\s/.test(b))  { out.push(`<h2>${inline(b.slice(3))}</h2>`); continue; }
+    if (/^\|/.test(b))    { out.push(table(b, inline)); continue; }
     if (/^>\s/.test(b)) {
-      closeList();
       out.push(`<blockquote>${inline(b.replace(/^>\s?/gm, ""))}</blockquote>`);
       continue;
     }
     if (/^[-*]\s/.test(b)) {
-      closeList(); list = "ul"; out.push("<ul>");
-      for (const li of b.split("\n")) out.push(`<li>${inline(li.replace(/^[-*]\s+/, ""))}</li>`);
-      closeList(); continue;
+      out.push("<ul>" + b.split("\n")
+        .map(li => `<li>${inline(li.replace(/^[-*]\s+/, ""))}</li>`).join("") + "</ul>");
+      continue;
     }
     if (/^\d+\.\s/.test(b)) {
-      closeList(); list = "ol"; out.push("<ol>");
-      for (const li of b.split("\n")) out.push(`<li>${inline(li.replace(/^\d+\.\s+/, ""))}</li>`);
-      closeList(); continue;
+      out.push("<ol>" + b.split("\n")
+        .map(li => `<li>${inline(li.replace(/^\d+\.\s+/, ""))}</li>`).join("") + "</ol>");
+      continue;
     }
-    closeList();
-    out.push(`<p>${inline(b).replace(/\n/g, "<br>")}</p>`);
+    const img = /^!\[([^\]]*)\]\(([^)\s]+)\)$/.exec(b);
+    if (img) {
+      out.push(`<figure class="pb-fig"><img loading="lazy" alt="${esc(img[1])}" src="${esc(img[2])}">${
+        img[1] ? `<figcaption>${inline(img[1])}</figcaption>` : ""}</figure>`);
+      continue;
+    }
+    /* the opening paragraph carries the eye into the piece */
+    out.push(`<p${first ? ' class="lede"' : ""}>${inline(b).replace(/\n/g, "<br>")}</p>`);
+    first = false;
   }
-  closeList();
   return out.join("\n");
+}
+
+function table(src, inline) {
+  const rows = src.split("\n").map(r => r.trim())
+    .filter(r => r && !/^\|[\s|:-]+\|$/.test(r))
+    .map(r => r.replace(/^\||\|$/g, "").split("|").map(c => c.trim()));
+  if (!rows.length) return "";
+  const [head, ...body] = rows;
+  return `<div class="table-card post-table"><div class="table-scroll"><table>
+    <thead><tr>${head.map(c => `<th>${inline(c)}</th>`).join("")}</tr></thead>
+    <tbody>${body.map(r => `<tr>${r.map(c => `<td>${inline(c)}</td>`).join("")}</tr>`).join("")}</tbody>
+    </table></div></div>`;
+}
+
+function renderBlock(kind, args, inner, inline) {
+  switch (kind) {
+    case "stat": {
+      const [value, label, note] = args.split("|").map(s => s.trim());
+      return `<div class="pb-stat">
+        <div class="pb-stat-v">${esc(value || "")}</div>
+        <div class="pb-stat-t">
+          ${label ? `<div class="pb-stat-l">${inline(label)}</div>` : ""}
+          ${note ? `<div class="pb-stat-n">${inline(note)}</div>` : ""}
+          ${inner ? `<div class="pb-stat-n">${inline(inner)}</div>` : ""}
+        </div></div>`;
+    }
+    case "stats": {
+      const rows = inner.split("\n").map(l => l.split("|").map(s => s.trim()));
+      return `<div class="pb-stats">${rows.map(([v, l, n]) => `
+        <div class="pb-stats-i">
+          <div class="pb-stats-v">${esc(v || "")}</div>
+          <div class="pb-stats-l">${inline(l || "")}</div>
+          ${n ? `<div class="pb-stats-n">${inline(n)}</div>` : ""}
+        </div>`).join("")}</div>`;
+    }
+    case "pull":
+      return `<figure class="pb-pull"><blockquote>${inline(inner)}</blockquote>${
+        args ? `<figcaption>${inline(args)}</figcaption>` : ""}</figure>`;
+    case "note":
+      return `<aside class="pb-note">${inline(inner)}</aside>`;
+    case "image": {
+      const [src, caption] = args.split("|").map(x => x.trim());
+      return `<figure class="pb-fig${inner ? " pb-fig-wide" : ""}">
+        <img loading="lazy" alt="${esc(caption || "")}" src="${esc(src || "")}">
+        ${caption ? `<figcaption>${inline(caption)}</figcaption>` : ""}</figure>`;
+    }
+    case "scoreboard":
+    case "standings":
+      return `<div class="nb-embed" data-embed="${kind}"${
+        args ? ` data-args="${esc(args)}"` : ""}></div>`;
+    default:
+      return `<p>${inline(inner)}</p>`;
+  }
 }
 
 /* ---------- share card (rasterise separately; see render-cards) ---------- */
@@ -163,7 +246,7 @@ function postHtml(p, bodyHtml) {
   <meta property="og:title" content="${esc(p.title)}" />
   <meta property="og:description" content="${esc(p.dek)}" />
   <meta property="og:url" content="${url}" />
-  <meta property="og:image" content="${SITE}/n/cards/${p.slug}.png" />
+  <meta property="og:image" content="${p.image ? `${SITE}/${p.image.replace(/^\//, "")}` : `${SITE}/n/cards/${p.slug}.png`}" />
   <meta property="article:published_time" content="${p.date}" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="theme-color" content="#0085CA" />
@@ -171,7 +254,7 @@ function postHtml(p, bodyHtml) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/style.css?v=3">
 </head>
 <body>
 

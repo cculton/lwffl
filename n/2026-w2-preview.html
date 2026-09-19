@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/style.css?v=3">
 </head>
 <body>
 
@@ -62,17 +62,18 @@
     </header>
 
     <div class="post-body">
-<p>This is a <strong>sample post</strong> showing what a Thursday preview looks like on the page. The prose is placeholder; the structure is real.</p>
+<p class="lede">This is a <strong>sample post</strong> showing what a Thursday preview looks like on the page. The prose is placeholder; the structure is real.</p>
 <h2>How a preview reads</h2>
 <p>The opening is the week's framing — who has something to prove, which game decides an early division, what the Week 1 results did and didn't tell us. Two or three paragraphs, no more.</p>
 <p>Then the matchups worth watching, each with the line and whatever history is relevant:</p>
-<ul>
-<li>The rematch of a playoff game nobody has stopped talking about</li>
-<li>The one where a manager faces the guy he traded his starting quarterback to</li>
-<li>The one that looks lopsided on paper and never is</li>
-</ul>
+<ul><li>The rematch of a playoff game nobody has stopped talking about</li><li>The one where a manager faces the guy he traded his starting quarterback to</li><li>The one that looks lopsided on paper and never is</li></ul>
 <h2>Why the numbers aren't typed here</h2>
 <p>On a real preview this section carries a matchup strip generated from the league's ELO ratings and head-to-head record — so the line and the series history are always consistent with <a href="../h2h.html">Head-to-Head</a> and never quietly go stale.</p>
+<h2>Images</h2>
+<p>Drop a file in <code>n/img/</code> and reference it the ordinary markdown way. An image on its own line becomes a figure, and the alt text becomes the caption:</p>
+<figure class="pb-fig"><img loading="lazy" alt="A share card, standing in for a real photo — any image in the repo works the same way." src="../n/cards/2026-w1-recap.png"><figcaption>A share card, standing in for a real photo — any image in the repo works the same way.</figcaption></figure>
+<p>Use <code>::: image path | caption</code> instead when the caption should differ from the alt text, and add a line inside the block to let it break the reading column on wide screens.</p>
+<p>A post can also set <code>image:</code> in its frontmatter to override the generated share card, so a link with a real photo unfurls with that photo rather than the text card.</p>
 <blockquote>Replace this file with the week's real preview and the sample badge disappears on its own.</blockquote>
     </div>
 

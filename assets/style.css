@@ -851,6 +851,95 @@ a.bxlink:hover { color: var(--accent); border-bottom-color: var(--accent); }
   letter-spacing: 0.12em; text-transform: uppercase; color: var(--soft);
 }
 
+
+/* ---------- rich blocks inside a post ---------- */
+
+/* The opening paragraph is set larger — a post is the one thing on this site
+   people read top to bottom, and it should announce itself as prose. */
+.post-body .lede { font-size: 1.14rem; line-height: 1.7; color: #dbe4f0; }
+
+.post-body .pb-stat {
+  display: flex; align-items: center; gap: 20px; margin: 28px 0;
+  padding: 20px 24px; border-radius: var(--radius);
+  border: 1px solid var(--border); border-left: 3px solid var(--accent);
+  background: linear-gradient(90deg, rgba(0,133,202,.09), rgba(0,133,202,0) 65%);
+}
+.pb-stat-v {
+  font-family: var(--font-display); font-weight: 700; font-size: 2.6rem;
+  line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+  background: var(--accent-grad); -webkit-background-clip: text;
+  background-clip: text; -webkit-text-fill-color: transparent; flex-shrink: 0;
+}
+.pb-stat-l { font-size: 0.95rem; font-weight: 600; color: var(--text); line-height: 1.4; }
+.pb-stat-n { font-size: 0.85rem; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+@media (max-width: 520px) {
+  .post-body .pb-stat { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .pb-stat-v { font-size: 2.1rem; }
+}
+
+.post-body .pb-stats {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px; margin: 28px 0; background: var(--border);
+  border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+}
+.pb-stats-i { background: var(--surface-solid); padding: 18px 20px; }
+.pb-stats-v {
+  font-family: var(--font-display); font-weight: 700; font-size: 1.6rem;
+  line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--text);
+}
+.pb-stats-l {
+  font-size: 0.66rem; font-weight: 700; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--soft); margin-top: 8px;
+}
+.pb-stats-n { font-size: 0.82rem; color: var(--muted); margin-top: 5px; }
+
+.post-body .pb-pull { margin: 32px 0; padding: 0 0 0 24px; border-left: 3px solid var(--accent-2); }
+.post-body .pb-pull blockquote {
+  margin: 0; padding: 0; border: 0; background: none; border-radius: 0;
+  font-family: var(--font-display); font-style: normal; font-weight: 600;
+  font-size: 1.35rem; line-height: 1.4; color: var(--text); letter-spacing: -0.01em;
+}
+.post-body .pb-pull figcaption {
+  margin-top: 10px; font-size: 0.8rem; color: var(--soft);
+  letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600;
+}
+
+.post-body .pb-note {
+  margin: 26px 0; padding: 14px 18px; font-size: 0.88rem; line-height: 1.6;
+  color: var(--muted); border: 1px solid var(--border);
+  border-left: 3px solid var(--gold); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: rgba(251,191,36,.05);
+}
+
+.post-body .post-table { margin: 26px 0; }
+.post-body .post-table table { font-size: 0.86rem; }
+.post-body .post-table td, .post-body .post-table th { padding: 10px 14px; }
+
+.post-body .pb-fig { margin: 30px 0; }
+.post-body .pb-fig img {
+  display: block; width: 100%; height: auto;
+  border-radius: var(--radius); border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.post-body .pb-fig figcaption {
+  margin-top: 10px; font-size: 0.8rem; line-height: 1.5; color: var(--soft);
+}
+/* breaks the reading column on wide screens, for a photo worth the room */
+@media (min-width: 900px) {
+  .post-body .pb-fig-wide { margin-left: -70px; margin-right: -70px; }
+}
+.post-body .pb-inline-img {
+  max-width: 100%; height: auto; border-radius: var(--radius-sm);
+  vertical-align: middle;
+}
+
+/* headings get a mark so the eye can find the structure while scrolling */
+.post-body h2 { position: relative; padding-left: 16px; }
+.post-body h2::before {
+  content: ""; position: absolute; left: 0; top: 0.32em; bottom: 0.22em;
+  width: 3px; border-radius: 2px; background: var(--accent-grad);
+}
+
 /* ---------- Sparkline ---------- */
 
 .spark { display: block; }

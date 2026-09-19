@@ -25,4 +25,14 @@ Then the matchups worth watching, each with the line and whatever history is rel
 
 On a real preview this section carries a matchup strip generated from the league's ELO ratings and head-to-head record — so the line and the series history are always consistent with [Head-to-Head](../h2h.html) and never quietly go stale.
 
+## Images
+
+Drop a file in `n/img/` and reference it the ordinary markdown way. An image on its own line becomes a figure, and the alt text becomes the caption:
+
+![A share card, standing in for a real photo — any image in the repo works the same way.](../n/cards/2026-w1-recap.png)
+
+Use `::: image path | caption` instead when the caption should differ from the alt text, and add a line inside the block to let it break the reading column on wide screens.
+
+A post can also set `image:` in its frontmatter to override the generated share card, so a link with a real photo unfurls with that photo rather than the text card.
+
 > Replace this file with the week's real preview and the sample badge disappears on its own.
