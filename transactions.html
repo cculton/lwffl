@@ -23,40 +23,6 @@
     .fbar-val { text-align:right; font-variant-numeric:tabular-nums; font-weight:600; font-size:0.87rem; }
     @media (max-width:560px){ .fbar-row { grid-template-columns:96px 1fr 58px; gap:8px; } }
 
-    .trade-card { margin-bottom:14px; }
-    .trade-head { display:flex; justify-content:space-between; align-items:baseline; gap:10px;
-                  padding-bottom:10px; margin-bottom:12px; border-bottom:1px solid var(--border-strong); }
-    .trade-sides { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
-    @media (max-width:640px){ .trade-sides { grid-template-columns:1fr; } }
-    .trade-side h4 { margin:0 0 8px; font-family:var(--font-display); font-size:0.82rem;
-                     letter-spacing:.05em; text-transform:uppercase; color:var(--soft); font-weight:700; }
-    .trade-side ul { margin:0; padding-left:16px; font-size:0.89rem; line-height:1.7; }
-    .tx-item { font-size:0.87rem; line-height:1.5; }
-    .tx-add { color:var(--green); } .tx-drop { color:var(--muted); }
-    .note { background:rgba(0,133,202,.07); border:1px solid var(--border); border-left:3px solid var(--accent);
-            border-radius:var(--radius-sm); padding:12px 16px; font-size:0.83rem; color:var(--muted);
-            margin-bottom:20px; line-height:1.55; }
-    .note strong { color:var(--text); }
-
-    /* trade scoring */
-    .metric-card h4 { margin:0 0 4px; font-family:var(--font-display); font-size:1rem; font-weight:700; }
-    .metric-q { font-size:0.84rem; color:var(--accent-2); font-style:italic; margin-bottom:10px; }
-    .metric-card p { margin:0 0 9px; font-size:0.86rem; line-height:1.6; color:var(--muted); }
-    .metric-card p:last-child { margin-bottom:0; }
-    .metric-card strong { color:var(--text); }
-    .metric-scope { margin-top:11px; padding-top:9px; border-top:1px solid var(--border);
-                    font-size:0.78rem; color:var(--soft); }
-
-    /* keep both sides' totals on the same line even when one haul is longer */
-    .trade-side { display:flex; flex-direction:column; }
-    .trade-side ul { flex:1 0 auto; }
-    .tv-foot { margin-top:12px; padding-top:9px; border-top:1px solid var(--border);
-               font-size:0.8rem; color:var(--soft); display:flex; flex-wrap:wrap; gap:4px 14px; }
-    .tv-foot b { color:var(--text); font-variant-numeric:tabular-nums; }
-    .trade-side li span.tv-p { color:var(--soft); font-size:0.82rem; }
-    .verdict { margin-top:13px; padding-top:11px; border-top:1px solid var(--border-strong);
-               font-size:0.86rem; }
-    .verdict .num { font-variant-numeric:tabular-nums; font-weight:700; }
   </style>
 </head>
 <body>
@@ -70,6 +36,7 @@
       <a href="seasons.html">Seasons</a>
       <a href="boxscores.html">Box Scores</a>
       <a href="transactions.html" class="active">Transactions</a>
+      <a href="trades.html">Trades</a>
       <a href="h2h.html">Head-to-Head</a>
       <a href="draft.html">Draft Central</a>
       <a href="explorer.html">Stat Lab</a>
@@ -91,7 +58,6 @@
   <div class="tabs" id="tabs">
     <button class="tab-btn active" data-tab="ledger">Ledger</button>
     <button class="tab-btn" data-tab="faab">FAAB</button>
-    <button class="tab-btn" data-tab="trades">Trades</button>
     <button class="tab-btn" data-tab="activity">Activity</button>
   </div>
 
@@ -106,7 +72,7 @@
 <script src="assets/tables.js?v=2"></script>
 <script>
 const CACHE = {};
-let IDX = null, TRADES = null, TV = null, TVBY = {}, TAB = "ledger";
+let IDX = null, TRADES = null, TAB = "ledger";
 
 const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -134,14 +100,12 @@ async function season(y) {
 
 (async () => {
   try {
-    const [idx, tr, tv] = await Promise.all([
+    const [idx, tr] = await Promise.all([
       fetch("transactions-index.json").then(r => r.json()),
       fetch("trades-history.json").then(r => r.json()).catch(() => null),
-      fetch("trade-value.json").then(r => r.json()).catch(() => null),
       LWFFL.load().catch(() => null)
     ]);
-    IDX = idx; TRADES = tr; TV = tv;
-    if (TV) TV.trades.forEach(t => { TVBY[`${t.year}|${t.date}|${t.parties.join("|")}`] = t; });
+    IDX = idx; TRADES = tr;
     const t = IDX.totals;
     document.getElementById("sub").textContent =
       `${t.transactions.toLocaleString()} moves from ${IDX.ledgerFrom} to ${IDX.seasons[IDX.seasons.length - 1].year}`;
@@ -183,7 +147,7 @@ async function season(y) {
 function render() {
   const p = document.getElementById("panel");
   p.classList.remove("loading");
-  ({ ledger: renderLedger, faab: renderFaab, trades: renderTrades, activity: renderActivity })[TAB](p);
+  ({ ledger: renderLedger, faab: renderFaab, activity: renderActivity })[TAB](p);
 }
 
 const yearOptions = sel => IDX.seasons.slice().reverse()
@@ -345,171 +309,6 @@ async function renderFaab(p) {
 
   document.getElementById("fY").addEventListener("change", draw);
   draw();
-}
-
-/* ---------------- Trades ---------------- */
-function renderTrades(p) {
-  if (!TRADES) { p.innerHTML = '<div class="loading">Trade history unavailable.</div>'; return; }
-
-  const gaps = TRADES.undocumentedSeasons || {};
-  const gapYears = Object.keys(gaps).map(Number).sort();
-  const gapTotal = Object.values(gaps).reduce((a, b) => a + b, 0);
-
-  const note = `
-    <div class="note">
-      <strong>${TRADES.totalPerCounters} trades</strong> have gone down in league history.
-      We've got full detail — both sides, every player — on <strong>${TRADES.withPlayers}</strong>
-      of them, pulled from ESPN's old trade confirmation emails. The counts match ESPN's own
-      trade totals exactly for ${TRADES.seasons.filter(s => s.reconciles).length} seasons.
-      ${gapTotal ? `The other <strong>${gapTotal}</strong> happened in
-        ${gapYears.join(" and ")}. We know they happened — ESPN just didn't send trade emails
-        before September 2016, and its records don't go back before 2018, so the details are gone.` : ""}
-    </div>`;
-
-  const byYear = {};
-  TRADES.trades.forEach(t => (byYear[t.year] = byYear[t.year] || []).push(t));
-  const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
-
-  const gapBlocks = gapYears.slice().reverse().map(y => `
-    <div class="section-label">${y}</div>
-    <div class="card" style="margin-bottom:14px">
-      <div style="font-size:0.88rem;color:var(--muted)">
-        <strong style="color:var(--text)">${gaps[y]} trades</strong> happened this season.
-        ESPN's counters confirm it, but nobody knows who traded what — the details are gone.
-      </div>
-    </div>`).join("");
-
-  const cards = years.map(y => {
-    const list = byYear[y].slice().reverse();
-    return `
-      <div class="section-label">${y} <span style="font-weight:400;text-transform:none;letter-spacing:0">— ${list.length} trade${list.length > 1 ? "s" : ""}</span></div>
-      ${list.map(tradeCard).join("")}`;
-  }).join("") + gapBlocks;
-
-  p.innerHTML = note + scoringExplainer() + careerBlock() + cards;
-  if (TV) buildCareerTable();
-}
-
-/* ---- the two metrics, explained where they're used ---- */
-function scoringExplainer() {
-  if (!TV) return "";
-  return `
-    <div class="section-label">How a trade is scored</div>
-    <div class="grid grid-2" style="margin-bottom:10px">
-      <div class="card metric-card">
-        <h4>Lineup Points</h4>
-        <div class="metric-q">Did you get more out of the trade than the other guy?</div>
-        <p>Every player you got in a trade gets tracked week by week, but his points only count
-           <strong>if you actually started him</strong>. Bench him and he's worth zero. Drop him,
-           or trade him away again, and he's done counting from that point on.</p>
-        <p>That's different from the usual way people judge trades — just adding up what the players
-           went on to score. Say you land a quarterback who racks up 200 points the rest of the way,
-           but you already had a good one. That trade barely helped you, because
-           <strong>you can only start one QB</strong>. Total points would still give you credit for
-           all 200.</p>
-        <div class="metric-scope">All ${TV.scored} trades with player detail, ${TV.firstYear}–present.</div>
-      </div>
-      <div class="card metric-card">
-        <h4>Swap-Back Margin</h4>
-        <div class="metric-q">Would you have been better off not trading at all?</div>
-        <p>For every week after the trade, your roster gets rebuilt two ways: what actually
-           happened, and what would've happened if the trade never went through — the players you
-           got are pulled out, and the players you gave away are put back in at whatever they
-           <strong>actually scored that week</strong>. Then we set the best possible lineup for
-           both versions and compare.</p>
-        <p>Setting the best lineup for <strong>both</strong> sides is what makes this fair. Compare
-           your real lineup to a perfect hindsight one instead, and the trade gets credit for good
-           bench decisions that had nothing to do with it. This number tends to run lower than
-           Lineup Points, because it also charges you for whoever the new player bumped out of
-           your starting spot.</p>
-        <div class="metric-scope">${TV.benchEraScored} trades, 2018 and later. ESPN didn't keep
-          bench data before that, so there's no roster to rebuild.</div>
-      </div>
-    </div>
-    <div class="note">
-      One thing to keep in mind: both of these measure <strong>how a trade turned out</strong>, not
-      whether it was smart at the time. We don't know what a manager was thinking when he pulled the
-      trigger, so a good trade wrecked by a season-ending injury looks the same here as a bad one.
-      Swap-back also runs a little generous — in ${TV.unobservableReturns} player-weeks, the guy
-      you gave up had already been dropped by everyone, so there's no real score to plug back into
-      your imaginary lineup.
-    </div>`;
-}
-
-function careerBlock() {
-  if (!TV) return "";
-  return `
-    <div class="section-label">Career trade ledger</div>
-    <div id="tvTbl" style="margin-bottom:26px"></div>`;
-}
-
-function buildCareerTable() {
-  const sign = (v, d = 1) => v == null ? "—"
-    : `<span class="${v > 0 ? "pos" : v < 0 ? "neg" : ""}">${v > 0 ? "+" : ""}${LWFFL.fmt(v, d)}</span>`;
-  dataTable(document.getElementById("tvTbl"), {
-    columns: [
-      { key: "manager", label: "Manager", dir: "asc", render: r => ml(r.manager) },
-      { key: "trades", label: "Trades", num: true },
-      { key: "won", label: "Won", num: true,
-        render: r => `${r.won}<span style="color:var(--soft)">/${r.trades}</span>` },
-      { key: "net", label: "Net lineup pts", num: true, render: r => sign(r.net) },
-      { key: "perTrade", label: "Per trade", num: true, render: r => sign(r.perTrade) },
-      { key: "swapBack", label: "Swap-back", num: true,
-        render: r => r.swapBack == null ? "—"
-          : `${sign(r.swapBack)} <span style="color:var(--soft);font-size:0.8rem">(${r.swapTrades})</span>` }
-    ],
-    rows: TV.career,
-    initialSort: { key: "net", dir: "desc" },
-    footer: () => `Net lineup points is what you got minus what they got, added up across every
-      trade. Swap-back only covers the ${TV.benchEraScored} trades from 2018 on — the number in
-      parentheses is how many of each manager's trades that includes.`
-  });
-}
-
-function tradeCard(t) {
-  const tv = TVBY[`${t.year}|${t.date}|${(t.parties || []).join("|")}`];
-  const sides = Object.entries(t.receives || {});
-  const head = sides.length ? sides.map(([m]) => nm(m)) : (t.parties || []).map(nm);
-
-  const sideHtml = ([m, players]) => {
-    const s = tv && tv.sides[m];
-    const lines = s
-      ? s.players.map(p => `<li>${esc(p.name)}
-          <span class="tv-p">— ${LWFFL.fmt(p.pts)} in ${p.starts} start${p.starts === 1 ? "" : "s"}</span></li>`)
-      : players.map(x => `<li>${esc(x)}</li>`);
-    return `
-      <div class="trade-side">
-        <h4>${esc(nm(m))} received</h4>
-        <ul>${lines.join("")}</ul>
-        ${s ? `<div class="tv-foot">
-          <span>Lineup points <b>${LWFFL.fmt(s.lineupPts)}</b></span>
-          ${s.swapBack == null ? "" :
-            `<span>Swap-back <b class="${s.swapBack > 0 ? "pos" : s.swapBack < 0 ? "neg" : ""}">${
-              s.swapBack > 0 ? "+" : ""}${LWFFL.fmt(s.swapBack)}</b></span>`}
-        </div>` : ""}
-      </div>`;
-  };
-
-  let verdict = "";
-  if (tv) {
-    const wk = `Week ${tv.week} · ${tv.weeksRemaining} week${tv.weeksRemaining === 1 ? "" : "s"} left in the season`;
-    verdict = `<div class="verdict">${tv.winner
-      ? `${ml(tv.winner)} came out ahead by <span class="num pos">${LWFFL.fmt(tv.margin)}</span> lineup points · ${wk}`
-      : `Dead even — neither side started a point more than the other · ${wk}`}</div>`;
-  }
-
-  return `
-    <div class="card trade-card">
-      <div class="trade-head">
-        <div style="font-family:var(--font-display);font-weight:700">${esc(head.join(" ↔ "))}</div>
-        <div style="font-size:0.82rem;color:var(--soft)">${whenFull(t.date)}</div>
-      </div>
-      ${sides.length
-        ? `<div class="trade-sides">${sides.map(sideHtml).join("")}</div>${verdict}`
-        : `<div style="font-size:0.85rem;color:var(--soft)">
-             ${esc(t.note || "Players traded were not retained in ESPN's archive.")}
-           </div>`}
-    </div>`;
 }
 
 /* ---------------- Activity ---------------- */

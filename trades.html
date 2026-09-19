@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Trade Log — LWFFL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .trade-card { margin-bottom: 14px; }
+    .trade-head { display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+                  padding-bottom:10px; margin-bottom:12px; border-bottom:1px solid var(--border-strong);
+                  flex-wrap:wrap; }
+    .trade-title { font-family:var(--font-display); font-weight:700; }
+    .trade-when { font-size:0.82rem; color:var(--soft); display:flex; align-items:center; gap:10px; }
+    .trade-sides { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+    @media (max-width:640px){ .trade-sides { grid-template-columns:1fr; } }
+    .trade-side { display:flex; flex-direction:column; }
+    .trade-side h4 { margin:0 0 8px; font-family:var(--font-display); font-size:0.82rem;
+                     letter-spacing:.05em; text-transform:uppercase; color:var(--soft); font-weight:700; }
+    .trade-side ul { margin:0; padding-left:16px; font-size:0.89rem; line-height:1.7; flex:1 0 auto; }
+    .trade-side li span.tv-p { color:var(--soft); font-size:0.82rem; }
+    .tv-foot { margin-top:12px; padding-top:9px; border-top:1px solid var(--border);
+               font-size:0.8rem; color:var(--soft); display:flex; flex-wrap:wrap; gap:4px 14px; }
+    .tv-foot b { color:var(--text); font-variant-numeric:tabular-nums; }
+    .verdict { margin-top:13px; padding-top:11px; border-top:1px solid var(--border-strong);
+               font-size:0.86rem; }
+    .verdict .num { font-variant-numeric:tabular-nums; font-weight:700; }
+    .note { background:rgba(0,133,202,.07); border:1px solid var(--border); border-left:3px solid var(--accent);
+            border-radius:var(--radius-sm); padding:12px 16px; font-size:0.83rem; color:var(--muted);
+            margin-bottom:20px; line-height:1.55; }
+    .note strong { color:var(--text); }
+    .gap-card { border-style:dashed; }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>LW</span>FFL</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="managers.html">Managers</a>
+      <a href="seasons.html">Seasons</a>
+      <a href="boxscores.html">Box Scores</a>
+      <a href="transactions.html">Transactions</a>
+      <a href="trades.html" class="active">Trades</a>
+      <a href="h2h.html">Head-to-Head</a>
+      <a href="draft.html">Draft Central</a>
+      <a href="explorer.html">Stat Lab</a>
+      <a href="records.html">Records</a>
+      <a href="arcade.html">Arcade</a>
+      <a href="league.html">Constitution</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="page-head">
+    <h1>Trade Log</h1>
+    <p class="sub" id="sub">Loading…</p>
+  </header>
+
+  <div class="subnav">
+    <a href="trades.html" class="active">Trade Log</a>
+    <a href="trade-metrics.html">Trade Metrics</a>
+  </div>
+
+  <div class="grid grid-4" id="cards" style="margin-bottom:26px"></div>
+
+  <div class="filter-bar">
+    <div class="full-span">
+      <label class="field-label" for="q">Search</label>
+      <input type="search" id="q" placeholder="Player or manager — try &ldquo;Gronkowski&rdquo; or &ldquo;Chad&rdquo;" autocomplete="off">
+    </div>
+    <div>
+      <label class="field-label" for="fY">Season</label>
+      <select id="fY"><option value="">All seasons</option></select>
+    </div>
+    <div>
+      <label class="field-label" for="fM">Manager</label>
+      <select id="fM"><option value="">Any manager</option></select>
+    </div>
+    <div>
+      <label class="field-label" for="fD">Detail</label>
+      <select id="fD">
+        <option value="">All trades</option>
+        <option value="yes">With player detail</option>
+        <option value="no">Players unknown</option>
+      </select>
+    </div>
+    <div>
+      <label class="field-label" for="fS">Sort</label>
+      <select id="fS">
+        <option value="new">Newest first</option>
+        <option value="old">Oldest first</option>
+        <option value="big">Biggest margin</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="filter-count" id="count"></div>
+  <div id="list"><div class="loading">Loading…</div></div>
+</div>
+
+<footer class="footer">
+  LWFFL · Legion of Whom Fantasy Football League
+</footer>
+
+<script src="assets/data.js?v=2"></script>
+<script src="assets/tables.js?v=2"></script>
+<script>
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const nm = m => m ? LWFFL.shortName(m) : "—";
+const ml = m => m ? LWFFL.mlink(m) : "—";
+const whenFull = iso => iso
+  ? new Date(iso + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+  : "date unknown";
+
+/* Trades inside this many lineup points are reported as too close to call
+   rather than a win. Four months of football separating two rosters by less
+   than a single good afternoon is not a verdict. */
+const PUSH_BAND = 15;
+
+let TRADES = null, TV = null, TVBY = {}, ROWS = [], PAGE = 1;
+const PER_PAGE = 10;
+
+(async () => {
+  try {
+    const [tr, tv] = await Promise.all([
+      fetch("trades-history.json").then(r => r.json()),
+      fetch("trade-value.json").then(r => r.json()).catch(() => null),
+      LWFFL.load().catch(() => null)
+    ]);
+    TRADES = tr; TV = tv;
+    if (TV) TV.trades.forEach(t => { TVBY[key(t)] = t; });
+    build();
+  } catch (e) {
+    console.error(e);
+    document.getElementById("list").innerHTML =
+      '<div class="loading">Could not load trade data.</div>';
+  }
+})();
+
+const key = t => `${t.year}|${t.date}|${(t.parties || []).join("|")}`;
+
+function build() {
+  const gaps = TRADES.undocumentedSeasons || {};
+  const gapTotal = Object.values(gaps).reduce((a, b) => a + b, 0);
+
+  document.getElementById("sub").textContent =
+    `${TRADES.totalPerCounters} trades in league history · ${TRADES.withPlayers} with full player detail`;
+
+  document.getElementById("cards").innerHTML = `
+    <div class="card"><div class="stat-label">Trades All Time</div>
+      <div class="stat-value">${TRADES.totalPerCounters}</div>
+      <div class="stat-sub">confirmed by ESPN's team counters</div></div>
+    <div class="card"><div class="stat-label">With Player Detail</div>
+      <div class="stat-value">${TRADES.withPlayers}</div>
+      <div class="stat-sub">both hauls recoverable</div></div>
+    <div class="card"><div class="stat-label">Details Lost</div>
+      <div class="stat-value">${gapTotal}</div>
+      <div class="stat-sub">before ESPN kept records</div></div>
+    <div class="card"><div class="stat-label">Busiest Season</div>
+      <div class="stat-value">${busiest().year}</div>
+      <div class="stat-sub">${busiest().espnCounter} trades</div></div>`;
+
+  /* flatten every trade into one searchable row */
+  ROWS = TRADES.trades.map(t => {
+    const tv = TVBY[key(t)];
+    const sides = Object.entries(t.receives || {});
+    const players = sides.flatMap(([, ps]) => ps)
+      .concat(tv ? Object.values(tv.sides).flatMap(s => s.players.map(p => p.name)) : []);
+    return {
+      t, tv,
+      year: t.year,
+      date: t.date || `${t.year}-00-00`,
+      detail: !!sides.length,
+      parties: t.parties || [],
+      margin: tv ? tv.margin : -1,
+      /* one lowercase haystack per trade — players, full names and short names */
+      hay: [...players, ...(t.parties || []), ...(t.parties || []).map(nm)]
+        .join(" ").toLowerCase()
+    };
+  });
+
+  const years = [...new Set(ROWS.map(r => r.year))].sort((a, b) => b - a);
+  fillSelect(document.getElementById("fY"), years);
+  const mgrs = [...new Set(ROWS.flatMap(r => r.parties))]
+    .sort((a, b) => nm(a).localeCompare(nm(b)));
+  fillSelectNames(document.getElementById("fM"), mgrs);
+
+  ["q", "fY", "fM", "fD", "fS"].forEach(id =>
+    document.getElementById(id).addEventListener("input", () => { PAGE = 1; apply(); }));
+
+  apply();
+}
+
+function busiest() {
+  return (TRADES.seasons || []).slice()
+    .sort((a, b) => b.espnCounter - a.espnCounter)[0] || { year: "—", espnCounter: 0 };
+}
+
+function apply() {
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const y = document.getElementById("fY").value;
+  const m = document.getElementById("fM").value;
+  const d = document.getElementById("fD").value;
+  const s = document.getElementById("fS").value;
+
+  let rows = ROWS.filter(r => {
+    if (y && String(r.year) !== y) return false;
+    if (m && !r.parties.includes(m)) return false;
+    if (d === "yes" && !r.detail) return false;
+    if (d === "no" && r.detail) return false;
+    if (q && !r.hay.includes(q)) return false;
+    return true;
+  });
+
+  rows.sort(
+    s === "old" ? (a, b) => a.date.localeCompare(b.date)
+    : s === "big" ? (a, b) => b.margin - a.margin
+    : (a, b) => b.date.localeCompare(a.date)
+  );
+
+  const filtered = q || y || m || d;
+  document.getElementById("count").textContent = filtered
+    ? `${rows.length} trade${rows.length === 1 ? "" : "s"} match`
+    : `${rows.length} trades on record with participants`;
+
+  renderList(rows, q);
+}
+
+function renderList(rows, q) {
+  const list = document.getElementById("list");
+  const pages = Math.max(1, Math.ceil(rows.length / PER_PAGE));
+  PAGE = Math.min(PAGE, pages);
+  const slice = rows.slice((PAGE - 1) * PER_PAGE, PAGE * PER_PAGE);
+
+  if (!rows.length) {
+    list.innerHTML = `<div class="card" style="text-align:center;color:var(--soft);padding:34px">
+      No trades match. Try a different player, manager or season.</div>`;
+    return;
+  }
+
+  list.innerHTML = slice.map(r => tradeCard(r, q)).join("") + (pages > 1 ? `
+    <div class="table-card"><div class="tbl-foot">
+      <button type="button" id="pPrev" ${PAGE <= 1 ? "disabled" : ""}>← Prev</button>
+      <span>Page ${PAGE} of ${pages} · ${rows.length} trades</span>
+      <button type="button" id="pNext" ${PAGE >= pages ? "disabled" : ""}>Next →</button>
+    </div></div>` : "") + gapBlocks();
+
+  const prev = document.getElementById("pPrev"), next = document.getElementById("pNext");
+  if (prev) prev.addEventListener("click", () => { PAGE--; renderList(rows, q); window.scrollTo({ top: 0, behavior: "smooth" }); });
+  if (next) next.addEventListener("click", () => { PAGE++; renderList(rows, q); window.scrollTo({ top: 0, behavior: "smooth" }); });
+}
+
+function gapBlocks() {
+  const gaps = TRADES.undocumentedSeasons || {};
+  const years = Object.keys(gaps).map(Number).sort((a, b) => b - a);
+  if (!years.length) return "";
+  return `
+    <div class="section-label">Not in the log</div>
+    ${years.map(y => `
+      <div class="card gap-card" style="margin-bottom:14px">
+        <div style="font-size:0.88rem;color:var(--muted)">
+          <strong style="color:var(--text)">${gaps[y]} trades</strong> happened in ${y}.
+          ESPN's counters confirm it, but no confirmation email survives and its
+          transaction records don't reach back that far, so who traded what is gone.
+        </div>
+      </div>`).join("")}`;
+}
+
+/* highlight the matched substring without letting user input become markup */
+function hl(text, q) {
+  const safe = esc(text);
+  if (!q) return safe;
+  const i = safe.toLowerCase().indexOf(q);
+  if (i < 0) return safe;
+  return safe.slice(0, i) + `<mark class="hit">` + safe.slice(i, i + q.length) +
+    `</mark>` + safe.slice(i + q.length);
+}
+
+function verdictPill(tv, manager) {
+  if (!tv) return "";
+  if (tv.margin < PUSH_BAND) return `<span class="trade-verdict push">Too close to call</span>`;
+  return tv.winner === manager
+    ? `<span class="trade-verdict win">Came out ahead</span>`
+    : `<span class="trade-verdict lost">Came out behind</span>`;
+}
+
+function tradeCard(r, q) {
+  const { t, tv } = r;
+  const sides = Object.entries(t.receives || {});
+  const head = sides.length ? sides.map(([m]) => nm(m)) : (t.parties || []).map(nm);
+
+  const sideHtml = ([m, players]) => {
+    const s = tv && tv.sides[m];
+    const lines = s
+      ? s.players.map(p => `<li>${hl(p.name, q)}
+          <span class="tv-p">— ${LWFFL.fmt(p.pts)} in ${p.starts} start${p.starts === 1 ? "" : "s"}</span></li>`)
+      : players.map(x => `<li>${hl(x, q)}</li>`);
+    return `
+      <div class="trade-side">
+        <h4>${esc(nm(m))} received ${verdictPill(tv, m)}</h4>
+        <ul>${lines.join("")}</ul>
+        ${s ? `<div class="tv-foot">
+          <span>Lineup points <b>${LWFFL.fmt(s.lineupPts)}</b></span>
+          ${s.swapBack == null ? "" :
+            `<span>Swap-back <b class="${s.swapBack > 0 ? "pos" : s.swapBack < 0 ? "neg" : ""}">${
+              s.swapBack > 0 ? "+" : ""}${LWFFL.fmt(s.swapBack)}</b></span>`}
+        </div>` : ""}
+      </div>`;
+  };
+
+  let verdict = "";
+  if (tv) {
+    const wk = `Week ${tv.week} · ${tv.weeksRemaining} week${tv.weeksRemaining === 1 ? "" : "s"} left in the season`;
+    verdict = `<div class="verdict">${
+      tv.margin < PUSH_BAND
+        ? `Too close to call — <span class="num">${LWFFL.fmt(tv.margin)}</span> lineup points separated them across the rest of the season · ${wk}`
+        : `${ml(tv.winner)} came out ahead by <span class="num pos">${LWFFL.fmt(tv.margin)}</span> lineup points · ${wk}`
+    }</div>`;
+  }
+
+  return `
+    <div class="card trade-card">
+      <div class="trade-head">
+        <div class="trade-title">${esc(head.join(" ↔ "))}</div>
+        <div class="trade-when">${LWFFL.ylink(t.year)} · ${whenFull(t.date)}</div>
+      </div>
+      ${sides.length
+        ? `<div class="trade-sides">${sides.map(sideHtml).join("")}</div>${verdict}`
+        : `<div style="font-size:0.85rem;color:var(--soft)">
+             ${esc(t.note || "Players traded were not retained in ESPN's archive.")}
+           </div>`}
+    </div>`;
+}
+</script>
+</body>
+</html>

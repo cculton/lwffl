@@ -22,6 +22,7 @@
       <a href="seasons.html">Seasons</a>
       <a href="boxscores.html">Box Scores</a>
       <a href="transactions.html">Transactions</a>
+      <a href="trades.html">Trades</a>
       <a href="h2h.html">Head-to-Head</a>
       <a href="draft.html">Draft Central</a>
       <a href="explorer.html">Stat Lab</a>
@@ -69,8 +70,10 @@ Promise.all([
 
 function renderIndex(M) {
   const { recordStr } = LWFFL;
+  /* alphabetical by the name shown on the tile, so scanning for someone works;
+     the Active / Alums split is what carries the ranking-free grouping */
   const list = Object.values(M.managers).sort((a, b) =>
-    b.career.titles.length - a.career.titles.length || b.career.winPct - a.career.winPct
+    LWFFL.shortName(a.name).localeCompare(LWFFL.shortName(b.name), "en", { sensitivity: "base" })
   );
 
   const active = list.filter(m => m.career.active);
@@ -104,7 +107,7 @@ function renderIndex(M) {
   main.innerHTML = `
     <header class="page-head">
       <h1>Managers</h1>
-      <p class="sub">${list.length} all-time managers, ranked by championships then win percentage</p>
+      <p class="sub">${list.length} all-time managers, A–Z within active and alums</p>
     </header>
     <div class="section-label" style="margin-top:0">Active <span style="font-weight:400;text-transform:none;letter-spacing:0">— ${active.length} managers</span></div>
     <div class="grid grid-auto">${active.map(card).join("")}</div>
@@ -463,7 +466,7 @@ function bestTradeTile(name, wantBest) {
   const partner = pick.trade.parties.find(p => p !== name);
   const cls = pick.val > 0 ? "pos" : pick.val < 0 ? "neg" : "";
   return foTile(label,
-    `<a class="bxlink" href="transactions.html?tab=trades"><span class="${cls}">${pick.val > 0 ? "+" : ""}${LWFFL.fmt(pick.val)}</span></a>`,
+    `<a class="bxlink" href="trade-metrics.html"><span class="${cls}">${pick.val > 0 ? "+" : ""}${LWFFL.fmt(pick.val)}</span></a>`,
     `swap-back pts · vs ${LWFFL.mlink(partner)} · ${pick.trade.year}`);
 }
 
