@@ -734,6 +734,123 @@ a.bxlink:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
 .rank-empty { margin-top: 16px; font-size: 0.84rem; color: var(--soft); }
 
+
+/* ---------- The Notebook ---------- */
+
+/* Long-form measure. Everywhere else on this site is a dashboard; a post is
+   the one thing people actually read start to finish, so it gets a column
+   narrow enough not to fight the eye. */
+.wrap-read { max-width: 760px; }
+
+.nb-card { display: block; }
+/* auto-fill rather than a fixed pair, so a lone pinned post or a
+   single-result filter fills the row instead of leaving a hole */
+.nb-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+.nb-kicker { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-bottom: 10px; }
+.nb-ed {
+  font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 6px; border: 1px solid var(--border-strong); color: var(--muted);
+}
+.nb-ed.ed-ann { border-color: rgba(251,191,36,.45); background: rgba(251,191,36,.10); color: var(--gold); }
+.nb-ed.ed-pre { border-color: rgba(0,133,202,.45);  background: rgba(0,133,202,.10);  color: var(--accent); }
+.nb-ed.ed-sun { border-color: rgba(129,140,248,.45); background: rgba(129,140,248,.10); color: var(--accent-2); }
+.nb-ed.ed-rec { border-color: rgba(52,211,153,.40); background: rgba(52,211,153,.08); color: var(--green); }
+.nb-wk { font-size: 0.74rem; font-weight: 600; color: var(--muted); }
+.nb-date { font-size: 0.74rem; color: var(--soft); margin-left: auto; }
+
+.nb-title {
+  font-family: var(--font-display); font-weight: 700; font-size: 1.15rem;
+  line-height: 1.25; letter-spacing: -0.005em;
+}
+.nb-lead .nb-title { font-size: 1.6rem; }
+.nb-dek { margin-top: 8px; font-size: 0.89rem; line-height: 1.6; color: var(--muted); }
+.nb-lead .nb-dek { font-size: 0.97rem; }
+@media (max-width: 600px) { .nb-lead .nb-title { font-size: 1.3rem; } }
+
+/* ---------- a post ---------- */
+
+.post-head { padding-bottom: 22px; border-bottom: 1px solid var(--border-strong); margin-bottom: 26px; }
+.post-kicker {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 12px;
+}
+.post-head h1 {
+  font-family: var(--font-display); font-size: clamp(1.7rem, 5vw, 2.5rem);
+  font-weight: 700; line-height: 1.12; letter-spacing: -0.015em;
+}
+.post-dek { margin-top: 14px; font-size: 1.05rem; line-height: 1.6; color: var(--muted); }
+.post-meta {
+  margin-top: 18px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: 0.8rem; color: var(--soft);
+}
+.post-meta .dot { color: var(--border-strong); }
+
+.copy-link {
+  margin-left: auto; background: var(--surface-solid); color: var(--muted);
+  border: 1px solid var(--border-strong); border-radius: 999px;
+  padding: 5px 13px; font-family: var(--font-body); font-size: 0.76rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+.copy-link:hover { color: var(--text); border-color: var(--accent); }
+.copy-link.ok { color: var(--green); border-color: rgba(52,211,153,.5); }
+
+.post-body { font-size: 1.02rem; line-height: 1.75; color: #cbd5e1; }
+.post-body h2 {
+  font-family: var(--font-display); font-size: 1.3rem; font-weight: 700;
+  color: var(--text); margin: 34px 0 12px; letter-spacing: -0.01em;
+}
+.post-body h3 {
+  font-family: var(--font-display); font-size: 1.05rem; font-weight: 600;
+  color: var(--text); margin: 26px 0 10px;
+}
+.post-body p { margin-bottom: 18px; }
+.post-body ul, .post-body ol { margin: 0 0 18px 22px; }
+.post-body li { margin-bottom: 7px; }
+.post-body strong { color: var(--text); font-weight: 600; }
+.post-body a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(0,133,202,.35); }
+.post-body a:hover { border-bottom-color: var(--accent); }
+.post-body blockquote {
+  margin: 24px 0; padding: 14px 20px; border-left: 3px solid var(--accent);
+  background: rgba(0,133,202,.06); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--muted); font-style: italic;
+}
+.post-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88em;
+  background: var(--surface-2); padding: 2px 6px; border-radius: 5px;
+}
+
+/* ---------- live results module under a recap ---------- */
+
+.nb-games { display: flex; flex-direction: column; }
+.nb-game {
+  display: grid; grid-template-columns: 1fr auto auto auto 1fr;
+  align-items: center; gap: 10px; padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+.nb-game:first-child { border-top: 0; padding-top: 2px; }
+.nb-team { font-size: 0.89rem; color: var(--soft); }
+.nb-team.won { color: var(--text); font-weight: 600; }
+.nb-team:last-child { text-align: right; }
+.nb-score {
+  font-family: var(--font-display); font-weight: 700; font-size: 0.95rem;
+  font-variant-numeric: tabular-nums; color: var(--soft);
+}
+.nb-score.won { color: var(--green); }
+.nb-vs { color: var(--border-strong); font-size: 0.8rem; }
+@media (max-width: 520px) {
+  .nb-game { grid-template-columns: 1fr auto auto auto 1fr; gap: 6px; font-size: 0.82rem; }
+  .nb-team { font-size: 0.8rem; }
+}
+
+.nb-notes {
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-strong);
+  display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; color: var(--muted);
+}
+.nb-k {
+  display: inline-block; min-width: 62px; font-size: 0.66rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--soft);
+}
+
 /* ---------- Sparkline ---------- */
 
 .spark { display: block; }

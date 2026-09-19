@@ -5,6 +5,12 @@
 const LWFFL = (() => {
   let cachePromise = null;
 
+  /* Notebook posts live at n/<slug>.html, one directory below every other
+     page. They set window.LWFFL_BASE = "../" before loading this file so the
+     data fetches and the cross-links keep resolving. Everything else leaves
+     it unset and nothing changes. */
+  const B = (typeof window !== "undefined" && window.LWFFL_BASE) || "";
+
   const slugify = name =>
     String(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
@@ -28,7 +34,7 @@ const LWFFL = (() => {
     : "";
 
   const mlink = name =>
-    `<a class="mlink" href="managers.html?m=${slugify(name)}">${shortName(name)}</a>${alumPill(name)}`;
+    `<a class="mlink" href="${B}managers.html?m=${slugify(name)}">${shortName(name)}</a>${alumPill(name)}`;
 
   const managerCell = name => mlink(name);
   const managerLabel = name => `${shortName(name)}${alumPill(name)}`;
@@ -57,7 +63,7 @@ const LWFFL = (() => {
       return a === b ? `${a}` : `${a}–${b}`;
     }).join(", ");
   };
-  const ylink = year => `<a class="ylink" href="seasons.html?y=${year}">${year}</a>`;
+  const ylink = year => `<a class="ylink" href="${B}seasons.html?y=${year}">${year}</a>`;
 
   /* ---- box score deep links ----
      Every matchup in league-scores.json has exactly one box score, so any score
@@ -73,7 +79,7 @@ const LWFFL = (() => {
   };
 
   const bxHref = (year, week, manager) => {
-    let u = `boxscores.html?y=${year}`;
+    let u = `${B}boxscores.html?y=${year}`;
     if (week != null) u += `&w=${week}`;
     if (manager) u += `&mgr=${slugify(manager)}`;
     return u;
@@ -204,10 +210,10 @@ const LWFFL = (() => {
     if (cachePromise) return cachePromise;
     cachePromise = (async () => {
       const [standings, games, seeds, box] = await Promise.all([
-        fetch("final-standings.json").then(r => r.json()),
-        fetch("league-scores.json").then(r => r.json()),
-        fetch("playoff-seeds.json").then(r => r.json()),
-        fetch("boxscores-index.json").then(r => r.json()).catch(() => null)
+        fetch(B + "final-standings.json").then(r => r.json()),
+        fetch(B + "league-scores.json").then(r => r.json()),
+        fetch(B + "playoff-seeds.json").then(r => r.json()),
+        fetch(B + "boxscores-index.json").then(r => r.json()).catch(() => null)
       ]);
       if (box) {
         boxIndex = {};

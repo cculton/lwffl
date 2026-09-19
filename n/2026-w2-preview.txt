@@ -1,0 +1,6 @@
+🔮 **Preview — Week 2**
+Everybody gets a chance to explain themselves
+
+A sample preview showing the layout — the matchup strip, the ELO lines and the head-to-head history all render from the league's own data once a real week's schedule is in.
+
+https://lwffl.com/n/2026-w2-preview.html

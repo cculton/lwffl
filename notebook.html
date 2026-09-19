@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Notebook — LWFFL</title>
+  <meta name="description" content="League announcements, weekly previews and recaps for the Legion of Whom Fantasy Football League." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="LWFFL Notebook" />
+  <meta property="og:title" content="The LWFFL Notebook" />
+  <meta property="og:description" content="Announcements, previews and recaps — every week of the league, written down." />
+  <meta property="og:url" content="https://lwffl.com/notebook.html" />
+  <meta name="theme-color" content="#0085CA" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .ctrl-row { display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; margin-bottom:18px; }
+    .ctrl-row > div { flex:0 0 auto; }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>LW</span>FFL</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="notebook.html" class="active">Notebook</a>
+      <a href="managers.html">Managers</a>
+      <a href="seasons.html">Seasons</a>
+      <a href="boxscores.html">Scores</a>
+      <a href="transactions.html">Transactions</a>
+      <a href="h2h.html">H2H</a>
+      <a href="draft.html">Draft</a>
+      <a href="explorer.html">Stat Lab</a>
+      <a href="records.html">Records</a>
+      <a href="arcade.html">Arcade</a>
+      <a href="league.html">Constitution</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="page-head">
+    <h1>The Notebook</h1>
+    <p class="sub">Announcements, previews and recaps — every week of the league, written down.</p>
+  </header>
+
+  <div id="main"><div class="loading">Loading…</div></div>
+</div>
+
+<footer class="footer">
+  LWFFL · Legion of Whom Fantasy Football League
+</footer>
+
+<script src="assets/data.js?v=2"></script>
+<script src="assets/tables.js?v=2"></script>
+<script src="assets/notebook.js?v=1"></script>
+<script>
+notebookFeed(document.getElementById("main")).catch(err => {
+  console.error(err);
+  document.getElementById("main").innerHTML =
+    '<div class="loading">Could not load the Notebook.</div>';
+});
+</script>
+</body>
+</html>
