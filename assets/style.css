@@ -585,6 +585,154 @@ a.bxlink:hover { color: var(--accent); border-bottom-color: var(--accent); }
   font-size: 1.05rem;
 }
 
+/* ---------- Manager profile: hero ---------- */
+
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 26px 26px 24px;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(ellipse 55% 130% at 0% 0%, rgba(0, 133, 202, 0.11), transparent 70%),
+    var(--surface);
+  backdrop-filter: blur(10px);
+}
+
+.profile-id { flex: 1 1 260px; min-width: 0; }
+
+.profile-name {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.profile-tenure {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.profile-accolades { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+.profile-accolades:empty { display: none; }
+
+.profile-rail { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
+
+.trend-box { text-align: right; }
+.trend-box .stat-label { display: block; margin-bottom: 6px; }
+
+@media (max-width: 600px) {
+  .profile-hero { padding: 20px; gap: 18px; }
+  .profile-rail { width: 100%; justify-content: space-between; }
+}
+
+/* ---------- Manager profile: headline stat cards ---------- */
+
+/* One shape for all four Memorable Matchups cards: the number that matters,
+   then the raw scoreline, then who and when. */
+.lead-val {
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  font-weight: 700;
+  line-height: 1.05;
+  margin-top: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.lead-detail {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.lead-meta { font-size: 0.78rem; color: var(--soft); margin-top: 4px; }
+
+/* ---------- Manager profile: top-five widgets ---------- */
+
+/* keeps the tie footnote on the baseline when sibling cards run longer */
+.rank-card { display: flex; flex-direction: column; }
+.rank-card .rank-list { flex: 1 0 auto; }
+
+.rank-list { margin-top: 14px; display: flex; flex-direction: column; }
+
+.rank-row {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+.rank-row:first-child { border-top: 0; padding-top: 2px; }
+
+.rank-badge {
+  font-family: var(--font-display);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--soft);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.rank-row.tier-1 .rank-badge { color: var(--gold); }
+
+.rank-main { min-width: 0; }
+
+.rank-name {
+  font-size: 0.89rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rank-sub { font-size: 0.73rem; color: var(--soft); margin-top: 1px; }
+
+.rank-pos {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  padding: 0 5px;
+  margin-right: 6px;
+  vertical-align: 1px;
+}
+
+.rank-val {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+.rank-val small { display: block; font-family: var(--font-body); font-size: 0.68rem;
+  font-weight: 500; color: var(--soft); letter-spacing: 0.06em; text-transform: uppercase; }
+
+.rank-foot {
+  margin-top: 11px;
+  padding-top: 9px;
+  border-top: 1px solid var(--border);
+  font-size: 0.74rem;
+  color: var(--soft);
+  line-height: 1.5;
+}
+
+.rank-empty { margin-top: 16px; font-size: 0.84rem; color: var(--soft); }
+
 /* ---------- Sparkline ---------- */
 
 .spark { display: block; }

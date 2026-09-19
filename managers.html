@@ -45,6 +45,8 @@
 <script>
 const initials = name => name.split(/\s+/).map(w => w[0]).join("").toUpperCase();
 const money = n => "$" + Number(n).toLocaleString("en-US");
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, ch =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
 
 let FO_IDX = null, FO_HL = null, FO_TV = null;
 
@@ -125,12 +127,26 @@ function renderProfile(M, m) {
   const biggestWin = wins.slice().sort((a, b) => (b.pf - b.pa) - (a.pf - a.pa))[0];
   const worstLoss = losses.slice().sort((a, b) => (b.pa - b.pf) - (a.pa - a.pf))[0];
 
-  const gameCard = (label, p, extra) => p ? `
-    <div class="card">
-      <div class="stat-label">${label}</div>
-      <div class="stat-value" style="font-size:1.35rem">${bxlink(p.year, p.week, p.manager, fmt(p.pf))}<span style="color:var(--soft);font-size:0.9rem;font-weight:500"> vs ${fmt(p.pa)}</span></div>
-      <div class="stat-sub">${extra} ${mlink(p.opp)} · ${ylink(p.year)} ${wlink(p.year, p.week, "Wk " + p.week)}</div>
-    </div>` : "";
+  /* All four cards share one shape: headline number, scoreline, who and when.
+     The two result cards lead with the margin — that is the story; the score
+     itself is the supporting detail. */
+  const gameCard = (label, p, opts) => {
+    if (!p) return "";
+    const margin = p.pf - p.pa;
+    const head = opts.margin
+      ? `<span class="${margin >= 0 ? "pos" : "neg"}">${margin >= 0 ? "+" : "−"}${fmt(Math.abs(margin))}</span>`
+      : fmt(p.pf);
+    const detail = opts.margin
+      ? `${fmt(p.pf)} – ${fmt(p.pa)}`
+      : `${margin >= 0 ? "Won" : "Lost"} by ${fmt(Math.abs(margin))}`;
+    return `
+      <div class="card">
+        <div class="stat-label">${label}</div>
+        <div class="lead-val">${bxlink(p.year, p.week, p.manager, head)}</div>
+        <div class="lead-detail">${detail}</div>
+        <div class="lead-meta">${opts.verb} ${mlink(p.opp)} · ${ylink(p.year)} ${wlink(p.year, p.week, "Wk " + p.week)}</div>
+      </div>`;
+  };
 
   /* season + rivals data (rendered as sortable tables below).
      Records and PF/PA per season come from every matchup played that
@@ -188,28 +204,31 @@ function renderProfile(M, m) {
   main.innerHTML = `
     <a class="back-link" href="managers.html">← All managers</a>
 
-    <header style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-bottom:30px">
+    <header class="profile-hero">
       <div class="avatar lg">${initials(m.name)}</div>
-      <div style="flex:1;min-width:220px">
-        <h1 style="font-family:var(--font-display);font-size:clamp(1.7rem,4vw,2.4rem);font-weight:700;line-height:1.1;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">${LWFFL.shortName(m.name)}${LWFFL.alumPill(m.name)}<span style="font-family:var(--font-body);font-size:0.9rem;font-weight:500;color:var(--muted)">${LWFFL.tenureStr(c.years, M.years[M.years.length - 1])}</span></h1>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+      <div class="profile-id">
+        <h1 class="profile-name">${LWFFL.shortName(m.name)}${LWFFL.alumPill(m.name)}<span class="profile-tenure">${LWFFL.tenureStr(c.years, M.years[M.years.length - 1])}</span></h1>
+        <div class="profile-accolades">
           ${c.titles.map(y => `<span class="pill gold" title="Championship season">🏆 Championship · ${y}</span>`).join("")}
           ${c.runnerUps.map(y => `<span class="pill" title="Runner-up finish">🥈 Runner-Up · ${y}</span>`).join("")}
           ${c.thirdPlaces.map(y => `<span class="pill" title="Third-place finish">🥉 Third Place · ${y}</span>`).join("")}
           ${c.scoringTitles.map(y => `<span class="pill accent" title="Scoring title">🕹️ Scoring Title · ${y}</span>`).join("")}
         </div>
       </div>
-      <div class="elo-badge" title="ELO power rating — updates after every matchup based on opponent strength, margin of victory, and playoff weighting">
-        <div class="elo-num">${M.elo.ratings[m.name].elo}</div>
-        <div class="elo-tag">ELO</div>
-        <div class="elo-rank">${M.elo.ratings[m.name].rank ? `#${M.elo.ratings[m.name].rank} of ${M.elo.rankedCount}` : "unranked"}</div>
-      </div>
-      <div style="text-align:right">
-        <div class="stat-label">Career finish trend</div>
-        ${sparkline(finishes)}
+      <div class="profile-rail">
+        <div class="elo-badge" title="ELO power rating — updates after every matchup based on opponent strength, margin of victory, and playoff weighting">
+          <div class="elo-num">${M.elo.ratings[m.name].elo}</div>
+          <div class="elo-tag">ELO</div>
+          <div class="elo-rank">${M.elo.ratings[m.name].rank ? `#${M.elo.ratings[m.name].rank} of ${M.elo.rankedCount}` : "unranked"}</div>
+        </div>
+        <div class="trend-box" title="Final standing each season, first to most recent">
+          <span class="stat-label">Finish trend</span>
+          ${sparkline(finishes)}
+        </div>
       </div>
     </header>
 
+    <div class="section-label">Career</div>
     <div class="grid grid-4">
       <div class="card"><div class="stat-label">Record</div><div class="stat-value">${recordStr(c.wins, c.losses, c.ties)}</div><div class="stat-sub">${(c.winPct * 100).toFixed(1)}% win pct · incl. playoffs</div></div>
       <div class="card"><div class="stat-label">Championships</div><div class="stat-value">${c.titles.length}</div><div class="stat-sub">${c.runnerUps.length} runner-up finish${c.runnerUps.length === 1 ? "" : "es"}</div></div>
@@ -219,21 +238,25 @@ function renderProfile(M, m) {
 
     <div class="section-label">Memorable Matchups</div>
     <div class="grid grid-4">
-      ${gameCard("Highest Score", best, "def.")}
-      ${gameCard("Lowest Score", worst, "vs")}
-      ${gameCard("Biggest Win", biggestWin, "def.")}
-      ${gameCard("Worst Loss", worstLoss, "vs")}
+      ${gameCard("Biggest Win", biggestWin, { margin: true, verb: "def." })}
+      ${gameCard("Worst Loss", worstLoss, { margin: true, verb: "vs" })}
+      ${gameCard("Highest Score", best, { margin: false, verb: best && best.pf > best.pa ? "def." : "vs" })}
+      ${gameCard("Lowest Score", worst, { margin: false, verb: worst && worst.pf > worst.pa ? "def." : "vs" })}
     </div>
 
     <div class="section-label">Front Office</div>
-    <div class="grid grid-3">
+    <div class="grid grid-4">
       ${faabSpentTile(m.name)}
       ${costliestBidTile(m.name)}
-      ${mostStartedTile(m.name)}
-    </div>
-    <div class="grid grid-2" style="margin-top:14px">
       ${bestTradeTile(m.name, true)}
       ${bestTradeTile(m.name, false)}
+    </div>
+
+    <div class="section-label">Roster Legends <span style="font-weight:400;text-transform:none;letter-spacing:0">— all time, ties included</span></div>
+    <div class="grid grid-3">
+      ${topDraftedTile(m.name)}
+      ${topStartedTile(m.name)}
+      ${topScorersTile(m.name)}
     </div>
 
     <div class="section-label">Analytics</div>
@@ -342,24 +365,93 @@ function faabSpentTile(name) {
     `#${rank} of ${entries.length} all-time spenders`);
 }
 
+/* Winning claims only — a losing bid was never paid, so it is not a "spend". */
 function costliestBidTile(name) {
   const hit = FO_HL && FO_HL.costliestBid[name];
-  if (!hit) return foTile("Costliest FAAB Bid", "—", "No winning bids on record");
-  return foTile("Costliest FAAB Bid",
+  if (!hit) return foTile("Costliest Winning Bid", "—", "No winning bids on record");
+  return foTile("Costliest Winning Bid",
     `<a class="bxlink" href="transactions.html?tab=faab">${money(hit.bid)}</a>`,
-    `${hit.player} · ${LWFFL.ylink(hit.year)}`);
+    `${esc(hit.player)} · ${LWFFL.ylink(hit.year)}`);
 }
 
-function mostStartedTile(name) {
-  const hit = FO_HL && FO_HL.mostStarted[name];
-  if (!hit) return foTile("Most Started Player", "—", "");
-  const names = hit.players.map(p => p.name).join(", ");
-  const posNote = hit.players.length === 1 ? ` · ${hit.players[0].pos}` : " · tied";
-  return foTile("Most Started Player", names, `${hit.starts} career starts${posNote}`);
+/* ---------- Roster Legends: three top-five widgets ---------- */
+
+/* Shared renderer. `data` is {rows:[{rank,name,pos,value,...}], tiedRest?}
+   straight out of scripts/build-manager-highlights.mjs. Ties share a rank and
+   are all listed; when the tie group at the cutoff is too long to show, the
+   build reports it as tiedRest and it is named here rather than dropped. */
+function rankTile(label, sub, data, opts) {
+  if (!data || !data.rows || !data.rows.length) {
+    return `
+      <div class="card rank-card">
+        <div class="stat-label">${label}</div>
+        <div class="chart-sub">${sub}</div>
+        <div class="rank-empty">${opts.empty}</div>
+      </div>`;
+  }
+  /* a rank shared by more than one row is marked "T" so a repeated number
+     reads as a tie rather than a bug */
+  const shared = {};
+  data.rows.forEach(r => { shared[r.rank] = (shared[r.rank] || 0) + 1; });
+
+  const rows = data.rows.map(r => `
+    <div class="rank-row tier-${r.rank}">
+      <div class="rank-badge">${shared[r.rank] > 1 ? "T" : ""}${r.rank}</div>
+      <div class="rank-main">
+        <div class="rank-name" title="${esc(r.name)}">${esc(r.name)}</div>
+        <div class="rank-sub">${r.pos ? `<span class="rank-pos">${esc(r.pos)}</span>` : ""}${opts.sub(r)}</div>
+      </div>
+      <div class="rank-val">${opts.val(r)}<small>${opts.unit}</small></div>
+    </div>`).join("");
+
+  const tie = data.tiedRest
+    ? `<div class="rank-foot">${data.tiedRest.count} more tied at ${opts.tie(data.tiedRest.value)}.</div>`
+    : "";
+
+  return `
+    <div class="card rank-card">
+      <div class="stat-label">${label}</div>
+      <div class="chart-sub">${sub}</div>
+      <div class="rank-list">${rows}</div>
+      ${tie}
+    </div>`;
+}
+
+function topDraftedTile(name) {
+  return rankTile("🎯 Most Drafted", "Players taken more than once across all drafts",
+    FO_HL && FO_HL.topDrafted[name], {
+      unit: "drafts",
+      val: r => r.value,
+      sub: r => (r.years || []).join(", "),
+      tie: v => `${v} drafts`,
+      empty: "Never drafted the same player twice."
+    });
+}
+
+function topStartedTile(name) {
+  return rankTile("🔁 Most Started", "Weeks in the starting lineup, playoffs included",
+    FO_HL && FO_HL.topStarted[name], {
+      unit: "starts",
+      val: r => r.value,
+      sub: r => `${LWFFL.fmt(r.pts, 1)} pts`,
+      tie: v => `${v} starts`,
+      empty: "No lineup data on record."
+    });
+}
+
+function topScorersTile(name) {
+  return rankTile("⚡ Top Contributors", "Points scored while in the starting lineup",
+    FO_HL && FO_HL.topScorers[name], {
+      unit: "pts",
+      val: r => LWFFL.fmt(r.value, 1),
+      sub: r => `${r.starts} start${r.starts === 1 ? "" : "s"}`,
+      tie: v => `${LWFFL.fmt(v, 1)} pts`,
+      empty: "No lineup data on record."
+    });
 }
 
 function bestTradeTile(name, wantBest) {
-  const label = wantBest ? "Best Trade (Swap-Back)" : "Worst Trade (Swap-Back)";
+  const label = wantBest ? "Best Trade" : "Worst Trade";
   if (!FO_TV) return foTile(label, "—", "");
   let pick = null;
   FO_TV.trades.forEach(t => {
@@ -372,7 +464,7 @@ function bestTradeTile(name, wantBest) {
   const cls = pick.val > 0 ? "pos" : pick.val < 0 ? "neg" : "";
   return foTile(label,
     `<a class="bxlink" href="transactions.html?tab=trades"><span class="${cls}">${pick.val > 0 ? "+" : ""}${LWFFL.fmt(pick.val)}</span></a>`,
-    `vs ${LWFFL.mlink(partner)} · ${pick.trade.year}`);
+    `swap-back pts · vs ${LWFFL.mlink(partner)} · ${pick.trade.year}`);
 }
 
 /* ---------- Analytics charts (ported from the classic manager cards) ---------- */
@@ -383,7 +475,12 @@ function renderCharts(M, m, c, myPerfs) {
   const common = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
 
   /* ELO progression vs league average */
-  const eloPts = (M.elo.seasonal[m.name] || []).filter(d => d.year >= c.firstYear);
+  /* bounded at both ends by seasons actually played — an alum's rating should
+     not flat-line to the present just because the league kept going without
+     him, and an active manager's live season still counts */
+  const lastPlayed = Math.max(c.lastYear, ...myPerfs.map(p => p.year));
+  const eloPts = (M.elo.seasonal[m.name] || [])
+    .filter(d => d.year >= c.firstYear && d.year <= lastPlayed);
   new Chart(document.getElementById("eloChart"), {
     type: "line",
     data: {
@@ -461,19 +558,42 @@ function renderCharts(M, m, c, myPerfs) {
       else if (p.pf < p.pa) haL++;
     }
   });
+  /* the record itself belongs in the hole, not in a tooltip */
+  const heartCenter = {
+    id: "heartCenter",
+    afterDraw(chart) {
+      const { ctx, chartArea: { top, bottom, left, right } } = chart;
+      const x = (left + right) / 2, y = (top + bottom) / 2;
+      const total = haW + haL;
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#e8ecf4";
+      ctx.font = "700 26px 'Space Grotesk', Inter, system-ui";
+      ctx.fillText(`${haW}–${haL}`, x, y + 2);
+      ctx.fillStyle = "#64748b";
+      ctx.font = "600 10px Inter, system-ui";
+      ctx.fillText(total ? `${((haW / total) * 100).toFixed(0)}% in nail-biters` : "none on record", x, y + 22);
+      ctx.restore();
+    }
+  };
   new Chart(document.getElementById("heartChart"), {
     type: "doughnut",
     data: { labels: ["Wins", "Losses"], datasets: [{ data: [haW, haL],
-      backgroundColor: ["#34d399", "#f87171"], borderWidth: 0, hoverOffset: 4 }] },
+      backgroundColor: ["rgba(52,211,153,0.75)", "rgba(248,113,113,0.7)"],
+      borderColor: "#0d1224", borderWidth: 2, hoverOffset: 6 }] },
+    plugins: [heartCenter],
     options: {
       ...common,
-      cutout: "65%",
-      plugins: { legend: { display: true, position: "bottom", labels: { color: "#94a3b8" } } }
+      cutout: "74%",
+      layout: { padding: 6 },
+      plugins: { legend: { display: true, position: "bottom",
+        labels: { color: "#94a3b8", boxWidth: 10, font: { size: 11 } } } }
     }
   });
 
   /* Scoring Spread — floor/ceiling floating bars per season */
-  const years = m.seasons.map(r => r.year);
+  /* from played matchups, so a live season shows up too */
+  const years = [...new Set(myPerfs.map(p => p.year))].sort((a, b) => a - b);
   const spreadData = years.map(y => {
     const scores = myPerfs.filter(p => p.year === y).map(p => p.pf);
     return scores.length ? [Math.min(...scores), Math.max(...scores)] : [0, 0];

@@ -269,11 +269,23 @@ async function renderFaab(p) {
     <div class="section-label">Spend by manager</div>
     <div class="card" id="fBars" style="margin-bottom:26px"></div>
     <div class="section-label">Biggest winning bids</div>
+    <div class="note">Winning claims only — one row per player per week, for the manager who
+      actually got him. Every losing bid ESPN kept is still in the <a class="ylink" href="#"
+      id="fLedgerLink">Ledger</a> under "Everything, including failed".</div>
     <div id="fTop"></div>`;
+  const ledgerLink = document.getElementById("fLedgerLink");
+  if (ledgerLink) ledgerLink.addEventListener("click", e => {
+    e.preventDefault();
+    document.querySelector('.tab-btn[data-tab="ledger"]').click();
+  });
 
+  /* Winning bids only. ESPN keeps every losing claim on a player at the same
+     timestamp, plus PENDING rows for claims a manager edited or that never
+     processed — without this filter one player shows up under four managers
+     and a manager shows up twice on his own claim. Same rule as faabByManager. */
   function bidsForYear(d) {
     return d.transactions
-      .filter(t => t.bid > 0)
+      .filter(t => t.bid > 0 && t.ty === "WAIVER" && t.st === "EXECUTED")
       .map(t => ({
         bid: t.bid, mgr: t.mgr, year: d.year, week: t.wk,
         player: (t.items.find(i => i.t === "ADD") || {}).p || "—"
