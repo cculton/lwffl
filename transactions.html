@@ -36,7 +36,6 @@
       <a href="seasons.html">Seasons</a>
       <a href="boxscores.html">Box Scores</a>
       <a href="transactions.html" class="active">Transactions</a>
-      <a href="trades.html">Trades</a>
       <a href="h2h.html">Head-to-Head</a>
       <a href="draft.html">Draft Central</a>
       <a href="explorer.html">Stat Lab</a>
@@ -55,10 +54,13 @@
 
   <div class="grid grid-4" id="cards" style="margin-bottom:26px"></div>
 
-  <div class="tabs" id="tabs">
-    <button class="tab-btn active" data-tab="ledger">Ledger</button>
-    <button class="tab-btn" data-tab="faab">FAAB</button>
-    <button class="tab-btn" data-tab="activity">Activity</button>
+  <div class="subnav" id="subnav">
+    <a href="transactions.html?tab=ledger" data-tab="ledger" class="active">Ledger</a>
+    <a href="transactions.html?tab=faab" data-tab="faab">FAAB</a>
+    <a href="transactions.html?tab=activity" data-tab="activity">Activity</a>
+    <span class="subnav-sep" aria-hidden="true"></span>
+    <a href="trades.html">Trade Log</a>
+    <a href="trade-metrics.html">Trade Metrics</a>
   </div>
 
   <div id="panel"><div class="loading">Loading…</div></div>
@@ -126,16 +128,17 @@ async function season(y) {
         <div class="stat-value">${t.topBid ? money(t.topBid.bid) : "—"}</div>
         <div class="stat-sub">${t.topBid ? `${esc(nm(t.topBid.mgr))} · ${esc(t.topBid.player)} · ${t.topBid.year}` : ""}</div></div>`;
 
-    document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => {
-      document.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("active", x === b));
+    document.querySelectorAll("#subnav a[data-tab]").forEach(b => b.addEventListener("click", ev => {
+      ev.preventDefault();
+      document.querySelectorAll("#subnav a[data-tab]").forEach(x => x.classList.toggle("active", x === b));
       TAB = b.dataset.tab;
       const u = new URL(location); u.searchParams.set("tab", TAB); history.replaceState(null, "", u);
       render();
     }));
     const q = new URLSearchParams(location.search).get("tab");
-    if (q && document.querySelector(`.tab-btn[data-tab="${q}"]`)) {
+    if (q && document.querySelector(`#subnav a[data-tab="${q}"]`)) {
       TAB = q;
-      document.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("active", x.dataset.tab === q));
+      document.querySelectorAll("#subnav a[data-tab]").forEach(x => x.classList.toggle("active", x.dataset.tab === q));
     }
     render();
   } catch (e) {
@@ -240,7 +243,7 @@ async function renderFaab(p) {
   const ledgerLink = document.getElementById("fLedgerLink");
   if (ledgerLink) ledgerLink.addEventListener("click", e => {
     e.preventDefault();
-    document.querySelector('.tab-btn[data-tab="ledger"]').click();
+    document.querySelector('#subnav a[data-tab="ledger"]').click();
   });
 
   /* Winning bids only. ESPN keeps every losing claim on a player at the same

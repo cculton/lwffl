@@ -10,12 +10,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/style.css">
   <style>
+    /* the two explainers run to different lengths; pin the scope line to the
+       baseline so the pair reads as one block rather than two ragged ones */
+    .metric-card { display:flex; flex-direction:column; }
     .metric-card h4 { margin:0 0 4px; font-family:var(--font-display); font-size:1rem; font-weight:700; }
+    .metric-card p:last-of-type { margin-bottom:auto; }
     .metric-q { font-size:0.84rem; color:var(--accent); font-style:italic; margin-bottom:10px; }
     .metric-card p { margin:0 0 9px; font-size:0.86rem; line-height:1.6; color:var(--muted); }
     .metric-card p:last-child { margin-bottom:0; }
     .metric-card strong { color:var(--text); }
-    .metric-scope { margin-top:11px; padding-top:9px; border-top:1px solid var(--border);
+    .metric-scope { margin-top:14px; padding-top:9px; border-top:1px solid var(--border);
                     font-size:0.78rem; color:var(--soft); }
     .note { background:rgba(0,133,202,.07); border:1px solid var(--border); border-left:3px solid var(--accent);
             border-radius:var(--radius-sm); padding:12px 16px; font-size:0.83rem; color:var(--muted);
@@ -34,8 +38,7 @@
       <a href="managers.html">Managers</a>
       <a href="seasons.html">Seasons</a>
       <a href="boxscores.html">Box Scores</a>
-      <a href="transactions.html">Transactions</a>
-      <a href="trades.html" class="active">Trades</a>
+      <a href="transactions.html" class="active">Transactions</a>
       <a href="h2h.html">Head-to-Head</a>
       <a href="draft.html">Draft Central</a>
       <a href="explorer.html">Stat Lab</a>
@@ -52,7 +55,11 @@
     <p class="sub" id="sub">Loading…</p>
   </header>
 
-  <div class="subnav">
+  <div class="subnav" id="subnav">
+    <a href="transactions.html?tab=ledger" data-tab="ledger">Ledger</a>
+    <a href="transactions.html?tab=faab" data-tab="faab">FAAB</a>
+    <a href="transactions.html?tab=activity" data-tab="activity">Activity</a>
+    <span class="subnav-sep" aria-hidden="true"></span>
     <a href="trades.html">Trade Log</a>
     <a href="trade-metrics.html" class="active">Trade Metrics</a>
   </div>
@@ -109,7 +116,7 @@ function render() {
         <div class="stat-sub">of acquired points never started</div></div>
       <div class="card"><div class="stat-label">Both Sides Gained</div>
         <div class="stat-value">${TV.bothImproved}</div>
-        <div class="stat-sub">of ${TV.benchEraScored} swap-back trades — see below</div></div>
+        <div class="stat-sub">of ${TV.benchEraScored} swap-back trades</div></div>
     </div>
 
     <div class="section-label" style="margin-top:0">How a trade is scored</div>
@@ -149,43 +156,11 @@ function render() {
       </div>
     </div>
 
-    <div class="note">
-      <strong>Swap-back doesn't add up to zero, and that's the point.</strong> Across the league it
-      totals about +${LWFFL.fmtInt(TV.leagueGainSum)}, and ${TV.bothImproved} trades helped both
-      sides. That isn't double-counting — lineup value is capped. A third good running back is
-      worth nothing if you can only start two, so a trade that turns one manager's surplus into
-      another's need genuinely makes both teams better. That's why the two of them shook on it.
-      <br><br>
-      To check the arithmetic isn't just inventing value, every real trade was re-scored with
-      <em>random</em> players from the same two rosters in the same week. Those fake trades come
-      out at a median of <strong>0.0</strong> with 40% hurting both sides. The real ones average
-      <strong>+30.4</strong> with only 14% hurting both. The engine isn't generous — the managers
-      were picking good trades.
-    </div>
-
-    <div class="note">
-      Both numbers measure <strong>how a trade turned out</strong>, not whether it was smart at the
-      time. Nobody knows what a manager was thinking when he pulled the trigger, so a good trade
-      wrecked by a season-ending injury looks the same here as a bad one. And trades made early
-      have more weeks to pile up points than trades made late — the median margin is
-      ${LWFFL.fmt(medianMargin(13), 0)} points when a trade lands with 13+ weeks to play against
-      ${LWFFL.fmt(medianMargin(0, 8), 0)} with eight or fewer, so career totals reward trading
-      early as much as trading well. <strong>Per-trade is the fairer column.</strong>
-    </div>
 
     <div class="section-label">Career trade ledger</div>
     <div id="tvTbl" style="margin-bottom:26px"></div>`;
 
   buildCareerTable();
-}
-
-/* median margin among trades landing inside a weeks-remaining window */
-function medianMargin(lo, hi = 99) {
-  const v = TV.trades.filter(t => t.weeksRemaining >= lo && t.weeksRemaining <= hi)
-    .map(t => t.margin).sort((a, b) => a - b);
-  if (!v.length) return 0;
-  const m = Math.floor(v.length / 2);
-  return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2;
 }
 
 function buildCareerTable() {
