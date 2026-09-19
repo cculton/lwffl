@@ -40,7 +40,8 @@
  * points. Small, but it is the honest number.
  *
  * Swap-back needs bench data to rebuild a roster, so it starts in 2018.
- * Lineup Points runs from 2016, where ESPN's trade emails begin.
+ * Lineup Points runs from 2014 — see scripts/merge-legacy-trades.mjs for how
+ * the 2014-15 trades were recovered after being written off as unrecoverable.
  */
 
 import fs from "node:fs";
@@ -164,33 +165,26 @@ const history = read("trades-history.json");
 const lastWeek = {};
 for (const year of years) lastWeek[year] = Math.max(...Object.keys(roster[year]).map(Number));
 
-/* Which week a trade lands in — the first week the received players could
-   have been started. Box scores carry no dates, so the mapping from a trade's
-   ISO date onto a scoring period was established by the original import and
-   is reused verbatim from the previous trade-value.json. Deriving it afresh
-   from the calendar would silently shift trade windows by a week and make the
-   old and new numbers incomparable. `WEEK_OVERRIDE` is that lookup. */
-const WEEK_OVERRIDE = (() => {
-  const map = new Map();
-  try {
-    for (const t of read("trade-value.json").trades) {
-      map.set(`${t.year}|${t.date}|${(t.parties || []).join("|")}`, t.week);
-    }
-  } catch { /* first run, or the file was removed — fall back to the estimate */ }
-  return map;
-})();
+/* NFL week-1 Thursday by season. A fantasy week rolls over on the Tuesday
+   before its games, which is where the -2 below comes from. Calibrated
+   against all 66 trades whose week the original import had already
+   established: this rule reproduces every one of them exactly, for both
+   anchor offsets of 2 and 3 days, so the boundary is not in doubt. */
+const WEEK1_THURSDAY = {
+  2014: "2014-09-04", 2015: "2015-09-10", 2016: "2016-09-08", 2017: "2017-09-07",
+  2018: "2018-09-06", 2019: "2019-09-05", 2020: "2020-09-10", 2021: "2021-09-09",
+  2022: "2022-09-08", 2023: "2023-09-07", 2024: "2024-09-05", 2025: "2025-09-04",
+  2026: "2026-09-10"
+};
 
-function tradeWeek(year, iso, parties) {
-  const hit = WEEK_OVERRIDE.get(`${year}|${iso}|${(parties || []).join("|")}`);
-  if (hit != null) return hit;
-  if (!iso) return null;
-  const weeks = Object.keys(roster[year]).map(Number).sort((a, b) => a - b);
-  /* ESPN weeks run Tuesday to Monday; Sep 1 anchors week 1 closely enough
-     that this only ever serves a trade the previous file did not carry. */
-  const start = new Date(`${year}-09-01T12:00:00`);
-  const d = new Date(`${iso}T12:00:00`);
-  const wk = Math.max(1, Math.ceil((d - start) / (7 * 864e5)) + 1);
-  return weeks.includes(wk) ? wk : Math.min(Math.max(wk, weeks[0]), weeks[weeks.length - 1]);
+function tradeWeek(year, iso) {
+  if (!iso || !WEEK1_THURSDAY[year]) return null;
+  const anchor = new Date(`${WEEK1_THURSDAY[year]}T12:00:00`);
+  anchor.setDate(anchor.getDate() - 2);
+  const wk = Math.floor((new Date(`${iso}T12:00:00`) - anchor) / (7 * 864e5)) + 1;
+  const weeks = Object.keys(roster[year] || {}).map(Number).sort((a, b) => a - b);
+  if (!weeks.length) return null;
+  return Math.min(Math.max(wk, weeks[0]), weeks[weeks.length - 1]);
 }
 
 let unobservable = 0, imputed = 0, observedReturns = 0;
@@ -201,20 +195,27 @@ function scoreTrade(t) {
   const sides = Object.entries(t.receives || {});
   if (sides.length !== 2 || !roster[year]) return null;
 
-  const week = tradeWeek(year, t.date, t.parties);
+  const week = tradeWeek(year, t.date);
   if (!week) return null;
   const end = lastWeek[year];
   const weeks = [];
   for (let w = week; w <= end; w++) if (roster[year][w]) weeks.push(w);
   if (!weeks.length) return null;
 
-  /* map each side's named haul onto player ids seen on that manager's roster */
+  /* Map each side's named haul onto player ids seen on that manager's roster.
+     Keyed by the name from the email, not by what the roster happens to show:
+     2014-17 box scores carry starters only, so a player who was acquired and
+     never started has no roster row at all. He still belongs on the trade
+     card with zero starts — dropping him would silently shorten the haul. */
   const idsFor = (manager, names) => {
-    const want = new Set(names.map(n => n.toLowerCase()));
     const found = new Map();
+    for (const n of names) found.set(n.toLowerCase(), { id: null, name: n, pos: null });
     for (const w of weeks) {
       for (const p of (roster[year][w] || {})[manager] || []) {
-        if (want.has(p.name.toLowerCase())) found.set(p.id, { id: p.id, name: p.name, pos: p.pos });
+        const k = p.name.toLowerCase();
+        if (found.has(k) && found.get(k).id == null) {
+          found.set(k, { id: p.id, name: p.name, pos: p.pos });
+        }
       }
     }
     return found;
@@ -232,17 +233,20 @@ function scoreTrade(t) {
     const gave = recv[other];             /* ...which the other side gave away */
 
     /* --- Lineup Points: received players, only where actually started --- */
+    const mineIds = new Set([...mine.values()].filter(p => p.id != null).map(p => p.id));
+    const gaveIds = new Set([...gave.values()].filter(p => p.id != null).map(p => p.id));
+
     const perPlayer = new Map();
-    for (const { id, name, pos } of mine.values()) perPlayer.set(id, { name, pos, pts: 0, starts: 0 });
+    for (const { name, pos } of mine.values()) perPlayer.set(name.toLowerCase(), { name, pos, pts: 0, starts: 0 });
     let lineupPts = 0, starts = 0, rosteredPts = 0;
     for (const w of weeks) {
       for (const p of (roster[year][w] || {})[m] || []) {
-        if (!mine.has(p.id)) continue;
+        if (!mineIds.has(p.id)) continue;
         rosteredPts += p.pts;                 /* whether started or benched */
         if (!p.started) continue;
         lineupPts += p.pts; starts++;
-        const rec = perPlayer.get(p.id);
-        rec.pts += p.pts; rec.starts++;
+        const rec = perPlayer.get(p.name.toLowerCase());
+        if (rec) { rec.pts += p.pts; rec.starts++; if (!rec.pos) rec.pos = p.pos; }
       }
     }
     benchedPts += rosteredPts - lineupPts;
@@ -260,10 +264,10 @@ function scoreTrade(t) {
         const actual = bestLineup(have, tmpl);
 
         /* no-trade roster: drop what came in, put back what went out */
-        const without = have.filter(p => !mine.has(p.id));
+        const without = have.filter(p => !mineIds.has(p.id));
         const held = new Set(without.map(p => p.id));
         for (const { id, name, pos } of gave.values()) {
-          if (held.has(id)) continue;                 /* re-acquired later */
+          if (id == null || held.has(id)) continue;                 /* re-acquired later */
           const seen = scores[year][w] && Object.prototype.hasOwnProperty.call(scores[year][w], id);
           if (seen) { observedReturns++; without.push({ id, name, pos, pts: scores[year][w][id] }); }
           else {

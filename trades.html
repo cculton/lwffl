@@ -152,9 +152,6 @@ const PER_PAGE = 10;
 const key = t => `${t.year}|${t.date}|${(t.parties || []).join("|")}`;
 
 function build() {
-  const gaps = TRADES.undocumentedSeasons || {};
-  const gapTotal = Object.values(gaps).reduce((a, b) => a + b, 0);
-
   document.getElementById("sub").textContent =
     `${TRADES.totalPerCounters} trades in league history · ${TRADES.withPlayers} with full player detail`;
 
@@ -165,9 +162,9 @@ function build() {
     <div class="card"><div class="stat-label">With Player Detail</div>
       <div class="stat-value">${TRADES.withPlayers}</div>
       <div class="stat-sub">both hauls recoverable</div></div>
-    <div class="card"><div class="stat-label">Details Lost</div>
-      <div class="stat-value">${gapTotal}</div>
-      <div class="stat-sub">before ESPN kept records</div></div>
+    <div class="card"><div class="stat-label">Players Unknown</div>
+      <div class="stat-value">${TRADES.totalPerCounters - TRADES.withPlayers}</div>
+      <div class="stat-sub">participants known, hauls lost</div></div>
     <div class="card"><div class="stat-label">Busiest Season</div>
       <div class="stat-value">${busiest().year}</div>
       <div class="stat-sub">${busiest().espnCounter} trades</div></div>`;
