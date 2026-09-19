@@ -4,7 +4,7 @@ edition: recap
 year: 2026
 week: 1
 title: Stuart opens at 138 and nobody else gets close
-dek: Week 1 delivered one blowout, one eight-point thriller, and the worst opening day of Adam's career. Six games, and only one of them was ever in doubt.
+dek: Week 1 delivered one blowout, one eight-point thriller, and the worst opening day of Adam's career. Six matchups, and only one of them was ever in doubt.
 date: 2026-09-16
 author: Cobey
 ---
@@ -15,16 +15,16 @@ The first Sunday of a fantasy season is supposed to tell you nothing. This one t
 ::: stat 138.30 | Stuart's opening score | Only one other manager cleared 110 all week.
 :::
 
-That's what Stuart hung on Connor, who put up 104.36 — a score that would have won four of the other five games this week and still lost by 34. There is no lineup decision available to Connor that changes the outcome. Some weeks you simply run into it.
+That's what Stuart hung on Connor, who put up 104.36 — a score that would have won four of the other five matchups this week and still lost by 34. There is no lineup decision available to Connor that changes the outcome. Some weeks you simply run into it.
 
 ::: image https://gray-wand-prod.gtv-cdn.com/resizer/v2/3EEUFRBIHVECTP76OYVK3U3L34.jpg?auth=82025a3bbe88d11d80653cfce0fcd8c4f381a87551486b604b7021647d1f1caf&width=800&height=450&smart=true | Week 1 is over and one manager already looks like a problem.
 :::
 
 ::: pull
-There is no lineup Connor sets that wins this game.
+There is no lineup Connor sets that wins this matchup.
 :::
 
-## The only real game
+## The only real matchup
 
 Thomas over Will by **8.26** was the week's lone contest, and the only matchup where either manager had a reason to watch the late window. Everything else was settled by early afternoon.
 

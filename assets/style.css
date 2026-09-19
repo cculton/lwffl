@@ -821,13 +821,13 @@ a.bxlink:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
 /* ---------- live results module under a recap ---------- */
 
-.nb-games { display: flex; flex-direction: column; }
-.nb-game {
+.nb-matchups { display: flex; flex-direction: column; }
+.nb-matchup {
   display: grid; grid-template-columns: 1fr auto auto auto 1fr;
   align-items: center; gap: 10px; padding: 10px 0;
   border-top: 1px solid var(--border);
 }
-.nb-game:first-child { border-top: 0; padding-top: 2px; }
+.nb-matchup:first-child { border-top: 0; padding-top: 2px; }
 .nb-team { font-size: 0.89rem; color: var(--soft); }
 .nb-team.won { color: var(--text); font-weight: 600; }
 .nb-team:last-child { text-align: right; }
@@ -838,7 +838,7 @@ a.bxlink:hover { color: var(--accent); border-bottom-color: var(--accent); }
 .nb-score.won { color: var(--green); }
 .nb-vs { color: var(--border-strong); font-size: 0.8rem; }
 @media (max-width: 520px) {
-  .nb-game { grid-template-columns: 1fr auto auto auto 1fr; gap: 6px; font-size: 0.82rem; }
+  .nb-matchup { grid-template-columns: 1fr auto auto auto 1fr; gap: 6px; font-size: 0.82rem; }
   .nb-team { font-size: 0.8rem; }
 }
 

@@ -11,7 +11,7 @@ sample: true
 ---
 This is a **sample post**. The copy is placeholder; every block below is real and works exactly like this in a live preview.
 
-A Thursday preview opens with the week's framing — who has something to prove, which game decides an early division, what Week 1 did and didn't tell us. Two or three paragraphs, then the numbers take over.
+A Thursday preview opens with the week's framing — who has something to prove, which matchup decides an early division, what Week 1 did and didn't tell us. Two or three paragraphs, then the numbers take over.
 
 ## The number that frames the week
 
@@ -23,9 +23,9 @@ A single figure, set large, for the one thing you want people to remember. Drop 
 ## The slate
 
 ::: stats
-6 | Games | Week 2
+6 | Matchups | Week 2
 1500 | Median ELO | Across the league
-4 | Rematches | Of a 2025 playoff game
+4 | Rematches | Of a 2025 playoff matchup
 :::
 
 A row of smaller figures when several things matter at once and none of them deserves the full treatment.

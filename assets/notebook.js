@@ -36,18 +36,18 @@ function notebookPost(article) {
   if (!week || (!embeds.length && !wantsTail)) return;
 
   LWFFL.load().then(M => {
-    const { fmt, mlink, bxlink, wlink, recordStr } = LWFFL;
+    const { fmt, mlink, bxlink, recordStr } = LWFFL;
 
     function scoreboard() {
-      const games = M.games.filter(g => g.year === year && g.week === week);
-      if (!games.length) return "";
+      const matchups = M.games.filter(g => g.year === year && g.week === week);
+      if (!matchups.length) return "";
 
-      const perfs = games.flatMap(g => ([
+      const perfs = matchups.flatMap(g => ([
         { m: g.manager1, pf: g.score1 }, { m: g.manager2, pf: g.score2 }
       ]));
       const high = perfs.slice().sort((a, b) => b.pf - a.pf)[0];
       const low = perfs.slice().sort((a, b) => a.pf - b.pf)[0];
-      const closest = games.slice()
+      const closest = matchups.slice()
         .sort((a, b) => Math.abs(a.score1 - a.score2) - Math.abs(b.score1 - b.score2))[0];
 
       const ranked = M.perfs
@@ -59,7 +59,7 @@ function notebookPost(article) {
       const row = g => {
         const w1 = g.score1 > g.score2;
         return `
-          <div class="nb-game">
+          <div class="nb-matchup">
             <div class="nb-team ${w1 ? "won" : ""}">${mlink(g.manager1)}</div>
             <div class="nb-score ${w1 ? "won" : ""}">${bxlink(g.year, g.week, g.manager1, fmt(g.score1, 2))}</div>
             <div class="nb-vs">–</div>
@@ -71,7 +71,7 @@ function notebookPost(article) {
       return `
         <div class="section-label">Week ${week} results</div>
         <div class="card">
-          <div class="nb-games">${games.map(row).join("")}</div>
+          <div class="nb-matchups">${matchups.map(row).join("")}</div>
           <div class="nb-notes">
             <div><span class="nb-k">High</span> ${mlink(high.m)} · <strong>${fmt(high.pf, 2)}</strong>${
               highRank && highRank <= 25 ? ` <span class="pill gold">#${highRank} all time</span>` : ""}</div>
@@ -79,16 +79,12 @@ function notebookPost(article) {
             <div><span class="nb-k">Closest</span> ${mlink(closest.score1 > closest.score2 ? closest.manager1 : closest.manager2)}
               by <strong>${fmt(Math.abs(closest.score1 - closest.score2), 2)}</strong></div>
           </div>
-          <div class="tbl-note" style="border-top:1px solid var(--border);margin-top:14px">
-            Pulled live from the league's box scores — these move with
-            ${wlink(year, week, "the week " + week + " scoreboard")}, they are not typed into the post.
-          </div>
         </div>`;
     }
 
     function standings() {
       /* A preview is written before its own week is played, so label the
-         table by the last week that actually has games rather than the week
+         table by the last week that actually has matchups rather than the week
          the post is about. */
       const played = M.perfs.filter(p => p.year === year && p.week <= week);
       if (!played.length) return "";
