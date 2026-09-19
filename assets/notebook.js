@@ -87,8 +87,14 @@ function notebookPost(article) {
     }
 
     function standings() {
+      /* A preview is written before its own week is played, so label the
+         table by the last week that actually has games rather than the week
+         the post is about. */
+      const played = M.perfs.filter(p => p.year === year && p.week <= week);
+      if (!played.length) return "";
+      const through = Math.max(...played.map(p => p.week));
       const rows = {};
-      M.perfs.filter(p => p.year === year && p.week <= week).forEach(p => {
+      played.forEach(p => {
         const r = rows[p.manager] = rows[p.manager] || { m: p.manager, w: 0, l: 0, t: 0, pf: 0 };
         if (p.pf > p.pa) r.w++; else if (p.pf < p.pa) r.l++; else r.t++;
         r.pf += p.pf;
@@ -97,7 +103,7 @@ function notebookPost(article) {
         (b.w - b.l) - (a.w - a.l) || b.pf - a.pf);
       if (!list.length) return "";
       return `
-        <div class="section-label">Standings through week ${week}</div>
+        <div class="section-label">Standings through week ${through}</div>
         <div class="table-card post-table"><div class="table-scroll"><table>
           <thead><tr><th>#</th><th>Manager</th><th class="num">Record</th><th class="num">PF</th></tr></thead>
           <tbody>${list.map((r, i) => `<tr>

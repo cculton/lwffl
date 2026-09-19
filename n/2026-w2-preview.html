@@ -7,11 +7,11 @@
 
   <!-- Discord and iMessage read these without running JS. This is the whole
        reason each post is a real file instead of a client-rendered route. -->
-  <meta name="description" content="A sample preview showing the layout — the matchup strip, the ELO lines and the head-to-head history all render from the league's own data once a real week's schedule is in." />
+  <meta name="description" content="A sample preview showing the layout — every block the Notebook can use, with placeholder copy where a real week's matchups would go." />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="LWFFL Notebook" />
   <meta property="og:title" content="Everybody gets a chance to explain themselves" />
-  <meta property="og:description" content="A sample preview showing the layout — the matchup strip, the ELO lines and the head-to-head history all render from the league's own data once a real week's schedule is in." />
+  <meta property="og:description" content="A sample preview showing the layout — every block the Notebook can use, with placeholder copy where a real week's matchups would go." />
   <meta property="og:url" content="https://lwffl.com/n/2026-w2-preview.html" />
   <meta property="og:image" content="https://lwffl.com/n/cards/2026-w2-preview.png" />
   <meta property="article:published_time" content="2026-09-18" />
@@ -52,7 +52,7 @@
     <header class="post-head">
       <div class="post-kicker">Preview · Week 2</div>
       <h1>Everybody gets a chance to explain themselves</h1>
-      <p class="post-dek">A sample preview showing the layout — the matchup strip, the ELO lines and the head-to-head history all render from the league's own data once a real week's schedule is in.</p>
+      <p class="post-dek">A sample preview showing the layout — every block the Notebook can use, with placeholder copy where a real week's matchups would go.</p>
       <div class="post-meta">
         <span>September 18, 2026</span><span class="dot">·</span>
         <span>Cobey</span>
@@ -62,19 +62,49 @@
     </header>
 
     <div class="post-body">
-<p class="lede">This is a <strong>sample post</strong> showing what a Thursday preview looks like on the page. The prose is placeholder; the structure is real.</p>
-<h2>How a preview reads</h2>
-<p>The opening is the week's framing — who has something to prove, which game decides an early division, what the Week 1 results did and didn't tell us. Two or three paragraphs, no more.</p>
-<p>Then the matchups worth watching, each with the line and whatever history is relevant:</p>
-<ul><li>The rematch of a playoff game nobody has stopped talking about</li><li>The one where a manager faces the guy he traded his starting quarterback to</li><li>The one that looks lopsided on paper and never is</li></ul>
-<h2>Why the numbers aren't typed here</h2>
-<p>On a real preview this section carries a matchup strip generated from the league's ELO ratings and head-to-head record — so the line and the series history are always consistent with <a href="../h2h.html">Head-to-Head</a> and never quietly go stale.</p>
+<p class="lede">This is a <strong>sample post</strong>. The copy is placeholder; every block below is real and works exactly like this in a live preview.</p>
+<p>A Thursday preview opens with the week's framing — who has something to prove, which game decides an early division, what Week 1 did and didn't tell us. Two or three paragraphs, then the numbers take over.</p>
+<h2>The number that frames the week</h2>
+<div class="pb-stat">
+        <div class="pb-stat-v">42.00</div>
+        <div class="pb-stat-t">
+          <div class="pb-stat-l">Cobey's Week 1 margin</div>
+          <div class="pb-stat-n">The largest of the opening week, and the reason he is favoured here.</div>
+          
+        </div></div>
+<p>A single figure, set large, for the one thing you want people to remember. Drop it wherever it lands hardest — usually right after the paragraph that earns it.</p>
+<h2>The slate</h2>
+<div class="pb-stats">
+        <div class="pb-stats-i">
+          <div class="pb-stats-v">6</div>
+          <div class="pb-stats-l">Games</div>
+          <div class="pb-stats-n">Week 2</div>
+        </div>
+        <div class="pb-stats-i">
+          <div class="pb-stats-v">1500</div>
+          <div class="pb-stats-l">Median ELO</div>
+          <div class="pb-stats-n">Across the league</div>
+        </div>
+        <div class="pb-stats-i">
+          <div class="pb-stats-v">4</div>
+          <div class="pb-stats-l">Rematches</div>
+          <div class="pb-stats-n">Of a 2025 playoff game</div>
+        </div></div>
+<p>A row of smaller figures when several things matter at once and none of them deserves the full treatment.</p>
+<div class="table-card post-table"><div class="table-scroll"><table>
+    <thead><tr><th>Matchup</th><th>Line</th><th>Series</th></tr></thead>
+    <tbody><tr><td>Stuart vs Cobey</td><td>Stuart −3.5</td><td>7–5 Cobey</td></tr><tr><td>Thomas vs Chad</td><td>Thomas −1.0</td><td>9–9</td></tr><tr><td>Adam vs Samuel</td><td>Samuel −8.5</td><td>4–8 Samuel</td></tr></tbody>
+    </table></div></div>
+<p>Ordinary markdown tables work, which is usually the cleanest way to lay out a slate.</p>
+<figure class="pb-pull"><blockquote>The rematch nobody has stopped talking about, eleven months later.</blockquote></figure>
+<p>A pull quote for the line worth stealing — set in the display face so it breaks the column visually rather than just sitting there in italics.</p>
 <h2>Images</h2>
-<p>Drop a file in <code>n/img/</code> and reference it the ordinary markdown way. An image on its own line becomes a figure, and the alt text becomes the caption:</p>
-<figure class="pb-fig"><img loading="lazy" alt="A share card, standing in for a real photo — any image in the repo works the same way." src="../n/cards/2026-w1-recap.png"><figcaption>A share card, standing in for a real photo — any image in the repo works the same way.</figcaption></figure>
-<p>Use <code>::: image path | caption</code> instead when the caption should differ from the alt text, and add a line inside the block to let it break the reading column on wide screens.</p>
-<p>A post can also set <code>image:</code> in its frontmatter to override the generated share card, so a link with a real photo unfurls with that photo rather than the text card.</p>
-<blockquote>Replace this file with the week's real preview and the sample badge disappears on its own.</blockquote>
+<figure class="pb-fig"><img loading="lazy" alt="A photo runs full width with its caption underneath. Drop a file in n/img/ and reference it the ordinary markdown way." src="../n/cards/2026-w1-recap.png"><figcaption>A photo runs full width with its caption underneath. Drop a file in n/img/ and reference it the ordinary markdown way.</figcaption></figure>
+<p>Use <code>::: image path | caption</code> instead when the caption should differ from the alt text. A post can also set <code>image:</code> in its frontmatter to override the share card, so a link with a real photo unfurls with that photo rather than the generated text card.</p>
+<h2>Where last week left things</h2>
+<div class="nb-embed" data-embed="standings"></div>
+<p>The standings and the scoreboard are read from the league's own box scores when the page loads, not typed in — so they stay correct however long it has been.</p>
+<aside class="pb-note">Replace this file with the week's real preview and the sample badge disappears on its own.</aside>
     </div>
 
     <!-- filled client-side from the same JSON the rest of the site uses -->

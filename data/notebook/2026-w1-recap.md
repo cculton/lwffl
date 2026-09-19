@@ -17,6 +17,9 @@ The first Sunday of a fantasy season is supposed to tell you nothing. This one t
 
 That's what Stuart hung on Connor, who put up 104.36 — a score that would have won four of the other five games this week and still lost by 34. There is no lineup decision available to Connor that changes the outcome. Some weeks you simply run into it.
 
+::: image https://gray-wand-prod.gtv-cdn.com/resizer/v2/3EEUFRBIHVECTP76OYVK3U3L34.jpg?auth=82025a3bbe88d11d80653cfce0fcd8c4f381a87551486b604b7021647d1f1caf&width=800&height=450&smart=true | Week 1 is over and one manager already looks like a problem.
+:::
+
 ::: pull
 There is no lineup Connor sets that wins this game.
 :::
@@ -51,8 +54,4 @@ Nothing, probably. Week 1 correlates with nothing except the standings, and the 
 Except for Stuart. That looked real.
 
 ::: standings
-:::
-
-::: note
-Every figure above is read from the league's box scores when the page loads, not typed into the post — so it will still be right years from now.
 :::
