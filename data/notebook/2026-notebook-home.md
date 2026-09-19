@@ -5,7 +5,7 @@ year: 2026
 title: The Notebook has a home
 dek: Previews, Sunday updates and recaps now live on the site instead of scrolling away in chat — with the numbers wired straight into the league's own box scores.
 date: 2026-09-16
-author: Cobey Culton
+author: Cobey
 pinned: true
 ---
 Every week of the Notebook has, until now, existed as a wall of text in the group chat that slid out of view by Wednesday. That stops here.

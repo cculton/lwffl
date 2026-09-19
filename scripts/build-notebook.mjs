@@ -241,6 +241,42 @@ function teaser(p) {
   return `${head}\n${p.title}\n\n${p.dek}\n\n${SITE}/n/${p.slug}.html\n`;
 }
 
+/* ---------- house style: first names only ---------- */
+
+/* The site shows managers by first name everywhere (LWFFL.shortName in
+   assets/data.js) — Ryans disambiguated by surname initial, Tom as Thomas.
+   A post that says "Stuart Sundseth" or just "Sundseth" reads as a different
+   person from the "Stuart" on every other page, so the build refuses it.
+   Roster comes from final-standings.json, so a new manager is covered the
+   moment they appear in the data. */
+const MANAGERS = [...new Set(
+  JSON.parse(fs.readFileSync(path.join(root, "final-standings.json"), "utf8"))
+    .map(r => r.manager).filter(Boolean)
+)];
+
+const shortName = name => {
+  const parts = name.trim().split(/\s+/);
+  const first = parts[0] === "Tom" ? "Thomas" : parts[0];
+  if (first !== "Ryan" || parts.length === 1) return first;
+  return `${first} ${parts[parts.length - 1][0]}.`;
+};
+
+function styleErrors(p) {
+  const text = [p.title, p.dek, p.body, p.author].filter(Boolean).join("\n");
+  const bad = [];
+  for (const full of MANAGERS) {
+    const parts = full.trim().split(/\s+/);
+    if (parts.length < 2) continue;
+    const surname = parts[parts.length - 1];
+    if (new RegExp(`\\b${full}\\b`).test(text)) {
+      bad.push(`"${full}" -> "${shortName(full)}"`);
+    } else if (new RegExp(`\\b${surname}\\b`).test(text)) {
+      bad.push(`"${surname}" -> "${shortName(full)}"`);
+    }
+  }
+  return bad;
+}
+
 /* ---------- build ---------- */
 
 fs.mkdirSync(path.join(OUT, "cards"), { recursive: true });
@@ -251,7 +287,12 @@ const posts = fs.readdirSync(SRC).filter(f => f.endsWith(".md")).map(f => {
     if (meta[k] == null) throw new Error(`${f}: missing "${k}"`);
   }
   if (!EDITIONS[meta.edition]) throw new Error(`${f}: unknown edition "${meta.edition}"`);
-  return { ...meta, body };
+  const post = { ...meta, body };
+  const bad = styleErrors(post);
+  if (bad.length) {
+    throw new Error(`${f}: use the first names the rest of the site uses — ` + bad.join(", "));
+  }
+  return post;
 });
 
 posts.sort((a, b) => b.date.localeCompare(a.date) || (b.week || 0) - (a.week || 0));

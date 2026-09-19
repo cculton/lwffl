@@ -6,7 +6,7 @@ week: 2
 title: Everybody gets a chance to explain themselves
 dek: A sample preview showing the layout — the matchup strip, the ELO lines and the head-to-head history all render from the league's own data once a real week's schedule is in.
 date: 2026-09-18
-author: Cobey Culton
+author: Cobey
 sample: true
 ---
 This is a **sample post** showing what a Thursday preview looks like on the page. The prose is placeholder; the structure is real.
