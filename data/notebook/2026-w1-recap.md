@@ -3,6 +3,7 @@ slug: 2026-w1-recap
 edition: recap
 year: 2026
 week: 1
+standings_week: 1
 title: "Week 1 Recap: Stuart's RBs power him to high score; Adam struggles"
 dek: Runner-up from last year makes a statement in the opening week
 date: 2026-09-16

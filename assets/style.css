@@ -1000,6 +1000,37 @@ a.home-notebook-card { display: grid; }
 .post-body .post-table { margin: 26px 0; }
 .post-body .post-table table { font-size: 0.86rem; }
 .post-body .post-table td, .post-body .post-table th { padding: 10px 14px; }
+.post-body .nb-standings-note {
+  margin: -8px 0 18px;
+  color: var(--soft);
+  font-size: 0.78rem;
+}
+.nb-playoff-key {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.nb-division + .nb-division { margin-top: 20px; }
+.post-body .nb-division-name {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--text);
+}
+.post-body .nb-division .post-table { margin: 0; }
+.nb-division-rank { color: var(--soft); }
+.nb-manager-cell { display: inline-flex; align-items: center; gap: 7px; }
+.nb-seed {
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.nb-playoff-row { background: rgba(0, 133, 202, 0.07); }
+.nb-playoff-row td:first-child { border-left: 2px solid var(--accent); }
 
 .post-body .pb-fig { margin: 30px 0; }
 .post-body .pb-fig img {

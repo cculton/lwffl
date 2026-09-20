@@ -291,7 +291,7 @@ ${shareAltTag}  <meta property="article:published_time" content="${p.date}" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/style.css?v=5">
+  <link rel="stylesheet" href="../assets/style.css?v=6">
   <script defer src="../assets/nav.js?v=1"></script>
 </head>
 <body>
@@ -319,7 +319,7 @@ ${shareAltTag}  <meta property="article:published_time" content="${p.date}" />
 <div class="wrap wrap-read">
   <a class="back-link" href="../notebook.html">← The Notebook</a>
 
-  <article class="post" data-edition="${esc(p.edition)}" data-year="${p.year}"${p.week ? ` data-week="${p.week}"` : ""}>
+  <article class="post" data-edition="${esc(p.edition)}" data-year="${p.year}"${p.week ? ` data-week="${p.week}" data-standings-week="${p.standings_week ?? (p.edition === "recap" ? p.week : Math.max(0, p.week - 1))}"` : ""}>
     <header class="post-head">
       <div class="post-kicker">${esc(kicker)}</div>
       <h1>${esc(p.title)}</h1>
@@ -348,7 +348,7 @@ ${bodyHtml}
 
 <script>window.LWFFL_BASE = "../";</script>
 <script src="../assets/data.js?v=4"></script>
-<script src="../assets/notebook.js?v=1"></script>
+<script src="../assets/notebook.js?v=2"></script>
 <script>notebookPost(document.querySelector(".post"));</script>
 </body>
 </html>

@@ -52,6 +52,10 @@ content:
       - name: week
         label: Week (if applicable)
         type: number
+      - name: standings_week
+        label: Standings through week
+        type: number
+        description: "Last completed week to show in a ::: standings block. For previews, this is usually the prior week."
       - name: title
         label: Title
         type: string

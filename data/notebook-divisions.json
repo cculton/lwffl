@@ -1,0 +1,16 @@
+{
+  "2026": [
+    {
+      "name": "First-Round Busts",
+      "managers": ["Bryce", "Ryan C.", "Ryan T.", "Will"]
+    },
+    {
+      "name": "Undrafted Free Agents",
+      "managers": ["Chad", "Matt", "Stuart", "Tom"]
+    },
+    {
+      "name": "Washed-Up Veterans",
+      "managers": ["Adam", "Cobey", "Connor", "Samuel"]
+    }
+  ]
+}

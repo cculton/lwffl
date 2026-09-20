@@ -3,6 +3,7 @@ slug: 2026-w2-preview
 edition: preview
 year: 2026
 week: 2
+standings_week: 1
 title: Everybody gets a chance to explain themselves
 dek: A sample preview showing the layout — every block the Notebook can use, with placeholder copy where a real week's matchups would go.
 date: 2026-09-18

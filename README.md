@@ -1,5 +1,19 @@
 A fully documented, data-driven archive of the **Legion of Whom Fantasy Football League (LWFFL)**.
 
+## Notebook standings
+
+Posts with a `::: standings` block show divisions and projected playoff spots
+through the `standings_week` in their frontmatter. Set it to the last completed
+week when publishing; a Week 2 preview, for example, uses `standings_week: 1`.
+This keeps an older post from changing when later games are added. The Pages CMS
+has a **Standings through week** field for this value.
+
+Division rosters live in `data/notebook-divisions.json`. Add a season there before
+publishing its first Notebook standings block. Use the manager labels from the
+score data (for example, `Tom` is displayed as Thomas). The shaded rows show
+provisional playoff positions, following the Constitution's three division
+leaders, one record wildcard, and two points wildcards.
+
 ## Notebook images in Pages CMS
 
 Upload photos in **Media** (`n/img`), then open a Notebook post. To place a photo

@@ -6,6 +6,54 @@
    identical to records.html forever instead of freezing whatever was true the
    day it was written. */
 
+function notebookDivisionStandings(perfs, divisions, year, standingsWeek) {
+  if (!Array.isArray(divisions) || !divisions.length) return null;
+  const played = perfs.filter(p => p.year === year && p.week <= standingsWeek &&
+    (!p.playoffs || p.playoffs === "N/A"));
+  if (!played.length) return null;
+
+  const rows = new Map();
+  divisions.forEach(division => division.managers.forEach(manager => {
+    rows.set(manager, { m: manager, w: 0, l: 0, t: 0, pf: 0, pa: 0 });
+  }));
+  if (played.some(p => !rows.has(p.manager))) return { missingDivisions: true };
+
+  played.forEach(p => {
+    const row = rows.get(p.manager);
+    if (p.pf > p.pa) row.w++; else if (p.pf < p.pa) row.l++; else row.t++;
+    row.pf += p.pf;
+    row.pa += p.pa;
+  });
+
+  const pct = r => (r.w + r.t / 2) / (r.w + r.l + r.t || 1);
+  const headToHead = (a, b) => {
+    const games = played.filter(p => p.manager === a.m && p.opp === b.m);
+    if (!games.length) return 0;
+    const wins = games.filter(p => p.pf > p.pa).length;
+    const ties = games.filter(p => p.pf === p.pa).length;
+    return 0.5 - (wins + ties / 2) / games.length;
+  };
+  const byRecord = (a, b) => pct(b) - pct(a) || b.pf - a.pf ||
+    headToHead(a, b) || b.pa - a.pa || a.m.localeCompare(b.m);
+  const byPoints = (a, b) => b.pf - a.pf || byRecord(a, b);
+
+  const groups = divisions.map(division => ({
+    name: division.name,
+    rows: division.managers.map(manager => rows.get(manager)).sort(byRecord)
+  }));
+  const seeds = new Map();
+  groups.map(group => group.rows[0]).sort(byRecord)
+    .forEach((row, index) => seeds.set(row.m, index + 1));
+
+  const remaining = [...rows.values()].filter(row => !seeds.has(row.m));
+  remaining.sort(byRecord);
+  if (remaining[0]) seeds.set(remaining.shift().m, 4);
+  remaining.sort(byPoints).slice(0, 2)
+    .forEach((row, index) => seeds.set(row.m, index + 5));
+
+  return { through: Math.max(...played.map(p => p.week)), groups, seeds };
+}
+
 function notebookPost(article) {
   if (!article) return;
 
@@ -25,6 +73,7 @@ function notebookPost(article) {
 
   const year = Number(article.dataset.year);
   const week = article.dataset.week ? Number(article.dataset.week) : null;
+  const standingsWeek = Number(article.dataset.standingsWeek ?? week);
 
   /* Embeds go wherever the author put ::: scoreboard / ::: standings in the
      markdown. If a post asks for neither, the template's trailing
@@ -35,7 +84,12 @@ function notebookPost(article) {
     (article.dataset.edition === "recap" || article.dataset.edition === "sunday");
   if (!week || (!embeds.length && !wantsTail)) return;
 
-  LWFFL.load().then(M => {
+  Promise.all([
+    LWFFL.load(),
+    fetch("../data/notebook-divisions.json")
+      .then(response => response.ok ? response.json() : {})
+      .catch(() => ({}))
+  ]).then(([M, divisionsByYear]) => {
     const { fmt, mlink, bxlink, recordStr } = LWFFL;
 
     function scoreboard() {
@@ -83,31 +137,32 @@ function notebookPost(article) {
     }
 
     function standings() {
-      /* A preview is written before its own week is played, so label the
-         table by the last week that actually has matchups rather than the week
-         the post is about. */
-      const played = M.perfs.filter(p => p.year === year && p.week <= week);
-      if (!played.length) return "";
-      const through = Math.max(...played.map(p => p.week));
-      const rows = {};
-      played.forEach(p => {
-        const r = rows[p.manager] = rows[p.manager] || { m: p.manager, w: 0, l: 0, t: 0, pf: 0 };
-        if (p.pf > p.pa) r.w++; else if (p.pf < p.pa) r.l++; else r.t++;
-        r.pf += p.pf;
-      });
-      const list = Object.values(rows).sort((a, b) =>
-        (b.w - b.l) - (a.w - a.l) || b.pf - a.pf);
-      if (!list.length) return "";
+      const snapshot = notebookDivisionStandings(
+        M.perfs, divisionsByYear[String(year)], year, standingsWeek);
+      if (!snapshot) return "";
+      if (snapshot.missingDivisions) return '<div class="card">Division standings are temporarily unavailable.</div>';
+      const esc = value => String(value).replace(/[&<>"']/g, char =>
+        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
       return `
-        <div class="section-label">Standings through week ${through}</div>
-        <div class="table-card post-table"><div class="table-scroll"><table>
-          <thead><tr><th>#</th><th>Manager</th><th class="num">Record</th><th class="num">PF</th></tr></thead>
-          <tbody>${list.map((r, i) => `<tr>
-            <td style="color:var(--soft)">${i + 1}</td>
-            <td>${mlink(r.m)}</td>
-            <td class="num">${recordStr(r.w, r.l, r.t)}</td>
-            <td class="num">${fmt(r.pf, 1)}</td></tr>`).join("")}</tbody>
-        </table></div></div>`;
+        <div class="section-label">Standings through week ${snapshot.through}</div>
+        <p class="nb-standings-note"><span class="nb-playoff-key" aria-hidden="true"></span>
+          Shaded rows are projected playoff spots if the season ended here.</p>
+        ${snapshot.groups.map(group => `
+          <section class="nb-division">
+            <h3 class="nb-division-name">${esc(group.name)}</h3>
+            <div class="table-card post-table"><div class="table-scroll"><table>
+              <thead><tr><th scope="col">#</th><th scope="col">Manager</th><th scope="col" class="num">Record</th><th scope="col" class="num">PF</th></tr></thead>
+              <tbody>${group.rows.map((r, i) => {
+                const seed = snapshot.seeds.get(r.m);
+                return `<tr${seed ? ' class="nb-playoff-row"' : ""}>
+                  <td class="nb-division-rank">${i + 1}</td>
+                  <td><span class="nb-manager-cell">${mlink(r.m)}${seed ?
+                    `<span class="nb-seed" aria-label="Projected playoff seed ${seed}">#${seed}</span>` : ""}</span></td>
+                  <td class="num">${recordStr(r.w, r.l, r.t)}</td>
+                  <td class="num">${fmt(r.pf, 1)}</td></tr>`;
+              }).join("")}</tbody>
+            </table></div></div>
+          </section>`).join("")}`;
     }
 
     const render = { scoreboard, standings };

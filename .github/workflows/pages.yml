@@ -26,6 +26,8 @@ jobs:
         run: node scripts/build-notebook.mjs
       - name: Check manager labels and crawler directives
         run: node scripts/check-privacy.mjs
+      - name: Check Notebook standings and playoff projection
+        run: node scripts/test-notebook-standings.mjs
       - name: Verify domain and generated pages
         run: |
           if test -f CNAME; then test "$(cat CNAME)" = 'lwffl.com'; fi
