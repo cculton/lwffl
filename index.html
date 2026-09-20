@@ -121,7 +121,8 @@ LWFFL.load().then(M => {
   document.getElementById("main").classList.remove("loading");
   document.getElementById("main").innerHTML = `
 
-    <div class="champ-banner" style="margin-top:34px">
+    <div class="section-label">League at a Glance</div>
+    <div class="champ-banner" style="margin-bottom:14px">
       <div class="trophy">🏆</div>
       <div style="flex:1;min-width:200px">
         <div class="cb-label">Defending Champion · ${latest.year}</div>
@@ -136,7 +137,6 @@ LWFFL.load().then(M => {
       <a class="pill accent" href="seasons.html?y=${latest.year}" style="text-decoration:none">Full season →</a>
     </div>
 
-    <div class="section-label">League at a Glance</div>
     <div class="grid grid-4">
       <div class="card">
         <div class="stat-label">Seasons</div>
