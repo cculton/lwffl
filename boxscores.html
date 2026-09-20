@@ -252,7 +252,11 @@ function renderWeek(data) {
 
 /* ---------- single box score ---------- */
 function sideHtml(side, data, won) {
-  const rows = side.starters.map(p => {
+  const starters = side.starters.filter(p => p.slot !== "WR/TE");
+  const flexIndex = starters.findIndex(p => p.slot === "FLEX");
+  starters.splice(flexIndex < 0 ? starters.length : flexIndex + 1, 0,
+    ...side.starters.filter(p => p.slot === "WR/TE"));
+  const rows = starters.map(p => {
     const flag = p.corrected
       ? ` <span class="dot" title="Corrected: ESPN's archived value for this player is wrong">◆</span>` : "";
     return `
