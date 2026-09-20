@@ -122,21 +122,6 @@ LWFFL.load().then(M => {
   document.getElementById("main").innerHTML = `
 
     <div class="section-label">League at a Glance</div>
-    <div class="champ-banner" style="margin-bottom:14px">
-      <div class="trophy">🏆</div>
-      <div style="flex:1;min-width:200px">
-        <div class="cb-label">Defending Champion · ${latest.year}</div>
-        <div class="cb-name">${mlink(latest.champ.manager)}</div>
-        <div class="cb-meta">
-          Defeated ${mlink(latest.runnerUp.manager)}
-          ${latest.champScore ? bxlink(latest.year, latest.champGame.week, latest.champ.manager,
-              `${fmt(latest.champScore.winner)} – ${fmt(latest.champScore.loser)}`) : ""}
-          in the championship · regular season ${recordStr(latest.champ.wins, latest.champ.losses, latest.champ.ties)}
-        </div>
-      </div>
-      <a class="pill accent" href="seasons.html?y=${latest.year}" style="text-decoration:none">Full season →</a>
-    </div>
-
     <div class="grid grid-4">
       <div class="card">
         <div class="stat-label">Seasons</div>
@@ -172,6 +157,21 @@ LWFFL.load().then(M => {
             </div>
           </div>
         </a>`).join("")}
+    </div>
+
+    <div class="champ-banner" style="margin-top:14px">
+      <div class="trophy">🏆</div>
+      <div style="flex:1;min-width:200px">
+        <div class="cb-label">Defending Champion · ${latest.year}</div>
+        <div class="cb-name">${mlink(latest.champ.manager)}</div>
+        <div class="cb-meta">
+          Defeated ${mlink(latest.runnerUp.manager)}
+          ${latest.champScore ? bxlink(latest.year, latest.champGame.week, latest.champ.manager,
+              `${fmt(latest.champScore.winner)} – ${fmt(latest.champScore.loser)}`) : ""}
+          in the championship · regular season ${recordStr(latest.champ.wins, latest.champ.losses, latest.champ.ties)}
+        </div>
+      </div>
+      <a class="pill accent" href="seasons.html?y=${latest.year}" style="text-decoration:none">Full season →</a>
     </div>
 
     <div class="section-label">All-Time Standings <span style="font-weight:400;text-transform:none;letter-spacing:0">— records include playoffs · click any column to sort</span></div>
