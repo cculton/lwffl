@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=3">
+  <link rel="stylesheet" href="assets/style.css?v=5">
+  <script defer src="assets/nav.js?v=1"></script>
 </head>
 <body>
 
@@ -38,6 +39,11 @@
     <h1><span style="color:var(--accent)">Legion of Whom</span><br>Fantasy Football League</h1>
   </header>
 
+  <section class="home-notebook" aria-labelledby="latestNotebookHeading">
+    <h2 class="section-label" id="latestNotebookHeading">Latest from the Notebook</h2>
+    <div id="latestNotebookCard" class="loading">Loading latest post…</div>
+  </section>
+
   <div id="main" class="loading">Loading league history…</div>
 
 </div>
@@ -49,6 +55,54 @@
 <script src="assets/data.js?v=2"></script>
 <script src="assets/tables.js?v=2"></script>
 <script>
+fetch("notebook-index.json")
+  .then(response => {
+    if (!response.ok) throw new Error("Could not load Notebook index");
+    return response.json();
+  })
+  .then(index => {
+    const posts = index.posts || [];
+    const post = posts.find(p => !p.sample) || posts[0];
+    const card = document.getElementById("latestNotebookCard");
+    if (!post) {
+      document.querySelector(".home-notebook").hidden = true;
+      return;
+    }
+    const esc = value => String(value ?? "").replace(/[&<>"']/g, char =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    const edition = { announcement: "Announcement", preview: "Preview", sunday: "Sunday Update", recap: "Recap" };
+    const date = new Date(`${post.date}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    const image = post.image
+      ? (/^https?:\/\//.test(post.image) ? post.image : post.image.replace(/^\/+/, ""))
+      : `n/cards/${post.slug}.png`;
+    card.classList.remove("loading");
+    card.innerHTML = `
+      <a class="card home-notebook-card" href="n/${encodeURIComponent(post.slug)}.html">
+        <div class="home-notebook-copy">
+          <div class="nb-kicker">
+            <span class="nb-ed">${esc(edition[post.edition] || "Notebook")}</span>
+            ${post.week ? `<span class="nb-wk">Week ${esc(post.week)}</span>` : ""}
+            <span class="nb-date">${esc(date)}</span>
+          </div>
+          <div class="nb-title">${esc(post.title)}</div>
+          <div class="nb-dek">${esc(post.dek)}</div>
+          <span class="home-notebook-link">Read the post →</span>
+        </div>
+        <div class="home-notebook-thumb">
+          <img src="${esc(image)}" alt="" loading="lazy" />
+          <span class="home-notebook-thumb-fallback" aria-hidden="true">LWFFL Notebook</span>
+        </div>
+      </a>`;
+    card.querySelector("img").addEventListener("error", event => {
+      event.target.parentElement.classList.add("is-fallback");
+    });
+  })
+  .catch(error => {
+    console.error(error);
+    document.getElementById("latestNotebookCard").innerHTML =
+      '<a class="card" href="notebook.html">Read the Notebook →</a>';
+  });
+
 LWFFL.load().then(M => {
   const { fmt, fmtInt, mlink, ylink, bxlink, recordStr, shortName, managerLabel, managerCell, finishCell } = LWFFL;
   const latest = M.seasonSummaries[M.seasonSummaries.length - 1];

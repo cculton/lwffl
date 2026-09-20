@@ -125,6 +125,48 @@ body::before {
   background: rgba(0, 133, 202, 0.12);
 }
 
+.nav-toggle { display: none; }
+
+@media (max-width: 760px) {
+  .nav-inner {
+    min-height: 64px;
+    height: auto;
+    flex-wrap: wrap;
+    gap: 0;
+  }
+
+  .nav-enhanced .nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 11px;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    font: 600 0.85rem var(--font-body);
+    cursor: pointer;
+  }
+  .nav-toggle:hover { border-color: var(--accent); }
+  .nav-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .nav-toggle-lines { display: grid; gap: 4px; }
+  .nav-toggle-lines span { display: block; width: 17px; height: 2px; border-radius: 2px; background: currentColor; }
+
+  .nav-enhanced .nav-links {
+    display: none;
+    width: 100%;
+    max-height: calc(100dvh - 72px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px 0 14px;
+    border-top: 1px solid var(--border);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .nav-enhanced.nav-open .nav-links { display: grid; }
+  .nav-links a { border-radius: 9px; padding: 11px 12px; }
+}
+
 /* ---------- Layout ---------- */
 
 .wrap {
@@ -766,6 +808,40 @@ a.bxlink:hover { color: var(--accent); border-bottom-color: var(--accent); }
 .nb-dek { margin-top: 8px; font-size: 0.89rem; line-height: 1.6; color: var(--muted); }
 .nb-lead .nb-dek { font-size: 0.97rem; }
 @media (max-width: 600px) { .nb-lead .nb-title { font-size: 1.3rem; } }
+
+/* The newest real Notebook story on the homepage. */
+.home-notebook { margin-top: 30px; }
+.home-notebook .section-label { margin-top: 0; }
+.home-notebook-card {
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 35%);
+  gap: 22px;
+  align-items: stretch;
+  min-height: 210px;
+  padding: 0;
+  overflow: hidden;
+}
+a.home-notebook-card { display: grid; }
+.home-notebook-copy { padding: 24px 0 24px 26px; display: flex; flex-direction: column; align-items: flex-start; }
+.home-notebook-copy .nb-title { margin-top: 12px; font-size: clamp(1.35rem, 2.5vw, 1.8rem); }
+.home-notebook-copy .nb-dek { margin-top: 10px; }
+.home-notebook-link { margin-top: auto; padding-top: 18px; color: var(--accent); font-size: 0.85rem; font-weight: 700; }
+.home-notebook-thumb {
+  position: relative;
+  min-height: 210px;
+  background: radial-gradient(circle at 75% 25%, rgba(129,140,248,.5), transparent 55%), #10294a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.home-notebook-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.home-notebook-thumb-fallback { display: none; color: white; font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.home-notebook-thumb.is-fallback img { display: none; }
+.home-notebook-thumb.is-fallback .home-notebook-thumb-fallback { display: block; }
+@media (max-width: 640px) {
+  .home-notebook-card { grid-template-columns: 1fr; gap: 0; }
+  .home-notebook-thumb { min-height: 170px; max-height: 220px; order: -1; }
+  .home-notebook-copy { padding: 20px; }
+}
 
 /* ---------- a post ---------- */
 

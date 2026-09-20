@@ -291,7 +291,8 @@ ${shareAltTag}  <meta property="article:published_time" content="${p.date}" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/style.css?v=4">
+  <link rel="stylesheet" href="../assets/style.css?v=5">
+  <script defer src="../assets/nav.js?v=1"></script>
 </head>
 <body>
 
@@ -389,7 +390,7 @@ fs.writeFileSync(path.join(root, "notebook-index.json"), JSON.stringify({
   posts: posts.map(p => ({
     slug: p.slug, edition: p.edition, year: p.year, week: p.week ?? null,
     title: p.title, dek: p.dek, date: p.date,
-    author: p.author || "Commissioner",
+    author: p.author || "Commissioner", image: p.image || null,
     pinned: !!p.pinned, sample: !!p.sample
   }))
 }) + "\n");
