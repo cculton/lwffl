@@ -1,0 +1,51 @@
+name: Build and deploy LWFFL
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out site
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build Notebook pages and index
+        run: node scripts/build-notebook.mjs
+      - name: Check manager labels and crawler directives
+        run: node scripts/check-privacy.mjs
+      - name: Verify domain and generated pages
+        run: |
+          if test -f CNAME; then test "$(cat CNAME)" = 'lwffl.com'; fi
+          test -s notebook-index.json
+          test -s n/2026-w1-recap.html
+      - name: Upload complete site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Transactions — LWFFL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css?v=3">
+  <style>
+    .ctrl-row { display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; margin-bottom:18px; }
+    .ctrl-row > div { flex:0 0 auto; }
+    .pill-group { display:flex; flex-wrap:wrap; gap:6px; }
+
+    /* single-hue magnitude bars: identity comes from the text label, never colour */
+    .fbar-row { display:grid; grid-template-columns:130px 1fr 70px; gap:12px; align-items:center;
+                padding:6px 0; }
+    .fbar-name { font-size:0.87rem; }
+    .fbar-track { background:var(--surface-2); border-radius:4px; height:16px; overflow:hidden; }
+    .fbar-fill { height:100%; background:var(--accent); border-radius:0 4px 4px 0; min-width:2px; }
+    .fbar-val { text-align:right; font-variant-numeric:tabular-nums; font-weight:600; font-size:0.87rem; }
+    @media (max-width:560px){ .fbar-row { grid-template-columns:96px 1fr 58px; gap:8px; } }
+
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>LW</span>FFL</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="notebook.html">Notebook</a>
+      <a href="managers.html">Managers</a>
+      <a href="seasons.html">Seasons</a>
+      <a href="boxscores.html">Scores</a>
+      <a href="transactions.html" class="active">Transactions</a>
+      <a href="h2h.html">H2H</a>
+      <a href="draft.html">Draft</a>
+      <a href="explorer.html">Stat Lab</a>
+      <a href="records.html">Records</a>
+      <a href="arcade.html">Arcade</a>
+      <a href="league.html">Constitution</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="page-head">
+    <h1>Transactions</h1>
+    <p class="sub" id="sub">Loading…</p>
+  </header>
+
+  <div class="grid grid-4" id="cards" style="margin-bottom:26px"></div>
+
+  <div class="subnav" id="subnav">
+    <a href="transactions.html?tab=ledger" data-tab="ledger" class="active">Ledger</a>
+    <a href="transactions.html?tab=faab" data-tab="faab">FAAB</a>
+    <a href="transactions.html?tab=activity" data-tab="activity">Activity</a>
+    <span class="subnav-sep" aria-hidden="true"></span>
+    <a href="trades.html">Trade Log</a>
+    <a href="trade-metrics.html">Trade Metrics</a>
+  </div>
+
+  <div id="panel"><div class="loading">Loading…</div></div>
+</div>
+
+<footer class="footer">
+  LWFFL · Legion of Whom Fantasy Football League
+</footer>
+
+<script src="assets/data.js?v=2"></script>
+<script src="assets/tables.js?v=2"></script>
+<script>
+const CACHE = {};
+let IDX = null, TRADES = null, TAB = "ledger";
+
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const money = n => "$" + Number(n).toLocaleString("en-US");
+const nm = m => m ? LWFFL.shortName(m) : "—";
+const ml = m => m ? LWFFL.mlink(m) : "—";
+const when = ms => ms ? new Date(ms).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—";
+// trades-history.json carries plain ISO dates ("2016-09-13"); noon keeps it off the UTC boundary
+const whenFull = iso => iso
+  ? new Date(iso + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+  : "date unknown";
+
+const TYPE_LABEL = { WAIVER: "Waiver", FREEAGENT: "Free agent", TRADE_ACCEPT: "Trade",
+  TRADE_PROPOSAL: "Trade proposed", TRADE_DECLINE: "Trade declined", TRADE_UPHOLD: "Trade upheld",
+  ROSTER: "Lineup", FUTURE_ROSTER: "Lineup (future)" };
+const statusLabel = s => s === "EXECUTED" ? "Completed"
+  : s === "CANCELED" ? "Canceled"
+  : s === "PENDING" ? "Never processed"
+  : s && s.startsWith("FAILED") ? "Failed" : (s || "—");
+
+async function season(y) {
+  if (!CACHE[y]) CACHE[y] = fetch(`transactions-${y}.json`).then(r => r.json());
+  return CACHE[y];
+}
+
+(async () => {
+  try {
+    const [idx, tr] = await Promise.all([
+      fetch("transactions-index.json").then(r => r.json()),
+      fetch("trades-history.json").then(r => r.json()).catch(() => null),
+      LWFFL.load().catch(() => null)
+    ]);
+    IDX = idx; TRADES = tr;
+    const t = IDX.totals;
+    document.getElementById("sub").textContent =
+      `${t.transactions.toLocaleString()} moves from ${IDX.ledgerFrom} to ${IDX.seasons[IDX.seasons.length - 1].year}`;
+
+    document.getElementById("cards").innerHTML = `
+      <div class="card"><div class="stat-label">Transactions</div>
+        <div class="stat-value">${t.transactions.toLocaleString()}</div>
+        <div class="stat-sub">since ${IDX.ledgerFrom}</div></div>
+      <div class="card"><div class="stat-label">FAAB Spent</div>
+        <div class="stat-value">${money(t.faab)}</div>
+        <div class="stat-sub">on winning waiver claims</div></div>
+      <div class="card"><div class="stat-label">Trades Completed</div>
+        <div class="stat-value">${TRADES ? TRADES.totalPerCounters : t.trades}</div>
+        <div class="stat-sub">${TRADES
+          ? `all time · ${TRADES.withPlayers} with player detail`
+          : `across ${IDX.seasons.length} seasons`}</div></div>
+      <div class="card"><div class="stat-label">Biggest Bid</div>
+        <div class="stat-value">${t.topBid ? money(t.topBid.bid) : "—"}</div>
+        <div class="stat-sub">${t.topBid ? `${esc(nm(t.topBid.mgr))} · ${esc(t.topBid.player)} · ${t.topBid.year}` : ""}</div></div>`;
+
+    document.querySelectorAll("#subnav a[data-tab]").forEach(b => b.addEventListener("click", ev => {
+      ev.preventDefault();
+      document.querySelectorAll("#subnav a[data-tab]").forEach(x => x.classList.toggle("active", x === b));
+      TAB = b.dataset.tab;
+      const u = new URL(location); u.searchParams.set("tab", TAB); history.replaceState(null, "", u);
+      render();
+    }));
+    const q = new URLSearchParams(location.search).get("tab");
+    if (q && document.querySelector(`#subnav a[data-tab="${q}"]`)) {
+      TAB = q;
+      document.querySelectorAll("#subnav a[data-tab]").forEach(x => x.classList.toggle("active", x.dataset.tab === q));
+    }
+    render();
+  } catch (e) {
+    console.error(e);
+    document.getElementById("panel").innerHTML = '<div class="loading">Could not load transaction data.</div>';
+  }
+})();
+
+function render() {
+  const p = document.getElementById("panel");
+  p.classList.remove("loading");
+  ({ ledger: renderLedger, faab: renderFaab, activity: renderActivity })[TAB](p);
+}
+
+const yearOptions = sel => IDX.seasons.slice().reverse()
+  .map(s => `<option value="${s.year}"${s.year === sel ? " selected" : ""}>${s.year}</option>`).join("");
+
+/* ---------------- Ledger ---------------- */
+async function renderLedger(p) {
+  const latest = IDX.seasons[IDX.seasons.length - 1].year;
+  p.innerHTML = `
+    <div class="ctrl-row">
+      <div><label class="field-label" for="lY">Season</label>
+        <select id="lY">${yearOptions(latest)}</select></div>
+      <div><label class="field-label" for="lS">Show</label>
+        <select id="lS">
+          <option value="done">Completed only</option>
+          <option value="all">Everything, including failed</option>
+          <option value="failed">Failed &amp; canceled only</option>
+        </select></div>
+      <div style="flex:1 1 220px">
+        <label class="field-label">Type</label>
+        <div class="pill-group" id="lT"></div>
+      </div>
+    </div>
+    <div id="lTbl"><div class="loading">Loading…</div></div>`;
+
+  const types = ["WAIVER", "FREEAGENT", "TRADE_ACCEPT", "ROSTER"];
+  let tbl = null, rows = [];
+
+  const picked = multiPills(document.getElementById("lT"), types, apply, v => TYPE_LABEL[v] || v);
+
+  async function load() {
+    const y = Number(document.getElementById("lY").value);
+    rows = (await season(y)).transactions;
+    apply();
+  }
+  function apply() {
+    const mode = document.getElementById("lS").value;
+    let r = rows.filter(t => {
+      if (mode === "done" && t.st !== "EXECUTED") return false;
+      if (mode === "failed" && t.st === "EXECUTED") return false;
+      if (picked.size && !picked.has(t.ty)) return false;
+      return true;
+    });
+    if (tbl) tbl.update(r); else tbl = build(r);
+  }
+  function build(r) {
+    return dataTable(document.getElementById("lTbl"), {
+      pageSize: 40,
+      columns: [
+        { key: "wk", label: "Wk", num: true, dir: "asc" },
+        { key: "date", label: "Date", get: t => t.date || 0, render: t => when(t.date) },
+        { key: "mgr", label: "Manager", dir: "asc", render: t => ml(t.mgr) },
+        { key: "ty", label: "Type", dir: "asc",
+          render: t => `<span class="pill${t.ty === "TRADE_ACCEPT" ? " accent" : ""}">${TYPE_LABEL[t.ty] || t.ty}</span>` },
+        { key: "_what", label: "Move", get: t => t.items.length, render: t =>
+            t.items.map(i => i.t === "ADD"
+              ? `<span class="tx-item tx-add">+ ${esc(i.p)}</span>`
+              : i.t === "DROP" ? `<span class="tx-item tx-drop">− ${esc(i.p)}</span>`
+              : `<span class="tx-item tx-drop">${esc(i.p)}</span>`).join("<br>") || "—" },
+        { key: "bid", label: "Bid", num: true, render: t => t.bid ? money(t.bid) : "—" },
+        { key: "st", label: "Result", dir: "asc", render: t =>
+            `<span class="${t.st === "EXECUTED" ? "pos" : "neg"}">${statusLabel(t.st)}</span>` }
+      ],
+      rows: r,
+      initialSort: { key: "wk", dir: "asc" },
+      footer: rr => `${rr.length.toLocaleString()} transactions`
+    });
+  }
+  document.getElementById("lY").addEventListener("change", load);
+  document.getElementById("lS").addEventListener("change", apply);
+  load();
+}
+
+/* ---------------- FAAB ---------------- */
+async function renderFaab(p) {
+  const yearOpts = `<option value="all">All time</option>` +
+    IDX.seasons.slice().reverse().map(s => `<option value="${s.year}">${s.year}</option>`).join("");
+  p.innerHTML = `
+    <div class="ctrl-row">
+      <div><label class="field-label" for="fY">Season</label>
+        <select id="fY">${yearOpts}</select></div>
+    </div>
+    <div class="section-label">Spend by manager</div>
+    <div class="card" id="fBars" style="margin-bottom:26px"></div>
+    <div class="section-label">Biggest winning bids</div>
+    <div class="note">Winning claims only — one row per player per week, for the manager who
+      actually got him. Every losing bid ESPN kept is still in the <a class="ylink" href="#"
+      id="fLedgerLink">Ledger</a> under "Everything, including failed".</div>
+    <div id="fTop"></div>`;
+  const ledgerLink = document.getElementById("fLedgerLink");
+  if (ledgerLink) ledgerLink.addEventListener("click", e => {
+    e.preventDefault();
+    document.querySelector('#subnav a[data-tab="ledger"]').click();
+  });
+
+  /* Winning bids only. ESPN keeps every losing claim on a player at the same
+     timestamp, plus PENDING rows for claims a manager edited or that never
+     processed — without this filter one player shows up under four managers
+     and a manager shows up twice on his own claim. Same rule as faabByManager. */
+  function bidsForYear(d) {
+    return d.transactions
+      .filter(t => t.bid > 0 && t.ty === "WAIVER" && t.st === "EXECUTED")
+      .map(t => ({
+        bid: t.bid, mgr: t.mgr, year: d.year, week: t.wk,
+        player: (t.items.find(i => i.t === "ADD") || {}).p || "—"
+      }))
+      .sort((a, b) => b.bid - a.bid)
+      .slice(0, 25);
+  }
+
+  let tbl = null;
+
+  async function draw() {
+    const sel = document.getElementById("fY").value;
+    let entries, total, label, bids;
+    if (sel === "all") {
+      entries = Object.entries(IDX.careers).map(([m, v]) => [m, v.faab]).filter(([, v]) => v > 0);
+      total = IDX.totals.faab;
+      label = "All-time total";
+      bids = IDX.topBids;
+    } else {
+      const y = Number(sel);
+      const d = await season(y);
+      entries = Object.entries(d.faabByManager).filter(([m]) => m && m !== "null");
+      total = entries.reduce((a, [, v]) => a + v, 0);
+      label = `${y} total`;
+      bids = bidsForYear(d);
+    }
+    entries.sort((a, b) => b[1] - a[1]);
+    const max = Math.max(1, ...entries.map(([, v]) => v));
+    document.getElementById("fBars").innerHTML = entries.length ? `
+      ${entries.map(([m, v]) => `
+        <div class="fbar-row">
+          <div class="fbar-name">${ml(m)}</div>
+          <div class="fbar-track"><div class="fbar-fill" style="width:${(v / max * 100).toFixed(1)}%"></div></div>
+          <div class="fbar-val">${money(v)}</div>
+        </div>`).join("")}
+      <div class="bs-sum" style="display:flex;justify-content:space-between;padding-top:12px;margin-top:8px;
+           border-top:1px solid var(--border-strong);font-family:var(--font-display);font-weight:700">
+        <span>${label}</span><span>${money(total)}</span></div>`
+      : '<div style="color:var(--soft);font-size:0.87rem">No winning bids recorded this season.</div>';
+
+    if (tbl) tbl.update(bids); else tbl = buildBids(bids);
+  }
+
+  function buildBids(rows) {
+    return dataTable(document.getElementById("fTop"), {
+      columns: [
+        { key: "bid", label: "Bid", num: true, render: b => `<span class="pos">${money(b.bid)}</span>` },
+        { key: "player", label: "Player", dir: "asc" },
+        { key: "mgr", label: "Manager", dir: "asc", render: b => ml(b.mgr) },
+        { key: "year", label: "Season", num: true, render: b => LWFFL.ylink(b.year) },
+        { key: "week", label: "Wk", num: true }
+      ],
+      rows,
+      initialSort: { key: "bid", dir: "desc" }
+    });
+  }
+
+  document.getElementById("fY").addEventListener("change", draw);
+  draw();
+}
+
+/* ---------------- Activity ---------------- */
+function renderActivity(p) {
+  const rows = Object.entries(IDX.careers).map(([m, v]) => ({ mgr: m, ...v,
+    winRate: v.claims ? (v.claims - v.lost) / v.claims : null }));
+  p.innerHTML = `
+    <div class="note">
+      Play-by-play transaction data starts in <strong>${IDX.ledgerFrom}</strong> — that's as far
+      back as ESPN kept it. For 2014–2017, all that's left is each team's season totals, in the
+      table below.
+    </div>
+    <div class="section-label">Career activity, ${IDX.ledgerFrom}–present</div>
+    <div id="aTbl" style="margin-bottom:26px"></div>
+    <div class="section-label">Season totals from ESPN's counters, 2014–2017</div>
+    <div id="cTbl"></div>`;
+
+  dataTable(document.getElementById("aTbl"), {
+    columns: [
+      { key: "mgr", label: "Manager", dir: "asc", render: r => ml(r.mgr) },
+      { key: "adds", label: "Adds", num: true },
+      { key: "drops", label: "Drops", num: true },
+      { key: "faab", label: "FAAB", num: true, render: r => money(r.faab) },
+      { key: "claims", label: "Claims", num: true },
+      { key: "lost", label: "Lost", num: true,
+        render: r => r.lost ? `<span class="neg">${r.lost}</span>` : "0" },
+      { key: "winRate", label: "Claim win %", num: true,
+        render: r => r.winRate == null ? "—" : (r.winRate * 100).toFixed(0) + "%" },
+      { key: "trades", label: "Trades", num: true }
+    ],
+    rows, initialSort: { key: "adds", dir: "desc" }
+  });
+
+  const old = [];
+  [2014, 2015, 2016, 2017].forEach(y => {
+    Object.entries(IDX.counters[String(y)] || {}).forEach(([m, v]) =>
+      old.push({ year: y, mgr: m, ...v }));
+  });
+  dataTable(document.getElementById("cTbl"), {
+    pageSize: 24,
+    columns: [
+      { key: "year", label: "Season", num: true, dir: "desc", render: r => LWFFL.ylink(r.year) },
+      { key: "mgr", label: "Manager", dir: "asc", render: r => ml(r.mgr) },
+      { key: "acquisitions", label: "Acquisitions", num: true },
+      { key: "drops", label: "Drops", num: true },
+      { key: "trades", label: "Trades", num: true }
+    ],
+    rows: old, initialSort: { key: "acquisitions", dir: "desc" }
+  });
+}
+</script>
+</body>
+</html>

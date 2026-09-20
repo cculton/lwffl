@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Box Scores — LWFFL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css?v=3">
+  <style>
+    .wk-bar { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:22px; }
+    .wk-btn {
+      font-family:var(--font-display); font-weight:600; font-size:0.82rem;
+      padding:7px 13px; border-radius:999px; cursor:pointer;
+      background:var(--surface-2); color:var(--muted);
+      border:1px solid var(--border); transition:all .12s;
+    }
+    .wk-btn:hover { border-color:var(--accent); color:var(--text); }
+    .wk-btn.on { background:var(--accent-grad); color:#fff; border-color:transparent; }
+    .wk-btn.po { border-color:var(--gold); color:var(--gold); }
+    .wk-btn.po.on { background:linear-gradient(135deg,var(--gold),#f59e0b); color:#1a1205; border-color:transparent; }
+
+    .mu-card { cursor:pointer; transition:border-color .12s, transform .12s; }
+    .mu-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+    .mu-row { display:flex; justify-content:space-between; gap:10px; align-items:baseline; }
+    .mu-row + .mu-row { margin-top:9px; }
+    .mu-win { font-weight:700; color:var(--text); }
+    .mu-lose { font-weight:400; color:var(--muted); }
+    .mu-score { font-variant-numeric:tabular-nums; font-family:var(--font-display); }
+    .mu-open { margin-top:12px; font-size:0.74rem; color:var(--soft); letter-spacing:.06em; text-transform:uppercase; }
+
+    .bs-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    @media (max-width:860px) { .bs-grid { grid-template-columns:1fr; } }
+
+    .bs-head { display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+               padding-bottom:12px; margin-bottom:6px; border-bottom:1px solid var(--border-strong); }
+    .bs-team { font-family:var(--font-display); font-weight:700; font-size:1.05rem; }
+    .bs-sub { font-size:0.78rem; color:var(--soft); margin-top:3px; }
+    .bs-total { font-family:var(--font-display); font-weight:700; font-size:1.5rem; font-variant-numeric:tabular-nums; }
+
+    table.bs { width:100%; border-collapse:collapse; font-size:0.86rem; }
+    table.bs td { padding:7px 4px; border-bottom:1px solid var(--border); vertical-align:baseline; }
+    table.bs tr:last-child td { border-bottom:none; }
+    .bs-slot { width:52px; font-family:var(--font-display); font-size:0.7rem; font-weight:700;
+               color:var(--soft); letter-spacing:.05em; }
+    .bs-slot.flex { color:var(--accent-2); }
+    .bs-nm { font-weight:500; }
+    .bs-meta { color:var(--soft); font-size:0.76rem; white-space:nowrap; }
+    .bs-pts { text-align:right; font-variant-numeric:tabular-nums; font-weight:600; width:58px; }
+    .bs-bench td { color:var(--muted); }
+    .bs-bench .bs-nm { font-weight:400; }
+    .bs-sec { font-family:var(--font-display); font-size:0.7rem; font-weight:700; letter-spacing:.1em;
+              text-transform:uppercase; color:var(--soft); padding:16px 4px 6px; }
+    .bs-sum { display:flex; justify-content:space-between; padding:11px 4px 0; margin-top:6px;
+              border-top:1px solid var(--border-strong); font-family:var(--font-display); font-weight:700; }
+    .note { background:rgba(0,133,202,.07); border:1px solid var(--border); border-left:3px solid var(--accent);
+            border-radius:var(--radius-sm); padding:12px 16px; font-size:0.83rem; color:var(--muted);
+            margin-bottom:22px; line-height:1.55; }
+    .note strong { color:var(--text); }
+    .dot { color:var(--accent-2); cursor:help; font-size:0.7rem; vertical-align:super; }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>LW</span>FFL</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="notebook.html">Notebook</a>
+      <a href="managers.html">Managers</a>
+      <a href="seasons.html">Seasons</a>
+      <a href="boxscores.html" class="active">Scores</a>
+      <a href="transactions.html">Transactions</a>
+      <a href="h2h.html">H2H</a>
+      <a href="draft.html">Draft</a>
+      <a href="explorer.html">Stat Lab</a>
+      <a href="records.html">Records</a>
+      <a href="arcade.html">Arcade</a>
+      <a href="league.html">Constitution</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="page-head">
+    <h1>Scores</h1>
+    <p class="sub">Every lineup, every week — <span id="countSub">loading…</span></p>
+  </header>
+
+  <div class="card" style="margin-bottom:20px">
+    <label class="field-label" for="selY">Season</label>
+    <select id="selY" disabled><option>Loading…</option></select>
+  </div>
+
+  <div id="wkBar" class="wk-bar"></div>
+  <div id="note"></div>
+  <div id="main"><div class="loading">Loading…</div></div>
+</div>
+
+<footer class="footer">
+  LWFFL · Legion of Whom Fantasy Football League
+</footer>
+
+<script src="assets/data.js?v=4"></script>
+<script>
+const CACHE = {};
+let INDEX = null, YEAR = null, WEEK = null;
+
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+const fmt = (n, d = 2) =>
+  Number(n).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+
+const nameOf = m => (m && LWFFL.shortName(m)) || "Unknown";
+const linkOf = m => m ? LWFFL.mlink(m) : "Unknown";
+
+async function season(year) {
+  if (!CACHE[year]) CACHE[year] = fetch(`boxscores-${year}.json`).then(r => r.json());
+  return CACHE[year];
+}
+
+/* ---------- boot ---------- */
+(async () => {
+  try {
+    /* shared model powers manager links + alum pills, same as every other page */
+    const [idx] = await Promise.all([
+      fetch("boxscores-index.json").then(r => r.json()),
+      LWFFL.load().catch(() => null)
+    ]);
+    INDEX = idx;
+    document.getElementById("countSub").textContent =
+      `${INDEX.totalMatchups.toLocaleString()} matchups across ${INDEX.seasons.length} seasons`;
+
+    const sel = document.getElementById("selY");
+    sel.innerHTML = INDEX.seasons.slice().reverse()
+      .map(s => `<option value="${s.year}">${s.year}</option>`).join("");
+    sel.disabled = false;
+
+    const q = new URLSearchParams(location.search);
+    const years = INDEX.seasons.map(s => s.year);
+    YEAR = years.includes(Number(q.get("y"))) ? Number(q.get("y")) : years[years.length - 1];
+    sel.value = YEAR;
+    WEEK = Number(q.get("w")) || null;
+
+    sel.addEventListener("change", () => { YEAR = Number(sel.value); WEEK = null; go(); });
+    await go(q.get("m"), q.get("mgr"));
+  } catch (e) {
+    console.error(e);
+    document.getElementById("main").innerHTML =
+      '<div class="loading">Could not load box score data.</div>';
+  }
+})();
+
+async function go(openId, openMgr) {
+  const model = await LWFFL.load();
+  const canonical = LWFFL.resolveManagerSlug(openMgr, model.managers);
+  if (canonical && canonical !== openMgr) {
+    openMgr = canonical;
+    const url = new URL(location);
+    url.searchParams.set("mgr", canonical);
+    history.replaceState(null, "", url);
+  }
+  const data = await season(YEAR);
+  const weeks = Object.keys(data.weeks).map(Number).sort((a, b) => a - b);
+  if (!weeks.includes(WEEK)) WEEK = weeks[weeks.length - 1];
+
+  const anyPlayoff = w => (data.weeks[String(w)] || []).some(m => m.round && m.round !== "N/A");
+  document.getElementById("wkBar").innerHTML = weeks.map(w =>
+    `<button class="wk-btn ${w === WEEK ? "on" : ""} ${anyPlayoff(w) ? "po" : ""}" data-w="${w}">Wk ${w}</button>`
+  ).join("");
+  document.querySelectorAll(".wk-btn").forEach(b =>
+    b.addEventListener("click", () => { WEEK = Number(b.dataset.w); go(); }));
+
+  const notes = [];
+  if (data.inferredSlots) notes.push(
+    "ESPN kept the nine starters for this season but not which position each one played, so the " +
+    "<strong>positions below are our best guess</strong> — based on the player's eligibility and " +
+    "that year's roster rules. The points and totals are exact either way. " +
+    "<strong>Bench players weren't archived at all</strong> for this era, so those are gone for good.");
+  if (anyPlayoff(WEEK)) notes.push(
+    "This is a playoff week, so you're only seeing <strong>championship bracket</strong> matchups. " +
+    "Consolation matchups aren't tracked anywhere else on the site, so we left them out here too.");
+  if (YEAR === 2018) notes.push(
+    "ESPN re-scores 2018 defenses using today's settings, which bumps up every D/ST line. " +
+    "We <strong>fixed those numbers</strong> to show what they actually scored back in 2018.");
+  document.getElementById("note").innerHTML =
+    notes.map(n => `<div class="note">${n}</div>`).join("");
+
+  /* ?m= is the matchup id; ?mgr= is a manager slug, which is what the rest of
+     the site links with — it only knows year, week and who was playing. */
+  const week = data.weeks[String(WEEK)] || [];
+  const found = openId != null
+    ? week.find(m => String(m.id) === String(openId))
+    : openMgr
+      ? week.find(m => [m.away, m.home].some(s =>
+          s.manager && LWFFL.slugify(s.manager) === openMgr))
+      : null;
+  if (found) { renderOne(data, found); syncUrl(found.id); }
+  else { renderWeek(data); syncUrl(); }
+}
+
+function syncUrl(id) {
+  const u = new URL(location);
+  u.searchParams.set("y", YEAR);
+  u.searchParams.set("w", WEEK);
+  u.searchParams.delete("mgr");          // resolved to a matchup id by now
+  if (id != null) u.searchParams.set("m", id); else u.searchParams.delete("m");
+  history.replaceState(null, "", u);
+  document.title = `${YEAR} Week ${WEEK} Box Scores — LWFFL`;
+}
+
+/* ---------- week grid ---------- */
+function renderWeek(data) {
+  const ms = data.weeks[String(WEEK)] || [];
+  const cards = ms.map(m => {
+    const aw = m.away.points > m.home.points, hw = m.home.points > m.away.points;
+    const badge = m.round && m.round !== "N/A"
+      ? `<span class="pill accent">${esc(m.round)}</span>` : "";
+    return `
+      <div class="card mu-card" data-id="${esc(m.id)}">
+        ${badge ? `<div style="margin-bottom:10px">${badge}</div>` : ""}
+        <div class="mu-row">
+          <span class="${aw ? "mu-win" : "mu-lose"}">${esc(nameOf(m.away.manager))}</span>
+          <span class="mu-score ${aw ? "mu-win pos" : "mu-lose"}">${fmt(m.away.points)}</span>
+        </div>
+        <div class="mu-row">
+          <span class="${hw ? "mu-win" : "mu-lose"}">${esc(nameOf(m.home.manager))}</span>
+          <span class="mu-score ${hw ? "mu-win pos" : "mu-lose"}">${fmt(m.home.points)}</span>
+        </div>
+        <div class="mu-open">View lineups →</div>
+      </div>`;
+  }).join("");
+
+  const main = document.getElementById("main");
+  main.classList.remove("loading");
+  main.innerHTML = ms.length
+    ? `<div class="section-label">${YEAR} · Week ${WEEK}</div><div class="grid grid-auto">${cards}</div>`
+    : '<div class="loading">No matchups recorded for this week.</div>';
+
+  main.querySelectorAll(".mu-card").forEach(c => c.addEventListener("click", () => {
+    const m = ms.find(x => String(x.id) === c.dataset.id);
+    renderOne(data, m);
+    syncUrl(m.id);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }));
+}
+
+/* ---------- single box score ---------- */
+function sideHtml(side, data, won) {
+  const rows = side.starters.map(p => {
+    const flag = p.corrected
+      ? ` <span class="dot" title="Corrected: ESPN's archived value for this player is wrong">◆</span>` : "";
+    return `
+      <tr>
+        <td class="bs-slot ${p.slot === "FLEX" ? "flex" : ""}">${esc(p.slot)}</td>
+        <td><span class="bs-nm">${esc(p.name)}</span>
+            <span class="bs-meta">${esc(p.pos)}${p.team ? " · " + esc(p.team) : ""}</span>${flag}</td>
+        <td class="bs-pts">${fmt(p.pts)}</td>
+      </tr>`;
+  }).join("");
+
+  const bench = side.bench.length ? `
+    <div class="bs-sec">Bench</div>
+    <table class="bs"><tbody class="bs-bench">
+      ${side.bench.map(p => `
+        <tr>
+          <td class="bs-slot">${esc(p.slot)}</td>
+          <td><span class="bs-nm">${esc(p.name)}</span>
+              <span class="bs-meta">${esc(p.pos)}${p.team ? " · " + esc(p.team) : ""}</span></td>
+          <td class="bs-pts">${fmt(p.pts)}</td>
+        </tr>`).join("")}
+    </tbody></table>
+    <div class="bs-sum"><span>Bench points</span>
+      <span>${fmt(side.bench.reduce((a, p) => a + p.pts, 0))}</span></div>`
+    : (data.benchAvailable ? "" :
+       `<div class="bs-sec">Bench</div>
+        <div style="font-size:0.82rem;color:var(--soft);padding:2px 4px">Not archived for this season.</div>`);
+
+  return `
+    <div class="card">
+      <div class="bs-head">
+        <div>
+          <div class="bs-team">${linkOf(side.manager)}</div>
+          <div class="bs-sub">${esc(side.teamName || "")}</div>
+        </div>
+        <div class="bs-total" style="color:${won ? "var(--green)" : "var(--muted)"}">${fmt(side.points)}</div>
+      </div>
+      <table class="bs"><tbody>${rows}</tbody></table>
+      <div class="bs-sum"><span>Starters</span><span>${fmt(side.starterSum)}</span></div>
+      ${bench}
+    </div>`;
+}
+
+function renderOne(data, m) {
+  const aw = m.away.points > m.home.points;
+  const hw = m.home.points > m.away.points;
+  const margin = Math.abs(m.away.points - m.home.points);
+  const round = m.round && m.round !== "N/A" ? m.round : "Regular Season";
+
+  const main = document.getElementById("main");
+  main.classList.remove("loading");
+  main.innerHTML = `
+    <a class="back-link" href="#" id="back">← Week ${WEEK} matchups</a>
+    <header class="page-head" style="text-align:center;margin-top:10px">
+      <h1 style="font-size:1.6rem">
+        ${esc(nameOf(m.away.manager))} <span style="color:var(--soft)">vs</span> ${esc(nameOf(m.home.manager))}
+      </h1>
+      <p class="sub">${YEAR} · Week ${WEEK} · ${esc(round)} ·
+        ${aw || hw ? `won by ${fmt(margin)}` : "tie"}</p>
+    </header>
+    <div class="bs-grid">
+      ${sideHtml(m.away, data, aw)}
+      ${sideHtml(m.home, data, hw)}
+    </div>`;
+
+  document.getElementById("back").addEventListener("click", e => {
+    e.preventDefault();
+    renderWeek(data);
+    syncUrl();
+  });
+}
+</script>
+</body>
+</html>

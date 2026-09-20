@@ -1,0 +1,24 @@
+# Credentials — never commit these. The git credential file for this repo
+# lives at ~/Documents/.lwffl-git-credentials, outside the repo, but these
+# patterns guard against a copy ever landing inside it.
+.git-credentials
+*.git-credentials
+.lwffl-git-credentials
+*.pem
+*.key
+.env
+.env.*
+.netrc
+
+# ESPN session material — the importers run in an authenticated browser and
+# must never persist cookies here.
+espn_cookies*
+*espn_s2*
+*SWID*
+
+# Local scratch
+.DS_Store
+node_modules/
+*.log
+.venv/
+__pycache__/

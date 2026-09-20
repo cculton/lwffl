@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Managers — LWFFL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css?v=3">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>LW</span>FFL</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="notebook.html">Notebook</a>
+      <a href="managers.html" class="active">Managers</a>
+      <a href="seasons.html">Seasons</a>
+      <a href="boxscores.html">Scores</a>
+      <a href="transactions.html">Transactions</a>
+      <a href="h2h.html">H2H</a>
+      <a href="draft.html">Draft</a>
+      <a href="explorer.html">Stat Lab</a>
+      <a href="records.html">Records</a>
+      <a href="arcade.html">Arcade</a>
+      <a href="league.html">Constitution</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div id="main" class="loading">Loading managers…</div>
+</div>
+
+<footer class="footer">
+  LWFFL · Legion of Whom Fantasy Football League
+</footer>
+
+<script src="assets/data.js?v=4"></script>
+<script src="assets/tables.js?v=2"></script>
+<script>
+const initials = name => name.split(/\s+/).map(w => w[0]).join("").toUpperCase();
+const money = n => "$" + Number(n).toLocaleString("en-US");
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, ch =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+
+let FO_IDX = null, FO_HL = null, FO_TV = null;
+
+Promise.all([
+  LWFFL.load(),
+  fetch("transactions-index.json").then(r => r.json()).catch(() => null),
+  fetch("manager-highlights.json").then(r => r.json()).catch(() => null),
+  fetch("trade-value.json").then(r => r.json()).catch(() => null)
+]).then(([M, idx, hl, tv]) => {
+  FO_IDX = idx; FO_HL = hl; FO_TV = tv;
+  const requested = new URLSearchParams(location.search).get("m");
+  const slug = LWFFL.resolveManagerSlug(requested, M.managers);
+  if (slug && slug !== requested) {
+    const url = new URL(location);
+    url.searchParams.set("m", slug);
+    history.replaceState(null, "", url);
+  }
+  if (slug && M.managers[slug]) renderProfile(M, M.managers[slug]);
+  else renderIndex(M);
+}).catch(err => {
+  console.error(err);
+  document.getElementById("main").textContent = "Could not load league data.";
+});
+
+/* ---------- Manager index ---------- */
+
+function renderIndex(M) {
+  const { recordStr } = LWFFL;
+  /* alphabetical by the name shown on the tile, so scanning for someone works;
+     the Active / Alums split is what carries the ranking-free grouping */
+  const list = Object.values(M.managers).sort((a, b) =>
+    LWFFL.shortName(a.name).localeCompare(LWFFL.shortName(b.name), "en", { sensitivity: "base" })
+  );
+
+  const active = list.filter(m => m.career.active);
+  const alums = list.filter(m => !m.career.active);
+
+  const card = m => {
+    const c = m.career;
+    return `
+      <a class="card" href="managers.html?m=${m.slug}">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+          <div class="avatar">${initials(m.name)}</div>
+          <div style="min-width:0">
+            <div style="font-family:var(--font-display);font-weight:700;font-size:1.08rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap">${LWFFL.shortName(m.name)}${LWFFL.alumPill(m.name)}</div>
+            <div class="stat-sub">${LWFFL.tenureStr(c.years, M.years[M.years.length - 1])}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="pill accent" title="Current ELO power rating">${M.elo.ratings[m.name].elo} ELO</span>
+          <span class="pill">${recordStr(c.wins, c.losses, c.ties)}</span>
+          <span class="pill">${(c.winPct * 100).toFixed(1)}%</span>
+          ${c.titles.length ? `<span class="pill gold" title="Championships">🏆 ${c.titles.length}</span>` : ""}
+          ${c.runnerUps.length ? `<span class="pill" title="Runner-up finishes">🥈 ${c.runnerUps.length}</span>` : ""}
+          ${c.thirdPlaces.length ? `<span class="pill" title="Third-place finishes">🥉 ${c.thirdPlaces.length}</span>` : ""}
+          ${c.scoringTitles.length ? `<span class="pill accent" title="Scoring titles">🕹️ ${c.scoringTitles.length}</span>` : ""}
+        </div>
+      </a>`;
+  };
+
+  const main = document.getElementById("main");
+  main.classList.remove("loading");
+  main.innerHTML = `
+    <header class="page-head">
+      <h1>Managers</h1>
+      <p class="sub">${list.length} all-time managers, A–Z within active and alums</p>
+    </header>
+    <div class="section-label" style="margin-top:0">Active <span style="font-weight:400;text-transform:none;letter-spacing:0">— ${active.length} managers</span></div>
+    <div class="grid grid-auto">${active.map(card).join("")}</div>
+    <div class="section-label">Alums <span style="font-weight:400;text-transform:none;letter-spacing:0">— ${alums.length} former managers</span></div>
+    <div class="grid grid-auto">${alums.map(card).join("")}</div>`;
+}
+
+/* ---------- Manager profile ---------- */
+
+function renderProfile(M, m) {
+  const { fmt, fmtInt, mlink, ylink, wlink, bxlink, recordStr, sparkline, managerCell, finishCell } = LWFFL;
+  const c = m.career;
+  const myPerfs = M.perfs.filter(p => p.manager === m.name);
+
+  /* memorable games */
+  const best = myPerfs.slice().sort((a, b) => b.pf - a.pf)[0];
+  const worst = myPerfs.slice().sort((a, b) => a.pf - b.pf)[0];
+  const wins = myPerfs.filter(p => p.pf > p.pa);
+  const losses = myPerfs.filter(p => p.pf < p.pa);
+  const biggestWin = wins.slice().sort((a, b) => (b.pf - b.pa) - (a.pf - a.pa))[0];
+  const worstLoss = losses.slice().sort((a, b) => (b.pa - b.pf) - (a.pa - a.pf))[0];
+
+  /* All four cards share one shape: headline number, scoreline, who and when.
+     The two result cards lead with the margin — that is the story; the score
+     itself is the supporting detail. */
+  const gameCard = (label, p, opts) => {
+    if (!p) return "";
+    const margin = p.pf - p.pa;
+    const head = opts.margin
+      ? `<span class="${margin >= 0 ? "pos" : "neg"}">${margin >= 0 ? "+" : "−"}${fmt(Math.abs(margin))}</span>`
+      : fmt(p.pf);
+    const detail = opts.margin
+      ? `${fmt(p.pf)} – ${fmt(p.pa)}`
+      : `${margin >= 0 ? "Won" : "Lost"} by ${fmt(Math.abs(margin))}`;
+    return `
+      <div class="card">
+        <div class="stat-label">${label}</div>
+        <div class="lead-val">${bxlink(p.year, p.week, p.manager, head)}</div>
+        <div class="lead-detail">${detail}</div>
+        <div class="lead-meta">${opts.verb} ${mlink(p.opp)} · ${ylink(p.year)} ${wlink(p.year, p.week, "Wk " + p.week)}</div>
+      </div>`;
+  };
+
+  /* season + rivals data (rendered as sortable tables below).
+     Records and PF/PA per season come from every matchup played that
+     year — playoffs included — so they sum to the career totals. */
+  const byYear = {};
+  myPerfs.forEach(p => {
+    const o = byYear[p.year] = byYear[p.year] || { w: 0, l: 0, t: 0, pf: 0, pa: 0, g: 0 };
+    if (p.pf > p.pa) o.w++; else if (p.pf < p.pa) o.l++; else o.t++;
+    o.pf += p.pf; o.pa += p.pa; o.g++;
+  });
+  const completedYears = new Set(m.seasons.map(r => r.year));
+  const seasonData = m.seasons.map(r => {
+    const o = byYear[r.year] || { w: 0, l: 0, t: 0, pf: 0, pa: 0, g: 0 };
+    return {
+      year: r.year,
+      wins: o.w, losses: o.l, ties: o.t, g: o.g,
+      points_for: o.pf, points_against: o.pa,
+      ppm: o.g ? o.pf / o.g : null,
+      winPct: o.g ? (o.w + o.t * 0.5) / o.g : 0,
+      weekly_margin: r.weekly_margin,
+      transaction_count: r.transaction_count,
+      final_standing: r.final_standing,
+      seed: M.seedMap[`${r.manager}_${r.year}`] ?? null
+    };
+  });
+  /* add any in-progress season years that have game data but no final standings yet */
+  Object.keys(byYear).map(Number).filter(y => !completedYears.has(y)).forEach(y => {
+    const o = byYear[y];
+    seasonData.push({
+      year: y,
+      wins: o.w, losses: o.l, ties: o.t, g: o.g,
+      points_for: o.pf, points_against: o.pa,
+      ppm: o.g ? o.pf / o.g : null,
+      winPct: o.g ? (o.w + o.t * 0.5) / o.g : 0,
+      weekly_margin: null,
+      transaction_count: null,
+      final_standing: null,
+      seed: M.seedMap[`${m.name}_${y}`] ?? null,
+      inProgress: true
+    });
+  });
+
+  const rivals = Object.entries(M.h2h[m.name] || {})
+    .map(([opp, r]) => ({
+      opp, ...r,
+      total: r.w + r.l + r.t,
+      winPct: (r.w + r.l + r.t) ? (r.w + r.t * 0.5) / (r.w + r.l + r.t) : 0,
+      diff: r.pf - r.pa
+    }));
+
+  const finishes = m.seasons.map(r => r.final_standing ?? 12);
+
+  const main = document.getElementById("main");
+  main.classList.remove("loading");
+  main.innerHTML = `
+    <a class="back-link" href="managers.html">← All managers</a>
+
+    <header class="profile-hero">
+      <div class="avatar lg">${initials(m.name)}</div>
+      <div class="profile-id">
+        <h1 class="profile-name">${LWFFL.shortName(m.name)}${LWFFL.alumPill(m.name)}<span class="profile-tenure">${LWFFL.tenureStr(c.years, M.years[M.years.length - 1])}</span></h1>
+        <div class="profile-accolades">
+          ${c.titles.map(y => `<span class="pill gold" title="Championship season">🏆 Championship · ${y}</span>`).join("")}
+          ${c.runnerUps.map(y => `<span class="pill" title="Runner-up finish">🥈 Runner-Up · ${y}</span>`).join("")}
+          ${c.thirdPlaces.map(y => `<span class="pill" title="Third-place finish">🥉 Third Place · ${y}</span>`).join("")}
+          ${c.scoringTitles.map(y => `<span class="pill accent" title="Scoring title">🕹️ Scoring Title · ${y}</span>`).join("")}
+        </div>
+      </div>
+      <div class="profile-rail">
+        <div class="elo-badge" title="ELO power rating — updates after every matchup based on opponent strength, margin of victory, and playoff weighting">
+          <div class="elo-num">${M.elo.ratings[m.name].elo}</div>
+          <div class="elo-tag">ELO</div>
+          <div class="elo-rank">${M.elo.ratings[m.name].rank ? `#${M.elo.ratings[m.name].rank} of ${M.elo.rankedCount}` : "unranked"}</div>
+        </div>
+        <div class="trend-box" title="Final standing each season, first to most recent">
+          <span class="stat-label">Finish trend</span>
+          ${sparkline(finishes)}
+        </div>
+      </div>
+    </header>
+
+    <div class="section-label">Career</div>
+    <div class="grid grid-4">
+      <div class="card"><div class="stat-label">Record</div><div class="stat-value">${recordStr(c.wins, c.losses, c.ties)}</div><div class="stat-sub">${(c.winPct * 100).toFixed(1)}% win pct · incl. playoffs</div></div>
+      <div class="card"><div class="stat-label">Championships</div><div class="stat-value">${c.titles.length}</div><div class="stat-sub">${c.runnerUps.length} runner-up finish${c.runnerUps.length === 1 ? "" : "es"}</div></div>
+      <div class="card"><div class="stat-label">Playoff Appearances</div><div class="stat-value">${c.playoffApps}</div><div class="stat-sub">in ${c.seasons} seasons</div></div>
+      <div class="card"><div class="stat-label">Points Per Matchup</div><div class="stat-value">${fmt(c.pf / c.games, 1)}</div><div class="stat-sub">${fmtInt(c.pf)} career points</div></div>
+    </div>
+
+    <div class="section-label">Memorable Matchups</div>
+    <div class="grid grid-4">
+      ${gameCard("Biggest Win", biggestWin, { margin: true, verb: "def." })}
+      ${gameCard("Worst Loss", worstLoss, { margin: true, verb: "vs" })}
+      ${gameCard("Highest Score", best, { margin: false, verb: best && best.pf > best.pa ? "def." : "vs" })}
+      ${gameCard("Lowest Score", worst, { margin: false, verb: worst && worst.pf > worst.pa ? "def." : "vs" })}
+    </div>
+
+    <div class="section-label">Front Office</div>
+    <div class="grid grid-4">
+      ${faabSpentTile(m.name)}
+      ${costliestBidTile(m.name)}
+      ${bestTradeTile(m.name, true)}
+      ${bestTradeTile(m.name, false)}
+    </div>
+
+    <div class="section-label">Roster Legends <span style="font-weight:400;text-transform:none;letter-spacing:0">— all time, ties included</span></div>
+    <div class="grid grid-3">
+      ${topDraftedTile(m.name)}
+      ${topStartedTile(m.name)}
+      ${topScorersTile(m.name)}
+    </div>
+
+    <div class="section-label">Analytics</div>
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="stat-label">ELO Progression</div>
+        <div class="chart-sub">End-of-season power rating vs league average (dashed) ·
+          Current <strong style="color:var(--accent)">${M.elo.ratings[m.name].elo}</strong> ·
+          Peak ${M.elo.ratings[m.name].peak} · Floor ${M.elo.ratings[m.name].floor}</div>
+        <div class="chart-box"><canvas id="eloChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="stat-label">✦ Luck Index</div>
+        <div class="chart-sub">Each season's points-for rank plotted against points-against rank</div>
+        <div class="chart-box"><canvas id="luckChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="stat-label">💓 Heart Attack Ratio</div>
+        <div class="chart-sub">Record in matchups decided by fewer than 5 points</div>
+        <div class="chart-box"><canvas id="heartChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="stat-label">📊 Scoring Spread</div>
+        <div class="chart-sub">Lowest and highest single-matchup score each season</div>
+        <div class="chart-box"><canvas id="spreadChart"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="stat-label">🏁 Post-Season Fate</div>
+      <div class="chart-sub">Conversion funnel from seasons played to championship glory</div>
+      <div id="fateFlow" class="fate-flow"></div>
+    </div>
+
+    <div class="section-label">Season by Season <span style="font-weight:400;text-transform:none;letter-spacing:0">— records include playoffs</span></div>
+    <div id="seasonTbl"></div>
+
+    <div class="section-label">Rivalries</div>
+    <div id="rivalTbl"></div>
+  `;
+
+  dataTable(document.getElementById("seasonTbl"), {
+    columns: [
+      { key: "year", label: "Year", render: r => r.inProgress ? `${ylink(r.year)} <span class="pill accent" style="font-size:0.7rem;padding:2px 7px">Live</span>` : ylink(r.year) },
+      { key: "winPct", label: "Record", num: true,
+        render: r => `${recordStr(r.wins, r.losses, r.ties)} (${(r.winPct * 100).toFixed(1)}%)` },
+      { key: "points_for", label: "PF", num: true, render: r => `<span class="pos">${fmt(r.points_for, 1)}</span>` },
+      { key: "points_against", label: "PA", num: true, render: r => `<span class="neg">${fmt(r.points_against, 1)}</span>` },
+      { key: "ppm", label: "PPM", num: true, render: r => r.ppm == null ? "—" : fmt(r.ppm, 1) },
+      { key: "weekly_margin", label: "Margin", num: true,
+        render: r => r.weekly_margin == null ? "—" : `<span class="${r.weekly_margin >= 0 ? "pos" : "neg"}">${r.weekly_margin > 0 ? "+" : ""}${fmt(r.weekly_margin, 1)}</span>` },
+      { key: "seed", label: "Seed", num: true, dir: "asc" },
+      { key: "final_standing", label: "Finish", num: true, dir: "asc",
+        render: r => r.inProgress ? `<span style="color:var(--soft)">—</span>` : finishCell(r.final_standing) },
+      { key: "transaction_count", label: "Moves", num: true }
+    ],
+    rows: seasonData,
+    initialSort: { key: "year", dir: "desc" }
+  });
+
+  dataTable(document.getElementById("rivalTbl"), {
+    columns: [
+      { key: "opp", label: "Opponent", dir: "asc", render: r => managerCell(r.opp) },
+      { key: "total", label: "MP", num: true },
+      { key: "w", label: "W", num: true },
+      { key: "l", label: "L", num: true },
+      { key: "t", label: "T", num: true },
+      { key: "winPct", label: "Win %", num: true, render: r => (r.winPct * 100).toFixed(1) + "%" },
+      { key: "pf", label: "PF", num: true, render: r => fmt(r.pf, 1) },
+      { key: "pa", label: "PA", num: true, render: r => fmt(r.pa, 1) },
+      { key: "diff", label: "Diff", num: true,
+        render: r => `<span class="${r.diff >= 0 ? "pos" : "neg"}">${r.diff >= 0 ? "+" : ""}${fmt(r.diff, 1)}</span>` },
+      { key: "_h2h", label: "", get: () => null,
+        render: r => `<a class="ylink" href="h2h.html?a=${LWFFL.slugify(m.name)}&b=${LWFFL.slugify(r.opp)}">Series →</a>` }
+    ],
+    rows: rivals,
+    initialSort: { key: "total", dir: "desc" },
+    footer: rows => {
+      const w = rows.reduce((a, r) => a + r.w, 0), l = rows.reduce((a, r) => a + r.l, 0), t = rows.reduce((a, r) => a + r.t, 0);
+      return `Combined head-to-head record: <strong>${recordStr(w, l, t)}</strong>`;
+    }
+  });
+
+  renderCharts(M, m, c, myPerfs);
+  document.title = `${LWFFL.shortName(m.name)} — LWFFL`;
+}
+
+/* ---------- Front Office tiles ---------- */
+
+function foTile(label, value, sub) {
+  return `
+    <div class="card">
+      <div class="stat-label">${label}</div>
+      <div class="stat-value" style="font-size:1.35rem">${value}</div>
+      <div class="stat-sub">${sub}</div>
+    </div>`;
+}
+
+function faabSpentTile(name) {
+  if (!FO_IDX) return foTile("Career FAAB Spent", "—", "");
+  const entries = Object.entries(FO_IDX.careers).filter(([, v]) => v.faab > 0);
+  const mine = FO_IDX.careers[name];
+  if (!mine || !mine.faab) return foTile("Career FAAB Spent", "$0", "No winning bids on record");
+  const rank = entries.slice().sort((a, b) => b[1].faab - a[1].faab).findIndex(([n]) => n === name) + 1;
+  return foTile("Career FAAB Spent",
+    `<a class="bxlink" href="transactions.html?tab=faab">${money(mine.faab)}</a>`,
+    `#${rank} of ${entries.length} all-time spenders`);
+}
+
+/* Winning claims only — a losing bid was never paid, so it is not a "spend". */
+function costliestBidTile(name) {
+  const hit = FO_HL && FO_HL.costliestBid[name];
+  if (!hit) return foTile("Costliest Winning Bid", "—", "No winning bids on record");
+  return foTile("Costliest Winning Bid",
+    `<a class="bxlink" href="transactions.html?tab=faab">${money(hit.bid)}</a>`,
+    `${esc(hit.player)} · ${LWFFL.ylink(hit.year)}`);
+}
+
+/* ---------- Roster Legends: three top-five widgets ---------- */
+
+/* Shared renderer. `data` is {rows:[{rank,name,pos,value,...}], tiedRest?}
+   straight out of scripts/build-manager-highlights.mjs. Ties share a rank and
+   are all listed; when the tie group at the cutoff is too long to show, the
+   build reports it as tiedRest and it is named here rather than dropped. */
+function rankTile(label, sub, data, opts) {
+  if (!data || !data.rows || !data.rows.length) {
+    return `
+      <div class="card rank-card">
+        <div class="stat-label">${label}</div>
+        <div class="chart-sub">${sub}</div>
+        <div class="rank-empty">${opts.empty}</div>
+      </div>`;
+  }
+  /* a rank shared by more than one row is marked "T" so a repeated number
+     reads as a tie rather than a bug */
+  const shared = {};
+  data.rows.forEach(r => { shared[r.rank] = (shared[r.rank] || 0) + 1; });
+
+  const rows = data.rows.map(r => `
+    <div class="rank-row tier-${r.rank}">
+      <div class="rank-badge">${shared[r.rank] > 1 ? "T" : ""}${r.rank}</div>
+      <div class="rank-main">
+        <div class="rank-name" title="${esc(r.name)}">${esc(r.name)}</div>
+        <div class="rank-sub">${r.pos ? `<span class="rank-pos">${esc(r.pos)}</span>` : ""}${opts.sub(r)}</div>
+      </div>
+      <div class="rank-val">${opts.val(r)}<small>${opts.unit}</small></div>
+    </div>`).join("");
+
+  const tie = data.tiedRest
+    ? `<div class="rank-foot">${data.tiedRest.count} more tied at ${opts.tie(data.tiedRest.value)}.</div>`
+    : "";
+
+  return `
+    <div class="card rank-card">
+      <div class="stat-label">${label}</div>
+      <div class="chart-sub">${sub}</div>
+      <div class="rank-list">${rows}</div>
+      ${tie}
+    </div>`;
+}
+
+function topDraftedTile(name) {
+  return rankTile("🎯 Most Drafted", "Players taken more than once across all drafts",
+    FO_HL && FO_HL.topDrafted[name], {
+      unit: "drafts",
+      val: r => r.value,
+      sub: r => (r.years || []).join(", "),
+      tie: v => `${v} drafts`,
+      empty: "Never drafted the same player twice."
+    });
+}
+
+function topStartedTile(name) {
+  return rankTile("🔁 Most Started", "Weeks in the starting lineup, playoffs included",
+    FO_HL && FO_HL.topStarted[name], {
+      unit: "starts",
+      val: r => r.value,
+      sub: r => `${LWFFL.fmt(r.pts, 1)} pts`,
+      tie: v => `${v} starts`,
+      empty: "No lineup data on record."
+    });
+}
+
+function topScorersTile(name) {
+  return rankTile("⚡ Top Contributors", "Points scored while in the starting lineup",
+    FO_HL && FO_HL.topScorers[name], {
+      unit: "pts",
+      val: r => LWFFL.fmt(r.value, 1),
+      sub: r => `${r.starts} start${r.starts === 1 ? "" : "s"}`,
+      tie: v => `${LWFFL.fmt(v, 1)} pts`,
+      empty: "No lineup data on record."
+    });
+}
+
+function bestTradeTile(name, wantBest) {
+  const label = wantBest ? "Best Trade" : "Worst Trade";
+  if (!FO_TV) return foTile(label, "—", "");
+  let pick = null;
+  FO_TV.trades.forEach(t => {
+    const s = t.sides[name];
+    if (!s || s.swapBack == null) return;
+    if (!pick || (wantBest ? s.swapBack > pick.val : s.swapBack < pick.val)) pick = { val: s.swapBack, trade: t };
+  });
+  if (!pick) return foTile(label, "—", "No trades scored (2018 and later only)");
+  const partner = pick.trade.parties.find(p => p !== name);
+  const cls = pick.val > 0 ? "pos" : pick.val < 0 ? "neg" : "";
+  return foTile(label,
+    `<a class="bxlink" href="trade-metrics.html"><span class="${cls}">${pick.val > 0 ? "+" : ""}${LWFFL.fmt(pick.val)}</span></a>`,
+    `swap-back pts · vs ${LWFFL.mlink(partner)} · ${pick.trade.year}`);
+}
+
+/* ---------- Analytics charts (ported from the classic manager cards) ---------- */
+
+function renderCharts(M, m, c, myPerfs) {
+  Chart.defaults.color = "#64748b";
+  Chart.defaults.font.family = "Inter, system-ui, sans-serif";
+  const common = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+
+  /* ELO progression vs league average */
+  /* bounded at both ends by seasons actually played — an alum's rating should
+     not flat-line to the present just because the league kept going without
+     him, and an active manager's live season still counts */
+  const lastPlayed = Math.max(c.lastYear, ...myPerfs.map(p => p.year));
+  const eloPts = (M.elo.seasonal[m.name] || [])
+    .filter(d => d.year >= c.firstYear && d.year <= lastPlayed);
+  new Chart(document.getElementById("eloChart"), {
+    type: "line",
+    data: {
+      labels: eloPts.map(d => d.year),
+      datasets: [
+        { label: "ELO", data: eloPts.map(d => d.elo), borderColor: "#0085CA",
+          backgroundColor: "rgba(0,133,202,0.1)", borderWidth: 3, pointRadius: 4,
+          pointHoverRadius: 7, pointBackgroundColor: "#fff", tension: 0.15, fill: true },
+        { label: "League avg", data: eloPts.map(d => Math.round(M.elo.leagueAvg[d.year])),
+          borderColor: "rgba(255,255,255,0.25)", borderWidth: 1.5, borderDash: [5, 5],
+          pointRadius: 0, fill: false }
+      ]
+    },
+    options: {
+      ...common,
+      plugins: { legend: { display: true, position: "top", align: "end", labels: { boxWidth: 12, font: { size: 10 } } } },
+      scales: { y: { grid: { color: "rgba(255,255,255,0.05)" } }, x: { grid: { display: false } } }
+    }
+  });
+
+  /* Luck Index — PF rank vs PA rank scatter with quadrant labels */
+  const luckPts = m.seasons.map(r => {
+    const ranks = M.seasonRanks[`${m.name}_${r.year}`] || { pfRank: 6, paRank: 6 };
+    return { x: ranks.pfRank, y: ranks.paRank, year: r.year };
+  });
+  const quadrants = {
+    id: "quadrants",
+    beforeDraw(chart) {
+      const { ctx, chartArea: { top, bottom, left, right } } = chart;
+      const midX = (left + right) / 2, midY = (top + bottom) / 2;
+      ctx.save();
+      ctx.strokeStyle = "rgba(255,255,255,0.1)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(midX, top); ctx.lineTo(midX, bottom);
+      ctx.moveTo(left, midY); ctx.lineTo(right, midY);
+      ctx.stroke();
+      ctx.font = "600 9px Inter, system-ui";
+      ctx.fillStyle = "rgba(255,255,255,0.4)";
+      ctx.textAlign = "center";
+      ctx.fillText("DOMINANT & LUCKY", (left + midX) / 2, top + 14);
+      ctx.fillText("SUBPAR & LUCKY", (midX + right) / 2, top + 14);
+      ctx.fillText("DOMINANT & UNLUCKY", (left + midX) / 2, bottom - 8);
+      ctx.fillText("SUBPAR & UNLUCKY", (midX + right) / 2, bottom - 8);
+      ctx.restore();
+    }
+  };
+  new Chart(document.getElementById("luckChart"), {
+    type: "scatter",
+    data: { datasets: [{ data: luckPts, backgroundColor: "rgba(0,133,202,0.55)",
+      borderColor: "rgba(0,133,202,0.9)", pointBorderWidth: 2, pointRadius: 6, pointHoverRadius: 8 }] },
+    plugins: [quadrants],
+    options: {
+      ...common,
+      layout: { padding: { top: 8 } },
+      scales: {
+        x: { title: { display: true, text: "PF Rank (1 = Best)" }, min: 0, max: 12,
+          ticks: { stepSize: 1 }, grid: { display: false } },
+        y: { title: { display: true, text: "PA Rank (1 = Unlucky)" }, min: 0, max: 13,
+          ticks: { stepSize: 1, callback: v => v === 13 ? null : v }, grid: { display: false } }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => `${ctx.raw.year}: PF #${ctx.raw.x} | PA #${ctx.raw.y}` } }
+      }
+    }
+  });
+
+  /* Heart Attack Ratio — record in matchups decided by < 5 */
+  let haW = 0, haL = 0;
+  myPerfs.forEach(p => {
+    if (Math.abs(p.pf - p.pa) < 5) {
+      if (p.pf > p.pa) haW++;
+      else if (p.pf < p.pa) haL++;
+    }
+  });
+  /* the record itself belongs in the hole, not in a tooltip */
+  const heartCenter = {
+    id: "heartCenter",
+    afterDraw(chart) {
+      const { ctx, chartArea: { top, bottom, left, right } } = chart;
+      const x = (left + right) / 2, y = (top + bottom) / 2;
+      const total = haW + haL;
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#e8ecf4";
+      ctx.font = "700 26px 'Space Grotesk', Inter, system-ui";
+      ctx.fillText(`${haW}–${haL}`, x, y + 2);
+      ctx.fillStyle = "#64748b";
+      ctx.font = "600 10px Inter, system-ui";
+      ctx.fillText(total ? `${((haW / total) * 100).toFixed(0)}% in nail-biters` : "none on record", x, y + 22);
+      ctx.restore();
+    }
+  };
+  new Chart(document.getElementById("heartChart"), {
+    type: "doughnut",
+    data: { labels: ["Wins", "Losses"], datasets: [{ data: [haW, haL],
+      backgroundColor: ["rgba(52,211,153,0.75)", "rgba(248,113,113,0.7)"],
+      borderColor: "#0d1224", borderWidth: 2, hoverOffset: 6 }] },
+    plugins: [heartCenter],
+    options: {
+      ...common,
+      cutout: "74%",
+      layout: { padding: 6 },
+      plugins: { legend: { display: true, position: "bottom",
+        labels: { color: "#94a3b8", boxWidth: 10, font: { size: 11 } } } }
+    }
+  });
+
+  /* Scoring Spread — floor/ceiling floating bars per season */
+  /* from played matchups, so a live season shows up too */
+  const years = [...new Set(myPerfs.map(p => p.year))].sort((a, b) => a - b);
+  const spreadData = years.map(y => {
+    const scores = myPerfs.filter(p => p.year === y).map(p => p.pf);
+    return scores.length ? [Math.min(...scores), Math.max(...scores)] : [0, 0];
+  });
+  new Chart(document.getElementById("spreadChart"), {
+    type: "bar",
+    data: { labels: years, datasets: [{ data: spreadData,
+      backgroundColor: "rgba(0,133,202,0.4)", borderRadius: 4 }] },
+    options: {
+      ...common,
+      scales: { y: { grid: { color: "rgba(255,255,255,0.05)" } }, x: { grid: { display: false } } }
+    }
+  });
+
+  /* Post-Season Fate funnel */
+  const finals = m.seasons.filter(r => (r.final_standing ?? 99) <= 2).length;
+  const pct = n => c.seasons ? (n / c.seasons) * 100 : 0;
+  document.getElementById("fateFlow").innerHTML = `
+    <div class="fate-step"><div class="fate-bar" style="width:100%"></div><div class="fate-label">Seasons Played</div><div class="fate-val">${c.seasons}</div></div>
+    <div class="fate-step step-playoffs"><div class="fate-bar" style="width:${pct(c.playoffApps)}%"></div><div class="fate-label">Made Playoffs</div><div class="fate-val">${c.playoffApps}</div></div>
+    <div class="fate-step step-finals"><div class="fate-bar" style="width:${pct(finals)}%"></div><div class="fate-label">Made Finals</div><div class="fate-val">${finals}</div></div>
+    <div class="fate-step step-titles"><div class="fate-bar" style="width:${pct(c.titles.length)}%"></div><div class="fate-label">Champion</div><div class="fate-val">${c.titles.length}</div></div>
+  `;
+}
+</script>
+</body>
+</html>

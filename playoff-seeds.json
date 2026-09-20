@@ -1,0 +1,363 @@
+[
+  {
+    "year": 2014,
+    "manager": "Ryan C.",
+    "seed": "1"
+  },
+  {
+    "year": 2014,
+    "manager": "Jordan",
+    "seed": 2
+  },
+  {
+    "year": 2014,
+    "manager": "Bryce",
+    "seed": 3
+  },
+  {
+    "year": 2014,
+    "manager": "Cobey",
+    "seed": 4
+  },
+  {
+    "year": 2014,
+    "manager": "Will",
+    "seed": 5
+  },
+  {
+    "year": 2014,
+    "manager": "Samuel",
+    "seed": 6
+  },
+  {
+    "year": 2015,
+    "manager": "Chad",
+    "seed": 1
+  },
+  {
+    "year": 2015,
+    "manager": "Adam",
+    "seed": 2
+  },
+  {
+    "year": 2015,
+    "manager": "Will",
+    "seed": 3
+  },
+  {
+    "year": 2015,
+    "manager": "Bryce",
+    "seed": 4
+  },
+  {
+    "year": 2015,
+    "manager": "Ryan T.",
+    "seed": 5
+  },
+  {
+    "year": 2015,
+    "manager": "Cobey",
+    "seed": 6
+  },
+  {
+    "year": 2016,
+    "manager": "Adam",
+    "seed": 1
+  },
+  {
+    "year": 2016,
+    "manager": "Matt",
+    "seed": 2
+  },
+  {
+    "year": 2016,
+    "manager": "Tom",
+    "seed": 3
+  },
+  {
+    "year": 2016,
+    "manager": "Ryan T.",
+    "seed": 4
+  },
+  {
+    "year": 2016,
+    "manager": "Connor",
+    "seed": 5
+  },
+  {
+    "year": 2016,
+    "manager": "Bryce",
+    "seed": 6
+  },
+  {
+    "year": 2017,
+    "manager": "Cobey",
+    "seed": 1
+  },
+  {
+    "year": 2017,
+    "manager": "Ryan C.",
+    "seed": 2
+  },
+  {
+    "year": 2017,
+    "manager": "Ryan D.",
+    "seed": 3
+  },
+  {
+    "year": 2017,
+    "manager": "Matt",
+    "seed": 4
+  },
+  {
+    "year": 2017,
+    "manager": "Will",
+    "seed": 5
+  },
+  {
+    "year": 2017,
+    "manager": "Bryce",
+    "seed": 6
+  },
+  {
+    "year": 2018,
+    "manager": "Matt",
+    "seed": 1
+  },
+  {
+    "year": 2018,
+    "manager": "Connor",
+    "seed": 2
+  },
+  {
+    "year": 2018,
+    "manager": "Cobey",
+    "seed": 3
+  },
+  {
+    "year": 2018,
+    "manager": "Ryan C.",
+    "seed": 4
+  },
+  {
+    "year": 2018,
+    "manager": "Adam",
+    "seed": 5
+  },
+  {
+    "year": 2018,
+    "manager": "Chad",
+    "seed": 6
+  },
+  {
+    "year": 2019,
+    "manager": "Matt",
+    "seed": 1
+  },
+  {
+    "year": 2019,
+    "manager": "Connor",
+    "seed": 2
+  },
+  {
+    "year": 2019,
+    "manager": "Cobey",
+    "seed": 3
+  },
+  {
+    "year": 2019,
+    "manager": "Ryan C.",
+    "seed": 4
+  },
+  {
+    "year": 2019,
+    "manager": "Adam",
+    "seed": 5
+  },
+  {
+    "year": 2019,
+    "manager": "Chad",
+    "seed": 6
+  },
+
+  {
+    "year": 2020,
+    "manager": "Cobey",
+    "seed": 1
+  },
+  {
+    "year": 2020,
+    "manager": "Matt",
+    "seed": 2
+  },
+  {
+    "year": 2020,
+    "manager": "Connor",
+    "seed": 3
+  },
+  {
+    "year": 2020,
+    "manager": "Ryan C.",
+    "seed": 4
+  },
+  {
+    "year": 2020,
+    "manager": "Ryan T.",
+    "seed": 5
+  },
+  {
+    "year": 2020,
+    "manager": "Bryce",
+    "seed": 6
+  },
+  {
+    "year": 2021,
+    "manager": "Adam",
+    "seed": 1
+  },
+  {
+    "year": 2021,
+    "manager": "Samuel",
+    "seed": 2
+  },
+  {
+    "year": 2021,
+    "manager": "Chad",
+    "seed": 3
+  },
+  {
+    "year": 2021,
+    "manager": "Ryan C.",
+    "seed": 4
+  },
+  {
+    "year": 2021,
+    "manager": "Matt",
+    "seed": 5
+  },
+  {
+    "year": 2021,
+    "manager": "Connor",
+    "seed": 6
+  },
+  {
+    "year": 2022,
+    "manager": "Nick",
+    "seed": 1
+  },
+  {
+    "year": 2022,
+    "manager": "Cobey",
+    "seed": 2
+  },
+  {
+    "year": 2022,
+    "manager": "Adam",
+    "seed": 3
+  },
+  {
+    "year": 2022,
+    "manager": "Will",
+    "seed": 4
+  },
+  {
+    "year": 2022,
+    "manager": "Matt",
+    "seed": 5
+  },
+  {
+    "year": 2022,
+    "manager": "Connor",
+    "seed": 6
+  },
+  {
+    "year": 2023,
+    "manager": "Nick",
+    "seed": 1
+  },
+  {
+    "year": 2023,
+    "manager": "Cobey",
+    "seed": 2
+  },
+  {
+    "year": 2023,
+    "manager": "Adam",
+    "seed": 3
+  },
+  {
+    "year": 2023,
+    "manager": "Will",
+    "seed": 4
+  },
+  {
+    "year": 2023,
+    "manager": "Matt",
+    "seed": 5
+  },
+  {
+    "year": 2023,
+    "manager": "Connor",
+    "seed": 6
+  },
+  {
+    "year": 2024,
+    "manager": "Matt",
+    "seed": 1
+  },
+  {
+    "year": 2024,
+    "manager": "Ryan C.",
+    "seed": 2
+  },
+  {
+    "year": 2024,
+    "manager": "Samuel",
+    "seed": 3
+  },
+  {
+    "year": 2024,
+    "manager": "Will",
+    "seed": 4
+  },
+  {
+    "year": 2024,
+    "manager": "Cobey",
+    "seed": 5
+  },
+  {
+    "year": 2024,
+    "manager": "Ryan T.",
+    "seed": 6
+  },
+  {
+    "year": 2025,
+    "manager": "Ryan T.",
+    "seed": 1
+  },
+  {
+    "year": 2025,
+    "manager": "Stuart",
+    "seed": 2
+  },
+  {
+    "year": 2025,
+    "manager": "Cobey",
+    "seed": 3
+  },
+  {
+    "year": 2025,
+    "manager": "Tom",
+    "seed": 4
+  },
+  {
+    "year": 2025,
+    "manager": "Adam",
+    "seed": 5
+  },
+  {
+    "year": 2025,
+    "manager": "Samuel",
+    "seed": 6
+  }
+]

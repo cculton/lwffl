@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Stat Lab — LWFFL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css?v=3">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>LW</span>FFL</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="notebook.html">Notebook</a>
+      <a href="managers.html">Managers</a>
+      <a href="seasons.html">Seasons</a>
+      <a href="boxscores.html">Scores</a>
+      <a href="transactions.html">Transactions</a>
+      <a href="h2h.html">H2H</a>
+      <a href="draft.html">Draft</a>
+      <a href="explorer.html" class="active">Stat Lab</a>
+      <a href="records.html">Records</a>
+      <a href="arcade.html">Arcade</a>
+      <a href="league.html">Constitution</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="page-head">
+    <h1>Stat Lab</h1>
+    <p class="sub">Every matchup and every season, fully filterable and sortable. Click any column header to sort.</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="games">Matchup Log</button>
+    <button class="tab-btn" data-tab="seasons">Season Stats</button>
+    <button class="tab-btn" data-tab="weeks">Weekly Trends</button>
+  </div>
+
+  <!-- ============ GAME LOG ============ -->
+  <section id="tab-games">
+    <div class="filter-bar">
+      <div class="full-span"><label class="field-label">Manager</label>
+        <div id="gMgr" class="pill-group"></div></div>
+      <div class="full-span"><label class="field-label">Opponent</label>
+        <div id="gOpp" class="pill-group"></div></div>
+      <div class="full-span"><label class="field-label">Season</label>
+        <div id="gYear" class="pill-group"></div></div>
+      <div class="full-span"><label class="field-label">Week</label>
+        <div id="gWeek" class="pill-group"></div></div>
+      <div><label class="field-label" for="gType">Type</label>
+        <select id="gType">
+          <option value="">All matchups</option>
+          <option value="reg">Regular season</option>
+          <option value="po">Playoffs</option>
+        </select></div>
+      <div><label class="field-label" for="gRes">Result</label>
+        <select id="gRes">
+          <option value="">All results</option>
+          <option value="W">Wins</option>
+          <option value="L">Losses</option>
+          <option value="T">Ties</option>
+        </select></div>
+    </div>
+    <div class="filter-count" id="gCount"></div>
+    <div id="gTable"></div>
+  </section>
+
+  <!-- ============ SEASON STATS ============ -->
+  <section id="tab-seasons" hidden>
+    <div class="filter-bar">
+      <div class="full-span"><label class="field-label">Manager</label>
+        <div id="sMgr" class="pill-group"></div></div>
+      <div class="full-span"><label class="field-label">Season</label>
+        <div id="sYear" class="pill-group"></div></div>
+      <div><label class="field-label" for="sPlayoffs">Made Playoffs</label>
+        <select id="sPlayoffs">
+          <option value="">All seasons</option>
+          <option value="yes">Playoff teams</option>
+          <option value="no">Missed playoffs</option>
+        </select></div>
+    </div>
+    <div class="filter-count" id="sCount"></div>
+    <div id="sTable"></div>
+  </section>
+
+  <!-- ============ WEEKLY TRENDS ============ -->
+  <section id="tab-weeks" hidden>
+    <div class="filter-bar">
+      <div class="full-span"><label class="field-label">Manager</label>
+        <div id="wMgr" class="pill-group"></div></div>
+      <div class="full-span"><label class="field-label">Season</label>
+        <div id="wYear" class="pill-group"></div></div>
+    </div>
+    <div class="filter-count" id="wCount"></div>
+    <div id="wTable"></div>
+  </section>
+</div>
+
+<footer class="footer">
+  LWFFL · Legion of Whom Fantasy Football League
+</footer>
+
+<script src="assets/data.js?v=2"></script>
+<script src="assets/tables.js?v=2"></script>
+<script>
+LWFFL.load().then(M => {
+  const { fmt, mlink, ylink, wlink, bxlink, isPlayoff, managerCell, finishCell } = LWFFL;
+  const names = Object.values(M.managers).map(m => m.name).sort();
+  const yearsDesc = M.years.slice().reverse().map(String);
+
+  /* ---------- tab switching ---------- */
+  document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("active", x === b));
+    ["games", "seasons", "weeks"].forEach(t =>
+      document.getElementById("tab-" + t).hidden = t !== b.dataset.tab);
+  }));
+
+  /* =================================================================
+     GAME LOG — all 2,026 individual performances
+     ================================================================= */
+  const perfRows = M.perfs.map(p => ({
+    ...p,
+    margin: p.pf - p.pa,
+    result: p.pf > p.pa ? "W" : p.pf < p.pa ? "L" : "T",
+    sortKey: p.year * 100 + p.week
+  }));
+
+  const selGMgr  = multiPills(document.getElementById("gMgr"),  names,      gUpdate, n => LWFFL.shortName(n));
+  const selGOpp  = multiPills(document.getElementById("gOpp"),  names,      gUpdate, n => LWFFL.shortName(n));
+  const selGYear = multiPills(document.getElementById("gYear"), yearsDesc,  gUpdate);
+  const selGWeek = multiPills(document.getElementById("gWeek"), Array.from({length: 17}, (_, i) => String(i + 1)), gUpdate);
+
+  const gCols = [
+    { key: "sortKey", label: "When", dir: "desc",
+      render: r => `${ylink(r.year)} · ${wlink(r.year, r.week, "Wk " + r.week)}` },
+    { key: "playoffs", label: "Type", dir: "asc", get: r => isPlayoff(r) ? r.playoffs : "Regular",
+      render: r => `<span class="pill ${isPlayoff(r) ? "accent" : ""}">${isPlayoff(r) ? r.playoffs : "Regular"}</span>` },
+    { key: "manager", label: "Manager", dir: "asc", render: r => managerCell(r.manager) },
+    { key: "pf", label: "Score", num: true,
+      render: r => bxlink(r.year, r.week, r.manager, `<strong>${fmt(r.pf)}</strong>`) },
+    { key: "opp", label: "Opponent", dir: "asc", render: r => managerCell(r.opp) },
+    { key: "pa", label: "Opp Score", num: true,
+      render: r => bxlink(r.year, r.week, r.opp, fmt(r.pa)) },
+    { key: "margin", label: "Margin", num: true,
+      render: r => `<span class="${r.margin > 0 ? "pos" : r.margin < 0 ? "neg" : ""}">${r.margin > 0 ? "+" : ""}${fmt(r.margin)}</span>` },
+    { key: "result", label: "Result", dir: "asc",
+      render: r => `<span class="${r.result === "W" ? "pos" : r.result === "L" ? "neg" : ""}">${r.result}</span>` }
+  ];
+
+  function gFiltered() {
+    const type = document.getElementById("gType").value;
+    const res = document.getElementById("gRes").value;
+    return perfRows.filter(r =>
+      (!selGMgr.size  || selGMgr.has(r.manager)) &&
+      (!selGOpp.size  || selGOpp.has(r.opp)) &&
+      (!selGYear.size || selGYear.has(String(r.year))) &&
+      (!selGWeek.size || selGWeek.has(String(r.week))) &&
+      (!type || (type === "po") === isPlayoff(r)) &&
+      (!res || r.result === res)
+    );
+  }
+
+  function gFooter(rows) {
+    if (!rows.length) return "";
+    const scores = rows.map(r => r.pf);
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    const w = rows.filter(r => r.result === "W").length;
+    const l = rows.filter(r => r.result === "L").length;
+    const t = rows.filter(r => r.result === "T").length;
+    return `Avg score <strong>${fmt(avg)}</strong> · High <strong>${fmt(Math.max(...scores))}</strong> · Low <strong>${fmt(Math.min(...scores))}</strong> · Combined record <strong>${w}-${l}${t ? "-" + t : ""}</strong>`;
+  }
+
+  const gTable = dataTable(document.getElementById("gTable"), {
+    columns: gCols, rows: gFiltered(),
+    initialSort: { key: "sortKey", dir: "desc" },
+    pageSize: 25, footer: gFooter
+  });
+
+  function gUpdate() {
+    const rows = gFiltered();
+    document.getElementById("gCount").textContent =
+      `${rows.length.toLocaleString()} of ${perfRows.length.toLocaleString()} performances`;
+    gTable.update(rows);
+  }
+  ["gType", "gRes"].forEach(id =>
+    document.getElementById(id).addEventListener("change", gUpdate));
+  gUpdate();
+
+  /* =================================================================
+     SEASON STATS — all 142 manager-seasons, every column
+     ================================================================= */
+  const seasonRows = M.standings.map(r => {
+    const g = (r.wins || 0) + (r.losses || 0) + (r.ties || 0);
+    return {
+      ...r, g,
+      ppm: g ? r.points_for / g : null,
+      papm: g ? r.points_against / g : null,
+      seed: M.seedMap[`${r.manager}_${r.year}`] ?? null,
+      winPct: g ? (r.wins + (r.ties || 0) * 0.5) / g : 0
+    };
+  });
+
+  const selSMgr  = multiPills(document.getElementById("sMgr"),  names,     sUpdate, n => LWFFL.shortName(n));
+  const selSYear = multiPills(document.getElementById("sYear"), yearsDesc, sUpdate);
+
+  const sCols = [
+    { key: "year", label: "Year", render: r => ylink(r.year) },
+    { key: "manager", label: "Manager", dir: "asc", render: r => managerCell(r.manager) },
+    { key: "wins", label: "W", num: true },
+    { key: "losses", label: "L", num: true },
+    { key: "ties", label: "T", num: true },
+    { key: "winPct", label: "Win %", num: true, render: r => (r.winPct * 100).toFixed(1) + "%" },
+    { key: "points_for", label: "PF", num: true, render: r => `<span class="pos">${fmt(r.points_for, 1)}</span>` },
+    { key: "points_against", label: "PA", num: true, render: r => `<span class="neg">${fmt(r.points_against, 1)}</span>` },
+    { key: "ppm", label: "PPM", num: true, render: r => r.ppm == null ? "—" : fmt(r.ppm, 1) },
+    { key: "papm", label: "PAPM", num: true, render: r => r.papm == null ? "—" : fmt(r.papm, 1) },
+    { key: "weekly_margin", label: "Margin", num: true,
+      render: r => r.weekly_margin == null ? "—" : `<span class="${r.weekly_margin >= 0 ? "pos" : "neg"}">${r.weekly_margin > 0 ? "+" : ""}${fmt(r.weekly_margin, 1)}</span>` },
+    { key: "division_finish", label: "Div", num: true, dir: "asc" },
+    { key: "seed", label: "Seed", num: true, dir: "asc" },
+    { key: "final_standing", label: "Finish", num: true, dir: "asc", render: r => finishCell(r.final_standing) },
+    { key: "transaction_count", label: "Moves", num: true }
+  ];
+
+  function sFiltered() {
+    const po = document.getElementById("sPlayoffs").value;
+    return seasonRows.filter(r =>
+      (!selSMgr.size  || selSMgr.has(r.manager)) &&
+      (!selSYear.size || selSYear.has(String(r.year))) &&
+      (!po || (po === "yes") === (r.seed != null))
+    );
+  }
+
+  function sFooter(rows) {
+    if (!rows.length) return "";
+    const pf = rows.reduce((a, r) => a + r.points_for, 0);
+    const w = rows.reduce((a, r) => a + r.wins, 0);
+    const l = rows.reduce((a, r) => a + r.losses, 0);
+    return `Combined <strong>${w}-${l}</strong> · Total PF <strong>${fmt(pf, 0)}</strong> · Avg PF/season <strong>${fmt(pf / rows.length, 1)}</strong>`;
+  }
+
+  const sTable = dataTable(document.getElementById("sTable"), {
+    columns: sCols, rows: sFiltered(),
+    initialSort: { key: "points_for", dir: "desc" },
+    pageSize: 25, footer: sFooter
+  });
+
+  function sUpdate() {
+    const rows = sFiltered();
+    document.getElementById("sCount").textContent =
+      `${rows.length} of ${seasonRows.length} manager-seasons · records here are regular season (the official standings basis)`;
+    sTable.update(rows);
+  }
+  document.getElementById("sPlayoffs").addEventListener("change", sUpdate);
+  sUpdate();
+
+  /* =================================================================
+     WEEKLY TRENDS — by-week averages, league-wide or per manager
+     ================================================================= */
+  const selWMgr  = multiPills(document.getElementById("wMgr"),  names,     wUpdate, n => LWFFL.shortName(n));
+  const selWYear = multiPills(document.getElementById("wYear"), yearsDesc, wUpdate);
+
+  const wCols = [
+    { key: "week", label: "Week", num: true, dir: "asc" },
+    { key: "avg", label: "Avg Score", num: true, render: r => `<strong>${fmt(r.avg)}</strong>` },
+    { key: "max", label: "High", num: true, render: r => `<span class="pos">${fmt(r.max)}</span>` },
+    { key: "min", label: "Low", num: true, render: r => `<span class="neg">${fmt(r.min)}</span>` },
+    { key: "winPct", label: "Win %", num: true, render: r => r.winPct == null ? "—" : (r.winPct * 100).toFixed(1) + "%" },
+    { key: "n", label: "Matchups", num: true }
+  ];
+
+  function wRows() {
+    const pool = M.perfs.filter(p =>
+      (!selWMgr.size  || selWMgr.has(p.manager)) &&
+      (!selWYear.size || selWYear.has(String(p.year)))
+    );
+    const rows = [];
+    for (let w = 1; w <= 17; w++) {
+      const games = pool.filter(p => p.week === w);
+      if (!games.length) continue;
+      const scores = games.map(p => p.pf);
+      const wins = games.filter(p => p.pf > p.pa).length;
+      const ties = games.filter(p => p.pf === p.pa).length;
+      rows.push({
+        week: w,
+        avg: scores.reduce((a, b) => a + b, 0) / scores.length,
+        max: Math.max(...scores),
+        min: Math.min(...scores),
+        winPct: selWMgr.size ? (wins + ties * 0.5) / games.length : null,
+        n: games.length
+      });
+    }
+    return rows;
+  }
+
+  const wTable = dataTable(document.getElementById("wTable"), {
+    columns: wCols, rows: wRows(),
+    initialSort: { key: "week", dir: "asc" }
+  });
+
+  function wUpdate() {
+    const who = selWMgr.size ? [...selWMgr].map(n => LWFFL.shortName(n)).join(", ") : "League-wide";
+    const when = selWYear.size ? [...selWYear].join(", ") : "all seasons";
+    document.getElementById("wCount").textContent =
+      `${who} · ${when} — win % shown when a manager is selected`;
+    wTable.update(wRows());
+  }
+  wUpdate();
+
+}).catch(err => {
+  console.error(err);
+  document.querySelector(".wrap").innerHTML += '<div class="loading">Could not load league data.</div>';
+});
+</script>
+</body>
+</html>

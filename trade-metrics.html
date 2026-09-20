@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Trade Metrics — LWFFL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css?v=3">
+  <style>
+    /* the two explainers run to different lengths; pin the scope line to the
+       baseline so the pair reads as one block rather than two ragged ones */
+    .metric-card { display:flex; flex-direction:column; }
+    .metric-card h4 { margin:0 0 4px; font-family:var(--font-display); font-size:1rem; font-weight:700; }
+    .metric-card p:last-of-type { margin-bottom:auto; }
+    .metric-q { font-size:0.84rem; color:var(--accent); font-style:italic; margin-bottom:10px; }
+    .metric-card p { margin:0 0 9px; font-size:0.86rem; line-height:1.6; color:var(--muted); }
+    .metric-card p:last-child { margin-bottom:0; }
+    .metric-card strong { color:var(--text); }
+    .metric-scope { margin-top:14px; padding-top:9px; border-top:1px solid var(--border);
+                    font-size:0.78rem; color:var(--soft); }
+    .note { background:rgba(0,133,202,.07); border:1px solid var(--border); border-left:3px solid var(--accent);
+            border-radius:var(--radius-sm); padding:12px 16px; font-size:0.83rem; color:var(--muted);
+            margin-bottom:20px; line-height:1.55; }
+    .note strong { color:var(--text); }
+    .note.caution { background:rgba(251,191,36,.06); border-left-color:var(--gold); }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>LW</span>FFL</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="notebook.html">Notebook</a>
+      <a href="managers.html">Managers</a>
+      <a href="seasons.html">Seasons</a>
+      <a href="boxscores.html">Scores</a>
+      <a href="transactions.html" class="active">Transactions</a>
+      <a href="h2h.html">H2H</a>
+      <a href="draft.html">Draft</a>
+      <a href="explorer.html">Stat Lab</a>
+      <a href="records.html">Records</a>
+      <a href="arcade.html">Arcade</a>
+      <a href="league.html">Constitution</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="page-head">
+    <h1>Trade Metrics</h1>
+    <p class="sub" id="sub">Loading…</p>
+  </header>
+
+  <div class="subnav" id="subnav">
+    <a href="transactions.html?tab=ledger" data-tab="ledger">Ledger</a>
+    <a href="transactions.html?tab=faab" data-tab="faab">FAAB</a>
+    <a href="transactions.html?tab=activity" data-tab="activity">Activity</a>
+    <span class="subnav-sep" aria-hidden="true"></span>
+    <a href="trades.html">Trade Log</a>
+    <a href="trade-metrics.html" class="active">Trade Metrics</a>
+  </div>
+
+  <div id="main"><div class="loading">Loading…</div></div>
+</div>
+
+<footer class="footer">
+  LWFFL · Legion of Whom Fantasy Football League
+</footer>
+
+<script src="assets/data.js?v=2"></script>
+<script src="assets/tables.js?v=2"></script>
+<script>
+const ml = m => m ? LWFFL.mlink(m) : "—";
+
+/* Matches trades.html — a margin this small across the rest of a season is
+   not a verdict, so it reads as a push in the career record. */
+let PUSH_BAND = 15;   /* overwritten from trade-value.json's pushBand on load */
+
+let TV = null, TH = null;
+
+(async () => {
+  try {
+    const [tv, th] = await Promise.all([
+      fetch("trade-value.json").then(r => r.json()),
+      fetch("trades-history.json").then(r => r.json()).catch(() => null),
+      LWFFL.load().catch(() => null)
+    ]);
+    TV = tv; TH = th;
+    if (TV.pushBand != null) PUSH_BAND = TV.pushBand;
+    render();
+  } catch (e) {
+    console.error(e);
+    document.getElementById("main").innerHTML =
+      '<div class="loading">Could not load trade scoring data.</div>';
+  }
+})();
+
+function render() {
+  document.getElementById("sub").textContent =
+    `How ${TV.scored} trades with player detail actually turned out, ${TV.firstYear}–present`;
+
+  document.getElementById("main").innerHTML = `
+    <div class="grid grid-4" style="margin-bottom:26px">
+      <div class="card"><div class="stat-label">Trades Scored</div>
+        <div class="stat-value">${TV.scored}</div>
+        <div class="stat-sub">of ${TH ? TH.totalPerCounters : TV.scored + TV.undocumentedTrades} all time</div></div>
+      <div class="card"><div class="stat-label">Points Changing Hands</div>
+        <div class="stat-value">${LWFFL.fmtInt(TV.lineupPtsTotal)}</div>
+        <div class="stat-sub">started by whoever acquired them</div></div>
+      <div class="card"><div class="stat-label">Landed on the Bench</div>
+        <div class="stat-value">${TV.benchWastePct}%</div>
+        <div class="stat-sub">of acquired points never started</div></div>
+      <div class="card"><div class="stat-label">Both Sides Gained</div>
+        <div class="stat-value">${TV.bothImproved}</div>
+        <div class="stat-sub">of ${TV.benchEraScored} swap-back trades</div></div>
+    </div>
+
+    <div class="section-label" style="margin-top:0">How a trade is scored</div>
+    <div class="grid grid-2" style="margin-bottom:10px">
+      <div class="card metric-card">
+        <h4>Lineup Points</h4>
+        <div class="metric-q">Did you get more out of the trade than the other guy?</div>
+        <p>Every player you got in a trade gets tracked week by week, but his points only count
+           <strong>if you actually started him</strong>. Bench him and he's worth zero. Drop him,
+           or trade him away again, and he's done counting from that point on.</p>
+        <p>That's different from the usual way people judge trades — just adding up what the players
+           went on to score. Say you land a quarterback who racks up 200 points the rest of the way,
+           but you already had a good one. That trade barely helped you, because
+           <strong>you can only start one QB</strong>. Total points would still give you credit for
+           all 200.</p>
+        <div class="metric-scope">All ${TV.scored} trades with player detail, ${TV.firstYear}–present.</div>
+      </div>
+      <div class="card metric-card">
+        <h4>Swap-Back Margin</h4>
+        <div class="metric-q">Would you have been better off not trading at all?</div>
+        <p>For every week after the trade, your roster gets rebuilt two ways: what actually
+           happened, and what would've happened if the trade never went through — the players you
+           got are pulled out, and the players you gave away are put back in at whatever they
+           <strong>actually scored that week</strong>. Then we set the best possible lineup for
+           both versions and compare.</p>
+        <p>Setting the best lineup for <strong>both</strong> sides is what makes this fair. Compare
+           your real lineup to a perfect hindsight one instead, and the trade gets credit for good
+           bench decisions that had nothing to do with it. This number tends to run lower than
+           Lineup Points, because it also charges you for whoever the new player bumped out of
+           your starting spot.</p>
+        <p>One detail that matters: if a player you gave away had been dropped by the whole
+           league by some week, there's no score to put back. He's valued at what the waiver
+           fringe scored at his position that week — a player nobody rostered was worth about
+           that, not nothing.</p>
+        <div class="metric-scope">${TV.benchEraScored} trades, 2018 and later. ESPN didn't keep
+          bench data before that, so there's no roster to rebuild.</div>
+      </div>
+    </div>
+
+
+    <div class="section-label">Career trade ledger</div>
+    <div id="tvTbl" style="margin-bottom:26px"></div>`;
+
+  buildCareerTable();
+}
+
+function buildCareerTable() {
+  const sign = (v, d = 1) => v == null ? "—"
+    : `<span class="${v > 0 ? "pos" : v < 0 ? "neg" : ""}">${v > 0 ? "+" : ""}${LWFFL.fmt(v, d)}</span>`;
+
+  /* w / l / p and gainPerTrade come straight from the build script, which
+     applies the same push band this page states. */
+  const rows = TV.career.map(c => ({ ...c, swapPer: c.gainPerTrade }));
+
+  dataTable(document.getElementById("tvTbl"), {
+    columns: [
+      { key: "manager", label: "Manager", dir: "asc", render: r => ml(r.manager) },
+      { key: "trades", label: "Trades", num: true },
+      { key: "w", label: "Record", num: true,
+        render: r => `${r.w}–${r.l}${r.p ? `–${r.p}` : ""}` },
+      { key: "perTrade", label: "Per trade", num: true, render: r => sign(r.perTrade) },
+      { key: "net", label: "Net lineup pts", num: true, render: r => sign(r.net) },
+      { key: "swapPer", label: "Swap-back / trade", num: true,
+        render: r => r.swapPer == null ? "—"
+          : `${sign(r.swapPer)} <span style="color:var(--soft);font-size:0.8rem">(${r.gainTrades})</span>` }
+    ],
+    rows,
+    initialSort: { key: "perTrade", dir: "desc" },
+    footer: () => `Sorted by points per trade, which does not reward simply trading more often.
+      Record counts a trade as a push when the two sides finished within ${PUSH_BAND} lineup points
+      of each other — ${TV.pushes} of ${TV.scored} trades.
+      Swap-back is shown per trade and only covers the ${TV.benchEraScored} trades from 2018 on;
+      the number in parentheses is how many of each manager's trades that includes, which ranges
+      from none to all of them.`
+  });
+}
+</script>
+</body>
+</html>

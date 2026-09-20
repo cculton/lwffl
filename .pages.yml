@@ -1,0 +1,89 @@
+media:
+  input: n/img
+  output: /n/img
+  categories: [image]
+  rename: safe
+
+settings:
+  content:
+    merge: true
+
+content:
+  - name: notebook
+    label: Notebook
+    type: collection
+    path: data/notebook
+    format: yaml-frontmatter
+    filename:
+      template: "{fields.slug}.md"
+      field: false
+    view:
+      fields: [title, edition, year, week, date]
+      primary: title
+      sort: [date, year, week, title]
+      search: [title, dek, author]
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: slug
+        label: Slug
+        type: string
+        required: true
+        pattern: "^[a-z0-9-]+$"
+      - name: edition
+        label: Edition
+        type: select
+        required: true
+        options:
+          values:
+            - name: announcement
+              label: Announcement
+            - name: preview
+              label: Preview
+            - name: sunday
+              label: Sunday Update
+            - name: recap
+              label: Recap
+      - name: year
+        label: Season
+        type: number
+        required: true
+      - name: week
+        label: Week (if applicable)
+        type: number
+      - name: title
+        label: Title
+        type: string
+        required: true
+      - name: dek
+        label: Summary
+        type: text
+        required: true
+      - name: date
+        label: Publication date
+        type: date
+        required: true
+      - name: author
+        label: Author
+        type: string
+      - name: pinned
+        label: Pin to top
+        type: boolean
+      - name: sample
+        label: Sample post
+        type: boolean
+      - name: image
+        label: Featured image
+        type: image
+        description: "Shown below the date, author and Copy link. JPEG/PNG also appears in link previews; other formats use the generated Notebook card there."
+      - name: image_caption
+        label: Featured image caption
+        type: text
+        description: "Shown beneath the image and used as link-preview text where the app displays descriptions."
+      - name: body
+        label: Story (Markdown)
+        type: code
+        options:
+          format: markdown
+        description: "Upload photos under Media, then place one anywhere on its own line as ![Your visible caption](/n/img/photo.jpg). Keep ::: blocks and tables intact."
