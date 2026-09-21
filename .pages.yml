@@ -18,7 +18,7 @@ content:
       template: "{fields.slug}.md"
       field: false
     view:
-      fields: [title, edition, year, week, date]
+      fields: [title, published, edition, year, week, date]
       primary: title
       sort: [date, year, week, title]
       search: [title, dek, author]
@@ -68,6 +68,11 @@ content:
         label: Publication date
         type: date
         required: true
+      - name: published
+        label: Published
+        type: boolean
+        default: true
+        description: "Turn off to keep this post out of the live site. Turn it back on to publish it."
       - name: author
         label: Author
         type: string

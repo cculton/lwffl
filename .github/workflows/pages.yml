@@ -33,6 +33,8 @@ jobs:
           if test -f CNAME; then test "$(cat CNAME)" = 'lwffl.com'; fi
           test -s notebook-index.json
           test -s n/2026-w1-recap.html
+      - name: Remove Notebook source files from deploy artifact
+        run: rm -rf data/notebook
       - name: Upload complete site
         uses: actions/upload-pages-artifact@v4
         with:

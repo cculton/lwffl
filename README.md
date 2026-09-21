@@ -22,6 +22,17 @@ score data (for example, `Tom` is displayed as Thomas). The shaded rows show
 provisional playoff positions, following the Constitution's three division
 leaders, one record wildcard, and two points wildcards.
 
+## Publishing Notebook posts
+
+The Pages CMS editor includes a **Published** toggle for every Notebook post.
+It is on by default. Turn it off and save to keep a draft out of the Notebook
+feed, homepage, generated post pages, teasers, and social cards. Turn it back
+on and save to publish the post again. Existing posts without a `published`
+frontmatter value remain published.
+
+Notebook Markdown source files are removed from the GitHub Pages deployment
+artifact so an unpublished draft cannot be read through its raw source URL.
+
 ## Notebook images in Pages CMS
 
 Upload photos in **Media** (`n/img`), then open a Notebook post. To place a photo

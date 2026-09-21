@@ -367,7 +367,7 @@ function teaser(p) {
 
 fs.mkdirSync(path.join(OUT, "cards"), { recursive: true });
 
-const posts = fs.readdirSync(SRC).filter(f => f.endsWith(".md")).map(f => {
+const allPosts = fs.readdirSync(SRC).filter(f => f.endsWith(".md")).map(f => {
   const { meta, body } = parse(path.join(SRC, f));
   for (const k of ["slug", "edition", "year", "title", "dek", "date"]) {
     if (meta[k] == null) throw new Error(`${f}: missing "${k}"`);
@@ -377,7 +377,24 @@ const posts = fs.readdirSync(SRC).filter(f => f.endsWith(".md")).map(f => {
   return post;
 });
 
+// Existing posts predate the CMS toggle, so a missing value remains published.
+// Only an explicit `published: false` keeps a post out of the deployed site.
+const posts = allPosts.filter(p => p.published !== false);
+const unpublishedPosts = allPosts.filter(p => p.published === false);
+
 posts.sort((a, b) => b.date.localeCompare(a.date) || (b.week || 0) - (a.week || 0));
+
+// Generated files are committed for previews and may still exist from an
+// earlier publish. Remove every variant in the build workspace so unpublishing
+// also withdraws the direct URL and its social preview assets.
+for (const p of unpublishedPosts) {
+  for (const file of [
+    path.join(OUT, `${p.slug}.html`),
+    path.join(OUT, `${p.slug}.txt`),
+    path.join(OUT, "cards", `${p.slug}.html`),
+    path.join(OUT, "cards", `${p.slug}.png`)
+  ]) fs.rmSync(file, { force: true });
+}
 
 for (const p of posts) {
   fs.writeFileSync(path.join(OUT, `${p.slug}.html`), postHtml(p, markdown(p.body)).replace(/[ \t]+$/gm, ""));
@@ -395,5 +412,6 @@ fs.writeFileSync(path.join(root, "notebook-index.json"), JSON.stringify({
   }))
 }) + "\n");
 
-console.log(`${posts.length} posts -> n/*.html, n/cards/*.html, n/*.txt, notebook-index.json`);
+console.log(`${posts.length} published posts -> n/*.html, n/cards/*.html, n/*.txt, notebook-index.json`);
+if (unpublishedPosts.length) console.log(`${unpublishedPosts.length} unpublished post(s) excluded`);
 for (const p of posts) console.log(`  ${p.date}  ${p.edition.padEnd(12)} ${p.slug}`);
