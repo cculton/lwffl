@@ -1,8 +1,8 @@
 A fully documented, data-driven archive of the **Legion of Whom Fantasy Football League (LWFFL)**.
 
-## Position-edge analytics
+## Positional-edge analytics
 
-Stat Lab's **Position Edge** tab reads the canonical `boxscores-YYYY.json` files and compares every normalized lineup position with that position's league-wide average in the same week. The default view is all-time regular season, with the manager included in the weekly average so each position is zero-sum across the league. Playoffs can be selected separately.
+Stat Lab's **Positional Edge** tab reads the canonical `boxscores-YYYY.json` files and compares every normalized lineup position with that position's league-wide average in the same week. The default view is all-time across every available regular-season and playoff lineup, with the manager included in the weekly average so each position is zero-sum across the league. Regular season and playoffs can also be selected separately.
 
 Lineups before 2025 assign the highest-scoring required RBs, WRs, and TE first; the remaining third RB/WR or second TE is FLEX. Beginning in 2025, required RB and WR slots are assigned first, then FLEX, then WR/TE. The FLEX choice preserves a valid WR/TE player when necessary, so a lineup with three RBs and three WRs assigns the extra RB to FLEX and the extra WR to WR/TE. Empty and zero-point starters remain in the calculation.
 

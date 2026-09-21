@@ -43,7 +43,7 @@
     <button class="tab-btn active" data-tab="games">Matchup Log</button>
     <button class="tab-btn" data-tab="seasons">Season Stats</button>
     <button class="tab-btn" data-tab="weeks">Weekly Trends</button>
-    <button class="tab-btn" data-tab="edges">Position Edge</button>
+    <button class="tab-btn" data-tab="edges">Positional Edge</button>
   </div>
 
   <!-- ============ GAME LOG ============ -->
@@ -109,7 +109,7 @@
   <section id="tab-edges" hidden>
     <div class="edge-method card">
       <div>
-        <div class="stat-label">Weekly lineup edge</div>
+        <div class="stat-label">Weekly positional edge</div>
         <p>Points above or below that week's league average at each normalized lineup position. RB and WR combine both required starters.</p>
       </div>
       <div class="edge-method-rule">
@@ -124,9 +124,9 @@
         <div id="eYear" class="pill-group"></div></div>
       <div><label class="field-label" for="eType">Type</label>
         <select id="eType">
+          <option value="">All available</option>
           <option value="reg">Regular season</option>
           <option value="po">Playoffs only</option>
-          <option value="">All available</option>
         </select></div>
     </div>
     <div class="filter-count" id="eCount"></div>
@@ -353,7 +353,7 @@ LWFFL.load().then(async M => {
   const edgeNames = [...new Set(edgeData.performances.map(row => row.manager))].sort();
   const edgeYearsDesc = edgeData.years.slice().reverse().map(String);
   const selEMgr = multiPills(document.getElementById("eMgr"), edgeNames, eUpdate, name => LWFFL.shortName(name));
-  const selEYear = multiPills(document.getElementById("eYear"), edgeYearsDesc, eUpdate);
+  const selEYear = allTimePills(document.getElementById("eYear"), edgeYearsDesc, eUpdate);
   const edgeSlotOrder = ["QB", "RB", "WR", "TE", "FLEX", "WR/TE", "D/ST", "K"];
   const availableSlots = edgeSlotOrder.filter(slot => edgeData.performances.some(row => Object.prototype.hasOwnProperty.call(row.edges, slot)));
   const edgeValue = value => value == null ? "—" :
@@ -387,7 +387,7 @@ LWFFL.load().then(async M => {
     columns: eColumns,
     rows: eRows(),
     initialSort: { key: "totalEdgePerWeek", dir: "desc" },
-    footer: () => "Positive numbers are points above the weekly league average; negative numbers are below it. The default is all-time regular season so owners are compared over equivalent schedules. Empty and zero-point starters remain part of the calculation."
+    footer: () => "Positive numbers are points above the weekly league average; negative numbers are below it. The default includes every available regular-season and playoff lineup. Empty and zero-point starters remain part of the calculation."
   });
 
   function eUpdate() {
@@ -402,6 +402,26 @@ LWFFL.load().then(async M => {
   }
   document.getElementById("eType").addEventListener("change", eUpdate);
   eUpdate();
+
+  function allTimePills(container, values, onChange) {
+    const selected = new Set();
+    container.innerHTML = `<button type="button" class="filter-pill on" data-all-time="true">All-time</button>` +
+      values.map(value => `<button type="button" class="filter-pill" data-v="${value}">${value}</button>`).join("");
+
+    container.addEventListener("click", event => {
+      const button = event.target.closest(".filter-pill");
+      if (!button) return;
+      if (button.dataset.allTime) selected.clear();
+      else if (selected.has(button.dataset.v)) selected.delete(button.dataset.v);
+      else selected.add(button.dataset.v);
+
+      container.querySelector("[data-all-time]").classList.toggle("on", selected.size === 0);
+      container.querySelectorAll("[data-v]").forEach(yearButton =>
+        yearButton.classList.toggle("on", selected.has(yearButton.dataset.v)));
+      onChange();
+    });
+    return selected;
+  }
 
   const requestedTab = new URLSearchParams(location.search).get("tab");
   const requestedButton = ["games", "seasons", "weeks", "edges"].includes(requestedTab)

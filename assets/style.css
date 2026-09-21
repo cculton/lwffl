@@ -265,8 +265,21 @@ a.card:hover {
 .edge-method-rule strong { color: var(--text); font-size: 0.82rem; }
 .edge-value { display: inline-block; min-width: 44px; font-weight: 700; font-variant-numeric: tabular-nums; }
 
+#eTable table { table-layout: fixed; font-size: 0.78rem; }
+#eTable th,
+#eTable td { padding: 10px 5px; }
+#eTable th { white-space: normal; line-height: 1.2; letter-spacing: 0.06em; }
+#eTable th:first-child,
+#eTable td:first-child { width: 96px; padding-left: 12px; text-align: left; }
+#eTable th:nth-child(2),
+#eTable td:nth-child(2) { width: 52px; }
+#eTable th:nth-last-child(-n+2),
+#eTable td:nth-last-child(-n+2) { width: 66px; }
+#eTable .edge-value { min-width: 0; }
+
 @media (max-width: 760px) {
   .edge-method { align-items: flex-start; flex-direction: column; gap: 12px; }
+  #eTable table { min-width: 820px; }
 }
 
 /* ---------- Tables ---------- */
