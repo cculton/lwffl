@@ -5,10 +5,13 @@ year: 2026
 week: 2
 standings_week: 1
 title: Everybody gets a chance to explain themselves
-dek: A sample preview showing the layout — every block the Notebook can use, with placeholder copy where a real week's matchups would go.
+dek: A sample preview showing the layout — every block the Notebook can use,
+  with placeholder copy where a real week's matchups would go.
 date: 2026-09-18
 author: Cobey
 sample: true
+published: false
+pinned: false
 ---
 This is a **sample post**. The copy is placeholder; every block below is real and works exactly like this in a live preview.
 
