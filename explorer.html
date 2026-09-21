@@ -118,8 +118,6 @@
       </div>
     </div>
     <div class="filter-bar">
-      <div class="full-span"><label class="field-label">Manager</label>
-        <div id="eMgr" class="pill-group"></div></div>
       <div class="full-span"><label class="field-label">Season</label>
         <div id="eYear" class="pill-group"></div></div>
       <div><label class="field-label" for="eType">Type</label>
@@ -350,9 +348,7 @@ LWFFL.load().then(async M => {
   /* =================================================================
      POSITION EDGE — normalized starter production vs weekly average
      ================================================================= */
-  const edgeNames = [...new Set(edgeData.performances.map(row => row.manager))].sort();
   const edgeYearsDesc = edgeData.years.slice().reverse().map(String);
-  const selEMgr = multiPills(document.getElementById("eMgr"), edgeNames, eUpdate, name => LWFFL.shortName(name));
   const selEYear = allTimePills(document.getElementById("eYear"), edgeYearsDesc, eUpdate);
   const edgeSlotOrder = ["QB", "RB", "WR", "TE", "FLEX", "WR/TE", "D/ST", "K"];
   const availableSlots = edgeSlotOrder.filter(slot => edgeData.performances.some(row => Object.prototype.hasOwnProperty.call(row.edges, slot)));
@@ -362,7 +358,6 @@ LWFFL.load().then(async M => {
   function eFilteredPerformances() {
     const type = document.getElementById("eType").value;
     return edgeData.performances.filter(row =>
-      (!selEMgr.size || selEMgr.has(row.manager)) &&
       (!selEYear.size || selEYear.has(String(row.year))) &&
       (!type || (type === "po") === row.isPlayoff)
     );
