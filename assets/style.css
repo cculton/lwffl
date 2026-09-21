@@ -267,14 +267,10 @@ a.card:hover {
 
 #eTable table { table-layout: fixed; font-size: 0.78rem; }
 #eTable th,
-#eTable td { padding: 10px 5px; }
+#eTable td { width: 8.333%; padding: 10px 5px; }
 #eTable th { white-space: normal; line-height: 1.2; letter-spacing: 0.06em; }
 #eTable th:first-child,
-#eTable td:first-child { width: 96px; padding-left: 12px; text-align: left; }
-#eTable th:nth-child(2),
-#eTable td:nth-child(2) { width: 52px; }
-#eTable th:nth-last-child(-n+2),
-#eTable td:nth-last-child(-n+2) { width: 66px; }
+#eTable td:first-child { padding-left: 12px; text-align: left; }
 #eTable .edge-value { min-width: 0; }
 
 @media (max-width: 760px) {
