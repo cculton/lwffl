@@ -52,7 +52,13 @@ assert.deepEqual(Array.from(seeds, ([name, seed]) => [name, seed]).sort((a, b) =
 ]);
 
 for (const slug of ["2026-w1-recap", "2026-w2-preview"]) {
-  const html = fs.readFileSync(path.join(root, "n", `${slug}.html`), "utf8");
+  const source = fs.readFileSync(path.join(root, "data", "notebook", `${slug}.md`), "utf8");
+  const htmlPath = path.join(root, "n", `${slug}.html`);
+  if (/^published:\s*false\s*$/m.test(source)) {
+    assert.equal(fs.existsSync(htmlPath), false, `${slug} should not have a generated page`);
+    continue;
+  }
+  const html = fs.readFileSync(htmlPath, "utf8");
   assert.match(html, /data-standings-week="1"/);
 }
 console.log("Notebook division standings and playoff projection passed");
