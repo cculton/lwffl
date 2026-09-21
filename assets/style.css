@@ -251,6 +251,24 @@ a.card:hover {
 
 .stat-sub { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
 
+/* ---------- Position edge ---------- */
+
+.edge-method {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 18px;
+}
+.edge-method p { color: var(--muted); font-size: 0.9rem; margin-top: 5px; max-width: 720px; }
+.edge-method-rule { display: flex; flex-direction: column; min-width: 190px; color: var(--muted); font-size: 0.78rem; }
+.edge-method-rule strong { color: var(--text); font-size: 0.82rem; }
+.edge-value { display: inline-block; min-width: 44px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 760px) {
+  .edge-method { align-items: flex-start; flex-direction: column; gap: 12px; }
+}
+
 /* ---------- Tables ---------- */
 
 .table-card {

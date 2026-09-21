@@ -43,6 +43,7 @@
     <button class="tab-btn active" data-tab="games">Matchup Log</button>
     <button class="tab-btn" data-tab="seasons">Season Stats</button>
     <button class="tab-btn" data-tab="weeks">Weekly Trends</button>
+    <button class="tab-btn" data-tab="edges">Position Edge</button>
   </div>
 
   <!-- ============ GAME LOG ============ -->
@@ -103,6 +104,34 @@
     <div class="filter-count" id="wCount"></div>
     <div id="wTable"></div>
   </section>
+
+  <!-- ============ POSITION EDGE ============ -->
+  <section id="tab-edges" hidden>
+    <div class="edge-method card">
+      <div>
+        <div class="stat-label">Weekly lineup edge</div>
+        <p>Points above or below that week's league average at each normalized lineup position. RB and WR combine both required starters.</p>
+      </div>
+      <div class="edge-method-rule">
+        <strong>Slot hierarchy</strong>
+        <span>Base positions → FLEX → WR/TE</span>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <div class="full-span"><label class="field-label">Manager</label>
+        <div id="eMgr" class="pill-group"></div></div>
+      <div class="full-span"><label class="field-label">Season</label>
+        <div id="eYear" class="pill-group"></div></div>
+      <div><label class="field-label" for="eType">Type</label>
+        <select id="eType">
+          <option value="reg">Regular season</option>
+          <option value="po">Playoffs only</option>
+          <option value="">All available</option>
+        </select></div>
+    </div>
+    <div class="filter-count" id="eCount"></div>
+    <div id="eTable"></div>
+  </section>
 </div>
 
 <footer class="footer">
@@ -111,8 +140,10 @@
 
 <script src="assets/data.js?v=2"></script>
 <script src="assets/tables.js?v=2"></script>
+<script src="assets/lineup-edge.js?v=1"></script>
 <script>
-LWFFL.load().then(M => {
+LWFFL.load().then(async M => {
+  const edgeData = await LWFFLLineupEdge.load();
   const { fmt, mlink, ylink, wlink, bxlink, isPlayoff, managerCell, finishCell } = LWFFL;
   const names = Object.values(M.managers).map(m => m.name).sort();
   const yearsDesc = M.years.slice().reverse().map(String);
@@ -120,7 +151,7 @@ LWFFL.load().then(M => {
   /* ---------- tab switching ---------- */
   document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => {
     document.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("active", x === b));
-    ["games", "seasons", "weeks"].forEach(t =>
+    ["games", "seasons", "weeks", "edges"].forEach(t =>
       document.getElementById("tab-" + t).hidden = t !== b.dataset.tab);
   }));
 
@@ -315,6 +346,68 @@ LWFFL.load().then(M => {
     wTable.update(wRows());
   }
   wUpdate();
+
+  /* =================================================================
+     POSITION EDGE — normalized starter production vs weekly average
+     ================================================================= */
+  const edgeNames = [...new Set(edgeData.performances.map(row => row.manager))].sort();
+  const edgeYearsDesc = edgeData.years.slice().reverse().map(String);
+  const selEMgr = multiPills(document.getElementById("eMgr"), edgeNames, eUpdate, name => LWFFL.shortName(name));
+  const selEYear = multiPills(document.getElementById("eYear"), edgeYearsDesc, eUpdate);
+  const edgeSlotOrder = ["QB", "RB", "WR", "TE", "FLEX", "WR/TE", "D/ST", "K"];
+  const availableSlots = edgeSlotOrder.filter(slot => edgeData.performances.some(row => Object.prototype.hasOwnProperty.call(row.edges, slot)));
+  const edgeValue = value => value == null ? "—" :
+    `<span class="edge-value ${value > 0 ? "pos" : value < 0 ? "neg" : ""}">${value > 0 ? "+" : ""}${fmt(value, 1)}</span>`;
+
+  function eFilteredPerformances() {
+    const type = document.getElementById("eType").value;
+    return edgeData.performances.filter(row =>
+      (!selEMgr.size || selEMgr.has(row.manager)) &&
+      (!selEYear.size || selEYear.has(String(row.year))) &&
+      (!type || (type === "po") === row.isPlayoff)
+    );
+  }
+
+  function eRows() {
+    return LWFFLLineupEdge.aggregate(eFilteredPerformances()).map(row => ({
+      ...row,
+      ...Object.fromEntries(availableSlots.map(slot => [slot, row.slotEdgePerWeek[slot] ?? null]))
+    }));
+  }
+
+  const eColumns = [
+    { key: "manager", label: "Manager", dir: "asc", render: row => managerCell(row.manager) },
+    { key: "games", label: "Lineups", num: true },
+    ...availableSlots.map(slot => ({ key: slot, label: `${slot} Δ/wk`, num: true, render: row => edgeValue(row[slot]) })),
+    { key: "totalEdgePerWeek", label: "Total Δ/wk", num: true, render: row => edgeValue(row.totalEdgePerWeek) },
+    { key: "totalEdge", label: "Total Δ", num: true, render: row => edgeValue(row.totalEdge) }
+  ];
+
+  const eTable = dataTable(document.getElementById("eTable"), {
+    columns: eColumns,
+    rows: eRows(),
+    initialSort: { key: "totalEdgePerWeek", dir: "desc" },
+    footer: () => "Positive numbers are points above the weekly league average; negative numbers are below it. The default is all-time regular season so owners are compared over equivalent schedules. Empty and zero-point starters remain part of the calculation."
+  });
+
+  function eUpdate() {
+    const filtered = eFilteredPerformances();
+    const type = document.getElementById("eType").value;
+    const typeLabel = type === "reg" ? "regular-season" : type === "po" ? "playoff" : "all available";
+    const scopeLabel = selEYear.size ? [...selEYear].sort().join(", ") : "All-time";
+    document.getElementById("eCount").textContent = edgeData.performances.length
+      ? `${scopeLabel} · ${filtered.length.toLocaleString()} ${typeLabel} lineups · ${edgeData.years[0]}–${edgeData.years.at(-1)} box-score coverage`
+      : "No player-level lineup seasons are available yet.";
+    eTable.update(eRows());
+  }
+  document.getElementById("eType").addEventListener("change", eUpdate);
+  eUpdate();
+
+  const requestedTab = new URLSearchParams(location.search).get("tab");
+  const requestedButton = ["games", "seasons", "weeks", "edges"].includes(requestedTab)
+    ? document.querySelector(`.tab-btn[data-tab="${requestedTab}"]`)
+    : null;
+  if (requestedButton) requestedButton.click();
 
 }).catch(err => {
   console.error(err);
