@@ -217,7 +217,7 @@ async function renderLedger(p) {
             `<span class="${t.st === "EXECUTED" ? "pos" : "neg"}">${statusLabel(t.st)}</span>` }
       ],
       rows: r,
-      initialSort: { key: "wk", dir: "asc" },
+      initialSort: { key: "date", dir: "desc" },
       footer: rr => `${rr.length.toLocaleString()} transactions`
     });
   }
