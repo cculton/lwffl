@@ -1,0 +1,68 @@
+name: Sync ESPN data
+
+# Pulls the current season from ESPN and republishes the site when anything changed:
+# scores and box scores for every final week, plus transactions and trades.
+# Runs daily through the season, so new trades are captured while ESPN still has
+# their player lists. Tuesday's early-afternoon run picks up Monday night's final
+# scores once ESPN has closed the week.
+#
+# Needs two repository secrets (Settings -> Secrets and variables -> Actions):
+#   ESPN_S2    the espn_s2 cookie from a browser signed in to ESPN Fantasy
+#   ESPN_SWID  the SWID cookie, including the curly braces
+# They last about a year. When they expire this workflow fails with a message
+# saying so, and GitHub emails the repo owner.
+
+on:
+  schedule:
+    - cron: '0 11 * 8-12,1 *'   # daily, 7am ET (6am in winter)
+    - cron: '0 18 * 8-12,1 2'   # Tuesday 2pm ET, after ESPN closes the week
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: espn-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Pull the current season from ESPN
+        env:
+          ESPN_S2: ${{ secrets.ESPN_S2 }}
+          ESPN_SWID: ${{ secrets.ESPN_SWID }}
+        run: node scripts/sync-espn.mjs
+
+      - name: Rebuild derived data
+        run: |
+          if git diff --quiet; then echo "No ESPN changes."; exit 0; fi
+          node scripts/build-trade-value.mjs
+          node scripts/build-manager-highlights.mjs
+
+      - name: Check privacy and consistency
+        run: |
+          node scripts/check-privacy.mjs
+          node scripts/check-data.mjs
+
+      - name: Commit, push and deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet; then echo "Nothing to publish."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          weeks=$(node -e 'const s=require("./boxscores-index.json").seasons.at(-1); console.log(`${s.year} through Week ${s.weeks.at(-1) ?? 0}`)')
+          git add league-scores.json boxscores-*.json transactions-*.json trades-history.json trade-value.json manager-highlights.json
+          git commit -m "Sync ESPN data: $weeks"
+          git pull --rebase
+          git push
+          # Pushes made with the workflow token don't trigger other workflows, so start the deploy explicitly.
+          gh workflow run pages.yml --ref main
