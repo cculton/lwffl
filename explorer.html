@@ -24,7 +24,6 @@
       <a href="boxscores.html">Scores</a>
       <a href="transactions.html">Transactions</a>
       <a href="h2h.html">H2H</a>
-      <a href="median.html">Median</a>
       <a href="draft.html">Draft</a>
       <a href="explorer.html" class="active">Stat Lab</a>
       <a href="records.html">Records</a>
@@ -45,6 +44,7 @@
     <button class="tab-btn" data-tab="seasons">Season Stats</button>
     <button class="tab-btn" data-tab="weeks">Weekly Trends</button>
     <button class="tab-btn" data-tab="edges">Positional Edge</button>
+    <button class="tab-btn" data-tab="median">Median Score Analysis</button>
   </div>
 
   <!-- ============ GAME LOG ============ -->
@@ -131,6 +131,37 @@
     <div class="filter-count" id="eCount"></div>
     <div id="eTable"></div>
   </section>
+
+  <!-- ============ MEDIAN SCORE ANALYSIS ============ -->
+  <section id="tab-median" hidden>
+    <div class="edge-method card">
+      <div>
+        <div class="stat-label">Median score analysis</div>
+        <p>What the standings look like if every manager also played the league median each week: a win for beating that week's median score. Regular season only.</p>
+      </div>
+      <div class="edge-method-rule">
+        <strong>Luck</strong>
+        <span>Actual H2H wins − expected wins</span>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <div><label class="field-label" for="mYear">Season</label>
+        <select id="mYear"></select></div>
+    </div>
+    <div class="filter-count" id="mCount"></div>
+    <div id="mTable"></div>
+    <div class="card" style="margin-top:24px">
+      <div class="stat-label">How to read this</div>
+      <ul style="margin:10px 0 0 18px;color:var(--muted);font-size:0.9rem;line-height:1.7">
+        <li><strong>H2H</strong> is the real regular-season record. <strong>Median</strong> is a win for every week your score beats the league median that week (the top half of the league), a loss otherwise. <strong>Total</strong> adds the two.</li>
+        <li><strong>Avg finish</strong> is where your score ranked among all teams each week, averaged (1 is the week's high score).</li>
+        <li><strong>Expected H2H wins</strong> is what you would have won against an average schedule: each week, the share of other teams you outscored.</li>
+        <li><strong>Luck</strong> is actual H2H wins minus expected H2H wins. Positive means the schedule helped you.</li>
+        <li><strong>PA vs avg</strong> is points against minus the league's average points against. Negative means opponents scored less against you than they did against a typical team.</li>
+        <li>Teams are ranked by total wins, then H2H wins, then points for.</li>
+      </ul>
+    </div>
+  </section>
 </div>
 
 <footer class="footer">
@@ -140,6 +171,7 @@
 <script src="assets/data.js?v=2"></script>
 <script src="assets/tables.js?v=2"></script>
 <script src="assets/lineup-edge.js?v=1"></script>
+<script src="assets/median-analysis.js?v=1"></script>
 <script>
 LWFFL.load().then(async M => {
   const edgeData = await LWFFLLineupEdge.load();
@@ -150,7 +182,7 @@ LWFFL.load().then(async M => {
   /* ---------- tab switching ---------- */
   document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => {
     document.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("active", x === b));
-    ["games", "seasons", "weeks", "edges"].forEach(t =>
+    ["games", "seasons", "weeks", "edges", "median"].forEach(t =>
       document.getElementById("tab-" + t).hidden = t !== b.dataset.tab);
   }));
 
@@ -419,8 +451,59 @@ LWFFL.load().then(async M => {
     return selected;
   }
 
+  /* =================================================================
+     MEDIAN SCORE ANALYSIS — computed from league-scores.json
+     ================================================================= */
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const medianYears = [...new Set(M.games.map(g => g.year))].sort((a, b) => b - a);
+  const teamNameCache = {};
+  const loadTeamNames = year => teamNameCache[year] || (teamNameCache[year] = fetch(`boxscores-${year}.json`)
+    .then(r => r.ok ? r.json() : Promise.reject(new Error(r.status)))
+    .then(data => {
+      const out = {};
+      Object.keys(data.weeks || {}).sort((a, b) => a - b).forEach(w => data.weeks[w].forEach(m =>
+        [m.home, m.away].forEach(t => { if (t && t.manager && t.teamName) out[t.manager] = String(t.teamName).replace(/\s+/g, " ").trim(); })));
+      return out;
+    }).catch(() => ({})));
+
+  const mSel = document.getElementById("mYear");
+  mSel.innerHTML = '<option value="all">All-time</option>' + medianYears.map(y => `<option value="${y}">${y}</option>`).join("");
+  const reqYear = new URLSearchParams(location.search).get("y");
+  mSel.value = reqYear === "all" || medianYears.includes(Number(reqYear)) ? reqYear : String(medianYears[0]);
+
+  async function renderMedian() {
+    const choice = mSel.value, isAll = choice === "all", year = Number(choice);
+    const { rec, signed } = LWFFLMedian;
+    const rows = isAll ? LWFFLMedian.allTime(M.games) : LWFFLMedian.forSeason(M.games, year);
+    const teams = isAll ? {} : await loadTeamNames(year);
+    if (mSel.value !== choice) return;                       // a newer pick superseded this one
+    const live = !M.games.some(g => g.year === (isAll ? medianYears[0] : year) && g.playoffs === "Championship");
+    const weeks = Math.max(...rows.map(r => r.weeks));
+    document.getElementById("mCount").textContent = isAll
+      ? `Every regular-season week since ${medianYears[medianYears.length - 1]}${live ? ` (includes ${medianYears[0]} so far)` : ""} · expected wins, luck and PA vs avg are season-by-season sums`
+      : `${rows.length} teams · ${weeks} regular-season weeks${live ? " so far (season in progress)" : ""}`;
+    dataTable(document.getElementById("mTable"), {
+      columns: [
+        { key: "rank", label: "Total rank", num: true, dir: "asc", render: r => r.rank },
+        { key: "manager", label: "Team", dir: "asc", render: r => teams[r.manager] ? `${esc(teams[r.manager])} (${mlink(r.manager)})` : mlink(r.manager) },
+        { key: "h2h", label: "H2H", num: true, get: r => r.hw + r.ht / 2, render: r => rec(r.hw, r.hl, r.ht) },
+        { key: "med", label: "Median", num: true, get: r => r.mw + r.mt / 2, render: r => rec(r.mw, r.ml, r.mt) },
+        { key: "total", label: "Total", num: true, get: r => r.totalWins, render: r => rec(r.tw, r.tl, r.tt) },
+        { key: "avgFinish", label: "Avg finish", num: true, dir: "asc", render: r => fmt(r.avgFinish) },
+        { key: "expected", label: "Expected H2H wins", num: true, render: r => fmt(r.expected) },
+        { key: "luck", label: "Luck", num: true,
+          render: r => `<span class="${r.luck > 0.005 ? "pos" : r.luck < -0.005 ? "neg" : ""}">${signed(r.luck, 2)}</span>` },
+        { key: "paVsAvg", label: "PA vs avg", num: true, render: r => signed(r.paVsAvg, 1) }
+      ],
+      rows,
+      initialSort: { key: "rank", dir: "asc" }
+    });
+  }
+  mSel.addEventListener("change", renderMedian);
+  renderMedian();
+
   const requestedTab = new URLSearchParams(location.search).get("tab");
-  const requestedButton = ["games", "seasons", "weeks", "edges"].includes(requestedTab)
+  const requestedButton = ["games", "seasons", "weeks", "edges", "median"].includes(requestedTab)
     ? document.querySelector(`.tab-btn[data-tab="${requestedTab}"]`)
     : null;
   if (requestedButton) requestedButton.click();
