@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Median Score Analysis — LWFFL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css?v=5">
+  <script defer src="assets/nav.js?v=1"></script>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span>LW</span>FFL</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="notebook.html">Notebook</a>
+      <a href="managers.html">Managers</a>
+      <a href="seasons.html">Seasons</a>
+      <a href="boxscores.html">Scores</a>
+      <a href="transactions.html">Transactions</a>
+      <a href="h2h.html">H2H</a>
+      <a href="median.html" class="active">Median</a>
+      <a href="draft.html">Draft</a>
+      <a href="explorer.html">Stat Lab</a>
+      <a href="records.html">Records</a>
+      <a href="arcade.html">Arcade</a>
+      <a href="league.html">Constitution</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="page-head">
+    <h1>Median Score Analysis</h1>
+    <p class="sub">What the standings would look like if every manager also played the league median each week</p>
+  </header>
+
+  <div class="card" style="margin-bottom:24px;max-width:320px">
+    <label class="field-label" for="selYear">Season</label>
+    <select id="selYear" disabled><option>Loading…</option></select>
+  </div>
+
+  <div id="results"><div class="loading">Loading league data…</div></div>
+
+  <div class="card" style="margin-top:24px">
+    <div class="stat-label">How to read this</div>
+    <ul style="margin:10px 0 0 18px;color:var(--muted);font-size:0.9rem;line-height:1.7">
+      <li><strong>H2H</strong> is the real regular-season record. <strong>Median</strong> is a win for every week your score beats the league median that week (the top half of the league), a loss otherwise. <strong>Total</strong> adds the two.</li>
+      <li><strong>Avg finish</strong> is where your score ranked among all teams each week, averaged (1 is the week's high score).</li>
+      <li><strong>Expected H2H wins</strong> is what you would have won against an average schedule: each week, the share of other teams you outscored.</li>
+      <li><strong>Luck</strong> is actual H2H wins minus expected H2H wins. Positive means the schedule helped you.</li>
+      <li><strong>PA vs avg</strong> is points against minus the league's average points against. Negative means opponents scored less against you than they did against a typical team.</li>
+      <li>Regular season only; playoffs are excluded. Teams are ranked by total wins, then H2H wins, then points for.</li>
+    </ul>
+  </div>
+</div>
+
+<footer class="footer">
+  LWFFL · Legion of Whom Fantasy Football League
+</footer>
+
+<script src="assets/data.js?v=4"></script>
+<script src="assets/tables.js?v=2"></script>
+<script src="assets/median-analysis.js?v=1"></script>
+<script>
+let MODEL = null;
+const teamNameCache = {};
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* Team names live in the season's box score file; load only the season being viewed. */
+function loadTeamNames(year) {
+  if (!teamNameCache[year]) {
+    teamNameCache[year] = fetch(`boxscores-${year}.json`)
+      .then(r => r.ok ? r.json() : Promise.reject(new Error(r.status)))
+      .then(data => {
+        const names = {};
+        Object.keys(data.weeks || {}).sort((a, b) => a - b).forEach(w => {
+          data.weeks[w].forEach(m => {
+            [m.home, m.away].forEach(t => {
+              if (t && t.manager && t.teamName) names[t.manager] = String(t.teamName).replace(/\s+/g, " ").trim();
+            });
+          });
+        });
+        return names;
+      })
+      .catch(() => ({}));
+  }
+  return teamNameCache[year];
+}
+
+LWFFL.load().then(M => {
+  MODEL = M;
+  const sel = document.getElementById("selYear");
+  /* years come from the score rows, so the in-progress season appears before final standings exist */
+  const years = [...new Set(M.games.map(g => g.year))].sort((a, b) => a - b);
+  M.scoreYears = years;
+  const yearsDesc = years.slice().reverse();
+  sel.innerHTML = '<option value="all">All-time</option>' +
+    yearsDesc.map(y => `<option value="${y}">${y}</option>`).join("");
+  sel.disabled = false;
+
+  const q = new URLSearchParams(location.search).get("y");
+  sel.value = q === "all" || years.includes(Number(q)) ? q : String(yearsDesc[0]);
+  sel.addEventListener("change", render);
+  render();
+}).catch(err => {
+  console.error(err);
+  document.getElementById("results").innerHTML = '<div class="loading">Could not load league data.</div>';
+});
+
+async function render() {
+  const { fmt, mlink } = LWFFL;
+  const { rec, signed } = LWFFLMedian;
+  const choice = document.getElementById("selYear").value;
+  const out = document.getElementById("results");
+  const isAll = choice === "all";
+  const year = Number(choice);
+
+  const rows = isAll ? LWFFLMedian.allTime(MODEL.games) : LWFFLMedian.forSeason(MODEL.games, year);
+  const names = isAll ? {} : await loadTeamNames(year);
+  if (document.getElementById("selYear").value !== choice) return;   // a newer pick superseded this one
+
+  const team = r => {
+    const t = names[r.manager];
+    return t ? `${esc(t)} (${mlink(r.manager)})` : mlink(r.manager);
+  };
+
+  out.innerHTML = '<div id="medianTbl"></div>';
+  dataTable(document.getElementById("medianTbl"), {
+    columns: [
+      { key: "rank", label: "Total rank", num: true, dir: "asc", render: r => r.rank },
+      { key: "manager", label: "Team", dir: "asc", render: team },
+      { key: "h2h", label: "H2H", num: true, get: r => r.hw + r.ht / 2, render: r => rec(r.hw, r.hl, r.ht) },
+      { key: "med", label: "Median", num: true, get: r => r.mw + r.mt / 2, render: r => rec(r.mw, r.ml, r.mt) },
+      { key: "total", label: "Total", num: true, get: r => r.totalWins, render: r => rec(r.tw, r.tl, r.tt) },
+      { key: "avgFinish", label: "Avg finish", num: true, dir: "asc", render: r => fmt(r.avgFinish) },
+      { key: "expected", label: "Expected H2H wins", num: true, render: r => fmt(r.expected) },
+      { key: "luck", label: "Luck", num: true,
+        render: r => `<span class="${r.luck > 0.005 ? "pos" : r.luck < -0.005 ? "neg" : ""}">${signed(r.luck, 2)}</span>` },
+      { key: "paVsAvg", label: "PA vs avg", num: true, render: r => signed(r.paVsAvg, 1) }
+    ],
+    rows,
+    initialSort: { key: "rank", dir: "asc" },
+    footer: () => {
+      const weeks = Math.max(...rows.map(r => r.weeks));
+      if (isAll) {
+        const last = MODEL.scoreYears[MODEL.scoreYears.length - 1];
+        const through = { year: last };
+        const live = !MODEL.games.some(g => g.year === last && g.playoffs === "Championship");
+        return `Every regular-season week since ${MODEL.scoreYears[0]} · ${rows.reduce((a, r) => a + r.weeks, 0) / 2} matchups` +
+          (live ? ` · includes ${through.year} through Week ${Math.max(...MODEL.games.filter(g => g.year === through.year).map(g => g.week))}` : "") +
+          " · expected wins, luck and PA vs avg are season-by-season sums";
+      }
+      const live = !MODEL.games.some(g => g.year === year && g.playoffs === "Championship");
+      return `${rows.length} teams · ${weeks} regular-season weeks${live ? " so far (season in progress)" : ""}`;
+    }
+  });
+
+  const url = new URL(location);
+  url.searchParams.set("y", choice);
+  history.replaceState(null, "", url);
+}
+</script>
+</body>
+</html>

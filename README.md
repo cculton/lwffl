@@ -42,6 +42,10 @@ Lineups before 2025 assign the highest-scoring required RBs, WRs, and TE first; 
 
 Run the focused checks with `node scripts/test-lineup-edge.cjs`.
 
+## Median score analysis
+
+`median.html` shows, for any season or all-time, how each manager would fare if they also played the league median every regular-season week: a win for beating the median score that week, a loss otherwise. It also shows average weekly finish, expected H2H wins against an average schedule, Luck (actual minus expected H2H wins) and PA vs avg. Everything is computed in the browser from `league-scores.json` by `assets/median-analysis.js`, so new weeks appear as soon as the sync commits them; team names come from the selected season's `boxscores-YYYY.json`. Playoffs are excluded. Run the checks with `node scripts/test-median-analysis.cjs`.
+
 ## Notebook standings
 
 Posts with a `::: standings` block show divisions and projected playoff spots

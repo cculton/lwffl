@@ -30,6 +30,8 @@ jobs:
         run: node scripts/check-data.mjs
       - name: Check Notebook standings and playoff projection
         run: node scripts/test-notebook-standings.mjs
+      - name: Check median score analysis
+        run: node scripts/test-median-analysis.cjs
       - name: Verify domain and generated pages
         run: |
           if test -f CNAME; then test "$(cat CNAME)" = 'lwffl.com'; fi

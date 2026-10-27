@@ -307,6 +307,7 @@ ${shareAltTag}  <meta property="article:published_time" content="${p.date}" />
       <a href="../boxscores.html">Scores</a>
       <a href="../transactions.html">Transactions</a>
       <a href="../h2h.html">H2H</a>
+      <a href="../median.html">Median</a>
       <a href="../draft.html">Draft</a>
       <a href="../explorer.html">Stat Lab</a>
       <a href="../records.html">Records</a>
