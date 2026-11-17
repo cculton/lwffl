@@ -9601,5 +9601,59 @@
     "manager2": "Chad",
     "score2": 68.94,
     "playoffs": "N/A"
+  },
+  {
+    "year": 2026,
+    "week": 10,
+    "manager1": "Bryce",
+    "score1": 122.76,
+    "manager2": "Tom",
+    "score2": 95.64,
+    "playoffs": "N/A"
+  },
+  {
+    "year": 2026,
+    "week": 10,
+    "manager1": "Stuart",
+    "score1": 100.62,
+    "manager2": "Ryan C.",
+    "score2": 94.98,
+    "playoffs": "N/A"
+  },
+  {
+    "year": 2026,
+    "week": 10,
+    "manager1": "Matt",
+    "score1": 122.56,
+    "manager2": "Connor",
+    "score2": 105.74,
+    "playoffs": "N/A"
+  },
+  {
+    "year": 2026,
+    "week": 10,
+    "manager1": "Ryan T.",
+    "score1": 103.56,
+    "manager2": "Adam",
+    "score2": 120.22,
+    "playoffs": "N/A"
+  },
+  {
+    "year": 2026,
+    "week": 10,
+    "manager1": "Will",
+    "score1": 71.44,
+    "manager2": "Cobey",
+    "score2": 110.32,
+    "playoffs": "N/A"
+  },
+  {
+    "year": 2026,
+    "week": 10,
+    "manager1": "Samuel",
+    "score1": 110.08,
+    "manager2": "Chad",
+    "score2": 69.48,
+    "playoffs": "N/A"
   }
 ]
